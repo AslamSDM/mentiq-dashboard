@@ -1,0 +1,65 @@
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { apiClient } from "@/lib/api";
+import type { AuthResponse } from "@/lib/api";
+
+const handler = NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        try {
+          const response: AuthResponse = await apiClient.login(
+            credentials.email,
+            credentials.password
+          );
+
+          if (response.token && response.user) {
+            return {
+              id: response.user.id,
+              email: response.user.email,
+              name: response.user.name,
+              accessToken: response.token,
+            };
+          }
+          return null;
+        } catch (error) {
+          console.error("Authentication error:", error);
+          return null;
+        }
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user && user.accessToken) {
+        token.accessToken = user.accessToken;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.accessToken) {
+        session.accessToken = token.accessToken;
+        // Set the token in the API client
+        apiClient.setToken(token.accessToken);
+      }
+      return session;
+    },
+  },
+  pages: {
+    signIn: "/signin",
+  },
+  session: {
+    strategy: "jwt",
+  },
+});
+
+export { handler as GET, handler as POST };

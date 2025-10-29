@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MentiQ Analytics Dashboard
+
+A modern analytics dashboard built with Next.js, NextAuth.js, and TypeScript for tracking user behavior and analytics.
 
 ## Getting Started
 
