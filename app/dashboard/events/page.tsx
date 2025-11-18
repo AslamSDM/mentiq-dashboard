@@ -73,7 +73,7 @@ export default function EventsPage() {
     return matchesSearch && matchesFilter;
   });
 
-  const eventTypes = Array.from(new Set(events.map((e) => e.name)));
+  const eventTypes = Array.from(new Set(events?.map((e) => e.name)));
 
   if (!selectedProjectId) {
     return (
@@ -239,7 +239,7 @@ export default function EventsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Events</SelectItem>
-                  {eventTypes.map((type) => (
+                  {eventTypes?.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -267,7 +267,7 @@ export default function EventsPage() {
                       </TableCell>
                     </TableRow>
                   ) : filteredEvents.length > 0 ? (
-                    filteredEvents.map((event) => (
+                    filteredEvents?.map((event) => (
                       <TableRow key={event.id}>
                         <TableCell>
                           <Badge variant="secondary">{event.name}</Badge>

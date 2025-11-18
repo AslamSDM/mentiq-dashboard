@@ -12,18 +12,24 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
-  const { setToken, fetchProjects, isAuthenticated } = useStore();
+  const { token, setToken, fetchProjects, isAuthenticated } = useStore();
 
   useEffect(() => {
+    console.log("Session status changed:", status, session);
+    console.log("Current token in Zustand:", token);
+    console.log("Session access token:", session?.accessToken);
+
     if (status === "authenticated" && session?.accessToken) {
+      console.log("Setting token from session:", session.accessToken);
       setToken(session.accessToken);
     } else if (status === "unauthenticated") {
+      console.log("Unauthenticated, clearing token");
       setToken(null);
     }
-  }, [status, session, setToken]);
+  }, [status, session, setToken, token]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && token) {
       fetchProjects();
     }
   }, [isAuthenticated, fetchProjects]);

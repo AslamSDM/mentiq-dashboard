@@ -42,7 +42,7 @@ import {
 } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
-import { CreateExperimentRequest } from "@/lib/api";
+import { CreateExperimentRequest } from "@/lib/services/experiment";
 
 export default function ABTestingPage() {
   const {
@@ -178,7 +178,7 @@ export default function ABTestingPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {experiments.filter((exp) => exp.status === "running").length}
+                {experiments.filter((exp) => exp.status === "RUNNING").length}
               </div>
               <p className="text-xs text-muted-foreground">Currently running</p>
             </CardContent>
@@ -233,7 +233,7 @@ export default function ABTestingPage() {
             <CardContent>
               <div className="text-2xl font-bold">
                 {experimentResults
-                  ? (experimentResults.summary.conversionRate * 100).toFixed(
+                  ? (experimentResults.summary.conversionRate * 100)?.toFixed(
                       2
                     ) + "%"
                   : "0%"}
@@ -288,21 +288,21 @@ export default function ABTestingPage() {
                   <SelectValue placeholder="Select an experiment" />
                 </SelectTrigger>
                 <SelectContent>
-                  {experiments.map((exp) => (
+                  {experiments?.map((exp) => (
                     <SelectItem key={exp.id} value={exp.id}>
                       <div className="flex items-center justify-between w-full">
                         <span className="truncate">{exp.name}</span>
                         <Badge
                           variant={
-                            exp.status === "running"
+                            exp.status === "RUNNING"
                               ? "default"
-                              : exp.status === "completed"
+                              : exp.status === "COMPLETED"
                               ? "secondary"
                               : "outline"
                           }
                           className="ml-2"
                         >
-                          {exp.status}
+                          {exp.status.toLowerCase()}
                         </Badge>
                       </div>
                     </SelectItem>
@@ -418,31 +418,31 @@ export default function ABTestingPage() {
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
-                      selectedExp.status === "running"
+                      selectedExp.status === "RUNNING"
                         ? "default"
-                        : selectedExp.status === "completed"
+                        : selectedExp.status === "COMPLETED"
                         ? "secondary"
                         : "outline"
                     }
                   >
-                    {selectedExp.status}
+                    {selectedExp.status.toLowerCase()}
                   </Badge>
-                  {selectedExp.status === "running" && (
+                  {selectedExp.status === "RUNNING" && (
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() =>
-                        updateExperimentStatus(selectedExp.id, "paused")
+                        updateExperimentStatus(selectedExp.id, "PAUSED")
                       }
                     >
                       Pause
                     </Button>
                   )}
-                  {selectedExp.status === "paused" && (
+                  {selectedExp.status === "PAUSED" && (
                     <Button
                       size="sm"
                       onClick={() =>
-                        updateExperimentStatus(selectedExp.id, "running")
+                        updateExperimentStatus(selectedExp.id, "RUNNING")
                       }
                     >
                       Resume
@@ -457,24 +457,37 @@ export default function ABTestingPage() {
                   <p className="text-sm font-medium">Traffic Allocation</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Progress
-                      value={selectedExp.trafficAllocation}
+                      value={
+                        selectedExp.traffic_split ||
+                        selectedExp.trafficAllocation ||
+                        0
+                      }
                       className="flex-1"
                     />
                     <span className="text-sm">
-                      {selectedExp.trafficAllocation}%
+                      {selectedExp.traffic_split ||
+                        selectedExp.trafficAllocation ||
+                        0}
+                      %
                     </span>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Start Date</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {new Date(selectedExp.startDate).toLocaleDateString()}
+                    {selectedExp.start_date
+                      ? new Date(selectedExp.start_date).toLocaleDateString()
+                      : selectedExp.startDate
+                      ? new Date(selectedExp.startDate).toLocaleDateString()
+                      : "Not set"}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">End Date</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {selectedExp.endDate
+                    {selectedExp.end_date
+                      ? new Date(selectedExp.end_date).toLocaleDateString()
+                      : selectedExp.endDate
                       ? new Date(selectedExp.endDate).toLocaleDateString()
                       : "Not set"}
                   </p>
@@ -499,7 +512,7 @@ export default function ABTestingPage() {
 
               <TabsContent value="results" className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
-                  {experimentResults.variants.map((variant) => (
+                  {experimentResults.variants?.map((variant) => (
                     <Card key={variant.variantId}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -508,7 +521,7 @@ export default function ABTestingPage() {
                           </CardTitle>
                           {variant.improvement > 0 && (
                             <Badge variant="default" className="bg-green-500">
-                              +{(variant.improvement * 100).toFixed(1)}%
+                              +{(variant.improvement * 100)?.toFixed(1)}%
                             </Badge>
                           )}
                         </div>
@@ -534,7 +547,7 @@ export default function ABTestingPage() {
                               Conversion Rate
                             </p>
                             <p className="text-3xl font-bold">
-                              {(variant.conversionRate * 100).toFixed(2)}%
+                              {(variant.conversionRate * 100)?.toFixed(2)}%
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                               <Progress
@@ -548,9 +561,13 @@ export default function ABTestingPage() {
                               Confidence Interval
                             </p>
                             <p className="text-sm text-muted-foreground">
-                              {(variant.confidenceInterval[0] * 100).toFixed(2)}
+                              {(variant.confidenceInterval[0] * 100)?.toFixed(
+                                2
+                              )}
                               % -{" "}
-                              {(variant.confidenceInterval[1] * 100).toFixed(2)}
+                              {(variant.confidenceInterval[1] * 100)?.toFixed(
+                                2
+                              )}
                               %
                             </p>
                           </div>
@@ -563,7 +580,7 @@ export default function ABTestingPage() {
 
               <TabsContent value="variants" className="space-y-4">
                 <div className="space-y-4">
-                  {selectedExp?.variants.map((variant) => (
+                  {selectedExp?.variants?.map((variant) => (
                     <Card key={variant.id}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
@@ -574,20 +591,23 @@ export default function ABTestingPage() {
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-2">
-                            {variant.isControl && (
+                            {(variant.is_control || variant.isControl) && (
                               <Badge variant="secondary">Control</Badge>
                             )}
                             <Badge variant="outline">
-                              {variant.trafficWeight}% traffic
+                              {variant.traffic_split ||
+                                variant.trafficWeight ||
+                                0}
+                              % traffic
                             </Badge>
                           </div>
                         </div>
                       </CardHeader>
                       <CardContent>
-                        {variant.changes.length > 0 ? (
+                        {variant.changes && variant.changes.length > 0 ? (
                           <div className="space-y-2">
                             <p className="text-sm font-medium">Changes:</p>
-                            {variant.changes.map((change, i) => (
+                            {variant.changes?.map((change, i) => (
                               <div
                                 key={i}
                                 className="flex items-center gap-2 p-2 bg-muted rounded text-sm"

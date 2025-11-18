@@ -48,6 +48,143 @@ const navigation = [
     ),
   },
   {
+    name: "Location Analytics",
+    href: "/dashboard/location",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+  },
+  {
+    name: "Device Analytics",
+    href: "/dashboard/devices",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+        <path d="M12 18h.01" />
+      </svg>
+    ),
+  },
+  {
+    name: "Revenue Analytics",
+    href: "/dashboard/revenue",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <line x1="12" x2="12" y1="2" y2="22" />
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      </svg>
+    ),
+  },
+  {
+    name: "Feature Adoption",
+    href: "/dashboard/adoption",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="m22 21-3-3m0 0a6 6 0 0 0-9-9 6 6 0 0 0 9 9Z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Retention Cohorts",
+    href: "/dashboard/retention",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M3 3v18h18" />
+        <path d="M18.7 8a4 4 0 0 0-7.4 0" />
+        <path d="M7.9 12a4 4 0 0 1 8.2 0" />
+        <path d="M3 16a9 9 0 0 1 18 0" />
+      </svg>
+    ),
+  },
+  {
+    name: "Churn Analysis",
+    href: "/dashboard/churn",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <path d="M12 9v4" />
+        <path d="m12 17.02.01 0" />
+      </svg>
+    ),
+  },
+  {
+    name: "Analytics Hub",
+    href: "/dashboard/unified-analytics",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
+        <path d="M3 3v18h18" />
+        <path d="m19 9-5 5-4-4-3 3" />
+      </svg>
+    ),
+  },
+  {
     name: "Heatmaps",
     href: "/dashboard/heatmaps",
     icon: (
@@ -253,24 +390,6 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "API Test",
-    href: "/dashboard/api-test",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
 ];
 
 export function DashboardSidebar() {
@@ -304,7 +423,7 @@ export function DashboardSidebar() {
         </span>
       </div>
       <nav className="flex-1 space-y-1 p-4">
-        {navigation.map((item) => {
+        {navigation?.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link

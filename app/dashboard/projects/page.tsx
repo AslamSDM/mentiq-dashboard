@@ -21,109 +21,126 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { apiClient, type Project } from "@/lib/api";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { apiClient, type Project, type ApiKey } from "@/lib/api";
+import { useStore } from "@/lib/store";
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  // Zustand store
+  const {
+    projects,
+    fetchProjects,
+    projectsLoaded,
+    createProject,
+    deleteProject,
+    apiKeys,
+    loadingApiKeys,
+    fetchApiKeys,
+    createApiKey,
+    deleteApiKey,
+    updateApiKey,
+  } = useStore();
+
+  // Local state
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set()
+  );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCreateKeyOpen, setIsCreateKeyOpen] = useState<string | null>(null);
   const [newProject, setNewProject] = useState({ name: "", description: "" });
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [newApiKey, setNewApiKey] = useState({
+    name: "",
+    permissions: [] as string[],
+  });
+  const [copiedItem, setCopiedItem] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const data = await apiClient.getProjects();
-        setProjects(data);
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-        // Set mock data on error for demo purposes
-        setProjects([
-          {
-            id: "1",
-            name: "Production App",
-            description: "Main production application",
-            apiKey: "pk_live_1234567890abcdef",
-            createdAt: "2024-01-15",
-            updatedAt: "2024-01-15",
-            accountId: "account-1",
-            eventCount: 12543,
-          },
-          {
-            id: "2",
-            name: "Staging Environment",
-            description: "Testing and staging",
-            apiKey: "pk_test_abcdef1234567890",
-            createdAt: "2024-01-20",
-            updatedAt: "2024-01-20",
-            accountId: "account-1",
-            eventCount: 3421,
-          },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
+    if (!projectsLoaded) {
+      setLoading(true);
+      fetchProjects().finally(() => setLoading(false));
+    }
+  }, [fetchProjects, projectsLoaded]);
 
   const handleCreateProject = async () => {
     try {
-      const project = await apiClient.createProject(newProject.name);
-      setProjects([
-        ...projects,
-        { ...project, description: newProject.description, eventCount: 0 },
-      ]);
+      await createProject(newProject.name, newProject.description);
       setNewProject({ name: "", description: "" });
       setIsCreateOpen(false);
     } catch (error) {
       console.error("Failed to create project:", error);
-      // Fallback to local creation for demo
-      const project: Project = {
-        id: Date.now().toString(),
-        name: newProject.name,
-        description: newProject.description,
-        apiKey: `pk_${Math.random()
-          .toString(36)
-          .substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        accountId: "demo-account",
-        eventCount: 0,
-      };
-      setProjects([...projects, project]);
       setNewProject({ name: "", description: "" });
       setIsCreateOpen(false);
     }
   };
 
-  const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
+  const handleCopyItem = (item: string, type: "key" | "id" = "key") => {
+    navigator.clipboard.writeText(item);
+    setCopiedItem(item);
+    setTimeout(() => setCopiedItem(null), 2000);
   };
 
-  const handleRegenerateKey = (projectId: string) => {
-    setProjects(
-      projects.map((p) =>
-        p.id === projectId
-          ? {
-              ...p,
-              apiKey: `pk_${Math.random()
-                .toString(36)
-                .substring(2, 15)}${Math.random()
-                .toString(36)
-                .substring(2, 15)}`,
-            }
-          : p
-      )
-    );
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await deleteProject(projectId);
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+    }
   };
 
-  const handleDeleteProject = (projectId: string) => {
-    setProjects(projects.filter((p) => p.id !== projectId));
+  const toggleProjectExpansion = (projectId: string) => {
+    setExpandedProjects((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+        // Fetch API keys when expanding if not already loaded
+        if (!apiKeys[projectId]) {
+          fetchApiKeys(projectId);
+        }
+      }
+      return newSet;
+    });
+  };
+
+  const handleCreateApiKey = async (projectId: string) => {
+    try {
+      await createApiKey(projectId, newApiKey.name, newApiKey.permissions);
+      setNewApiKey({ name: "", permissions: [] });
+      setIsCreateKeyOpen(null);
+    } catch (error) {
+      console.error("Failed to create API key:", error);
+      setNewApiKey({ name: "", permissions: [] });
+      setIsCreateKeyOpen(null);
+    }
+  };
+
+  const handleDeleteApiKey = async (projectId: string, keyId: string) => {
+    try {
+      await deleteApiKey(projectId, keyId);
+    } catch (error) {
+      console.error("Failed to delete API key:", error);
+    }
+  };
+
+  const handleToggleKeyStatus = async (
+    projectId: string,
+    keyId: string,
+    isActive: boolean
+  ) => {
+    try {
+      await updateApiKey(projectId, keyId, { isActive });
+    } catch (error) {
+      console.error("Failed to update API key:", error);
+    }
   };
 
   if (loading) {
@@ -220,7 +237,7 @@ export default function ProjectsPage() {
         </div>
 
         <div className="grid gap-4">
-          {projects.map((project) => (
+          {projects?.map((project) => (
             <Card key={project.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -235,22 +252,24 @@ export default function ProjectsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">API Key</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={project.apiKey || "No API key"}
-                      readOnly
-                      className="font-mono text-sm"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopyKey(project.apiKey || "")}
-                      className="shrink-0"
-                      disabled={!project.apiKey}
-                    >
-                      {copiedKey === project.apiKey ? (
-                        <>
+                  <Label className="text-sm font-medium">
+                    Project Information
+                  </Label>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground">
+                        Project ID:
+                      </Label>
+                      <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
+                        {project.id}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCopyItem(project.id, "id")}
+                        className="h-6 w-6 p-0"
+                      >
+                        {copiedItem === project.id ? (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -259,13 +278,11 @@ export default function ProjectsPage() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="h-4 w-4"
+                            className="h-3 w-3"
                           >
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
-                        </>
-                      ) : (
-                        <>
+                        ) : (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -274,7 +291,7 @@ export default function ProjectsPage() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className="h-4 w-4"
+                            className="h-3 w-3"
                           >
                             <rect
                               width="14"
@@ -286,20 +303,20 @@ export default function ProjectsPage() {
                             />
                             <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                           </svg>
-                        </>
-                      )}
-                    </Button>
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Created on{" "}
+                      {new Date(project.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Created on{" "}
-                    {new Date(project.createdAt).toLocaleDateString()}
-                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleRegenerateKey(project.id)}
+                    onClick={() => toggleProjectExpansion(project.id)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -309,14 +326,14 @@ export default function ProjectsPage() {
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="mr-2 h-4 w-4"
+                      className={`mr-2 h-4 w-4 transition-transform ${
+                        expandedProjects.has(project.id) ? "rotate-180" : ""
+                      }`}
                     >
-                      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                      <path d="M3 3v5h5" />
-                      <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                      <path d="M16 16h5v5" />
+                      <path d="m6 9 6 6 6-6" />
                     </svg>
-                    Regenerate Key
+                    {expandedProjects.has(project.id) ? "Hide" : "Show"} API
+                    Keys
                   </Button>
                   <Button
                     variant="destructive"
@@ -340,6 +357,214 @@ export default function ProjectsPage() {
                     Delete
                   </Button>
                 </div>
+
+                {/* Collapsible API Keys Section */}
+                {expandedProjects.has(project.id) && (
+                  <div className="mt-6 border-t pt-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">API Keys</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Manage API keys for secure access to your project
+                          data.
+                        </p>
+                      </div>
+                      <Dialog
+                        open={isCreateKeyOpen === project.id}
+                        onOpenChange={(open) =>
+                          setIsCreateKeyOpen(open ? project.id : null)
+                        }
+                      >
+                        <DialogTrigger asChild>
+                          <Button size="sm">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="mr-2 h-4 w-4"
+                            >
+                              <path d="M5 12h14" />
+                              <path d="M12 5v14" />
+                            </svg>
+                            Create New Key
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Create New API Key</DialogTitle>
+                            <DialogDescription>
+                              Generate a new API key for secure access to{" "}
+                              {project.name}.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="key-name">Key Name</Label>
+                              <Input
+                                id="key-name"
+                                placeholder="Production Key, Development Key, etc."
+                                value={newApiKey.name}
+                                onChange={(e) =>
+                                  setNewApiKey({
+                                    ...newApiKey,
+                                    name: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsCreateKeyOpen(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={() => handleCreateApiKey(project.id)}
+                              disabled={!newApiKey.name}
+                            >
+                              Create Key
+                            </Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                    {loadingApiKeys ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      </div>
+                    ) : (
+                      <div className="border rounded-lg">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Name</TableHead>
+                              <TableHead>Key</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead>Created</TableHead>
+                              <TableHead>Last Used</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {(apiKeys[project.id] || [])?.map((key: ApiKey) => (
+                              <TableRow key={key.id}>
+                                <TableCell className="font-medium">
+                                  {key.name}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <code className="text-sm bg-muted px-2 py-1 rounded font-mono">
+                                      {key.key.substring(0, 20)}...
+                                    </code>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleCopyItem(key.key)}
+                                    >
+                                      {copiedItem === key.key ? (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="h-4 w-4"
+                                        >
+                                          <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                      ) : (
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="h-4 w-4"
+                                        >
+                                          <rect
+                                            width="14"
+                                            height="14"
+                                            x="8"
+                                            y="8"
+                                            rx="2"
+                                            ry="2"
+                                          />
+                                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                                        </svg>
+                                      )}
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant={
+                                      key.isActive ? "default" : "secondary"
+                                    }
+                                  >
+                                    {key.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  {new Date(key.createdAt).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>
+                                  {key.lastUsedAt
+                                    ? new Date(
+                                        key.lastUsedAt
+                                      ).toLocaleDateString()
+                                    : "Never"}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleToggleKeyStatus(
+                                          project.id,
+                                          key.id,
+                                          !key.isActive
+                                        )
+                                      }
+                                    >
+                                      {key.isActive ? "Disable" : "Enable"}
+                                    </Button>
+                                    <Button
+                                      variant="destructive"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleDeleteApiKey(project.id, key.id)
+                                      }
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                        {(apiKeys[project.id] || []).length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No API keys found. Create your first key to get
+                            started.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

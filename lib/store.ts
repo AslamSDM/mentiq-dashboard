@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import {
   apiClient,
-  ApiClient,
+  setAuthToken,
   Project,
+  ApiKey,
   AnalyticsData,
   EventData,
   HeatmapData,
@@ -13,11 +14,13 @@ import {
   CreateExperimentRequest,
   Session,
   User,
+  UserProfile,
+  UserListResponse,
   SessionsOverview,
 } from "./api";
 
 interface AppState {
-  apiClient: ApiClient;
+  apiClient: typeof apiClient;
   // Auth
   token: string | null;
   isAuthenticated: boolean;
@@ -29,7 +32,25 @@ interface AppState {
   selectedProjectId: string | null;
   projectsLoaded: boolean;
   fetchProjects: () => Promise<void>;
+  createProject: (name: string, description?: string) => Promise<Project>;
+  deleteProject: (projectId: string) => Promise<void>;
   setSelectedProjectId: (projectId: string | null) => void;
+
+  // API Keys
+  apiKeys: Record<string, ApiKey[]>;
+  loadingApiKeys: Record<string, boolean>;
+  fetchApiKeys: (projectId: string) => Promise<void>;
+  createApiKey: (
+    projectId: string,
+    name: string,
+    permissions: string[]
+  ) => Promise<ApiKey>;
+  deleteApiKey: (projectId: string, keyId: string) => Promise<void>;
+  updateApiKey: (
+    projectId: string,
+    keyId: string,
+    updates: Partial<ApiKey>
+  ) => Promise<void>;
 
   // Analytics
   analyticsData: AnalyticsData | null;
@@ -65,7 +86,7 @@ interface AppState {
   setSelectedExperimentId: (experimentId: string | null) => void;
   updateExperimentStatus: (
     experimentId: string,
-    status: "running" | "paused" | "completed"
+    status: "DRAFT" | "RUNNING" | "PAUSED" | "COMPLETED" | "ARCHIVED"
   ) => Promise<void>;
 
   // Sessions & Users
@@ -93,10 +114,9 @@ export const useStore = create<AppState>()(
       token: null,
       isAuthenticated: false,
       setToken: (token) => {
+        console.log("Zustand: Setting token", token);
+        setAuthToken(token);
         set({ token, isAuthenticated: !!token });
-        if (token) {
-          apiClient.setToken(token);
-        }
       },
       logout: () => {
         set({
@@ -106,25 +126,63 @@ export const useStore = create<AppState>()(
           selectedProjectId: null,
           projectsLoaded: false,
         });
-        apiClient.setToken("");
+        setAuthToken(null);
       },
 
       // Projects state
       projects: [],
       selectedProjectId: null,
       projectsLoaded: false,
+
+      // API Keys state
+      apiKeys: {},
+      loadingApiKeys: {},
       fetchProjects: async () => {
-        if (get().projectsLoaded || !get().isAuthenticated) return;
+        if (!get().isAuthenticated) return;
         console.log("Zustand: Fetching projects...");
         try {
           const projects = await apiClient.getProjects();
           console.log("Zustand: Projects fetched", projects);
           set({ projects, projectsLoaded: true });
-          if (projects.length > 0 && !get().selectedProjectId) {
+          if (projects?.length > 0 && !get().selectedProjectId) {
             get().setSelectedProjectId(projects[0].id);
           }
         } catch (error) {
           console.error("Zustand: Failed to fetch projects", error);
+          set({ projectsLoaded: true });
+        }
+      },
+      createProject: async (name, description) => {
+        if (!get().isAuthenticated) throw new Error("Not authenticated");
+        try {
+          const project = await apiClient.createProject(name);
+          const projectWithDescription = {
+            ...project,
+            description: description || "",
+          };
+          set((state) => ({
+            projects: [...state.projects, projectWithDescription],
+          }));
+          return projectWithDescription;
+        } catch (error) {
+          console.error("Zustand: Failed to create project", error);
+          throw error;
+        }
+      },
+      deleteProject: async (projectId) => {
+        if (!get().isAuthenticated) throw new Error("Not authenticated");
+        try {
+          await apiClient.deleteProject(projectId);
+          set((state) => ({
+            projects: state.projects.filter((p) => p.id !== projectId),
+            selectedProjectId:
+              state.selectedProjectId === projectId
+                ? null
+                : state.selectedProjectId,
+          }));
+        } catch (error) {
+          console.error("Zustand: Failed to delete project", error);
+          throw error;
         }
       },
       setSelectedProjectId: (projectId) => {
@@ -135,14 +193,98 @@ export const useStore = create<AppState>()(
         }
       },
 
+      // API Keys actions
+      fetchApiKeys: async (projectId) => {
+        if (!get().isAuthenticated) return;
+        set((state) => ({
+          loadingApiKeys: { ...state.loadingApiKeys, [projectId]: true },
+        }));
+        try {
+          const keys = await apiClient.getApiKeys(projectId);
+          set((state) => ({
+            apiKeys: { ...state.apiKeys, [projectId]: keys },
+            loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
+          }));
+        } catch (error) {
+          console.error("Zustand: Failed to fetch API keys", error);
+          set((state) => ({
+            apiKeys: { ...state.apiKeys, [projectId]: [] },
+            loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
+          }));
+        }
+      },
+      createApiKey: async (projectId, name, permissions) => {
+        if (!get().isAuthenticated) throw new Error("Not authenticated");
+        try {
+          const newKey = await apiClient.createApiKeys(
+            projectId,
+            name,
+            permissions
+          );
+          set((state) => ({
+            apiKeys: {
+              ...state.apiKeys,
+              [projectId]: [...(state.apiKeys[projectId] || []), newKey],
+            },
+          }));
+          return newKey;
+        } catch (error) {
+          console.error("Zustand: Failed to create API key", error);
+          throw error;
+        }
+      },
+      deleteApiKey: async (projectId, keyId) => {
+        if (!get().isAuthenticated) throw new Error("Not authenticated");
+        try {
+          await apiClient.deleteApiKey(projectId, keyId);
+          set((state) => ({
+            apiKeys: {
+              ...state.apiKeys,
+              [projectId]: (state.apiKeys[projectId] || []).filter(
+                (k) => k.id !== keyId
+              ),
+            },
+          }));
+        } catch (error) {
+          console.error("Zustand: Failed to delete API key", error);
+          throw error;
+        }
+      },
+      updateApiKey: async (projectId, keyId, updates) => {
+        if (!get().isAuthenticated) throw new Error("Not authenticated");
+        try {
+          const updatedKey = await apiClient.updateApiKey(
+            projectId,
+            keyId,
+            updates
+          );
+          set((state) => ({
+            apiKeys: {
+              ...state.apiKeys,
+              [projectId]: (state.apiKeys[projectId] || []).map((k) =>
+                k.id === keyId ? updatedKey : k
+              ),
+            },
+          }));
+        } catch (error) {
+          console.error("Zustand: Failed to update API key", error);
+          throw error;
+        }
+      },
+
       // Analytics state
       analyticsData: null,
       loadingAnalytics: false,
       events: [],
       loadingEvents: false,
       fetchAnalytics: async (params) => {
-        const { selectedProjectId } = get();
-        if (!selectedProjectId) return;
+        const { selectedProjectId, isAuthenticated } = get();
+        if (!selectedProjectId || !isAuthenticated) {
+          console.warn(
+            "Cannot fetch analytics: no project or not authenticated"
+          );
+          return;
+        }
 
         console.log("Fetching analytics with params:", params);
         set({ loadingAnalytics: true });
@@ -305,7 +447,7 @@ export const useStore = create<AppState>()(
         try {
           const response = await apiClient.getUsers(selectedProjectId);
           // Extract users array from UserListResponse
-          const users = response.users.map((profile) => ({
+          const users = response.users?.map((profile: UserProfile) => ({
             id: profile.userId,
             email: undefined,
             firstSeen: profile.firstSeen,

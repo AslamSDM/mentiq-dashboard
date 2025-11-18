@@ -1,109 +1,42 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { DashboardHeader } from "@/components/dashboard-header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useState, useEffect } from "react";
+import { DashboardHeader } from "@/components/dashboard-header";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import { useStore } from "@/lib/store";
 
-type Session = {
-  id: string
-  userId?: string
-  startTime: string
-  endTime?: string
-  duration: number
-  pageViews: number
-  events: number
-  device: string
-  browser: string
-  location: string
-}
-
-type User = {
-  id: string
-  email?: string
-  firstSeen: string
-  lastSeen: string
-  totalSessions: number
-  totalEvents: number
-  avgSessionDuration: number
-  properties?: Record<string, any>
-}
-
-const mockSessions: Session[] = [
-  {
-    id: "session_abc",
-    userId: "user_123",
-    startTime: "2024-01-28T10:00:00Z",
-    endTime: "2024-01-28T10:15:00Z",
-    duration: 900,
-    pageViews: 5,
-    events: 12,
-    device: "Desktop",
-    browser: "Chrome",
-    location: "New York, US",
-  },
-  {
-    id: "session_def",
-    userId: "user_456",
-    startTime: "2024-01-28T09:45:00Z",
-    endTime: "2024-01-28T10:05:00Z",
-    duration: 1200,
-    pageViews: 8,
-    events: 15,
-    device: "Mobile",
-    browser: "Safari",
-    location: "London, UK",
-  },
-  {
-    id: "session_ghi",
-    startTime: "2024-01-28T09:30:00Z",
-    duration: 600,
-    pageViews: 3,
-    events: 7,
-    device: "Tablet",
-    browser: "Firefox",
-    location: "Tokyo, JP",
-  },
-]
-
-const mockUsers: User[] = [
-  {
-    id: "user_123",
-    email: "john@example.com",
-    firstSeen: "2024-01-15T08:00:00Z",
-    lastSeen: "2024-01-28T10:15:00Z",
-    totalSessions: 45,
-    totalEvents: 523,
-    avgSessionDuration: 780,
-    properties: { plan: "premium", role: "admin" },
-  },
-  {
-    id: "user_456",
-    email: "jane@example.com",
-    firstSeen: "2024-01-20T12:00:00Z",
-    lastSeen: "2024-01-28T10:05:00Z",
-    totalSessions: 23,
-    totalEvents: 287,
-    avgSessionDuration: 920,
-    properties: { plan: "free", role: "user" },
-  },
-  {
-    id: "user_789",
-    email: "bob@example.com",
-    firstSeen: "2024-01-10T14:00:00Z",
-    lastSeen: "2024-01-27T16:30:00Z",
-    totalSessions: 67,
-    totalEvents: 891,
-    avgSessionDuration: 650,
-    properties: { plan: "premium", role: "user" },
-  },
-]
+import type { Session, User } from "@/lib/types";
 
 const sessionDurationData = [
   { time: "00:00", duration: 420 },
@@ -112,27 +45,50 @@ const sessionDurationData = [
   { time: "12:00", duration: 820 },
   { time: "16:00", duration: 750 },
   { time: "20:00", duration: 590 },
-]
+];
 
 export default function SessionsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [localSelectedUser, setLocalSelectedUser] = useState<User | null>(null);
+
+  const {
+    sessions,
+    users,
+    selectedSession,
+    sessionsOverview,
+    loadingSessions,
+    loadingUsers,
+    fetchSessions,
+    fetchUsers,
+    fetchSessionsOverview,
+    selectSession,
+  } = useStore();
+
+  useEffect(() => {
+    fetchSessions();
+    fetchUsers();
+    fetchSessionsOverview();
+  }, [fetchSessions, fetchUsers, fetchSessionsOverview]);
 
   const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${minutes}m ${secs}s`
-  }
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}m ${secs}s`;
+  };
 
   return (
     <div className="flex flex-col h-full">
-      <DashboardHeader title="Sessions & Users" description="Track user sessions and analyze user behavior patterns" />
+      <DashboardHeader
+        title="Sessions & Users"
+        description="Track user sessions and analyze user behavior patterns"
+      />
       <div className="flex-1 p-6 space-y-6">
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Sessions
+              </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -147,13 +103,17 @@ export default function SessionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8,234</div>
-              <p className="text-xs text-muted-foreground">Last 30 days</p>
+              <div className="text-2xl font-bold">
+                {sessionsOverview?.totalSessions || sessions.length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Total sessions</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Active Users
+              </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -171,13 +131,17 @@ export default function SessionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2,350</div>
-              <p className="text-xs text-muted-foreground">Unique users</p>
+              <div className="text-2xl font-bold">
+                {sessionsOverview?.activeUsers || users.length || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">Active users</p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Session Duration</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Avg. Session Duration
+              </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -193,7 +157,11 @@ export default function SessionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4m 32s</div>
+              <div className="text-2xl font-bold">
+                {sessionsOverview?.avgSessionDuration
+                  ? formatDuration(sessionsOverview.avgSessionDuration)
+                  : "0m 0s"}
+              </div>
               <p className="text-xs text-muted-foreground">Average time</p>
             </CardContent>
           </Card>
@@ -215,8 +183,12 @@ export default function SessionsPage() {
               </svg>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">32%</div>
-              <p className="text-xs text-muted-foreground">Single page visits</p>
+              <div className="text-2xl font-bold">
+                {sessionsOverview?.bounceRate
+                  ? `${Math.round(sessionsOverview.bounceRate * 100)}%`
+                  : "0%"}
+              </div>
+              <p className="text-xs text-muted-foreground">Bounce rate</p>
             </CardContent>
           </Card>
         </div>
@@ -224,7 +196,9 @@ export default function SessionsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Session Duration Trend</CardTitle>
-            <CardDescription>Average session duration over the last 24 hours</CardDescription>
+            <CardDescription>
+              Average session duration over the last 24 hours
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -237,12 +211,25 @@ export default function SessionsPage() {
               className="h-[250px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={sessionDurationData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <LineChart
+                  data={
+                    sessionsOverview?.sessionDurationTrend ||
+                    sessionDurationData
+                  }
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-muted"
+                  />
                   <XAxis dataKey="time" className="text-xs" />
                   <YAxis className="text-xs" />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Line type="monotone" dataKey="duration" stroke="var(--color-duration)" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="duration"
+                    stroke="var(--color-duration)"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -259,7 +246,9 @@ export default function SessionsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Active Sessions</CardTitle>
-                <CardDescription>Recent user sessions with detailed information</CardDescription>
+                <CardDescription>
+                  Recent user sessions with detailed information
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Input
@@ -281,18 +270,30 @@ export default function SessionsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockSessions.map((session) => (
+                      {sessions?.map((session) => (
                         <TableRow key={session.id}>
-                          <TableCell className="font-mono text-sm">{session.id}</TableCell>
-                          <TableCell className="font-mono text-sm">{session.userId || "-"}</TableCell>
-                          <TableCell>{formatDuration(session.duration)}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {session.id}
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {session.userId || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {formatDuration(session.duration)}
+                          </TableCell>
                           <TableCell>
                             <Badge variant="secondary">{session.events}</Badge>
                           </TableCell>
                           <TableCell>{session.device}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{session.location}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {session.location}
+                          </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedSession(session)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => selectSession(session)}
+                            >
                               View
                             </Button>
                           </TableCell>
@@ -309,7 +310,11 @@ export default function SessionsPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Session Details</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedSession(null)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => selectSession(null)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -329,35 +334,57 @@ export default function SessionsPage() {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Session ID</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Session ID
+                      </p>
                       <p className="text-sm font-mono">{selectedSession.id}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">User ID</p>
-                      <p className="text-sm font-mono">{selectedSession.userId || "Anonymous"}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        User ID
+                      </p>
+                      <p className="text-sm font-mono">
+                        {selectedSession.userId || "Anonymous"}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Start Time</p>
-                      <p className="text-sm">{new Date(selectedSession.startTime).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Start Time
+                      </p>
+                      <p className="text-sm">
+                        {new Date(selectedSession.startTime).toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Duration</p>
-                      <p className="text-sm">{formatDuration(selectedSession.duration)}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Duration
+                      </p>
+                      <p className="text-sm">
+                        {formatDuration(selectedSession.duration)}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Page Views</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Page Views
+                      </p>
                       <p className="text-sm">{selectedSession.pageViews}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Events</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Events
+                      </p>
                       <p className="text-sm">{selectedSession.events}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Device</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Device
+                      </p>
                       <p className="text-sm">{selectedSession.device}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Browser</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Browser
+                      </p>
                       <p className="text-sm">{selectedSession.browser}</p>
                     </div>
                   </div>
@@ -370,7 +397,9 @@ export default function SessionsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>User Directory</CardTitle>
-                <CardDescription>Identified users and their activity metrics</CardDescription>
+                <CardDescription>
+                  Identified users and their activity metrics
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Input
@@ -392,20 +421,30 @@ export default function SessionsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockUsers.map((user) => (
+                      {users?.map((user) => (
                         <TableRow key={user.id}>
-                          <TableCell className="font-mono text-sm">{user.id}</TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {user.id}
+                          </TableCell>
                           <TableCell>{user.email || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="secondary">{user.totalSessions}</Badge>
+                            <Badge variant="secondary">
+                              {user.totalSessions}
+                            </Badge>
                           </TableCell>
                           <TableCell>{user.totalEvents}</TableCell>
-                          <TableCell>{formatDuration(user.avgSessionDuration)}</TableCell>
+                          <TableCell>
+                            {formatDuration(user.avgSessionDuration)}
+                          </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {new Date(user.lastSeen).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => setSelectedUser(user)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLocalSelectedUser(user)}
+                            >
                               View
                             </Button>
                           </TableCell>
@@ -417,12 +456,16 @@ export default function SessionsPage() {
               </CardContent>
             </Card>
 
-            {selectedUser && (
+            {localSelectedUser && (
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>User Profile</CardTitle>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setLocalSelectedUser(null)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -442,35 +485,65 @@ export default function SessionsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">User ID</p>
-                      <p className="text-sm font-mono">{selectedUser.id}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        User ID
+                      </p>
+                      <p className="text-sm font-mono">
+                        {localSelectedUser.id}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Email</p>
-                      <p className="text-sm">{selectedUser.email || "Not provided"}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Email
+                      </p>
+                      <p className="text-sm">
+                        {localSelectedUser.email || "Not provided"}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">First Seen</p>
-                      <p className="text-sm">{new Date(selectedUser.firstSeen).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        First Seen
+                      </p>
+                      <p className="text-sm">
+                        {new Date(localSelectedUser.firstSeen).toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Last Seen</p>
-                      <p className="text-sm">{new Date(selectedUser.lastSeen).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Last Seen
+                      </p>
+                      <p className="text-sm">
+                        {new Date(localSelectedUser.lastSeen).toLocaleString()}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
-                      <p className="text-sm">{selectedUser.totalSessions}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Sessions
+                      </p>
+                      <p className="text-sm">
+                        {localSelectedUser.totalSessions}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Total Events</p>
-                      <p className="text-sm">{selectedUser.totalEvents}</p>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Total Events
+                      </p>
+                      <p className="text-sm">{localSelectedUser.totalEvents}</p>
                     </div>
                   </div>
-                  {selectedUser.properties && (
+                  {localSelectedUser.properties && (
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">User Properties</p>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">
+                        User Properties
+                      </p>
                       <div className="bg-muted p-4 rounded-lg">
-                        <pre className="text-xs font-mono">{JSON.stringify(selectedUser.properties, null, 2)}</pre>
+                        <pre className="text-xs font-mono">
+                          {JSON.stringify(
+                            localSelectedUser.properties,
+                            null,
+                            2
+                          )}
+                        </pre>
                       </div>
                     </div>
                   )}
@@ -481,5 +554,5 @@ export default function SessionsPage() {
         </Tabs>
       </div>
     </div>
-  )
+  );
 }

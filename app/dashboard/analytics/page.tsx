@@ -24,7 +24,39 @@ import {
   getMAUValue,
   getPageViewsValue,
   getConversionRate,
+  getTotalEventsValue,
+  getUniqueUsersValue,
+  getTopEventsValue,
+  getTotalSessionsValue,
 } from "@/lib/api";
+
+// Helper function to get country flag emoji
+const getCountryFlag = (countryName: string): string => {
+  const countryFlags: { [key: string]: string } = {
+    "United States": "🇺🇸",
+    Canada: "🇨🇦",
+    "United Kingdom": "🇬🇧",
+    Germany: "🇩🇪",
+    France: "🇫🇷",
+    India: "🇮🇳",
+    China: "🇨🇳",
+    Japan: "🇯🇵",
+    Brazil: "🇧🇷",
+    Australia: "🇦🇺",
+    Netherlands: "🇳🇱",
+    Sweden: "🇸🇪",
+    Norway: "🇳🇴",
+    Denmark: "🇩🇰",
+    Finland: "🇫🇮",
+    Spain: "🇪🇸",
+    Italy: "🇮🇹",
+    Russia: "🇷🇺",
+    Mexico: "🇲🇽",
+    Argentina: "🇦🇷",
+  };
+
+  return countryFlags[countryName] || "🌍";
+};
 
 export default function AnalyticsPage() {
   const {
@@ -34,12 +66,13 @@ export default function AnalyticsPage() {
     events,
     fetchAnalytics,
     fetchEvents,
+    isAuthenticated,
   } = useStore();
 
   const [dateRange, setDateRange] = useState<string>("7d");
 
   useEffect(() => {
-    if (!selectedProjectId) return;
+    if (!selectedProjectId || !isAuthenticated) return;
 
     // Calculate date range
     const endDate = new Date();
@@ -64,7 +97,13 @@ export default function AnalyticsPage() {
       endDate: endDate.toISOString().split("T")[0],
     });
     fetchEvents();
-  }, [selectedProjectId, dateRange, fetchAnalytics, fetchEvents]);
+  }, [
+    selectedProjectId,
+    dateRange,
+    fetchAnalytics,
+    fetchEvents,
+    isAuthenticated,
+  ]);
 
   if (loadingAnalytics) {
     return (
@@ -93,7 +132,10 @@ export default function AnalyticsPage() {
   const mau = getMAUValue(analyticsData);
   const pageViews = getPageViewsValue(analyticsData);
   const conversionRate = getConversionRate(analyticsData);
-  const topEvents = analyticsData.metrics.top_events || [];
+  const totalEvents = getTotalEventsValue(analyticsData);
+  const uniqueUsers = getUniqueUsersValue(analyticsData);
+  const topEvents = getTopEventsValue(analyticsData);
+  const totalSessions = getTotalSessionsValue(analyticsData);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -138,7 +180,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {events.length.toLocaleString()}
+              {totalEvents.toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600">+12.5%</span> from last period
@@ -227,7 +269,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(conversionRate * 100).toFixed(1)}%
+              {(conversionRate * 100)?.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600">+4.1%</span> from last period
@@ -247,20 +289,20 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-8">
-              {topEvents.slice(0, 5).map((event, i) => (
+              {topEvents.slice(0, 5)?.map((event, i) => (
                 <div key={i} className="flex items-center">
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {event.name}
+                      {event.name || `Event ${i + 1}`}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {event.count.toLocaleString()} events
+                      {event.count?.toLocaleString() || 0} events
                     </p>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium">
-                      {events.length > 0
-                        ? ((event.count / events.length) * 100).toFixed(1)
+                      {totalEvents > 0
+                        ? ((event.count / totalEvents) * 100)?.toFixed(1)
                         : "0"}
                       %
                     </div>
@@ -284,27 +326,58 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {events.slice(0, 10).map((event) => (
-                <div
-                  key={event.id}
-                  className="flex items-center justify-between border-b pb-2"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{event.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      User: {event.userId} • Session: {event.sessionId}
-                    </p>
+              {events.slice(0, 10)?.map((event: any, index: number) => {
+                // Extract country from user_agent_details or use fallback
+                const country =
+                  event.UserAgentDetails?.country || event.Country || "Unknown";
+                const city =
+                  event.UserAgentDetails?.city || event.City || "Unknown";
+                const countryFlag =
+                  country !== "Unknown" ? getCountryFlag(country) : "🌍";
+
+                return (
+                  <div
+                    key={event.ID || index}
+                    className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{countryFlag}</span>
+                        <p className="text-sm font-medium">
+                          {event.Event || event.event || "Unknown Event"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        {event.UserId && (
+                          <span>User: {event.UserId.substring(0, 8)}...</span>
+                        )}
+                        {event.SessionId && (
+                          <span>
+                            Session: {event.SessionId.substring(0, 8)}...
+                          </span>
+                        )}
+                        {event.Url && <span>URL: {event.Url}</span>}
+                        {city !== "Unknown" && country !== "Unknown" && (
+                          <span>
+                            {city}, {country}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(
+                          event.Timestamp || event.timestamp || Date.now()
+                        ).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(event.timestamp).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
               {events.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent events
+                  No recent events found. Start tracking events to see data
+                  here.
                 </p>
               )}
             </div>
@@ -343,9 +416,7 @@ export default function AnalyticsPage() {
             <CardTitle>Total Sessions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">
-              {analyticsData.metrics.total_sessions || 0}
-            </div>
+            <div className="text-3xl font-bold">{totalSessions}</div>
             <p className="text-xs text-muted-foreground mt-2">
               Sessions in the selected period
             </p>

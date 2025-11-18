@@ -4,6 +4,8 @@ export { projectService } from "./services/project";
 export { analyticsService } from "./services/analytics";
 export { experimentService } from "./services/experiment";
 export { userService } from "./services/user";
+export { stripeService } from "./services/stripe";
+export { enhancedAnalyticsService } from "./services/enhanced-analytics";
 
 // Export token management
 export { setAuthToken, getAuthToken } from "./services/base";
@@ -29,16 +31,16 @@ export {
 import { authService } from "./services/auth";
 import { projectService } from "./services/project";
 import { analyticsService } from "./services/analytics";
-import { experimentService } from "./services/experiment";
-import { userService } from "./services/user";
+import { stripeService } from "./services/stripe";
+import { enhancedAnalyticsService } from "./services/enhanced-analytics";
 
 export const apiClient = {
   // Set project ID globally
   setProjectId: (projectId: string) => {
     projectService.setProjectId(projectId);
     analyticsService.setProjectId(projectId);
-    experimentService.setProjectId(projectId);
-    userService.setProjectId(projectId);
+    stripeService.setProjectId(projectId);
+    enhancedAnalyticsService.setProjectId(projectId);
   },
 
   // Auth methods (no auth required)
@@ -60,32 +62,42 @@ export const apiClient = {
 
   // Analytics
   getAnalytics: analyticsService.getAnalytics.bind(analyticsService),
-  getAnalyticsGlobal:
-    analyticsService.getAnalyticsGlobal.bind(analyticsService),
   getDashboard: analyticsService.getDashboard.bind(analyticsService),
   getUserMetrics: analyticsService.getUserMetrics.bind(analyticsService),
   getSessions: analyticsService.getSessions.bind(analyticsService),
   getSession: analyticsService.getSession.bind(analyticsService),
   getSessionsOverview:
     analyticsService.getSessionsOverview.bind(analyticsService),
-  getEvents: analyticsService.getEvents.bind(analyticsService),
 
-  // Experiments (A/B Testing)
-  getExperiments: experimentService.getExperiments.bind(experimentService),
-  createExperiment: experimentService.createExperiment.bind(experimentService),
-  updateExperiment: experimentService.updateExperiment.bind(experimentService),
-  updateExperimentStatus:
-    experimentService.updateExperimentStatus.bind(experimentService),
-  getExperimentResults:
-    experimentService.getExperimentResults.bind(experimentService),
+  // Stripe Revenue Analytics
+  syncStripeData: stripeService.syncStripeData.bind(stripeService),
+  getRevenueMetrics: stripeService.getRevenueMetrics.bind(stripeService),
+  getRevenueAnalytics: stripeService.getRevenueAnalytics.bind(stripeService),
+  getCustomerAnalytics: stripeService.getCustomerAnalytics.bind(stripeService),
+  updateStripeKey: stripeService.updateStripeKey.bind(stripeService),
 
-  // Heatmaps
-  getHeatmaps: experimentService.getHeatmaps.bind(experimentService),
-  getHeatmapPages: experimentService.getHeatmapPages.bind(experimentService),
-
-  // Users
-  getUsers: userService.getUsers.bind(userService),
-  getUser: userService.getUser.bind(userService),
+  // Enhanced Analytics
+  getLocationAnalytics: enhancedAnalyticsService.getLocationAnalytics.bind(
+    enhancedAnalyticsService
+  ),
+  getDeviceAnalytics: enhancedAnalyticsService.getDeviceAnalytics.bind(
+    enhancedAnalyticsService
+  ),
+  getRetentionCohorts: enhancedAnalyticsService.getRetentionCohorts.bind(
+    enhancedAnalyticsService
+  ),
+  getFeatureAdoption: enhancedAnalyticsService.getFeatureAdoption.bind(
+    enhancedAnalyticsService
+  ),
+  getChurnRisk: enhancedAnalyticsService.getChurnRisk.bind(
+    enhancedAnalyticsService
+  ),
+  getConversionFunnel: enhancedAnalyticsService.getConversionFunnel.bind(
+    enhancedAnalyticsService
+  ),
+  getSessionAnalytics: enhancedAnalyticsService.getSessionAnalytics.bind(
+    enhancedAnalyticsService
+  ),
 
   // Health check
   healthCheck: authService.healthCheck.bind(authService),

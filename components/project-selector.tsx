@@ -11,7 +11,22 @@ import {
 import { useStore } from "../lib/store";
 
 export function ProjectSelector() {
-  const { selectedProjectId, projects, setSelectedProjectId } = useStore();
+  const {
+    selectedProjectId,
+    projects,
+    setSelectedProjectId,
+    fetchProjects,
+    projectsLoaded,
+    isAuthenticated,
+  } = useStore();
+
+  useEffect(() => {
+    if (isAuthenticated && !projectsLoaded) {
+      fetchProjects();
+    }
+  }, [isAuthenticated, projectsLoaded, fetchProjects]);
+
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
   return (
     <div className="flex items-center gap-2">
@@ -26,10 +41,12 @@ export function ProjectSelector() {
             placeholder={
               projects.length === 0 ? "No projects" : "Select a project"
             }
-          />
+          >
+            {selectedProject ? selectedProject.name : "Select a project"}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {projects.map((project) => (
+          {projects?.map((project) => (
             <SelectItem key={project.id} value={project.id}>
               {project.name}
             </SelectItem>
