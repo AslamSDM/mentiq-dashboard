@@ -195,7 +195,7 @@ export default function UnifiedAnalyticsPage() {
       // Process device data
       if (deviceRes?.data) {
         const transformedDevices: DeviceData[] = (
-          deviceRes.data.devices || []
+          deviceRes.data?.by_device || []
         )?.map((d: any) => ({
           device_type: d.device,
           users: Math.floor(d.count * 0.7),
