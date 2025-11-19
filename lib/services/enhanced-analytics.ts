@@ -56,6 +56,29 @@ export interface SessionData {
   bounce_rate: number;
 }
 
+export interface DeviceMetric {
+  device: string;
+  sessions: number;
+  users: number;
+  page_views: number;
+  bounce_rate: string;
+  avg_session_time: string;
+  conversion_rate: string;
+}
+
+export interface OSMetric {
+  os: string;
+  sessions: number;
+  users: number;
+  conversion_rate: string;
+}
+
+export interface BrowserMetric {
+  browser: string;
+  sessions: number;
+  users: number;
+}
+
 class EnhancedAnalyticsService extends BaseHttpService {
   /**
    * Get location analytics
@@ -94,9 +117,9 @@ class EnhancedAnalyticsService extends BaseHttpService {
     endDate?: string
   ): Promise<{
     data: {
-      devices: EnhancedDeviceData[];
-      operating_systems: EnhancedDeviceData[];
-      browsers: EnhancedDeviceData[];
+      by_device: DeviceMetric[];
+      by_os: OSMetric[];
+      by_browser: BrowserMetric[];
     };
   }> {
     const params = new URLSearchParams();

@@ -102,7 +102,7 @@ interface AppState {
   fetchSessions: () => Promise<void>;
   fetchUsers: () => Promise<void>;
   fetchSessionsOverview: () => Promise<void>;
-  selectSession: (session: Session | null) => void;
+  selectSession: (session: Session | null) => Promise<void>;
   selectUser: (user: User | null) => void;
 }
 
@@ -480,8 +480,22 @@ export const useStore = create<AppState>()(
           set({ loadingSessionsOverview: false });
         }
       },
-      selectSession: (session) => {
+      selectSession: async (session) => {
         set({ selectedSession: session });
+        if (session) {
+          const { selectedProjectId, apiClient } = get();
+          if (!selectedProjectId) return;
+          console.log(session);
+          try {
+            const fullSession = await apiClient.getSession(
+              selectedProjectId,
+              session.id
+            );
+            set({ selectedSession: fullSession });
+          } catch (error) {
+            console.error("Failed to fetch session details:", error);
+          }
+        }
       },
       selectUser: (user) => {
         set({ selectedUser: user });

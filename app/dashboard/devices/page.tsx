@@ -100,28 +100,55 @@ export default function DeviceAnalyticsPage() {
       );
 
       // Transform backend response to match component's expected structure
-      // Service returns: { data: { devices: [...], operating_systems: [...], browsers: [...] } }
       if (response?.data) {
-        // Transform from EnhancedDeviceData to component's expected format
-        const by_device = response.data.devices?.map((d) => ({
-          device: d.device,
-          sessions: d.count,
-          users: Math.floor(d.count * 0.7), // Estimate users from sessions
-          bounce_rate: 0.35, // Default bounce rate (backend doesn't provide this)
-          avg_session_time: 240, // Default session time (backend doesn't provide this)
+        // Helper to parse duration string "0s", "1m 30s" to seconds
+        const parseDuration = (str: string) => {
+          if (!str) return 0;
+          // Simple parsing for "0s" or similar formats
+          // If it's just a number string
+          if (!isNaN(Number(str))) return Number(str);
+
+          // Remove 's' and parse
+          if (str.endsWith("s")) return parseFloat(str.replace("s", ""));
+
+          return 0;
+        };
+
+        // Helper to parse percentage string "0.00%" to decimal 0.0
+        const parsePercentage = (str: string) => {
+          if (!str) return 0;
+          return parseFloat(str.replace("%", "")) / 100;
+        };
+
+        // Transform from API format to component's expected format
+        const by_device = (response.data.by_device || []).map((d) => ({
+          device: d.device || "Unknown",
+          sessions: d.sessions || 0,
+          users: d.users || 0,
+          bounce_rate:
+            typeof d.bounce_rate === "string"
+              ? parsePercentage(d.bounce_rate)
+              : 0,
+          avg_session_time:
+            typeof d.avg_session_time === "string"
+              ? parseDuration(d.avg_session_time)
+              : 0,
         }));
 
-        const by_os = response.data.operating_systems?.map((os) => ({
-          os: os.os || os.device, // Use os field or fallback to device
-          sessions: os.count,
-          users: Math.floor(os.count * 0.7),
-          conversion_rate: 3.5, // Default conversion rate (backend doesn't provide this)
+        const by_os = (response.data.by_os || []).map((os) => ({
+          os: os.os || "Unknown",
+          sessions: os.sessions || 0,
+          users: os.users || 0,
+          conversion_rate:
+            typeof os.conversion_rate === "string"
+              ? parsePercentage(os.conversion_rate)
+              : 0,
         }));
 
-        const by_browser = response.data.browsers?.map((b) => ({
-          browser: b.browser || b.device, // Use browser field or fallback
-          sessions: b.count,
-          users: Math.floor(b.count * 0.7),
+        const by_browser = (response.data.by_browser || []).map((b) => ({
+          browser: b.browser || "Unknown",
+          sessions: b.sessions || 0,
+          users: b.users || 0,
           performance_score: 88, // Default performance score (backend doesn't provide this)
         }));
 
@@ -148,11 +175,6 @@ export default function DeviceAnalyticsPage() {
       }
     } catch (error) {
       console.error("Error fetching device analytics:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch device analytics. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }

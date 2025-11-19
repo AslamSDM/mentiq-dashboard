@@ -95,6 +95,7 @@ export interface Session {
   duration: number;
   pageViews: number;
   events: number;
+  eventsList?: any[]; // Full list of events for replay
   device: string;
   browser: string;
   location: string;
@@ -425,11 +426,51 @@ export class AnalyticsService extends BaseHttpService {
 
   // Sessions endpoints
   async getSessions(projectId: string): Promise<Session[]> {
-    return this.request(`/api/v1/projects/${projectId}/sessions`);
+    const response = (await this.request(
+      `/api/v1/projects/${projectId}/recordings`
+    )) as any;
+    // Handle the response structure which contains { recordings: [], total: number, ... }
+    const recordingsList = response.recordings || [];
+
+    return recordingsList.map((recording: any) => ({
+      id: recording.id,
+      userId: recording.user_id,
+      startTime: recording.created_at,
+      duration: recording.duration,
+      events: recording.event_count,
+      pageViews: 0, // Not available in recording list
+      device: "Unknown", // Not available in recording list
+      browser: "Unknown", // Not available in recording list
+      location: "Unknown", // Not available in recording list
+      projectId: projectId,
+      createdAt: recording.created_at,
+      updatedAt: recording.updated_at,
+    }));
   }
 
   async getSession(projectId: string, sessionId: string): Promise<Session> {
-    return this.request(`/api/v1/projects/${projectId}/sessions/${sessionId}`);
+    const session = (await this.request(
+      `/api/v1/projects/${projectId}/recordings/${sessionId}`
+    )) as any;
+
+    return {
+      id: session.id,
+      userId: session.user_id,
+      startTime: session.start_time,
+      endTime: session.end_time,
+      duration: session.duration,
+      pageViews: session.page_views,
+      events: Array.isArray(session.events)
+        ? session.events.length
+        : session.events,
+      eventsList: session.events || [],
+      device: session.device,
+      browser: session.browser,
+      location: session.city || session.country || session.location,
+      projectId: projectId,
+      createdAt: session.start_time,
+      updatedAt: session.end_time,
+    };
   }
 
   async getSessionsOverview(projectId: string): Promise<SessionsOverview> {
