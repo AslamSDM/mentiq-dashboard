@@ -7,6 +7,7 @@ export async function middleware(req: NextRequest) {
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
+  console.log(token);
   const isAuth = !!token;
   const isAuthPage =
     req.nextUrl.pathname.startsWith("/signin") ||
