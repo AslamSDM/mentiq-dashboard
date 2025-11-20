@@ -39,6 +39,7 @@ export default function SignInPage() {
       if (result?.error) {
         setError("Invalid credentials. Please try again.");
       } else if (result?.ok) {
+        router.refresh();
         router.push("/dashboard");
       }
     } catch (error) {
