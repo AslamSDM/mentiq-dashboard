@@ -24,6 +24,11 @@ export interface AnalyticsData {
 export interface AnalyticsMetricResult {
   metric: string;
   value: number | Record<string, any>;
+  time_series?: Array<{
+    date: string;
+    value: number;
+    unique_users?: number;
+  }>;
 }
 
 export interface DashboardData {
@@ -296,6 +301,7 @@ export class AnalyticsService extends BaseHttpService {
       "page_views",
       "total_sessions",
       "conversion_rate",
+      "bounce_rate",
     ];
     searchParams.set("metrics", metrics.join(","));
 

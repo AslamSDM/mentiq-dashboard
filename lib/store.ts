@@ -60,6 +60,7 @@ interface AppState {
   fetchAnalytics: (params: {
     startDate: string;
     endDate: string;
+    groupBy?: string;
   }) => Promise<void>;
   fetchEvents: () => Promise<void>;
 

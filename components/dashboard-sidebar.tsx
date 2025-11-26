@@ -28,63 +28,63 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Analytics",
-    href: "/dashboard/analytics",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M3 3v18h18" />
-        <path d="m19 9-5 5-4-4-3 3" />
-      </svg>
-    ),
-  },
-  {
-    name: "Location Analytics",
-    href: "/dashboard/location",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-        <circle cx="12" cy="10" r="3" />
-      </svg>
-    ),
-  },
-  {
-    name: "Device Analytics",
-    href: "/dashboard/devices",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-        <path d="M12 18h.01" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Analytics",
+  //   href: "/dashboard/analytics",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="M3 3v18h18" />
+  //       <path d="m19 9-5 5-4-4-3 3" />
+  //     </svg>
+  //   ),
+  // },
+  // {
+  //   name: "Location Analytics",
+  //   href: "/dashboard/location",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+  //       <circle cx="12" cy="10" r="3" />
+  //     </svg>
+  //   ),
+  // },
+  // {
+  //   name: "Device Analytics",
+  //   href: "/dashboard/devices",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+  //       <path d="M12 18h.01" />
+  //     </svg>
+  //   ),
+  // },
   {
     name: "Revenue Analytics",
     href: "/dashboard/revenue",
@@ -101,26 +101,6 @@ const navigation = [
       >
         <line x1="12" x2="12" y1="2" y2="22" />
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-  },
-  {
-    name: "Feature Adoption",
-    href: "/dashboard/adoption",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="m22 21-3-3m0 0a6 6 0 0 0-9-9 6 6 0 0 0 9 9Z" />
       </svg>
     ),
   },
@@ -165,47 +145,28 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Analytics Hub",
-    href: "/dashboard/unified-analytics",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M3 3v18h18" />
-        <path d="m19 9-5 5-4-4-3 3" />
-      </svg>
-    ),
-  },
-  {
-    name: "Heatmaps",
-    href: "/dashboard/heatmaps",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <rect width="18" height="18" x="3" y="3" rx="2" />
-        <path d="M7 7h.01" />
-        <path d="M17 7h.01" />
-        <path d="M7 17h.01" />
-        <path d="M17 17h.01" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Heatmaps",
+  //   href: "/dashboard/heatmaps",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <rect width="18" height="18" x="3" y="3" rx="2" />
+  //       <path d="M7 7h.01" />
+  //       <path d="M17 7h.01" />
+  //       <path d="M7 17h.01" />
+  //       <path d="M17 17h.01" />
+  //     </svg>
+  //   ),
+  // },
   {
     name: "A/B Testing",
     href: "/dashboard/ab-testing",
@@ -266,26 +227,26 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Path Analysis",
-    href: "/dashboard/path-analysis",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 16v-4" />
-        <path d="M12 8h.01" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Path Analysis",
+  //   href: "/dashboard/path-analysis",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <circle cx="12" cy="12" r="10" />
+  //       <path d="M12 16v-4" />
+  //       <path d="M12 8h.01" />
+  //     </svg>
+  //   ),
+  // },
   {
     name: "Session Replay",
     href: "/dashboard/session-replay",

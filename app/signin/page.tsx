@@ -37,12 +37,14 @@ export default function SignInPage() {
       });
 
       if (result?.error) {
+        console.error("Sign in error:", result.error);
         setError("Invalid credentials. Please try again.");
       } else if (result?.ok) {
-        router.refresh();
-        router.push("/dashboard");
+        // Force a hard navigation to ensure session cookies are picked up correctly
+        window.location.href = "/dashboard";
       }
     } catch (error) {
+      console.error("Sign in exception:", error);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);

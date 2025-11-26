@@ -34,10 +34,23 @@ export interface FeatureData {
 export interface ChurnData {
   user_id: string;
   email?: string;
-  risk_score: number;
+  risk_score: string;
+  health_score: string;
+  category: string;
   last_active: string;
   days_inactive: number;
-  total_events: number;
+  sessions_total: number;
+  avg_sessions_week: string;
+  is_churned: boolean;
+  trend: number;
+}
+
+export interface ChurnStats {
+  total_users: number;
+  at_risk_users: number;
+  churned_users: number;
+  churn_rate_30d: string;
+  risk_breakdown: Record<string, number>;
 }
 
 export interface FunnelStep {
@@ -198,11 +211,8 @@ class EnhancedAnalyticsService extends BaseHttpService {
     projectId: string,
     threshold?: number
   ): Promise<{
-    data: {
-      at_risk_users: ChurnData[];
-      total_at_risk: number;
-      churn_rate: number;
-    };
+    at_risk_users: ChurnData[];
+    churn_stats: ChurnStats;
   }> {
     const params = new URLSearchParams();
     if (threshold) params.append("threshold", threshold.toString());

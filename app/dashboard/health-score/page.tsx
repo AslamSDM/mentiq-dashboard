@@ -14,6 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
 import { useToast } from "@/hooks/use-toast";
+import { ChurnRiskCard } from "@/components/churn-risk-card";
 
 export default function HealthScorePage() {
   const { selectedProjectId } = useStore();
@@ -22,6 +23,7 @@ export default function HealthScorePage() {
   // State for health score data
   const [healthData, setHealthData] = useState<any>(null);
   const [churnData, setChurnData] = useState<any>(null);
+  const [churnStats, setChurnStats] = useState<any>(null);
   const [featureData, setFeatureData] = useState<any>(null);
   const [sessionData, setSessionData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -50,8 +52,9 @@ export default function HealthScorePage() {
           .catch(() => null),
       ]);
 
-      if (churnRes?.data) {
-        setChurnData(churnRes.data);
+      if (churnRes) {
+        setChurnData(churnRes.at_risk_users);
+        setChurnStats(churnRes.churn_stats);
       }
 
       if (featureRes?.data) {
@@ -75,12 +78,14 @@ export default function HealthScorePage() {
 
   // Calculate overall health score based on real data
   const calculateOverallHealthScore = () => {
-    if (!churnData || !featureData || !sessionData) return 0;
+    if (!churnStats || !featureData || !sessionData) return 0;
 
     // Health metrics calculation
-    const churnScore = churnData.churn_rate
-      ? Math.max(0, 100 - churnData.churn_rate * 100)
-      : 80;
+    const churnRate = churnStats.churn_rate_30d
+      ? parseFloat(churnStats.churn_rate_30d.replace("%", "")) / 100
+      : 0;
+    const churnScore = Math.max(0, 100 - churnRate * 100);
+
     const engagementScore = sessionData.session_data?.overview?.bounce_rate
       ? Math.max(0, 100 - sessionData.session_data.overview.bounce_rate)
       : 75;
@@ -150,14 +155,21 @@ export default function HealthScorePage() {
     },
     {
       name: "Churn Risk",
-      score: churnData?.churn_rate
-        ? Math.max(0, Math.round(100 - churnData.churn_rate * 100))
+      score: churnStats?.churn_rate_30d
+        ? Math.max(
+            0,
+            Math.round(
+              100 - parseFloat(churnStats.churn_rate_30d.replace("%", ""))
+            )
+          )
         : 0,
-      trend: churnData ? "-0.5%" : "N/A",
+      trend: churnStats ? "-0.5%" : "N/A",
       status:
-        churnData?.churn_rate < 0.05
+        churnStats?.churn_rate_30d &&
+        parseFloat(churnStats.churn_rate_30d.replace("%", "")) < 5
           ? "good"
-          : churnData?.churn_rate < 0.15
+          : churnStats?.churn_rate_30d &&
+            parseFloat(churnStats.churn_rate_30d.replace("%", "")) < 15
           ? "warning"
           : "critical",
     },
@@ -193,21 +205,6 @@ export default function HealthScorePage() {
           : "critical",
     },
   ].filter((metric) => metric.score > 0 || loading); // Show loading metrics or real data
-
-  // Get at-risk users from churn data
-  const atRiskUsers =
-    churnData?.at_risk_users?.map((user: any, index: number) => ({
-      id: user.user_id || `user-${index}`,
-      email: user.email || `user${index + 1}@company.com`,
-      score: Math.round(100 - user.risk_score * 100),
-      lastSeen: user.last_active
-        ? `${Math.round(
-            (new Date().getTime() - new Date(user.last_active).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )} days ago`
-        : `${user.days_inactive || 0} days ago`,
-      revenue: "$" + Math.floor(Math.random() * 500 + 99) + "/mo", // Mock revenue for now
-    })) || [];
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
@@ -346,61 +343,18 @@ export default function HealthScorePage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>At-Risk Users</CardTitle>
-          <CardDescription>
-            Users with low health scores requiring attention
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : atRiskUsers.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                No at-risk users identified
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                All users appear to be healthy
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {atRiskUsers?.map((user: any) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium">{user.email}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Last seen: {user.lastSeen}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{user.revenue}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Monthly value
-                      </p>
-                    </div>
-                    <div
-                      className={`text-2xl font-bold ${getScoreColor(
-                        user.score
-                      )}`}
-                    >
-                      {user.score}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Churn Risk Analysis
+          </h2>
+        </div>
+        <ChurnRiskCard
+          stats={churnStats}
+          users={churnData || []}
+          loading={loading}
+        />
+      </div>
     </div>
   );
 }

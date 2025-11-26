@@ -3,11 +3,25 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
+  // Check if NEXTAUTH_SECRET is configured
+  if (!process.env.NEXTAUTH_SECRET) {
+    console.error("❌ NEXTAUTH_SECRET is not configured!");
+    console.error("Please set NEXTAUTH_SECRET in your environment variables");
+  }
+
   const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  console.log(token);
+  
+  // Enhanced logging for debugging
+  console.log("🔐 Middleware Debug:", {
+    path: req.nextUrl.pathname,
+    hasToken: !!token,
+    tokenEmail: token?.email || "N/A",
+    hasSecret: !!process.env.NEXTAUTH_SECRET,
+  });
+
   const isAuth = !!token;
   const isAuthPage =
     req.nextUrl.pathname.startsWith("/signin") ||

@@ -10,6 +10,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   Line,
@@ -18,6 +28,9 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  Pie,
+  PieChart,
+  Cell,
 } from "recharts";
 import {
   ChartContainer,
@@ -26,6 +39,7 @@ import {
 } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
@@ -41,68 +55,134 @@ import {
   getUniqueUsersValue,
   getTopEventsValue,
 } from "@/lib/api";
-import { stripeService } from "@/lib/services/stripe";
+import { projectService } from "@/lib/services/project";
 import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  DollarSign,
+  Users,
+  TrendingDown,
+  CreditCard,
+  Smartphone,
+  Monitor,
+  Tablet,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DashboardPage() {
-  const { selectedProjectId, analyticsData, loadingAnalytics, fetchAnalytics } =
-    useStore();
+  const {
+    selectedProjectId,
+    analyticsData,
+    loadingAnalytics,
+    events,
+    fetchAnalytics,
+    fetchEvents,
+  } = useStore();
   const { toast } = useToast();
 
-  // State for enhanced analytics data
-  const [churnData, setChurnData] = useState<any>(null);
-  const [revenueData, setRevenueData] = useState<any>(null);
+  // State for all analytics data
+  const [revenueMetrics, setRevenueMetrics] = useState<any>(null);
+  const [revenueAnalytics, setRevenueAnalytics] = useState<any>(null);
   const [locationData, setLocationData] = useState<any>(null);
+  const [deviceData, setDeviceData] = useState<any>(null);
+  const [retentionData, setRetentionData] = useState<any>(null);
+  const [bounceRate, setBounceRate] = useState<number>(0);
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
+  const [engagementTab, setEngagementTab] = useState("dau");
+  const [dateRange, setDateRange] = useState<string>("30d");
 
   // Fetch analytics data
   useEffect(() => {
     if (selectedProjectId) {
+      const endDate = new Date();
+      const startDate = new Date();
+
+      switch (dateRange) {
+        case "1d":
+          startDate.setDate(startDate.getDate() - 1);
+          break;
+        case "7d":
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case "30d":
+          startDate.setDate(startDate.getDate() - 30);
+          break;
+        case "90d":
+          startDate.setDate(startDate.getDate() - 90);
+          break;
+      }
+
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
       fetchAnalytics({
-        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        endDate: new Date().toISOString().split("T")[0],
+        startDate: startDateStr,
+        endDate: endDateStr,
+        groupBy: "day",
       });
 
-      // Fetch enhanced analytics
-      fetchEnhancedData();
-    }
-  }, [selectedProjectId, fetchAnalytics]);
+      fetchEvents();
 
-  const fetchEnhancedData = async () => {
+      // Fetch enhanced analytics
+      fetchAllData(startDateStr, endDateStr);
+    }
+  }, [selectedProjectId, fetchAnalytics, fetchEvents, dateRange]);
+
+  // Update bounce rate when analytics data changes
+  useEffect(() => {
+    if (analyticsData?.results) {
+      const bounceRateMetric = analyticsData.results.find((r: any) => r.metric === "bounce_rate");
+      if (bounceRateMetric?.value) {
+        const valueStr = String(bounceRateMetric.value);
+        const rate = parseFloat(valueStr.replace("%", ""));
+        if (!isNaN(rate)) setBounceRate(rate);
+      }
+    }
+  }, [analyticsData]);
+
+  const fetchAllData = async (startDate: string, endDate: string) => {
     if (!selectedProjectId) return;
 
     setLoadingEnhanced(true);
     try {
-      const [churnRes, revenueRes, locationRes] = await Promise.all([
-        enhancedAnalyticsService
-          .getChurnRisk(selectedProjectId, 50)
-          .catch(() => null),
-        stripeService.getRevenueAnalytics(selectedProjectId).catch(() => null),
-        enhancedAnalyticsService
-          .getLocationAnalytics(selectedProjectId)
-          .catch(() => null),
-      ]);
+      const [revenueMetricsRes, revenueAnalyticsRes, locationRes, deviceRes, retentionRes] =
+        await Promise.all([
+          projectService.getRevenueMetrics(selectedProjectId).catch(() => null),
+          projectService
+            .getRevenueAnalytics(selectedProjectId, startDate, endDate)
+            .catch(() => null),
+          enhancedAnalyticsService
+            .getLocationAnalytics(selectedProjectId)
+            .catch(() => null),
+          enhancedAnalyticsService
+            .getDeviceAnalytics(selectedProjectId, startDate, endDate)
+            .catch(() => null),
+          enhancedAnalyticsService
+            .getRetentionCohorts(selectedProjectId, startDate, endDate)
+            .catch(() => null),
+        ]);
 
-      if (churnRes?.data) {
-        setChurnData(churnRes.data);
-      }
-
-      if (revenueRes?.data) {
-        setRevenueData(revenueRes.data);
-      }
-
-      if (locationRes?.data) {
-        setLocationData(locationRes.data);
-      }
+      if (revenueMetricsRes?.status === "success")
+        setRevenueMetrics(revenueMetricsRes.data);
+      if (revenueAnalyticsRes?.status === "success")
+        setRevenueAnalytics(revenueAnalyticsRes.data);
+      if (locationRes?.data) setLocationData(locationRes.data);
+      if (deviceRes?.data) setDeviceData(deviceRes.data);
+      if (retentionRes?.data) setRetentionData(retentionRes.data);
     } catch (error) {
-      console.error("Error fetching enhanced data:", error);
+      console.error("Error fetching dashboard data:", error);
       toast({
         title: "Error",
-        description: "Failed to load enhanced analytics data",
+        description: "Failed to load some dashboard data",
         variant: "destructive",
       });
     } finally {
@@ -110,105 +190,47 @@ export default function DashboardPage() {
     }
   };
 
-  if (!selectedProjectId) {
-    return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Analytics Overview"
-          description="Monitor user metrics and analytics"
-        />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="w-24 h-24 mx-auto bg-muted rounded-full flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-12 w-12 text-muted-foreground"
-              >
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">No Project Selected</h3>
-              <p className="text-muted-foreground">
-                Please select a project to view analytics data
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadingAnalytics) {
-    return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Analytics Overview"
-          description="Monitor user metrics and analytics"
-        />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Extract metrics from analytics data with proper error handling
-  const dau = analyticsData ? getDAUValue(analyticsData) : 0;
-  const wau = analyticsData ? getWAUValue(analyticsData) : 0;
-  const mau = analyticsData ? getMAUValue(analyticsData) : 0;
-  const pageViews = analyticsData ? getPageViewsValue(analyticsData) : 0;
-  const totalSessions = analyticsData
-    ? getTotalSessionsValue(analyticsData)
-    : 0;
-  const totalEvents = analyticsData ? getTotalEventsValue(analyticsData) : 0;
+  // Derived values from analytics
   const uniqueUsers = analyticsData ? getUniqueUsersValue(analyticsData) : 0;
+  
+  // Helper functions
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
 
-  // Get top events and pages from analytics data
-  const topEvents = analyticsData ? getTopEventsValue(analyticsData) : [];
-  const pageViewsData = analyticsData
-    ? getMetricValue(analyticsData, "page_views")
-    : null;
-  const topPages =
-    pageViewsData &&
-    typeof pageViewsData === "object" &&
-    "breakdown" in pageViewsData
-      ? Object.entries(pageViewsData.breakdown as Record<string, number>)
-          ?.map(([page, views]) => ({
-            page,
-            views,
-            uniqueVisitors: Math.round(views * 0.8), // Estimate unique visitors
-            avgTimeOnPage: Math.floor(Math.random() * 300) + 60, // Random but realistic time
-            bounceRate: Math.random() * 0.6 + 0.2, // Random bounce rate between 20-80%
-          }))
-          .sort((a, b) => b.views - a.views)
-      : [];
+  const formatPercentage = (value: number) => `${value?.toFixed(1)}%`;
 
-  // Get geographical data from enhanced analytics API
-  const geoData = locationData?.locations
-    ? locationData.locations
-        .map((location: any) => ({
-          country: location.country,
-          users: location.unique_users,
-          sessions: location.event_count,
-          code: getCountryCode(location.country),
-          lat: getCountryLat(location.country),
-          lng: getCountryLng(location.country),
-        }))
-        .sort((a: any, b: any) => b.users - a.users)
-        .slice(0, 8)
-    : [];
+  // Process Device Data for Table
+  const getDeviceTableData = () => {
+    if (!deviceData?.by_device) return [];
+    return deviceData.by_device.map((d: any) => ({
+      device: d.device || "Unknown",
+      sessions: d.sessions || 0,
+      users: d.users || 0,
+      bounce_rate:
+        typeof d.bounce_rate === "string"
+          ? parseFloat(d.bounce_rate.replace("%", ""))
+          : 0,
+      avg_session_time: d.avg_session_time || "0s",
+    }));
+  };
 
-  // Helper functions for country mapping (simplified with common countries)
+  // Process Location Data for Map
+  const getGeoData = () => {
+    if (!locationData?.locations) return [];
+    return locationData.locations
+      .map((location: any) => ({
+        country: location.country,
+        users: location.unique_users,
+        sessions: location.event_count,
+        code: getCountryCode(location.country),
+      }))
+      .sort((a: any, b: any) => b.users - a.users);
+  };
+
   function getCountryCode(country: string): string {
     const countryMap: Record<string, string> = {
       "United States": "US",
@@ -218,723 +240,375 @@ export default function DashboardPage() {
       UK: "GB",
       GB: "GB",
       Germany: "DE",
-      DE: "DE",
       Canada: "CA",
-      CA: "CA",
       France: "FR",
-      FR: "FR",
       Australia: "AU",
-      AU: "AU",
       India: "IN",
-      IN: "IN",
       Japan: "JP",
-      JP: "JP",
       Brazil: "BR",
-      BR: "BR",
       Italy: "IT",
-      IT: "IT",
       Spain: "ES",
-      ES: "ES",
       Netherlands: "NL",
-      NL: "NL",
       Sweden: "SE",
-      SE: "SE",
       Norway: "NO",
-      NO: "NO",
       China: "CN",
-      CN: "CN",
+      Russia: "RU",
+      South_Korea: "KR",
     };
     return countryMap[country] || country.slice(0, 2).toUpperCase();
   }
 
-  function getCountryLat(country: string): number {
-    const latMap: Record<string, number> = {
-      "United States": 37.0902,
-      USA: 37.0902,
-      US: 37.0902,
-      "United Kingdom": 55.3781,
-      UK: 55.3781,
-      GB: 55.3781,
-      Germany: 51.1657,
-      DE: 51.1657,
-      Canada: 56.1304,
-      CA: 56.1304,
-      France: 46.2276,
-      FR: 46.2276,
-      Australia: -25.2744,
-      AU: -25.2744,
-      India: 20.5937,
-      IN: 20.5937,
-      Japan: 36.2048,
-      JP: 36.2048,
-      Brazil: -14.235,
-      BR: -14.235,
-      Italy: 41.8719,
-      IT: 41.8719,
-      Spain: 40.4637,
-      ES: 40.4637,
-      Netherlands: 52.1326,
-      NL: 52.1326,
-      Sweden: 60.1282,
-      SE: 60.1282,
-      Norway: 60.472,
-      NO: 60.472,
-      China: 35.8617,
-      CN: 35.8617,
+  // Helper function to get country flag emoji
+  const getCountryFlag = (countryName: string): string => {
+    const countryFlags: { [key: string]: string } = {
+      "United States": "🇺🇸",
+      Canada: "🇨🇦",
+      "United Kingdom": "🇬🇧",
+      Germany: "🇩🇪",
+      France: "🇫🇷",
+      India: "🇮🇳",
+      China: "🇨🇳",
+      Japan: "🇯🇵",
+      Brazil: "🇧🇷",
+      Australia: "🇦🇺",
+      Netherlands: "🇳🇱",
+      Sweden: "🇸🇪",
+      Norway: "🇳🇴",
+      Denmark: "🇩🇰",
+      Finland: "🇫🇮",
+      Spain: "🇪🇸",
+      Italy: "🇮🇹",
+      Russia: "🇷🇺",
+      Mexico: "🇲🇽",
+      Argentina: "🇦🇷",
     };
-    return latMap[country] || 0;
-  }
 
-  function getCountryLng(country: string): number {
-    const lngMap: Record<string, number> = {
-      "United States": -95.7129,
-      USA: -95.7129,
-      US: -95.7129,
-      "United Kingdom": -3.436,
-      UK: -3.436,
-      GB: -3.436,
-      Germany: 10.4515,
-      DE: 10.4515,
-      Canada: -106.3468,
-      CA: -106.3468,
-      France: 2.2137,
-      FR: 2.2137,
-      Australia: 133.7751,
-      AU: 133.7751,
-      India: 78.9629,
-      IN: 78.9629,
-      Japan: 138.2529,
-      JP: 138.2529,
-      Brazil: -51.9253,
-      BR: -51.9253,
-      Italy: 12.5674,
-      IT: 12.5674,
-      Spain: -3.7492,
-      ES: -3.7492,
-      Netherlands: 5.2913,
-      NL: 5.2913,
-      Sweden: 18.6435,
-      SE: 18.6435,
-      Norway: 8.4689,
-      NO: 8.4689,
-      China: 104.1954,
-      CN: 104.1954,
-    };
-    return lngMap[country] || 0;
+    return countryFlags[countryName] || "🌍";
+  };
+
+  const getEngagementData = () => {
+    if (!analyticsData?.results) return [];
+    const result = analyticsData.results.find(
+      (r) => r.metric === engagementTab
+    );
+    return result?.time_series || [];
+  };
+
+  const getEngagementValue = () => {
+    if (!analyticsData) return 0;
+    switch (engagementTab) {
+      case "dau":
+        return getDAUValue(analyticsData);
+      case "wau":
+        return getWAUValue(analyticsData);
+      case "mau":
+        return getMAUValue(analyticsData);
+      default:
+        return 0;
+    }
+  };
+
+  const pageViews = analyticsData ? getPageViewsValue(analyticsData) : 0;
+  const totalEvents = analyticsData ? getTotalEventsValue(analyticsData) : 0;
+  const topEvents = analyticsData ? getTopEventsValue(analyticsData) : [];
+  const totalSessions = analyticsData
+    ? getTotalSessionsValue(analyticsData)
+    : 0;
+
+  if (!selectedProjectId) {
+    return (
+      <div className="flex flex-col h-full">
+        <DashboardHeader
+          title="Overview"
+          description="Unified view of your project analytics"
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="w-24 h-24 mx-auto bg-muted rounded-full flex items-center justify-center">
+              <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">Select a Project</h3>
+              <p className="text-muted-foreground">
+                Please select a project to view the dashboard
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Analytics Overview"
-        description="Monitor user health, churn risk, and revenue metrics"
-      />
-      <div className="flex-1 p-6 space-y-6">
-        {/* Analytics Overview Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="dau">Daily Active Users</TabsTrigger>
-            <TabsTrigger value="wau">Weekly Active Users</TabsTrigger>
-            <TabsTrigger value="mau">Monthly Active Users</TabsTrigger>
-          </TabsList>
+    <div className="flex flex-col h-full space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <DashboardHeader
+          title="Overview"
+          description="Unified view of your project analytics"
+        />
+        <div className="flex items-center space-x-2">
+          <Select value={dateRange} onValueChange={setDateRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select date range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1d">Last 24 hours</SelectItem>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="90d">Last 90 days</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-              <Card className="border-l-4 border-l-chart-1">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Events
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {totalEvents.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    in selected period
-                  </p>
-                </CardContent>
-              </Card>
+      {/* 1. Revenue Analytics (Top) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Revenue Analytics
+          </h2>
+          <Link href="/dashboard/revenue">
+            <Button variant="ghost" size="sm">
+              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
 
-              <Card className="border-l-4 border-l-chart-2">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Daily Active Users
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {dau.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    from yesterday
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-chart-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Weekly Active Users
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {wau.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    from last week
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-chart-4">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Monthly Active Users
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {mau.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    from last month
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-chart-4">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Page Views
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {pageViews.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Last 30 days</p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-l-4 border-l-chart-5">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Sessions
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M12 2v20M2 12h20" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {totalSessions.toLocaleString()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Last 30 days</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Geographical Distribution */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>User Distribution by Country</CardTitle>
-                  <CardDescription>
-                    Geographic distribution of your users (darker = more users)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[650px] w-full relative overflow-hidden">
-                  {loadingEnhanced ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                  ) : geoData && geoData.length > 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <WorldMap geoData={geoData} svgUrl="/world.svg" />
-                    </div>
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                      <div className="text-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="h-12 w-12 mx-auto mb-2 opacity-50"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                          <path d="M2 12h20" />
-                        </svg>
-                        <p className="text-sm">No location data available</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Start tracking user locations to see geographical
-                          distribution
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Countries</CardTitle>
-                  <CardDescription>Ranked by number of users</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {geoData && geoData.length > 0 ? (
-                      geoData.map((geo: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between"
-                        >
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
-                              {i + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {geo.country}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {geo.sessions?.toLocaleString() || 0} sessions
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold">
-                              {geo.users?.toLocaleString() || 0}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              users
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    ) : loadingEnhanced ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-sm">No location data available</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Page Views Overview */}
-            {topPages && topPages.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Pages</CardTitle>
-                  <CardDescription>
-                    Most viewed pages in the selected period
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {topPages.length > 0 ? (
-                      topPages.slice(0, 5).map((page: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between py-3 border-b last:border-0"
-                        >
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">
-                              {page.page || "Unknown Page"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {((page.views / pageViews) * 100).toFixed(1)}% of
-                              total page views
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold">
-                              {page.views.toLocaleString()}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Views
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-sm">No page view data available</p>
-                        <p className="text-xs">
-                          Start tracking page views to see top pages
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Top Events Overview */}
-            {topEvents && topEvents.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Events</CardTitle>
-                  <CardDescription>
-                    Most frequent events in the selected period
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {topEvents && topEvents.length > 0 ? (
-                      topEvents.slice(0, 5).map((event: any, i: number) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between py-3 border-b last:border-0"
-                        >
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">
-                              {event.name || `Event Type ${i + 1}`}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {totalEvents > 0
-                                ? ((event.count / totalEvents) * 100).toFixed(1)
-                                : "0"}
-                              % of total events
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold">
-                              {event.count?.toLocaleString() || 0}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              Events
-                            </p>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p className="text-sm">No event data available</p>
-                        <p className="text-xs">
-                          Start tracking events to see top events
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="dau" className="space-y-6">
+        {loadingEnhanced ? (
+          <div className="grid gap-4 md:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-muted animate-pulse rounded-xl" />
+            ))}
+          </div>
+        ) : revenueMetrics ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Daily Active Users</CardTitle>
-                <CardDescription>
-                  Current daily active users metrics
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">MRR</CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{dau.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(revenueMetrics.mrr)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {revenueMetrics.growth_rate > 0 ? "+" : ""}
+                  {formatPercentage(revenueMetrics.growth_rate)} from last month
+                </p>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="wau" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Weekly Active Users</CardTitle>
-                <CardDescription>
-                  Current weekly active users metrics
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Active Subscriptions
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{wau.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  {revenueMetrics.active_subscriptions}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {revenueMetrics.new_subscriptions} new this month
+                </p>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="mau" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Monthly Active Users</CardTitle>
-                <CardDescription>
-                  Current monthly active users metrics
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Churn Rate
+                </CardTitle>
+                <TrendingDown className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{mau.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  {formatPercentage(revenueMetrics.churn_rate)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {revenueMetrics.churned_subscriptions} canceled this month
+                </p>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">ARPU</CardTitle>
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(revenueMetrics.arpu)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Average revenue per user
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <Card className="bg-muted/50 border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <p className="text-muted-foreground mb-4">
+                No revenue data available. Configure Stripe to see metrics.
+              </p>
+              <Link href="/dashboard/revenue">
+                <Button variant="outline">Configure Stripe</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+        {/* Revenue Chart */}
+        {revenueAnalytics && (
+          <Card>
             <CardHeader>
-              <CardTitle>User Health Score Distribution</CardTitle>
+              <CardTitle>Revenue Trend</CardTitle>
               <CardDescription>
-                Breakdown of users by health score ranges
+                Monthly Recurring Revenue over time
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {loadingEnhanced ? (
-                <div className="h-[300px] flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              ) : churnData && churnData.at_risk_users ? (
-                <ChartContainer
-                  config={{
-                    count: {
-                      label: "Users",
-                      color: "hsl(var(--chart-1))",
-                    },
-                  }}
-                  className="h-[300px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        {
-                          range: "90-100",
-                          count: churnData.at_risk_users.filter(
-                            (u: any) => u.risk_score > 90
-                          ).length,
-                          color: "hsl(var(--chart-1))",
-                        },
-                        {
-                          range: "70-89",
-                          count: churnData.at_risk_users.filter(
-                            (u: any) => u.risk_score > 70 && u.risk_score <= 90
-                          ).length,
-                          color: "hsl(var(--chart-2))",
-                        },
-                        {
-                          range: "50-69",
-                          count: churnData.at_risk_users.filter(
-                            (u: any) => u.risk_score > 50 && u.risk_score <= 70
-                          ).length,
-                          color: "hsl(var(--chart-3))",
-                        },
-                        {
-                          range: "0-49",
-                          count: churnData.at_risk_users.filter(
-                            (u: any) => u.risk_score <= 50
-                          ).length,
-                          color: "hsl(var(--chart-4))",
-                        },
-                      ]}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted"
+              <ChartContainer
+                config={{
+                  mrr: {
+                    label: "MRR",
+                    color: "hsl(var(--primary))",
+                  },
+                }}
+                className="h-[300px] w-full"
+              >
+                <AreaChart data={revenueAnalytics.time_series}>
+                  <defs>
+                    <linearGradient id="colorMrr" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0.3}
                       />
-                      <XAxis dataKey="range" className="text-xs" />
-                      <YAxis className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar
-                        dataKey="count"
-                        radius={[8, 8, 0, 0]}
-                        fill="hsl(var(--chart-1))"
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--primary))"
+                        stopOpacity={0}
                       />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              ) : (
-                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  No health score data available
-                </div>
-              )}
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-muted"
+                  />
+                  <XAxis dataKey="date" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="mrr"
+                    stroke="hsl(var(--primary))"
+                    fillOpacity={1}
+                    fill="url(#colorMrr)"
+                  />
+                </AreaChart>
+              </ChartContainer>
             </CardContent>
           </Card>
+        )}
+      </div>
 
-          <Card className="col-span-3">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>At-Risk Users</CardTitle>
-                  <CardDescription>
-                    Users with low health scores
-                  </CardDescription>
-                </div>
-                <Link href="/dashboard/churn-risk">
-                  <Button variant="ghost" size="sm">
-                    View All
-                  </Button>
-                </Link>
-              </div>
+      {/* 2. General Analytics (DAU, MAU, WAU) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">
+            User Engagement
+          </h2>
+          <Link href="/dashboard/analytics">
+            <Button variant="ghost" size="sm">
+              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Events
+              </CardTitle>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {loadingEnhanced ? (
-                <div className="flex items-center justify-center h-40">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : churnData &&
-                churnData.at_risk_users &&
-                churnData.at_risk_users.length > 0 ? (
-                <div className="space-y-4">
-                  {churnData.at_risk_users
-                    .slice(0, 4)
-                    ?.map((user: any, i: number) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 pb-3 border-b last:border-0"
-                      >
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium">
-                              {user.email || user.user_id}
-                            </p>
-                            <Badge
-                              variant={
-                                user.risk_score > 70
-                                  ? "destructive"
-                                  : "secondary"
-                              }
-                              className="text-xs"
-                            >
-                              {user.risk_score > 70 ? "High" : "Medium"}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Last active:{" "}
-                            {new Date(user.last_active).toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Inactive for {user.days_inactive} days
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-bold">
-                            {user.risk_score}
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Risk Score
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-40 text-muted-foreground">
-                  No at-risk users found
-                </div>
-              )}
+              <div className="text-2xl font-bold">
+                {totalEvents.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                In selected period
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Page Views</CardTitle>
+              <Monitor className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {pageViews.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                In selected period
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Unique Users
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {uniqueUsers.toLocaleString()}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                In selected period
+              </p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Retention & Bounce Rate Metrics */}
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Churn Rate Trend</CardTitle>
-              <CardDescription>Monthly churn rate trend</CardDescription>
+              <CardTitle>User Retention</CardTitle>
+              <CardDescription>Percentage of users returning over time</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingEnhanced ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : churnData ? (
-                <div className="h-[250px] flex flex-col items-center justify-center">
-                  <div className="text-6xl font-bold text-red-600">
-                    {(churnData.churn_rate || 0)?.toFixed(1)}%
+              ) : retentionData?.cohorts && retentionData.cohorts.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="text-3xl font-bold">
+                    {retentionData.cohorts[0]?.retention_rate?.toFixed(1) || 0}%
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Current Churn Rate
+                  <p className="text-sm text-muted-foreground">
+                    Current retention rate
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {churnData.total_at_risk || 0} users at risk
-                  </p>
+                  <div className="space-y-2">
+                    {retentionData.cohorts.slice(0, 3).map((cohort: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{cohort.cohort_period || `Week ${idx + 1}`}</span>
+                        <div className="flex items-center gap-2">
+                          <Progress value={cohort.retention_rate || 0} className="w-24 h-2" />
+                          <span className="font-medium w-12 text-right">{cohort.retention_rate?.toFixed(1) || 0}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  No churn data available
+                <div className="text-center py-8 text-muted-foreground">
+                  No retention data available
                 </div>
               )}
             </CardContent>
@@ -942,55 +616,47 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
-              <CardDescription>Monthly recurring revenue</CardDescription>
+              <CardTitle>Bounce Rate</CardTitle>
+              <CardDescription>Single-page sessions (lower is better)</CardDescription>
             </CardHeader>
             <CardContent>
-              {loadingEnhanced ? (
-                <div className="h-[250px] flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+              {loadingAnalytics ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : revenueData &&
-                revenueData.time_series &&
-                revenueData.time_series.length > 0 ? (
-                <ChartContainer
-                  config={{
-                    mrr: {
-                      label: "MRR ($)",
-                      color: "hsl(var(--chart-2))",
-                    },
-                  }}
-                  className="h-[250px]"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={revenueData.time_series.slice(-6)}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted"
-                      />
-                      <XAxis dataKey="date" className="text-xs" />
-                      <YAxis className="text-xs" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line
-                        type="monotone"
-                        dataKey="mrr"
-                        stroke="var(--color-mrr)"
-                        strokeWidth={3}
-                        dot={{ fill: "var(--color-mrr)", r: 4 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
               ) : (
-                <div className="h-[250px] flex flex-col items-center justify-center">
-                  <p className="text-muted-foreground mb-2">
-                    No revenue data available
+                <div className="space-y-4">
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-3xl font-bold">
+                      {bounceRate.toFixed(1)}%
+                    </div>
+                    {bounceRate < 40 ? (
+                      <Badge variant="default" className="bg-green-500">
+                        Excellent
+                      </Badge>
+                    ) : bounceRate < 55 ? (
+                      <Badge variant="secondary">Good</Badge>
+                    ) : bounceRate < 70 ? (
+                      <Badge variant="outline">Average</Badge>
+                    ) : (
+                      <Badge variant="destructive">Needs Attention</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {bounceRate < 40
+                      ? "Users are highly engaged"
+                      : bounceRate < 55
+                      ? "Healthy engagement levels"
+                      : bounceRate < 70
+                      ? "Room for improvement"
+                      : "Consider improving content"}
                   </p>
-                  <Link href="/dashboard/revenue">
-                    <Button variant="outline" size="sm">
-                      Configure Stripe
-                    </Button>
-                  </Link>
+                  <div className="pt-2">
+                    <Progress value={100 - bounceRate} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(100 - bounceRate).toFixed(1)}% engaged sessions
+                    </p>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -999,118 +665,382 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Recommended Actions</CardTitle>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Active Users</CardTitle>
+                <CardDescription>User engagement over time</CardDescription>
+              </div>
+              <Tabs
+                value={engagementTab}
+                onValueChange={setEngagementTab}
+                className="w-[300px]"
+              >
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="dau">DAU</TabsTrigger>
+                  <TabsTrigger value="wau">WAU</TabsTrigger>
+                  <TabsTrigger value="mau">MAU</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6">
+              <div className="text-3xl font-bold">
+                {getEngagementValue().toLocaleString()}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {engagementTab === "dau"
+                  ? "Daily Active Users"
+                  : engagementTab === "wau"
+                  ? "Weekly Active Users"
+                  : "Monthly Active Users"}
+              </p>
+            </div>
+            <div className="h-[350px] w-full">
+              {loadingAnalytics ? (
+                <div className="h-full w-full flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : getEngagementData().length > 0 ? (
+                <ChartContainer
+                  config={{
+                    value: {
+                      label: "Users",
+                      color: "hsl(var(--primary))",
+                    },
+                  }}
+                  className="h-full w-full"
+                >
+                  <AreaChart data={getEngagementData()}>
+                    <defs>
+                      <linearGradient
+                        id="colorUsers"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="hsl(var(--primary))"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="hsl(var(--primary))"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="stroke-muted/20"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      minTickGap={30}
+                      tickFormatter={(value) =>
+                        new Date(value).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })
+                      }
+                    />
+                    <YAxis
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                    />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          labelFormatter={(value) =>
+                            new Date(value).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          }
+                        />
+                      }
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorUsers)"
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                  No data available for this period
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Events & Recent Events */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Events</CardTitle>
             <CardDescription>
-              Data-driven insights to reduce churn and improve retention
+              Most frequently triggered events in the selected period
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              {churnData && churnData.total_at_risk > 0 && (
-                <div className="flex items-start gap-3 p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
-                  <div className="h-10 w-10 rounded-full bg-chart-1/20 flex items-center justify-center flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-chart-1"
-                    >
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                    </svg>
+            <div className="space-y-8">
+              {topEvents.slice(0, 5)?.map((event: any, i: number) => (
+                <div key={i} className="flex items-center">
+                  <div className="flex-1 space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {event.name || `Event ${i + 1}`}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {event.count?.toLocaleString() || 0} events
+                    </p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      Reach out to {churnData.total_at_risk} at-risk users
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Users with high risk scores
-                    </p>
-                    <Link href="/dashboard/churn-risk">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="h-auto p-0 text-xs"
-                      >
-                        View users →
-                      </Button>
-                    </Link>
+                  <div className="text-right">
+                    <div className="text-sm font-medium">
+                      {totalEvents > 0
+                        ? ((event.count / totalEvents) * 100)?.toFixed(1)
+                        : "0"}
+                      %
+                    </div>
                   </div>
                 </div>
+              ))}
+              {topEvents.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No events data available
+                </p>
               )}
-
-              {!revenueData && (
-                <div className="flex items-start gap-3 p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
-                  <div className="h-10 w-10 rounded-full bg-chart-3/20 flex items-center justify-center flex-shrink-0">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 text-chart-3"
-                    >
-                      <line x1="12" x2="12" y1="2" y2="22" />
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Connect Stripe</p>
-                    <p className="text-xs text-muted-foreground">
-                      Enable revenue analytics and tracking
-                    </p>
-                    <Link href="/dashboard/revenue">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="h-auto p-0 text-xs"
-                      >
-                        Configure →
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-start gap-3 p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors">
-                <div className="h-10 w-10 rounded-full bg-chart-2/20 flex items-center justify-center flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 text-chart-2"
-                  >
-                    <path d="M3 3v18h18" />
-                    <path d="m19 9-5 5-4-4-3 3" />
-                  </svg>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">View Conversion Funnels</p>
-                  <p className="text-xs text-muted-foreground">
-                    Analyze user conversion patterns
-                  </p>
-                  <Link href="/dashboard/conversion">
-                    <Button
-                      variant="link"
-                      size="sm"
-                      className="h-auto p-0 text-xs"
-                    >
-                      View funnels →
-                    </Button>
-                  </Link>
-                </div>
-              </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Events */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Events</CardTitle>
+            <CardDescription>Latest events from your users</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {events.slice(0, 10)?.map((event: any, index: number) => {
+                // Extract country from user_agent_details or use fallback
+                const country =
+                  event.UserAgentDetails?.country || event.Country || "Unknown";
+                const city =
+                  event.UserAgentDetails?.city || event.City || "Unknown";
+                const countryFlag =
+                  country !== "Unknown" ? getCountryFlag(country) : "🌍";
+
+                return (
+                  <div
+                    key={event.ID || index}
+                    className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{countryFlag}</span>
+                        <p className="text-sm font-medium">
+                          {event.Event || event.event || "Unknown Event"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        {event.UserId && (
+                          <span>User: {event.UserId.substring(0, 8)}...</span>
+                        )}
+                        {event.SessionId && (
+                          <span>
+                            Session: {event.SessionId.substring(0, 8)}...
+                          </span>
+                        )}
+                        {event.Url && <span>URL: {event.Url}</span>}
+                        {city !== "Unknown" && country !== "Unknown" && (
+                          <span>
+                            {city}, {country}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(
+                          event.Timestamp || event.timestamp || Date.now()
+                        ).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+              {events.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No recent events found. Start tracking events to see data
+                  here.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 3. Location Analytics */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Location Analytics
+          </h2>
+          <Link href="/dashboard/location">
+            <Button variant="ghost" size="sm">
+              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Global Distribution</CardTitle>
+              <CardDescription>User activity by country</CardDescription>
+            </CardHeader>
+            <CardContent className="h-[400px] relative overflow-hidden">
+              {loadingEnhanced ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="animate-spin" />
+                </div>
+              ) : getGeoData().length > 0 ? (
+                <WorldMap geoData={getGeoData()} svgUrl="/world.svg" />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No location data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Countries</CardTitle>
+              <CardDescription>By user count</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {getGeoData()
+                  .slice(0, 6)
+                  .map((geo: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold">
+                          {i + 1}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {geo.country}
+                        </span>
+                      </div>
+                      <span className="text-sm font-bold">
+                        {geo.users.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                {getGeoData().length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    No data
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* 4. Device Analytics (Table) */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Device Analytics
+          </h2>
+          <Link href="/dashboard/devices">
+            <Button variant="ghost" size="sm">
+              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Device Performance</CardTitle>
+            <CardDescription>Breakdown by device type</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loadingEnhanced ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="animate-spin" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Device</TableHead>
+                    <TableHead className="text-right">Users</TableHead>
+                    <TableHead className="text-right">Sessions</TableHead>
+                    <TableHead className="text-right">Bounce Rate</TableHead>
+                    <TableHead className="text-right">Avg. Duration</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {getDeviceTableData().length > 0 ? (
+                    getDeviceTableData().map((device: any, i: number) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-medium flex items-center gap-2">
+                          {device.device === "Desktop" ? (
+                            <Monitor className="h-4 w-4" />
+                          ) : device.device === "Mobile" ? (
+                            <Smartphone className="h-4 w-4" />
+                          ) : (
+                            <Tablet className="h-4 w-4" />
+                          )}
+                          {device.device}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {device.users.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {device.sessions.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {device.bounce_rate.toFixed(1)}%
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {device.avg_session_time}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        No device data available
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
