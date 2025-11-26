@@ -10,17 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Line,
   LineChart,
@@ -28,6 +17,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  Legend,
+  Tooltip,
 } from "recharts";
 import {
   ChartContainer,
@@ -35,55 +26,112 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
+import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
 
-import type { Session, User } from "@/lib/types";
-
-const sessionDurationData = [
-  { time: "00:00", duration: 420 },
-  { time: "04:00", duration: 380 },
-  { time: "08:00", duration: 680 },
-  { time: "12:00", duration: 820 },
-  { time: "16:00", duration: 750 },
-  { time: "20:00", duration: 590 },
-];
+interface SessionAnalyticsResponse {
+  overview: {
+    total_sessions: number;
+    unique_users: number;
+    avg_session_duration: string;
+    bounce_rate: string;
+    return_visitor_rate: string;
+  };
+  engagement: {
+    dau: number;
+    wau: number;
+    mau: number;
+    stickiness_ratio: string;
+    session_frequency: string;
+  };
+  time_series: Array<{
+    date: string;
+    sessions: number;
+    users: number;
+  }>;
+  meta?: {
+    date_range: string;
+    total_events: number;
+    data_points: number;
+  };
+}
 
 export default function SessionsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [localSelectedUser, setLocalSelectedUser] = useState<User | null>(null);
+  const [sessionData, setSessionData] =
+    useState<SessionAnalyticsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState({
+    start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    end: new Date().toISOString().split("T")[0],
+  });
 
-  const {
-    sessions,
-    users,
-    selectedSession,
-    sessionsOverview,
-    loadingSessions,
-    loadingUsers,
-    fetchSessions,
-    fetchUsers,
-    fetchSessionsOverview,
-    selectSession,
-  } = useStore();
+  const { selectedProject } = useStore();
 
   useEffect(() => {
-    fetchSessions();
-    fetchUsers();
-    fetchSessionsOverview();
-  }, [fetchSessions, fetchUsers, fetchSessionsOverview]);
+    if (selectedProject?.id) {
+      loadSessionData();
+    }
+  }, [selectedProject, dateRange]);
 
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}m ${secs}s`;
+  const loadSessionData = async () => {
+    if (!selectedProject?.id) return;
+
+    try {
+      setLoading(true);
+      const response = await enhancedAnalyticsService.getSessionAnalytics(
+        selectedProject.id,
+        dateRange.start,
+        dateRange.end
+      );
+
+      console.log("📊 Session Analytics Response:", response);
+
+      // Handle both wrapped and unwrapped responses
+      if (response.session_data) {
+        setSessionData(response.session_data);
+      } else if (response.data?.session_data) {
+        setSessionData(response.data.session_data);
+      } else if (response.overview) {
+        setSessionData(response as SessionAnalyticsResponse);
+      } else {
+        console.warn("Unexpected response format:", response);
+      }
+    } catch (error) {
+      console.error("Failed to load session analytics:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full">
+        <DashboardHeader
+          title="Session Analytics"
+          description="Comprehensive session and user engagement metrics"
+        />
+        <div className="flex-1 p-6 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              Loading session analytics...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
       <DashboardHeader
-        title="Sessions & Users"
-        description="Track user sessions and analyze user behavior patterns"
+        title="Session Analytics"
+        description="Comprehensive session and user engagement metrics"
       />
       <div className="flex-1 p-6 space-y-6">
-        <div className="grid gap-4 md:grid-cols-4">
+        {/* Overview Cards */}
+        <div className="grid gap-4 md:grid-cols-5">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -104,15 +152,16 @@ export default function SessionsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {sessionsOverview?.totalSessions || sessions.length || 0}
+                {sessionData?.overview?.total_sessions?.toLocaleString() || 0}
               </div>
               <p className="text-xs text-muted-foreground">Total sessions</p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Active Users
+                Unique Users
               </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -132,15 +181,16 @@ export default function SessionsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {sessionsOverview?.activeUsers || users.length || 0}
+                {sessionData?.overview?.unique_users?.toLocaleString() || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Active users</p>
+              <p className="text-xs text-muted-foreground">Unique users</p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Avg. Session Duration
+                Avg. Duration
               </CardTitle>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -158,13 +208,12 @@ export default function SessionsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {sessionsOverview?.avgSessionDuration
-                  ? formatDuration(sessionsOverview.avgSessionDuration)
-                  : "0m 0s"}
+                {sessionData?.overview?.avg_session_duration || "0m"}
               </div>
               <p className="text-xs text-muted-foreground">Average time</p>
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Bounce Rate</CardTitle>
@@ -184,51 +233,194 @@ export default function SessionsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {sessionsOverview?.bounceRate
-                  ? `${Math.round(sessionsOverview.bounceRate * 100)}%`
-                  : "0%"}
+                {sessionData?.overview?.bounce_rate || "0%"}
               </div>
               <p className="text-xs text-muted-foreground">Bounce rate</p>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Return Rate</CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M3 21v-5h5" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {sessionData?.overview?.return_visitor_rate || "0%"}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Returning visitors
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
+        {/* Engagement Metrics */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">DAU</CardTitle>
+              <Badge variant="secondary">Daily</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {sessionData?.engagement?.dau?.toLocaleString() || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Daily Active Users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">WAU</CardTitle>
+              <Badge variant="secondary">Weekly</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {sessionData?.engagement?.wau?.toLocaleString() || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Weekly Active Users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">MAU</CardTitle>
+              <Badge variant="secondary">Monthly</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {sessionData?.engagement?.mau?.toLocaleString() || 0}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Monthly Active Users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Stickiness</CardTitle>
+              <Badge variant="secondary">DAU/MAU</Badge>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {sessionData?.engagement?.stickiness_ratio || "0%"}
+              </div>
+              <p className="text-xs text-muted-foreground">Engagement ratio</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Session Trend Chart */}
         <Card>
           <CardHeader>
-            <CardTitle>Session Duration Trend</CardTitle>
+            <CardTitle>Session & User Trends</CardTitle>
             <CardDescription>
-              Average session duration over the last 24 hours
+              {sessionData?.meta?.date_range ||
+                "Daily sessions and unique users over time"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer
               config={{
-                duration: {
-                  label: "Duration (seconds)",
+                sessions: {
+                  label: "Sessions",
+                  color: "hsl(var(--chart-1))",
+                },
+                users: {
+                  label: "Unique Users",
                   color: "hsl(var(--chart-2))",
                 },
               }}
-              className="h-[250px]"
+              className="h-[400px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={
-                    sessionsOverview?.sessionDurationTrend ||
-                    sessionDurationData
-                  }
-                >
+                <LineChart data={sessionData?.time_series || []}>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     className="stroke-muted"
                   />
-                  <XAxis dataKey="time" className="text-xs" />
+                  <XAxis
+                    dataKey="date"
+                    className="text-xs"
+                    tickFormatter={(value) => {
+                      const date = new Date(value);
+                      return `${date.getMonth() + 1}/${date.getDate()}`;
+                    }}
+                  />
                   <YAxis className="text-xs" />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Date
+                                </span>
+                                <span className="font-bold text-muted-foreground">
+                                  {payload[0].payload.date}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Sessions
+                                </span>
+                                <span className="font-bold">
+                                  {payload[0].value}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                  Users
+                                </span>
+                                <span className="font-bold">
+                                  {payload[1]?.value || 0}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Legend />
                   <Line
                     type="monotone"
-                    dataKey="duration"
-                    stroke="var(--color-duration)"
+                    dataKey="sessions"
+                    stroke="var(--color-sessions)"
                     strokeWidth={2}
+                    dot={{ fill: "var(--color-sessions)", r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="users"
+                    stroke="var(--color-users)"
+                    strokeWidth={2}
+                    dot={{ fill: "var(--color-users)", r: 3 }}
+                    activeDot={{ r: 5 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -236,322 +428,164 @@ export default function SessionsPage() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="sessions" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="sessions">Sessions</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="sessions" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Active Sessions</CardTitle>
-                <CardDescription>
-                  Recent user sessions with detailed information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input
-                  placeholder="Search sessions..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Session ID</TableHead>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Duration</TableHead>
-                        <TableHead>Events</TableHead>
-                        <TableHead>Device</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sessions?.map((session) => (
-                        <TableRow key={session.id}>
-                          <TableCell className="font-mono text-sm">
-                            {session.id}
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {session.userId || "-"}
-                          </TableCell>
-                          <TableCell>
-                            {formatDuration(session.duration)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{session.events}</Badge>
-                          </TableCell>
-                          <TableCell>{session.device}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {session.location}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => selectSession(session)}
-                            >
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+        {/* Additional Insights */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Session Quality Metrics</CardTitle>
+              <CardDescription>
+                Insights into user engagement and behavior patterns
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Session Frequency
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {sessionData?.engagement?.session_frequency || "0"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Sessions per user
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Data Points
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {sessionData?.meta?.data_points || 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Days analyzed</p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Total Events
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {sessionData?.meta?.total_events?.toLocaleString() || 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Events tracked
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Events per Session
+                  </p>
+                  <p className="text-2xl font-bold">
+                    {sessionData?.overview?.total_sessions &&
+                    sessionData?.meta?.total_events
+                      ? Math.round(
+                          sessionData.meta.total_events /
+                            sessionData.overview.total_sessions
+                        )
+                      : 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Average activity
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            {selectedSession && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Session Details</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => selectSession(null)}
-                    >
+          <Card>
+            <CardHeader>
+              <CardTitle>Key Insights</CardTitle>
+              <CardDescription>
+                Performance indicators and trends
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4"
+                        className="h-5 w-5 text-green-600 dark:text-green-400"
                       >
-                        <path d="M18 6 6 18" />
-                        <path d="m6 6 12 12" />
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                       </svg>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Session ID
-                      </p>
-                      <p className="text-sm font-mono">{selectedSession.id}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        User ID
+                      <p className="text-sm font-medium">High Engagement</p>
+                      <p className="text-xs text-muted-foreground">
+                        {sessionData?.overview?.return_visitor_rate || "0%"}{" "}
+                        users return
                       </p>
-                      <p className="text-sm font-mono">
-                        {selectedSession.userId || "Anonymous"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Start Time
-                      </p>
-                      <p className="text-sm">
-                        {new Date(selectedSession.startTime).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Duration
-                      </p>
-                      <p className="text-sm">
-                        {formatDuration(selectedSession.duration)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Page Views
-                      </p>
-                      <p className="text-sm">{selectedSession.pageViews}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Total Events
-                      </p>
-                      <p className="text-sm">{selectedSession.events}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Device
-                      </p>
-                      <p className="text-sm">{selectedSession.device}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Browser
-                      </p>
-                      <p className="text-sm">{selectedSession.browser}</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="users" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>User Directory</CardTitle>
-                <CardDescription>
-                  Identified users and their activity metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Input
-                  placeholder="Search users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Sessions</TableHead>
-                        <TableHead>Events</TableHead>
-                        <TableHead>Avg. Duration</TableHead>
-                        <TableHead>Last Seen</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users?.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-mono text-sm">
-                            {user.id}
-                          </TableCell>
-                          <TableCell>{user.email || "-"}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">
-                              {user.totalSessions}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{user.totalEvents}</TableCell>
-                          <TableCell>
-                            {formatDuration(user.avgSessionDuration)}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(user.lastSeen).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setLocalSelectedUser(user)}
-                            >
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                  <Badge variant="secondary">
+                    {sessionData?.overview?.return_visitor_rate || "0%"}
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
 
-            {localSelectedUser && (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>User Profile</CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setLocalSelectedUser(null)}
-                    >
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4"
+                        className="h-5 w-5 text-blue-600 dark:text-blue-400"
                       >
-                        <path d="M18 6 6 18" />
-                        <path d="m6 6 12 12" />
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
                       </svg>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        User ID
-                      </p>
-                      <p className="text-sm font-mono">
-                        {localSelectedUser.id}
-                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Email
+                      <p className="text-sm font-medium">Avg. Session Time</p>
+                      <p className="text-xs text-muted-foreground">
+                        Time spent per visit
                       </p>
-                      <p className="text-sm">
-                        {localSelectedUser.email || "Not provided"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        First Seen
-                      </p>
-                      <p className="text-sm">
-                        {new Date(localSelectedUser.firstSeen).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Last Seen
-                      </p>
-                      <p className="text-sm">
-                        {new Date(localSelectedUser.lastSeen).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Total Sessions
-                      </p>
-                      <p className="text-sm">
-                        {localSelectedUser.totalSessions}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Total Events
-                      </p>
-                      <p className="text-sm">{localSelectedUser.totalEvents}</p>
                     </div>
                   </div>
-                  {localSelectedUser.properties && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-2">
-                        User Properties
-                      </p>
-                      <div className="bg-muted p-4 rounded-lg">
-                        <pre className="text-xs font-mono">
-                          {JSON.stringify(
-                            localSelectedUser.properties,
-                            null,
-                            2
-                          )}
-                        </pre>
-                      </div>
+                  <Badge variant="secondary">
+                    {sessionData?.overview?.avg_session_duration || "0m"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="h-5 w-5 text-purple-600 dark:text-purple-400"
+                      >
+                        <path d="M3 3v18h18" />
+                        <path d="M18 17V9" />
+                        <path d="M13 17V5" />
+                        <path d="M8 17v-3" />
+                      </svg>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+                    <div>
+                      <p className="text-sm font-medium">User Stickiness</p>
+                      <p className="text-xs text-muted-foreground">
+                        DAU/MAU ratio
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary">
+                    {sessionData?.engagement?.stickiness_ratio || "0%"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

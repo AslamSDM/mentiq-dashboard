@@ -299,15 +299,17 @@ export interface CustomerAnalytics {
     paid_customers: number;
     free_customers: number;
     total_mrr: number;
+    avg_mrr: number;
     conversion_rate: number;
   };
-  customer_segments: Array<{
-    customer_id: string;
+  customers: Array<{
+    id: string;
     email: string;
     name: string;
     mrr: number;
-    status: "subscribed" | "free";
+    status: "active" | "free";
     created: string;
+    subscriptions: number;
   }>;
 }
 

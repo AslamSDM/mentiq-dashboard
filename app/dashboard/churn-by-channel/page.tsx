@@ -27,8 +27,7 @@ export default function ChurnByChannelPage() {
   const { selectedProjectId } = useStore();
   const { toast } = useToast();
 
-  const [churnData, setChurnData] = useState<any>(null);
-  const [locationData, setLocationData] = useState<any>(null);
+  const [channelChurnData, setChannelChurnData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,21 +41,12 @@ export default function ChurnByChannelPage() {
 
     setLoading(true);
     try {
-      const [churnRes, locationRes] = await Promise.all([
-        enhancedAnalyticsService
-          .getChurnRisk(selectedProjectId)
-          .catch(() => null),
-        enhancedAnalyticsService
-          .getLocationAnalytics(selectedProjectId)
-          .catch(() => null),
-      ]);
+      const response = await enhancedAnalyticsService.getChurnByChannel(
+        selectedProjectId
+      );
 
-      if (churnRes?.data) {
-        setChurnData(churnRes.data);
-      }
-
-      if (locationRes?.data) {
-        setLocationData(locationRes.data);
+      if (response?.data) {
+        setChannelChurnData(response.data);
       }
     } catch (error) {
       console.error("Error fetching channel data:", error);
@@ -69,46 +59,30 @@ export default function ChurnByChannelPage() {
       setLoading(false);
     }
   };
-  // Generate channel data from real analytics
+
+  // Transform API data to component format
   const channelData: ChannelData[] =
-    locationData?.locations && churnData
-      ? locationData.locations
-          .slice(0, 6)
-          .map((location: any, index: number) => {
-            const baseUsers = location.unique_users || 100;
-            const churnRate = Math.min(
-              25,
-              Math.max(
-                5,
-                churnData.churn_rate * 100 * (0.8 + Math.random() * 0.4)
-              )
-            );
-            const churned = Math.round(baseUsers * (churnRate / 100));
-            const avgLifetime = Math.max(3, Math.round(12 - churnRate * 0.3));
-            const ltv = Math.round(1000 + avgLifetime * 150 - churnRate * 20);
+    channelChurnData?.channels && channelChurnData.channels.length > 0
+      ? channelChurnData.channels.map((ch: any) => {
+          // Estimate lifetime based on churn rate (inverse relationship)
+          const avgLifetime = Math.max(3, Math.round(12 - ch.churn_rate * 0.1));
+          // Estimate LTV based on lifetime (simple estimation)
+          const ltv = Math.round(1000 + avgLifetime * 150 - ch.churn_rate * 10);
 
-            const channels = [
-              "Organic Search",
-              "Paid Social",
-              "Direct Traffic",
-              "Email Campaign",
-              "Referral",
-              "Paid Search",
-              "Social Media",
-              "Content Marketing",
-            ];
-
-            return {
-              channel: channels[index] || `Channel ${index + 1}`,
-              totalUsers: baseUsers,
-              churned,
-              churnRate: Number(churnRate.toFixed(1)),
-              avgLifetime: `${avgLifetime}.${Math.floor(
-                Math.random() * 10
-              )} months`,
-              ltv: `$${ltv.toLocaleString()}`,
-            };
-          }) || []
+          return {
+            channel: ch.channel
+              .split("_")
+              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(" "),
+            totalUsers: ch.total_users,
+            churned: ch.churned_users,
+            churnRate: Number(ch.churn_rate.toFixed(1)),
+            avgLifetime: `${avgLifetime}.${Math.floor(
+              Math.random() * 10
+            )} months`,
+            ltv: `$${ltv.toLocaleString()}`,
+          };
+        })
       : // Fallback data if no real data available
         [
           {
@@ -387,6 +361,92 @@ export default function ChurnByChannelPage() {
           </div>
         </CardContent>
       </Card>
+
+      {channelChurnData?.channels?.some(
+        (ch: any) => ch.at_risk_users && ch.at_risk_users.length > 0
+      ) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>At-Risk Users by Channel</CardTitle>
+            <CardDescription>
+              Users with contact information who may be at risk of churning
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {channelChurnData.channels
+                .filter(
+                  (ch: any) => ch.at_risk_users && ch.at_risk_users.length > 0
+                )
+                .map((ch: any, idx: number) => (
+                  <div key={idx} className="space-y-3">
+                    <h4 className="font-semibold text-sm">
+                      {ch.channel
+                        .split("_")
+                        .map(
+                          (w: string) => w.charAt(0).toUpperCase() + w.slice(1)
+                        )
+                        .join(" ")}{" "}
+                      ({ch.at_risk_users.length} at-risk)
+                    </h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2 px-3">User ID</th>
+                            <th className="text-left py-2 px-3">Email</th>
+                            <th className="text-right py-2 px-3">
+                              Last Activity
+                            </th>
+                            <th className="text-right py-2 px-3">
+                              Days Inactive
+                            </th>
+                            <th className="text-right py-2 px-3">Risk Score</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ch.at_risk_users.map((user: any, i: number) => (
+                            <tr key={i} className="border-b last:border-0">
+                              <td className="py-2 px-3 font-mono text-xs">
+                                {user.user_id.slice(0, 8)}...
+                              </td>
+                              <td className="py-2 px-3">
+                                {user.email || (
+                                  <span className="text-muted-foreground italic">
+                                    No email
+                                  </span>
+                                )}
+                              </td>
+                              <td className="text-right py-2 px-3">
+                                {new Date(
+                                  user.last_activity
+                                ).toLocaleDateString()}
+                              </td>
+                              <td className="text-right py-2 px-3">
+                                {user.days_since}
+                              </td>
+                              <td
+                                className={`text-right py-2 px-3 font-medium ${
+                                  user.risk_score > 70
+                                    ? "text-red-600"
+                                    : user.risk_score > 40
+                                    ? "text-yellow-600"
+                                    : "text-orange-600"
+                                }`}
+                              >
+                                {user.risk_score.toFixed(0)}%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -140,7 +140,9 @@ export default function DashboardPage() {
   // Update bounce rate when analytics data changes
   useEffect(() => {
     if (analyticsData?.results) {
-      const bounceRateMetric = analyticsData.results.find((r: any) => r.metric === "bounce_rate");
+      const bounceRateMetric = analyticsData.results.find(
+        (r: any) => r.metric === "bounce_rate"
+      );
       if (bounceRateMetric?.value) {
         const valueStr = String(bounceRateMetric.value);
         const rate = parseFloat(valueStr.replace("%", ""));
@@ -154,22 +156,27 @@ export default function DashboardPage() {
 
     setLoadingEnhanced(true);
     try {
-      const [revenueMetricsRes, revenueAnalyticsRes, locationRes, deviceRes, retentionRes] =
-        await Promise.all([
-          projectService.getRevenueMetrics(selectedProjectId).catch(() => null),
-          projectService
-            .getRevenueAnalytics(selectedProjectId, startDate, endDate)
-            .catch(() => null),
-          enhancedAnalyticsService
-            .getLocationAnalytics(selectedProjectId)
-            .catch(() => null),
-          enhancedAnalyticsService
-            .getDeviceAnalytics(selectedProjectId, startDate, endDate)
-            .catch(() => null),
-          enhancedAnalyticsService
-            .getRetentionCohorts(selectedProjectId, startDate, endDate)
-            .catch(() => null),
-        ]);
+      const [
+        revenueMetricsRes,
+        revenueAnalyticsRes,
+        locationRes,
+        deviceRes,
+        retentionRes,
+      ] = await Promise.all([
+        projectService.getRevenueMetrics(selectedProjectId).catch(() => null),
+        projectService
+          .getRevenueAnalytics(selectedProjectId, startDate, endDate)
+          .catch(() => null),
+        enhancedAnalyticsService
+          .getLocationAnalytics(selectedProjectId)
+          .catch(() => null),
+        enhancedAnalyticsService
+          .getDeviceAnalytics(selectedProjectId, startDate, endDate)
+          .catch(() => null),
+        enhancedAnalyticsService
+          .getRetentionCohorts(selectedProjectId, startDate, endDate)
+          .catch(() => null),
+      ]);
 
       if (revenueMetricsRes?.status === "success")
         setRevenueMetrics(revenueMetricsRes.data);
@@ -192,7 +199,7 @@ export default function DashboardPage() {
 
   // Derived values from analytics
   const uniqueUsers = analyticsData ? getUniqueUsersValue(analyticsData) : 0;
-  
+
   // Helper functions
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -287,15 +294,27 @@ export default function DashboardPage() {
   };
 
   const getEngagementData = () => {
-    if (!analyticsData?.results) return [];
+    if (!analyticsData?.results) {
+      console.log("⚠️ No analytics results available");
+      return [];
+    }
     const result = analyticsData.results.find(
       (r) => r.metric === engagementTab
     );
+    console.log(`📊 Engagement data for ${engagementTab}:`, result);
+    console.log(`📊 Time series for ${engagementTab}:`, result?.time_series);
     return result?.time_series || [];
   };
 
   const getEngagementValue = () => {
-    if (!analyticsData) return 0;
+    if (!analyticsData) {
+      console.log("⚠️ No analytics data available for engagement value");
+      return 0;
+    }
+    console.log(
+      `📊 Getting engagement value for ${engagementTab}`,
+      analyticsData
+    );
     switch (engagementTab) {
       case "dau":
         return getDAUValue(analyticsData);
@@ -579,7 +598,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>User Retention</CardTitle>
-              <CardDescription>Percentage of users returning over time</CardDescription>
+              <CardDescription>
+                Percentage of users returning over time
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingEnhanced ? (
@@ -595,15 +616,27 @@ export default function DashboardPage() {
                     Current retention rate
                   </p>
                   <div className="space-y-2">
-                    {retentionData.cohorts.slice(0, 3).map((cohort: any, idx: number) => (
-                      <div key={idx} className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">{cohort.cohort_period || `Week ${idx + 1}`}</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={cohort.retention_rate || 0} className="w-24 h-2" />
-                          <span className="font-medium w-12 text-right">{cohort.retention_rate?.toFixed(1) || 0}%</span>
+                    {retentionData.cohorts
+                      .slice(0, 3)
+                      .map((cohort: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span className="text-muted-foreground">
+                            {cohort.cohort_period || `Week ${idx + 1}`}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Progress
+                              value={cohort.retention_rate || 0}
+                              className="w-24 h-2"
+                            />
+                            <span className="font-medium w-12 text-right">
+                              {cohort.retention_rate?.toFixed(1) || 0}%
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
               ) : (
@@ -617,7 +650,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Bounce Rate</CardTitle>
-              <CardDescription>Single-page sessions (lower is better)</CardDescription>
+              <CardDescription>
+                Single-page sessions (lower is better)
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingAnalytics ? (

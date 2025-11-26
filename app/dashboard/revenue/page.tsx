@@ -623,35 +623,45 @@ export default function RevenuePage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {customerAnalytics.customer_segments
-                          .slice(0, 10)
-                          ?.map((customer) => (
-                            <div
-                              key={customer.customer_id}
-                              className="flex items-center justify-between p-3 border rounded"
-                            >
-                              <div>
-                                <p className="font-medium">{customer.email}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {customer.name}
-                                </p>
+                        {customerAnalytics.customers &&
+                        Array.isArray(customerAnalytics.customers) &&
+                        customerAnalytics.customers.length > 0 ? (
+                          customerAnalytics.customers
+                            .slice(0, 10)
+                            .map((customer: any) => (
+                              <div
+                                key={customer.id}
+                                className="flex items-center justify-between p-3 border rounded"
+                              >
+                                <div>
+                                  <p className="font-medium">
+                                    {customer.email || "N/A"}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {customer.name || "Unknown"}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-medium">
+                                    {formatCurrency(customer.mrr || 0)}
+                                  </p>
+                                  <Badge
+                                    variant={
+                                      customer.status === "active"
+                                        ? "default"
+                                        : "secondary"
+                                    }
+                                  >
+                                    {customer.status}
+                                  </Badge>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="font-medium">
-                                  {formatCurrency(customer.mrr)}
-                                </p>
-                                <Badge
-                                  variant={
-                                    customer.status === "subscribed"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                >
-                                  {customer.status}
-                                </Badge>
-                              </div>
-                            </div>
-                          ))}
+                            ))
+                        ) : (
+                          <p className="text-center text-muted-foreground py-8">
+                            No customer data available
+                          </p>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

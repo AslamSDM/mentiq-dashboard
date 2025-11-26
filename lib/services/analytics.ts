@@ -314,7 +314,15 @@ export class AnalyticsService extends BaseHttpService {
     if (params?.offset) searchParams.set("offset", params.offset.toString());
 
     const query = searchParams.toString();
-    return this.request(`/api/v1/analytics${query ? `?${query}` : ""}`);
+    console.log("🔍 Analytics API Request:", `/api/v1/analytics?${query}`);
+    const response = await this.request(
+      `/api/v1/analytics${query ? `?${query}` : ""}`
+    );
+    console.log(
+      "📊 Analytics API Response:",
+      JSON.stringify(response, null, 2)
+    );
+    return response as AnalyticsData;
   }
 
   async getDashboardGlobal(): Promise<DashboardData> {
@@ -494,18 +502,23 @@ export const getMetricValue = (
 };
 
 export const getDAUValue = (data: AnalyticsData) => {
-  console.log("Analytics Data:", data);
+  console.log("📈 getDAUValue - Full Analytics Data:", data);
   const result = data?.results?.find((r) => r.metric === "dau");
+  console.log("📈 getDAUValue - DAU Result:", result);
+  console.log("📈 getDAUValue - DAU Value:", result?.value);
+  console.log("📈 getDAUValue - DAU Time Series:", result?.time_series);
   return typeof result?.value === "number" ? result.value : 0;
 };
 
 export const getWAUValue = (data: AnalyticsData) => {
   const result = data?.results?.find((r) => r.metric === "wau");
+  console.log("📈 getWAUValue - WAU Result:", result);
   return typeof result?.value === "number" ? result.value : 0;
 };
 
 export const getMAUValue = (data: AnalyticsData) => {
   const result = data?.results?.find((r) => r.metric === "mau");
+  console.log("📈 getMAUValue - MAU Result:", result);
   return typeof result?.value === "number" ? result.value : 0;
 };
 

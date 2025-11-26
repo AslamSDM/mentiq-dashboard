@@ -104,27 +104,27 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Retention Cohorts",
-    href: "/dashboard/retention",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M3 3v18h18" />
-        <path d="M18.7 8a4 4 0 0 0-7.4 0" />
-        <path d="M7.9 12a4 4 0 0 1 8.2 0" />
-        <path d="M3 16a9 9 0 0 1 18 0" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Retention Cohorts",
+  //   href: "/dashboard/retention",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="M3 3v18h18" />
+  //       <path d="M18.7 8a4 4 0 0 0-7.4 0" />
+  //       <path d="M7.9 12a4 4 0 0 1 8.2 0" />
+  //       <path d="M3 16a9 9 0 0 1 18 0" />
+  //     </svg>
+  //   ),
+  // },
   {
     name: "Churn Analysis",
     href: "/dashboard/churn",
@@ -207,26 +207,26 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Churn Risk",
-    href: "/dashboard/churn-risk",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-        <path d="M12 9v4" />
-        <path d="M12 17h.01" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Churn Risk",
+  //   href: "/dashboard/churn-risk",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+  //       <path d="M12 9v4" />
+  //       <path d="M12 17h.01" />
+  //     </svg>
+  //   ),
+  // },
   // {
   //   name: "Path Analysis",
   //   href: "/dashboard/path-analysis",
@@ -265,25 +265,25 @@ const navigation = [
       </svg>
     ),
   },
-  {
-    name: "Revenue Leakage",
-    href: "/dashboard/revenue-leakage",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <line x1="12" x2="12" y1="2" y2="22" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-  },
+  // {
+  //   name: "Revenue Leakage",
+  //   href: "/dashboard/revenue-leakage",
+  //   icon: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       viewBox="0 0 24 24"
+  //       fill="none"
+  //       stroke="currentColor"
+  //       strokeWidth="2"
+  //       strokeLinecap="round"
+  //       strokeLinejoin="round"
+  //       className="h-5 w-5"
+  //     >
+  //       <line x1="12" x2="12" y1="2" y2="22" />
+  //       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+  //     </svg>
+  //   ),
+  // },
   {
     name: "Churn by Channel",
     href: "/dashboard/churn-by-channel",

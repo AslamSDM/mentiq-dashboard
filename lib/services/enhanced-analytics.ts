@@ -36,7 +36,7 @@ export interface ChurnData {
   email?: string;
   risk_score: string;
   health_score: string;
-  category: string;
+  category: string; // "Critical" | "High" | "Medium" | "Low"
   last_active: string;
   days_inactive: number;
   sessions_total: number;
@@ -90,6 +90,23 @@ export interface BrowserMetric {
   browser: string;
   sessions: number;
   users: number;
+}
+
+export interface AtRiskUser {
+  user_id: string;
+  email?: string;
+  last_activity: string;
+  days_since: number;
+  risk_score: number;
+}
+
+export interface ChannelChurnData {
+  channel: string;
+  total_users: number;
+  active_users: number;
+  churned_users: number;
+  churn_rate: number;
+  at_risk_users: AtRiskUser[];
 }
 
 class EnhancedAnalyticsService extends BaseHttpService {
@@ -211,21 +228,28 @@ class EnhancedAnalyticsService extends BaseHttpService {
     projectId: string,
     threshold?: number
   ): Promise<{
-    at_risk_users: ChurnData[];
-    churn_stats: ChurnStats;
+    status: string;
+    data: {
+      at_risk_users: ChurnData[];
+      total_at_risk: number;
+      churn_rate: string;
+    };
   }> {
     const params = new URLSearchParams();
-    if (threshold) params.append("threshold", threshold.toString());
+    if (threshold) params.append("risk_threshold", threshold.toString());
 
     const queryString = params.toString();
     const endpoint = `/api/v1/projects/${projectId}/analytics/churn${
       queryString ? `?${queryString}` : ""
     }`;
 
-    return this.request(endpoint, {
+    const response = await this.request(endpoint, {
       method: "GET",
       projectId,
     });
+
+    console.log("🔍 Churn Risk API Response:", response);
+    return response as any;
   }
 
   /**
@@ -264,12 +288,30 @@ class EnhancedAnalyticsService extends BaseHttpService {
     startDate?: string,
     endDate?: string
   ): Promise<{
-    data: {
-      sessions: SessionData[];
-      summary: {
+    session_data: {
+      overview: {
         total_sessions: number;
-        avg_session_duration: number;
-        avg_bounce_rate: number;
+        unique_users: number;
+        avg_session_duration: string;
+        bounce_rate: string;
+        return_visitor_rate: string;
+      };
+      engagement: {
+        dau: number;
+        wau: number;
+        mau: number;
+        stickiness_ratio: string;
+        session_frequency: string;
+      };
+      time_series: Array<{
+        date: string;
+        sessions: number;
+        users: number;
+      }>;
+      meta: {
+        date_range: string;
+        data_points: number;
+        total_events: number;
       };
     };
   }> {
@@ -279,6 +321,35 @@ class EnhancedAnalyticsService extends BaseHttpService {
 
     const queryString = params.toString();
     const endpoint = `/api/v1/projects/${projectId}/analytics/sessions${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return this.request(endpoint, {
+      method: "GET",
+      projectId,
+    });
+  }
+
+  /**
+   * Get churn analysis by channel
+   */
+  async getChurnByChannel(
+    projectId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{
+    data: {
+      channels: ChannelChurnData[];
+      start_date: string;
+      end_date: string;
+    };
+  }> {
+    const params = new URLSearchParams();
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+
+    const queryString = params.toString();
+    const endpoint = `/api/v1/analytics/churn-by-channel${
       queryString ? `?${queryString}` : ""
     }`;
 
