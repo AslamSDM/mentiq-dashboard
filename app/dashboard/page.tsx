@@ -873,54 +873,57 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {events.slice(0, 10)?.map((event: any, index: number) => {
-                // Extract country from user_agent_details or use fallback
-                const country =
-                  event.UserAgentDetails?.country || event.Country || "Unknown";
-                const city =
-                  event.UserAgentDetails?.city || event.City || "Unknown";
-                const countryFlag =
-                  country !== "Unknown" ? getCountryFlag(country) : "🌍";
+              {Array.isArray(events) &&
+                events.slice(0, 10)?.map((event: any, index: number) => {
+                  // Extract country from user_agent_details or use fallback
+                  const country =
+                    event.UserAgentDetails?.country ||
+                    event.Country ||
+                    "Unknown";
+                  const city =
+                    event.UserAgentDetails?.city || event.City || "Unknown";
+                  const countryFlag =
+                    country !== "Unknown" ? getCountryFlag(country) : "🌍";
 
-                return (
-                  <div
-                    key={event.ID || index}
-                    className="flex items-center justify-between border-b pb-2 last:border-b-0"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm">{countryFlag}</span>
-                        <p className="text-sm font-medium">
-                          {event.Event || event.event || "Unknown Event"}
+                  return (
+                    <div
+                      key={event.ID || index}
+                      className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{countryFlag}</span>
+                          <p className="text-sm font-medium">
+                            {event.Event || event.event || "Unknown Event"}
+                          </p>
+                        </div>
+                        <div className="flex gap-2 text-xs text-muted-foreground">
+                          {event.UserId && (
+                            <span>User: {event.UserId.substring(0, 8)}...</span>
+                          )}
+                          {event.SessionId && (
+                            <span>
+                              Session: {event.SessionId.substring(0, 8)}...
+                            </span>
+                          )}
+                          {event.Url && <span>URL: {event.Url}</span>}
+                          {city !== "Unknown" && country !== "Unknown" && (
+                            <span>
+                              {city}, {country}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(
+                            event.Timestamp || event.timestamp || Date.now()
+                          ).toLocaleString()}
                         </p>
                       </div>
-                      <div className="flex gap-2 text-xs text-muted-foreground">
-                        {event.UserId && (
-                          <span>User: {event.UserId.substring(0, 8)}...</span>
-                        )}
-                        {event.SessionId && (
-                          <span>
-                            Session: {event.SessionId.substring(0, 8)}...
-                          </span>
-                        )}
-                        {event.Url && <span>URL: {event.Url}</span>}
-                        {city !== "Unknown" && country !== "Unknown" && (
-                          <span>
-                            {city}, {country}
-                          </span>
-                        )}
-                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(
-                          event.Timestamp || event.timestamp || Date.now()
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
               {events.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   No recent events found. Start tracking events to see data

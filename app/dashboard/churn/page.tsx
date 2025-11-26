@@ -48,7 +48,10 @@ import {
   Activity,
   Shield,
 } from "lucide-react";
-import { enhancedAnalyticsService, type ChurnData } from "@/lib/services/enhanced-analytics";
+import {
+  enhancedAnalyticsService,
+  type ChurnData,
+} from "@/lib/services/enhanced-analytics";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChurnRiskUser {
@@ -101,33 +104,54 @@ export default function ChurnAnalysisPage() {
     setIsLoading(true);
     try {
       // Call real churn risk API
-      const response = await enhancedAnalyticsService.getChurnRisk(selectedProjectId, 70);
-      
+      const response = await enhancedAnalyticsService.getChurnRisk(
+        selectedProjectId,
+        70
+      );
+
       if (response.status === "success" && response.data) {
         const { at_risk_users, total_at_risk, churn_rate } = response.data;
-        
+
         // Parse churn rate (comes as "2.7%")
-        const parsedChurnRate = parseFloat(churn_rate?.replace('%', '') || '0');
-        
+        const parsedChurnRate = parseFloat(churn_rate?.replace("%", "") || "0");
+
         // Categorize users by risk category (Critical/High/Medium/Low)
-        const highRiskUsers = at_risk_users.filter((u: ChurnData) => 
-          u.category === 'Critical' || u.category === 'High'
+        const highRiskUsers = at_risk_users.filter(
+          (u: ChurnData) => u.category === "Critical" || u.category === "High"
         );
-        const mediumRiskUsers = at_risk_users.filter((u: ChurnData) => u.category === 'Medium');
-        const lowRiskUsers = at_risk_users.filter((u: ChurnData) => u.category === 'Low');
-        const churnedUsers = at_risk_users.filter((u: ChurnData) => u.is_churned);
+        const mediumRiskUsers = at_risk_users.filter(
+          (u: ChurnData) => u.category === "Medium"
+        );
+        const lowRiskUsers = at_risk_users.filter(
+          (u: ChurnData) => u.category === "Low"
+        );
+        const churnedUsers = at_risk_users.filter(
+          (u: ChurnData) => u.is_churned
+        );
 
         // Map backend ChurnData to frontend ChurnRiskUser
-        const mappedRiskUsers: ChurnRiskUser[] = at_risk_users.map((user: ChurnData) => ({
-          user_id: user.user_id,
-          email: user.email || user.user_id,
-          risk_score: parseFloat(user.risk_score?.replace('%', '') || '0'),
-          risk_level: user.category.toLowerCase() as 'high' | 'medium' | 'low',
-          last_activity: user.last_active,
-          days_since_activity: user.days_inactive || 0,
-          churn_probability: parseFloat(user.risk_score?.replace('%', '') || '0'),
-          predicted_churn_date: new Date(Date.now() + (30 - (user.days_inactive || 0)) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        }));
+        const mappedRiskUsers: ChurnRiskUser[] = at_risk_users.map(
+          (user: ChurnData) => ({
+            user_id: user.user_id,
+            email: user.email || user.user_id,
+            risk_score: parseFloat(user.risk_score?.replace("%", "") || "0"),
+            risk_level: user.category.toLowerCase() as
+              | "high"
+              | "medium"
+              | "low",
+            last_activity: user.last_active,
+            days_since_activity: user.days_inactive || 0,
+            churn_probability: parseFloat(
+              user.risk_score?.replace("%", "") || "0"
+            ),
+            predicted_churn_date: new Date(
+              Date.now() +
+                (30 - (user.days_inactive || 0)) * 24 * 60 * 60 * 1000
+            )
+              .toISOString()
+              .split("T")[0],
+          })
+        );
 
         setChurnMetrics({
           total_users: total_at_risk + 1000, // Approximate total (at_risk is subset)
@@ -145,26 +169,42 @@ export default function ChurnAnalysisPage() {
         const factors: ChurnFactors[] = [
           {
             factor: "Low Engagement",
-            impact_score: Math.round((at_risk_users.filter((u: ChurnData) => 
-              parseFloat(u.avg_sessions_week) < 2).length / at_risk_users.length) * 100),
+            impact_score: Math.round(
+              (at_risk_users.filter(
+                (u: ChurnData) => parseFloat(u.avg_sessions_week) < 2
+              ).length /
+                at_risk_users.length) *
+                100
+            ),
             description: `Users with <2 sessions per week`,
           },
           {
             factor: "Declining Usage",
-            impact_score: Math.round((at_risk_users.filter((u: ChurnData) => 
-              u.trend < -10).length / at_risk_users.length) * 100),
+            impact_score: Math.round(
+              (at_risk_users.filter((u: ChurnData) => u.trend < -10).length /
+                at_risk_users.length) *
+                100
+            ),
             description: `Users showing negative engagement trend`,
           },
           {
             factor: "Inactive Period",
-            impact_score: Math.round((at_risk_users.filter((u: ChurnData) => 
-              u.days_inactive > 14).length / at_risk_users.length) * 100),
+            impact_score: Math.round(
+              (at_risk_users.filter((u: ChurnData) => u.days_inactive > 14)
+                .length /
+                at_risk_users.length) *
+                100
+            ),
             description: `Users inactive for >14 days`,
           },
           {
             factor: "Critical Risk",
-            impact_score: Math.round((at_risk_users.filter((u: ChurnData) => 
-              u.category === 'Critical').length / at_risk_users.length) * 100),
+            impact_score: Math.round(
+              (at_risk_users.filter((u: ChurnData) => u.category === "Critical")
+                .length /
+                at_risk_users.length) *
+                100
+            ),
             description: `Users in critical risk category`,
           },
         ].sort((a, b) => b.impact_score - a.impact_score);
@@ -174,7 +214,7 @@ export default function ChurnAnalysisPage() {
         // Trend data - using current snapshot (would need time-series endpoint for historical)
         setChurnTrends([
           {
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString().split("T")[0],
             churn_rate: parsedChurnRate,
             churned_users: churnedUsers.length,
             total_users: total_at_risk + 1000,

@@ -429,9 +429,12 @@ export class AnalyticsService extends BaseHttpService {
     if (params?.userId) searchParams.set("userId", params.userId);
 
     const query = searchParams.toString();
-    return this.request(
+    const response = (await this.request(
       `/api/v1/projects/${projectId}/events${query ? `?${query}` : ""}`
-    );
+    )) as any;
+
+    // Backend returns { events: [], meta: {} }, extract the events array
+    return Array.isArray(response) ? response : response.events || [];
   }
 
   async getEventSummary(projectId: string): Promise<EventSummary> {
