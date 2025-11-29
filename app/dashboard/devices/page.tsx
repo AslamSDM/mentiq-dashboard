@@ -38,7 +38,6 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { useStore } from "@/lib/store";
 import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 
@@ -122,7 +121,7 @@ export default function DeviceAnalyticsPage() {
         };
 
         // Transform from API format to component's expected format
-        const by_device = (response.data.by_device || []).map((d) => ({
+        const by_device = (response.data.by_device || []).map((d: any) => ({
           device: d.device || "Unknown",
           sessions: d.sessions || 0,
           users: d.users || 0,
@@ -136,7 +135,7 @@ export default function DeviceAnalyticsPage() {
               : 0,
         }));
 
-        const by_os = (response.data.by_os || []).map((os) => ({
+        const by_os = (response.data.by_os || []).map((os: any) => ({
           os: os.os || "Unknown",
           sessions: os.sessions || 0,
           users: os.users || 0,
@@ -146,7 +145,7 @@ export default function DeviceAnalyticsPage() {
               : 0,
         }));
 
-        const by_browser = (response.data.by_browser || []).map((b) => ({
+        const by_browser = (response.data.by_browser || []).map((b: any) => ({
           browser: b.browser || "Unknown",
           sessions: b.sessions || 0,
           users: b.users || 0,

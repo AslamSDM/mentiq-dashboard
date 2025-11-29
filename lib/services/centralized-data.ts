@@ -317,13 +317,13 @@ class CentralizedDataService {
       cacheKey,
       "analytics",
       CACHE_CONFIG.ANALYTICS,
-      () =>
-        cachedAnalyticsService.getAnalytics(
-          projectId,
+      async () => {
+        const { analyticsService } = await import("./analytics");
+        return analyticsService.getAnalytics(projectId, {
           startDate,
           endDate,
-          groupBy
-        ),
+        });
+      },
       projectId
     );
   }
@@ -333,7 +333,10 @@ class CentralizedDataService {
       "events",
       "events",
       CACHE_CONFIG.ANALYTICS,
-      () => cachedAnalyticsService.getEvents(projectId),
+      async () => {
+        const { analyticsService } = await import("./analytics");
+        return analyticsService.getEvents(projectId);
+      },
       projectId
     );
   }
@@ -401,15 +404,8 @@ class CentralizedDataService {
           endDate
         );
         console.log("🔍 Retention raw API response:", response);
-        // The API returns { data: { cohorts: [...] } } or { cohorts: [...] }
-        // Extract the cohorts properly
-        const result = response?.data?.cohorts
-          ? { cohorts: response.data.cohorts }
-          : response?.cohorts
-          ? { cohorts: response.cohorts }
-          : response?.data || response;
-        console.log("🔍 Retention processed result:", result);
-        return result;
+        // The API returns { cohorts: [...] }
+        return response;
       },
       projectId
     );
@@ -515,7 +511,7 @@ class CentralizedDataService {
           startDate,
           endDate
         );
-        return response.data;
+        return response;
       },
       projectId
     );
@@ -545,17 +541,23 @@ class CentralizedDataService {
       "sessions",
       "sessions",
       CACHE_CONFIG.SESSIONS,
-      () => cachedAnalyticsService.getSessions(projectId),
+      async () => {
+        const { analyticsService } = await import("./analytics");
+        return analyticsService.getSessions(projectId);
+      },
       projectId
     );
   }
 
-  async getUsers(projectId: string): Promise<any[]> {
+  async getUsers(projectId: string): Promise<any> {
     return this.getCachedOrFetch(
       "users",
       "users",
       CACHE_CONFIG.SESSIONS,
-      () => cachedAnalyticsService.getUsers(projectId),
+      async () => {
+        const { apiClient } = await import("../api");
+        return apiClient.getUsers(projectId);
+      },
       projectId
     );
   }
@@ -565,7 +567,10 @@ class CentralizedDataService {
       "overview",
       "sessionsOverview",
       CACHE_CONFIG.SESSIONS,
-      () => cachedAnalyticsService.getSessionsOverview(projectId),
+      async () => {
+        const { analyticsService } = await import("./analytics");
+        return analyticsService.getSessionsOverview(projectId);
+      },
       projectId
     );
   }
@@ -577,7 +582,10 @@ class CentralizedDataService {
       "experiments",
       "experiments",
       CACHE_CONFIG.EXPERIMENTS,
-      () => cachedAnalyticsService.getExperiments(projectId),
+      async () => {
+        const { apiClient } = await import("../api");
+        return apiClient.getExperiments(projectId);
+      },
       projectId
     );
   }
@@ -590,8 +598,10 @@ class CentralizedDataService {
       experimentId,
       "experimentResults",
       CACHE_CONFIG.EXPERIMENTS,
-      () =>
-        cachedAnalyticsService.getExperimentResults(projectId, experimentId),
+      async () => {
+        const { apiClient } = await import("../api");
+        return apiClient.getExperimentResults(projectId, experimentId);
+      },
       projectId
     );
   }

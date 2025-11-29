@@ -69,26 +69,29 @@ export default function LocationAnalyticsPage() {
 
       if (response.data && response.data.locations) {
         // Transform the API data to match the expected format
-        const countries = response.data.locations.reduce((acc: any[], loc) => {
-          const existing = acc.find((c) => c.country === loc.country);
-          if (existing) {
-            existing.sessions += loc.event_count;
-            existing.users += loc.unique_users;
-          } else {
-            acc.push({
-              country: loc.country,
-              country_code: getCountryCodeFromName(loc.country),
-              sessions: loc.event_count,
-              users: loc.unique_users,
-              conversion_rate: 0, // Would need actual conversion data
-            });
-          }
-          return acc;
-        }, []);
+        const countries = response.data.locations.reduce(
+          (acc: any[], loc: any) => {
+            const existing = acc.find((c) => c.country === loc.country);
+            if (existing) {
+              existing.sessions += loc.event_count;
+              existing.users += loc.unique_users;
+            } else {
+              acc.push({
+                country: loc.country,
+                country_code: getCountryCodeFromName(loc.country),
+                sessions: loc.event_count,
+                users: loc.unique_users,
+                conversion_rate: 0, // Would need actual conversion data
+              });
+            }
+            return acc;
+          },
+          []
+        );
 
         const cities = response.data.locations
-          .filter((loc) => loc.city)
-          ?.map((loc) => ({
+          .filter((loc: any) => loc.city)
+          ?.map((loc: any) => ({
             city: loc.city || "Unknown",
             country: loc.country,
             sessions: loc.event_count,
@@ -97,17 +100,21 @@ export default function LocationAnalyticsPage() {
           }));
 
         setLocationData({
-          by_country: countries.sort((a, b) => b.users - a.users).slice(0, 10),
-          by_city: cities.sort((a, b) => b.users - a.users).slice(0, 10),
+          by_country: countries
+            .sort((a: any, b: any) => b.users - a.users)
+            .slice(0, 10),
+          by_city: cities
+            .sort((a: any, b: any) => b.users - a.users)
+            .slice(0, 10),
           summary: {
             total_countries: [
-              ...new Set(response.data.locations?.map((l) => l.country)),
+              ...new Set(response.data.locations?.map((l: any) => l.country)),
             ].length,
             total_cities: [
               ...new Set(
                 response.data.locations
-                  .filter((l) => l.city)
-                  ?.map((l) => l.city)
+                  .filter((l: any) => l.city)
+                  ?.map((l: any) => l.city)
               ),
             ].length,
             top_country: countries.length > 0 ? countries[0].country : "N/A",

@@ -387,13 +387,15 @@ export function prepareBatchExport(
 ): BatchHealthScoreExport {
   const distribution = {
     healthy: 0,
-    "at-risk": 0,
+    at_risk: 0,
     warning: 0,
     critical: 0,
   };
 
   userHealthScores.forEach(({ healthScore }) => {
-    distribution[healthScore.scoreRange]++;
+    const range =
+      healthScore.scoreRange === "at-risk" ? "at_risk" : healthScore.scoreRange;
+    distribution[range as keyof typeof distribution]++;
   });
 
   return {

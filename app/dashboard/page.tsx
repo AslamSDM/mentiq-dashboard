@@ -176,7 +176,7 @@ export default function DashboardPage() {
           .catch(() => null),
         enhancedAnalyticsService
           .getRetentionCohorts(selectedProjectId, startDate, endDate)
-          .then((res) =>
+          .then((res: any) =>
             res?.data?.cohorts
               ? { cohorts: res.data.cohorts }
               : res?.cohorts
