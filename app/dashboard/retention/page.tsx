@@ -103,7 +103,11 @@ export default function RetentionPage() {
         const retention = cohort.retention || {};
 
         return {
-          cohort_date: cohort.cohort_date || cohort.cohort_month || cohort.cohort || "Unknown",
+          cohort_date:
+            cohort.cohort_date ||
+            cohort.cohort_month ||
+            cohort.cohort ||
+            "Unknown",
           cohort_size: cohort.users || cohort.cohort_size || 0,
           day_0: 100, // Always 100% on signup day
           day_1: retention["day_1"] || 0,
