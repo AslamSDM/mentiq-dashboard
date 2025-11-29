@@ -95,23 +95,23 @@ export default function RetentionPage() {
       const response = await enhancedAnalyticsService.getRetentionCohorts(
         selectedProjectId
       );
-      const apiCohorts = response.data.cohorts;
+      const apiCohorts = response?.cohorts || response?.data?.cohorts || [];
 
       // Transform API response to match our UI format
-      const transformedCohorts: CohortData[] = apiCohorts.map((cohort) => {
-        // Extract retention rates from retention_data object
-        const retentionData = cohort.retention_data || {};
+      const transformedCohorts: CohortData[] = apiCohorts.map((cohort: any) => {
+        // Extract retention rates from retention object
+        const retention = cohort.retention || {};
 
         return {
-          cohort_date: cohort.cohort,
-          cohort_size: cohort.cohort_size,
+          cohort_date: cohort.cohort_date || cohort.cohort_month || cohort.cohort || "Unknown",
+          cohort_size: cohort.users || cohort.cohort_size || 0,
           day_0: 100, // Always 100% on signup day
-          day_1: retentionData["1"] || 0,
-          day_7: retentionData["7"] || 0,
-          day_30: retentionData["30"] || 0,
-          day_90: retentionData["90"] || 0,
-          day_180: retentionData["180"] || 0,
-          day_365: retentionData["365"] || 0,
+          day_1: retention["day_1"] || 0,
+          day_7: retention["day_7"] || 0,
+          day_30: retention["day_30"] || 0,
+          day_90: retention["day_90"] || 0,
+          day_180: retention["day_180"] || 0,
+          day_365: retention["day_365"] || 0,
         };
       });
 
