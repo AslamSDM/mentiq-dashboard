@@ -1,10 +1,10 @@
 /**
  * Health Score Calculator
  * Implements the health score calculation as per the Mentiq specification document
- * 
+ *
  * The health score is a composite score (0-100) representing the overall likelihood
  * of a user or account to stay, expand, or churn.
- * 
+ *
  * Score Ranges:
  * - 80-100: Healthy (Retained & potential expansion)
  * - 60-79: At Risk (Requires monitoring)
@@ -22,7 +22,7 @@ export interface HealthScoreInputs {
     sessionLength?: number; // avg duration in seconds
     stickinessRatio?: number; // DAU/MAU ratio (0-1)
   };
-  
+
   // Adoption Signals (25% weight)
   adoption: {
     coreFeatures?: {
@@ -33,7 +33,7 @@ export interface HealthScoreInputs {
     featureDepth?: number; // avg uses per feature
     adoptionRate?: number; // 0-1
   };
-  
+
   // Churn Risk Signals (30% weight)
   churnRisk: {
     daysSinceLastLogin?: number;
@@ -43,10 +43,10 @@ export interface HealthScoreInputs {
     bounceRate?: number; // 0-1
     errorRate?: number; // 0-1
   };
-  
+
   // Account Context (15% weight)
   accountContext: {
-    planTier?: 'free' | 'trial' | 'basic' | 'pro' | 'enterprise';
+    planTier?: "free" | "trial" | "basic" | "pro" | "enterprise";
     daysSinceSignup?: number;
     isPaid?: boolean;
     mrr?: number;
@@ -55,7 +55,7 @@ export interface HealthScoreInputs {
 
 export interface HealthScoreResult {
   overallScore: number;
-  scoreRange: 'healthy' | 'at-risk' | 'warning' | 'critical';
+  scoreRange: "healthy" | "at-risk" | "warning" | "critical";
   components: {
     engagement: { score: number; weight: number; weighted: number };
     adoption: { score: number; weight: number; weighted: number };
@@ -81,13 +81,18 @@ export interface HealthScoreResult {
  * Based on DAU/WAU/MAU ratios, session frequency, and session length
  * Weight: 30% of total health score
  */
-export function calculateEngagementScore(engagement: HealthScoreInputs['engagement']): number {
+export function calculateEngagementScore(
+  engagement: HealthScoreInputs["engagement"]
+): number {
   let score = 0;
   let factorCount = 0;
 
   // Stickiness ratio (DAU/MAU) - most important (40% of engagement)
   if (engagement.stickinessRatio !== undefined) {
-    const stickinessScore = Math.min(100, engagement.stickinessRatio * 100 * 3.33); // 30% stickiness = 100 score
+    const stickinessScore = Math.min(
+      100,
+      engagement.stickinessRatio * 100 * 3.33
+    ); // 30% stickiness = 100 score
     score += stickinessScore * 0.4;
     factorCount++;
   }
@@ -95,7 +100,10 @@ export function calculateEngagementScore(engagement: HealthScoreInputs['engageme
   // Session frequency (30% of engagement)
   if (engagement.sessionFrequency !== undefined) {
     // 5+ sessions per week = excellent
-    const frequencyScore = Math.min(100, (engagement.sessionFrequency / 5) * 100);
+    const frequencyScore = Math.min(
+      100,
+      (engagement.sessionFrequency / 5) * 100
+    );
     score += frequencyScore * 0.3;
     factorCount++;
   }
@@ -109,7 +117,11 @@ export function calculateEngagementScore(engagement: HealthScoreInputs['engageme
   }
 
   // DAU/WAU/MAU presence (10% of engagement)
-  if (engagement.dau !== undefined && engagement.mau !== undefined && engagement.mau > 0) {
+  if (
+    engagement.dau !== undefined &&
+    engagement.mau !== undefined &&
+    engagement.mau > 0
+  ) {
     const dauMauRatio = engagement.dau / engagement.mau;
     const ratioScore = Math.min(100, dauMauRatio * 100 * 3.33);
     score += ratioScore * 0.1;
@@ -127,7 +139,9 @@ export function calculateEngagementScore(engagement: HealthScoreInputs['engageme
  * Based on core feature usage, time to activation, and feature depth
  * Weight: 25% of total health score
  */
-export function calculateAdoptionScore(adoption: HealthScoreInputs['adoption']): number {
+export function calculateAdoptionScore(
+  adoption: HealthScoreInputs["adoption"]
+): number {
   let score = 0;
 
   // Use adoptionRate if provided directly
@@ -140,10 +154,11 @@ export function calculateAdoptionScore(adoption: HealthScoreInputs['adoption']):
     } else {
       score = (adoptionPercent / 50) * 50; // 0-50% -> 0-50 score
     }
-  } 
+  }
   // Calculate from core features
   else if (adoption.coreFeatures && adoption.coreFeatures.total > 0) {
-    const adoptionRate = adoption.coreFeatures.used / adoption.coreFeatures.total;
+    const adoptionRate =
+      adoption.coreFeatures.used / adoption.coreFeatures.total;
     const adoptionPercent = adoptionRate * 100;
 
     if (adoptionPercent >= 80) {
@@ -183,7 +198,9 @@ export function calculateAdoptionScore(adoption: HealthScoreInputs['adoption']):
  * Higher score = lower risk. Based on inactivity, frustration signals, and errors
  * Weight: 30% of total health score
  */
-export function calculateChurnRiskScore(churnRisk: HealthScoreInputs['churnRisk']): number {
+export function calculateChurnRiskScore(
+  churnRisk: HealthScoreInputs["churnRisk"]
+): number {
   let score = 100; // Start at perfect, subtract for risk signals
 
   // Inactivity penalty
@@ -236,25 +253,27 @@ export function calculateChurnRiskScore(churnRisk: HealthScoreInputs['churnRisk'
  * Based on plan tier, tenure, and payment status
  * Weight: 15% of total health score
  */
-export function calculateAccountContextScore(context: HealthScoreInputs['accountContext']): number {
+export function calculateAccountContextScore(
+  context: HealthScoreInputs["accountContext"]
+): number {
   let score = 50; // Baseline
 
   // Plan tier scoring
   if (context.planTier) {
     switch (context.planTier) {
-      case 'enterprise':
+      case "enterprise":
         score += 30;
         break;
-      case 'pro':
+      case "pro":
         score += 20;
         break;
-      case 'basic':
+      case "basic":
         score += 10;
         break;
-      case 'trial':
+      case "trial":
         score += 0; // Neutral
         break;
-      case 'free':
+      case "free":
         score -= 10;
         break;
     }
@@ -291,35 +310,39 @@ export function calculateAccountContextScore(context: HealthScoreInputs['account
 /**
  * Calculate overall health score with all components
  */
-export function calculateHealthScore(inputs: HealthScoreInputs): HealthScoreResult {
+export function calculateHealthScore(
+  inputs: HealthScoreInputs
+): HealthScoreResult {
   // Component scores
   const engagementScore = calculateEngagementScore(inputs.engagement);
   const adoptionScore = calculateAdoptionScore(inputs.adoption);
   const churnRiskScore = calculateChurnRiskScore(inputs.churnRisk);
-  const accountContextScore = calculateAccountContextScore(inputs.accountContext);
+  const accountContextScore = calculateAccountContextScore(
+    inputs.accountContext
+  );
 
   // Weights (as per specification)
   const weights = {
-    engagement: 0.30,
+    engagement: 0.3,
     adoption: 0.25,
-    churnRisk: 0.30,
+    churnRisk: 0.3,
     accountContext: 0.15,
   };
 
   // Calculate weighted overall score
   const overallScore = Math.round(
     engagementScore * weights.engagement +
-    adoptionScore * weights.adoption +
-    churnRiskScore * weights.churnRisk +
-    accountContextScore * weights.accountContext
+      adoptionScore * weights.adoption +
+      churnRiskScore * weights.churnRisk +
+      accountContextScore * weights.accountContext
   );
 
   // Determine score range
-  let scoreRange: 'healthy' | 'at-risk' | 'warning' | 'critical';
-  if (overallScore >= 80) scoreRange = 'healthy';
-  else if (overallScore >= 60) scoreRange = 'at-risk';
-  else if (overallScore >= 40) scoreRange = 'warning';
-  else scoreRange = 'critical';
+  let scoreRange: "healthy" | "at-risk" | "warning" | "critical";
+  if (overallScore >= 80) scoreRange = "healthy";
+  else if (overallScore >= 60) scoreRange = "at-risk";
+  else if (overallScore >= 40) scoreRange = "warning";
+  else scoreRange = "critical";
 
   // Generate recommendations
   const recommendations = generateRecommendations(inputs, {
@@ -338,7 +361,13 @@ export function calculateHealthScore(inputs: HealthScoreInputs): HealthScoreResu
   });
 
   // Create LLM context for AI-powered advice
-  const llmContext = createLLMContext(inputs, overallScore, scoreRange, recommendations, signals);
+  const llmContext = createLLMContext(
+    inputs,
+    overallScore,
+    scoreRange,
+    recommendations,
+    signals
+  );
 
   return {
     overallScore,
@@ -382,46 +411,93 @@ function generateRecommendations(
 
   // Engagement recommendations
   if (scores.engagement < 60) {
-    if (inputs.engagement.stickinessRatio && inputs.engagement.stickinessRatio < 0.2) {
-      recommendations.push("Critical: Stickiness ratio below 20%. Focus on daily habit formation features.");
+    if (
+      inputs.engagement.stickinessRatio &&
+      inputs.engagement.stickinessRatio < 0.2
+    ) {
+      recommendations.push(
+        "Critical: Stickiness ratio below 20%. Focus on daily habit formation features."
+      );
     }
-    if (inputs.engagement.sessionFrequency && inputs.engagement.sessionFrequency < 2) {
-      recommendations.push("Users logging in less than 2x/week. Implement email nudges and push notifications.");
+    if (
+      inputs.engagement.sessionFrequency &&
+      inputs.engagement.sessionFrequency < 2
+    ) {
+      recommendations.push(
+        "Users logging in less than 2x/week. Implement email nudges and push notifications."
+      );
     }
-    recommendations.push("Engagement is low. Consider in-app onboarding improvements and value delivery.");
+    recommendations.push(
+      "Engagement is low. Consider in-app onboarding improvements and value delivery."
+    );
   }
 
   // Adoption recommendations
   if (scores.adoption < 60) {
-    if (inputs.adoption.coreFeatures && inputs.adoption.coreFeatures.used < inputs.adoption.coreFeatures.total * 0.5) {
-      recommendations.push("Users adopting less than 50% of core features. Implement feature discovery tooltips.");
+    if (
+      inputs.adoption.coreFeatures &&
+      inputs.adoption.coreFeatures.used <
+        inputs.adoption.coreFeatures.total * 0.5
+    ) {
+      recommendations.push(
+        "Users adopting less than 50% of core features. Implement feature discovery tooltips."
+      );
     }
-    if (inputs.adoption.timeToFirstKeyAction && inputs.adoption.timeToFirstKeyAction > 7) {
-      recommendations.push("Time to activation exceeds 7 days. Streamline onboarding and reduce friction.");
+    if (
+      inputs.adoption.timeToFirstKeyAction &&
+      inputs.adoption.timeToFirstKeyAction > 7
+    ) {
+      recommendations.push(
+        "Time to activation exceeds 7 days. Streamline onboarding and reduce friction."
+      );
     }
-    recommendations.push("Feature adoption needs improvement. Add guided product tours and use-case templates.");
+    recommendations.push(
+      "Feature adoption needs improvement. Add guided product tours and use-case templates."
+    );
   }
 
   // Churn risk recommendations
   if (scores.churnRisk < 60) {
-    if (inputs.churnRisk.daysSinceLastLogin && inputs.churnRisk.daysSinceLastLogin >= 14) {
-      recommendations.push("URGENT: User inactive for 14+ days. Initiate win-back campaign immediately.");
+    if (
+      inputs.churnRisk.daysSinceLastLogin &&
+      inputs.churnRisk.daysSinceLastLogin >= 14
+    ) {
+      recommendations.push(
+        "URGENT: User inactive for 14+ days. Initiate win-back campaign immediately."
+      );
     }
-    if (inputs.churnRisk.rageClickCount && inputs.churnRisk.rageClickCount > 0) {
-      recommendations.push("Rage clicks detected. Review UX for points of frustration and fix immediately.");
+    if (
+      inputs.churnRisk.rageClickCount &&
+      inputs.churnRisk.rageClickCount > 0
+    ) {
+      recommendations.push(
+        "Rage clicks detected. Review UX for points of frustration and fix immediately."
+      );
     }
-    if (inputs.churnRisk.supportTicketsLast30Days && inputs.churnRisk.supportTicketsLast30Days >= 3) {
-      recommendations.push("High support ticket volume. Assign CSM for proactive outreach.");
+    if (
+      inputs.churnRisk.supportTicketsLast30Days &&
+      inputs.churnRisk.supportTicketsLast30Days >= 3
+    ) {
+      recommendations.push(
+        "High support ticket volume. Assign CSM for proactive outreach."
+      );
     }
   }
 
   // Account context recommendations
   if (scores.accountContext < 60) {
-    if (inputs.accountContext.planTier === 'trial') {
-      recommendations.push("Trial user. Focus on demonstrating value and conversion before trial expires.");
+    if (inputs.accountContext.planTier === "trial") {
+      recommendations.push(
+        "Trial user. Focus on demonstrating value and conversion before trial expires."
+      );
     }
-    if (inputs.accountContext.daysSinceSignup && inputs.accountContext.daysSinceSignup < 7) {
-      recommendations.push("New user (< 7 days). Critical onboarding period - ensure quick wins.");
+    if (
+      inputs.accountContext.daysSinceSignup &&
+      inputs.accountContext.daysSinceSignup < 7
+    ) {
+      recommendations.push(
+        "New user (< 7 days). Critical onboarding period - ensure quick wins."
+      );
     }
   }
 
@@ -439,23 +515,56 @@ function identifySignals(
   const negative: string[] = [];
 
   // Engagement signals
-  if (inputs.engagement.stickinessRatio && inputs.engagement.stickinessRatio >= 0.3) {
-    positive.push(`Strong stickiness ratio: ${(inputs.engagement.stickinessRatio * 100).toFixed(1)}%`);
-  } else if (inputs.engagement.stickinessRatio && inputs.engagement.stickinessRatio < 0.15) {
-    negative.push(`Low stickiness ratio: ${(inputs.engagement.stickinessRatio * 100).toFixed(1)}%`);
+  if (
+    inputs.engagement.stickinessRatio &&
+    inputs.engagement.stickinessRatio >= 0.3
+  ) {
+    positive.push(
+      `Strong stickiness ratio: ${(
+        inputs.engagement.stickinessRatio * 100
+      ).toFixed(1)}%`
+    );
+  } else if (
+    inputs.engagement.stickinessRatio &&
+    inputs.engagement.stickinessRatio < 0.15
+  ) {
+    negative.push(
+      `Low stickiness ratio: ${(
+        inputs.engagement.stickinessRatio * 100
+      ).toFixed(1)}%`
+    );
   }
 
-  if (inputs.engagement.sessionFrequency && inputs.engagement.sessionFrequency >= 5) {
-    positive.push(`High session frequency: ${inputs.engagement.sessionFrequency} logins/week`);
-  } else if (inputs.engagement.sessionFrequency && inputs.engagement.sessionFrequency < 2) {
-    negative.push(`Low session frequency: ${inputs.engagement.sessionFrequency} logins/week`);
+  if (
+    inputs.engagement.sessionFrequency &&
+    inputs.engagement.sessionFrequency >= 5
+  ) {
+    positive.push(
+      `High session frequency: ${inputs.engagement.sessionFrequency} logins/week`
+    );
+  } else if (
+    inputs.engagement.sessionFrequency &&
+    inputs.engagement.sessionFrequency < 2
+  ) {
+    negative.push(
+      `Low session frequency: ${inputs.engagement.sessionFrequency} logins/week`
+    );
   }
 
   // Adoption signals
   if (inputs.adoption.adoptionRate && inputs.adoption.adoptionRate >= 0.8) {
-    positive.push(`Excellent adoption rate: ${(inputs.adoption.adoptionRate * 100).toFixed(0)}%`);
-  } else if (inputs.adoption.adoptionRate && inputs.adoption.adoptionRate < 0.5) {
-    negative.push(`Poor adoption rate: ${(inputs.adoption.adoptionRate * 100).toFixed(0)}%`);
+    positive.push(
+      `Excellent adoption rate: ${(inputs.adoption.adoptionRate * 100).toFixed(
+        0
+      )}%`
+    );
+  } else if (
+    inputs.adoption.adoptionRate &&
+    inputs.adoption.adoptionRate < 0.5
+  ) {
+    negative.push(
+      `Poor adoption rate: ${(inputs.adoption.adoptionRate * 100).toFixed(0)}%`
+    );
   }
 
   // Churn risk signals
@@ -468,16 +577,28 @@ function identifySignals(
   }
 
   if (inputs.churnRisk.rageClickCount && inputs.churnRisk.rageClickCount > 0) {
-    negative.push(`${inputs.churnRisk.rageClickCount} rage click events detected`);
+    negative.push(
+      `${inputs.churnRisk.rageClickCount} rage click events detected`
+    );
   }
 
   // Account context signals
-  if (inputs.accountContext.isPaid && inputs.accountContext.planTier === 'enterprise') {
+  if (
+    inputs.accountContext.isPaid &&
+    inputs.accountContext.planTier === "enterprise"
+  ) {
     positive.push("Enterprise paid customer");
   }
 
-  if (inputs.accountContext.daysSinceSignup && inputs.accountContext.daysSinceSignup >= 365) {
-    positive.push(`Loyal customer: ${Math.floor(inputs.accountContext.daysSinceSignup / 365)} year(s)`);
+  if (
+    inputs.accountContext.daysSinceSignup &&
+    inputs.accountContext.daysSinceSignup >= 365
+  ) {
+    positive.push(
+      `Loyal customer: ${Math.floor(
+        inputs.accountContext.daysSinceSignup / 365
+      )} year(s)`
+    );
   }
 
   return { positive, negative };
@@ -492,13 +613,16 @@ function createLLMContext(
   scoreRange: string,
   recommendations: string[],
   signals: { positive: string[]; negative: string[] }
-): HealthScoreResult['llmContext'] {
+): HealthScoreResult["llmContext"] {
   // Create summary
   const summary = `User Health Score: ${overallScore}/100 (${scoreRange}). ${
-    scoreRange === 'critical' ? 'IMMEDIATE ACTION REQUIRED - High churn risk.' :
-    scoreRange === 'warning' ? 'User needs intervention to prevent churn.' :
-    scoreRange === 'at-risk' ? 'User requires monitoring and engagement.' :
-    'User is healthy and engaged.'
+    scoreRange === "critical"
+      ? "IMMEDIATE ACTION REQUIRED - High churn risk."
+      : scoreRange === "warning"
+      ? "User needs intervention to prevent churn."
+      : scoreRange === "at-risk"
+      ? "User requires monitoring and engagement."
+      : "User is healthy and engaged."
   }`;
 
   // Gather all metrics for LLM
@@ -538,31 +662,68 @@ function createLLMContext(
 
   // Identify risk factors for LLM
   const riskFactors: string[] = [];
-  if (inputs.churnRisk.daysSinceLastLogin && inputs.churnRisk.daysSinceLastLogin >= 14) {
-    riskFactors.push(`Inactivity: ${inputs.churnRisk.daysSinceLastLogin} days since last login`);
+  if (
+    inputs.churnRisk.daysSinceLastLogin &&
+    inputs.churnRisk.daysSinceLastLogin >= 14
+  ) {
+    riskFactors.push(
+      `Inactivity: ${inputs.churnRisk.daysSinceLastLogin} days since last login`
+    );
   }
   if (inputs.churnRisk.rageClickCount && inputs.churnRisk.rageClickCount > 0) {
-    riskFactors.push(`User frustration: ${inputs.churnRisk.rageClickCount} rage click events`);
+    riskFactors.push(
+      `User frustration: ${inputs.churnRisk.rageClickCount} rage click events`
+    );
   }
   if (inputs.adoption.adoptionRate && inputs.adoption.adoptionRate < 0.5) {
-    riskFactors.push(`Low feature adoption: ${(inputs.adoption.adoptionRate * 100).toFixed(0)}%`);
+    riskFactors.push(
+      `Low feature adoption: ${(inputs.adoption.adoptionRate * 100).toFixed(
+        0
+      )}%`
+    );
   }
-  if (inputs.engagement.stickinessRatio && inputs.engagement.stickinessRatio < 0.15) {
-    riskFactors.push(`Poor engagement: ${(inputs.engagement.stickinessRatio * 100).toFixed(1)}% stickiness`);
+  if (
+    inputs.engagement.stickinessRatio &&
+    inputs.engagement.stickinessRatio < 0.15
+  ) {
+    riskFactors.push(
+      `Poor engagement: ${(inputs.engagement.stickinessRatio * 100).toFixed(
+        1
+      )}% stickiness`
+    );
   }
 
   // Identify opportunities for LLM
   const opportunities: string[] = [];
-  if (inputs.accountContext.isPaid && inputs.accountContext.mrr && inputs.accountContext.mrr >= 100) {
-    opportunities.push(`High-value customer (MRR: $${inputs.accountContext.mrr}) - prioritize retention`);
+  if (
+    inputs.accountContext.isPaid &&
+    inputs.accountContext.mrr &&
+    inputs.accountContext.mrr >= 100
+  ) {
+    opportunities.push(
+      `High-value customer (MRR: $${inputs.accountContext.mrr}) - prioritize retention`
+    );
   }
-  if (inputs.engagement.sessionFrequency && inputs.engagement.sessionFrequency >= 3) {
+  if (
+    inputs.engagement.sessionFrequency &&
+    inputs.engagement.sessionFrequency >= 3
+  ) {
     opportunities.push("User shows engagement - good candidate for upsell");
   }
-  if (inputs.adoption.coreFeatures && inputs.adoption.coreFeatures.used >= inputs.adoption.coreFeatures.total * 0.7) {
-    opportunities.push("Strong feature adoption - can introduce advanced features");
+  if (
+    inputs.adoption.coreFeatures &&
+    inputs.adoption.coreFeatures.used >=
+      inputs.adoption.coreFeatures.total * 0.7
+  ) {
+    opportunities.push(
+      "Strong feature adoption - can introduce advanced features"
+    );
   }
-  if (inputs.accountContext.daysSinceSignup && inputs.accountContext.daysSinceSignup >= 90 && inputs.accountContext.planTier !== 'enterprise') {
+  if (
+    inputs.accountContext.daysSinceSignup &&
+    inputs.accountContext.daysSinceSignup >= 90 &&
+    inputs.accountContext.planTier !== "enterprise"
+  ) {
     opportunities.push("Long-term user ready for upgrade pitch");
   }
 

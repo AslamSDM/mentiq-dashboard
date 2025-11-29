@@ -3,18 +3,22 @@
  * Helper functions to prepare and format health score data for AI/LLM consumption
  */
 
-import { HealthScoreResult } from './health-score-calculator';
+import { HealthScoreResult } from "./health-score-calculator";
 
 /**
  * Generate a comprehensive prompt for an LLM to provide churn reduction advice
  */
-export function generateChurnReductionPrompt(healthScore: HealthScoreResult): string {
+export function generateChurnReductionPrompt(
+  healthScore: HealthScoreResult
+): string {
   const prompt = `
 You are an expert SaaS retention strategist analyzing user health metrics to provide actionable churn reduction advice.
 
 ## User Health Score Analysis
 
-**Overall Health Score:** ${healthScore.overallScore}/100 (${healthScore.scoreRange.toUpperCase()})
+**Overall Health Score:** ${
+    healthScore.overallScore
+  }/100 (${healthScore.scoreRange.toUpperCase()})
 
 ### Score Interpretation:
 - 80-100: Healthy (Retained & potential expansion)
@@ -24,16 +28,28 @@ You are an expert SaaS retention strategist analyzing user health metrics to pro
 
 ### Component Scores:
 
-1. **Engagement Score:** ${healthScore.components.engagement.score}/100 (Weight: ${(healthScore.components.engagement.weight * 100).toFixed(0)}%)
+1. **Engagement Score:** ${
+    healthScore.components.engagement.score
+  }/100 (Weight: ${(healthScore.components.engagement.weight * 100).toFixed(
+    0
+  )}%)
    - Measures daily/weekly/monthly active users, session frequency, and stickiness ratio
 
-2. **Adoption Score:** ${healthScore.components.adoption.score}/100 (Weight: ${(healthScore.components.adoption.weight * 100).toFixed(0)}%)
+2. **Adoption Score:** ${healthScore.components.adoption.score}/100 (Weight: ${(
+    healthScore.components.adoption.weight * 100
+  ).toFixed(0)}%)
    - Measures core feature usage, time to activation, and feature depth
 
-3. **Churn Risk Score:** ${healthScore.components.churnRisk.score}/100 (Weight: ${(healthScore.components.churnRisk.weight * 100).toFixed(0)}%)
+3. **Churn Risk Score:** ${
+    healthScore.components.churnRisk.score
+  }/100 (Weight: ${(healthScore.components.churnRisk.weight * 100).toFixed(0)}%)
    - Measures inactivity, rage clicks, drop-offs, and frustration signals
 
-4. **Account Context Score:** ${healthScore.components.accountContext.score}/100 (Weight: ${(healthScore.components.accountContext.weight * 100).toFixed(0)}%)
+4. **Account Context Score:** ${
+    healthScore.components.accountContext.score
+  }/100 (Weight: ${(healthScore.components.accountContext.weight * 100).toFixed(
+    0
+  )}%)
    - Measures plan tier, tenure, and payment status
 
 ### Current Situation Summary:
@@ -45,19 +61,39 @@ ${JSON.stringify(healthScore.llmContext.metrics, null, 2)}
 \`\`\`
 
 ### Positive Signals:
-${healthScore.signals.positive.length > 0 ? healthScore.signals.positive.map(s => `✓ ${s}`).join('\n') : 'None identified'}
+${
+  healthScore.signals.positive.length > 0
+    ? healthScore.signals.positive.map((s) => `✓ ${s}`).join("\n")
+    : "None identified"
+}
 
 ### Negative Signals (Risk Factors):
-${healthScore.signals.negative.length > 0 ? healthScore.signals.negative.map(s => `⚠ ${s}`).join('\n') : 'None identified'}
+${
+  healthScore.signals.negative.length > 0
+    ? healthScore.signals.negative.map((s) => `⚠ ${s}`).join("\n")
+    : "None identified"
+}
 
 ### Current Risk Factors:
-${healthScore.llmContext.riskFactors.length > 0 ? healthScore.llmContext.riskFactors.map(r => `• ${r}`).join('\n') : 'No major risk factors identified'}
+${
+  healthScore.llmContext.riskFactors.length > 0
+    ? healthScore.llmContext.riskFactors.map((r) => `• ${r}`).join("\n")
+    : "No major risk factors identified"
+}
 
 ### Identified Opportunities:
-${healthScore.llmContext.opportunities.length > 0 ? healthScore.llmContext.opportunities.map(o => `• ${o}`).join('\n') : 'Limited opportunities based on current data'}
+${
+  healthScore.llmContext.opportunities.length > 0
+    ? healthScore.llmContext.opportunities.map((o) => `• ${o}`).join("\n")
+    : "Limited opportunities based on current data"
+}
 
 ### Pre-Generated Recommendations:
-${healthScore.recommendations.length > 0 ? healthScore.recommendations.map((r, i) => `${i + 1}. ${r}`).join('\n') : 'No specific recommendations at this time'}
+${
+  healthScore.recommendations.length > 0
+    ? healthScore.recommendations.map((r, i) => `${i + 1}. ${r}`).join("\n")
+    : "No specific recommendations at this time"
+}
 
 ---
 
@@ -94,28 +130,49 @@ Please provide your analysis in a clear, actionable format that a founder or cus
 /**
  * Generate a prompt for revenue optimization advice
  */
-export function generateRevenueOptimizationPrompt(healthScore: HealthScoreResult): string {
+export function generateRevenueOptimizationPrompt(
+  healthScore: HealthScoreResult
+): string {
   const mrr = healthScore.llmContext.metrics.account_context?.mrr || 0;
-  const planTier = healthScore.llmContext.metrics.account_context?.plan_tier || 'unknown';
-  
+  const planTier =
+    healthScore.llmContext.metrics.account_context?.plan_tier || "unknown";
+
   const prompt = `
 You are a SaaS revenue optimization expert analyzing customer health data to maximize revenue and minimize revenue leakage.
 
 ## Customer Profile
 
-**Health Score:** ${healthScore.overallScore}/100 (${healthScore.scoreRange.toUpperCase()})
+**Health Score:** ${
+    healthScore.overallScore
+  }/100 (${healthScore.scoreRange.toUpperCase()})
 **Current MRR:** $${mrr}
 **Plan Tier:** ${planTier}
-**Revenue Risk Level:** ${healthScore.overallScore < 40 ? 'CRITICAL - Immediate churn risk' : healthScore.overallScore < 60 ? 'HIGH - At-risk revenue' : healthScore.overallScore < 80 ? 'MODERATE - Monitor closely' : 'LOW - Stable revenue'}
+**Revenue Risk Level:** ${
+    healthScore.overallScore < 40
+      ? "CRITICAL - Immediate churn risk"
+      : healthScore.overallScore < 60
+      ? "HIGH - At-risk revenue"
+      : healthScore.overallScore < 80
+      ? "MODERATE - Monitor closely"
+      : "LOW - Stable revenue"
+  }
 
 ## Key Revenue Metrics:
 ${JSON.stringify(healthScore.llmContext.metrics, null, 2)}
 
 ## Risk Factors Impacting Revenue:
-${healthScore.llmContext.riskFactors.length > 0 ? healthScore.llmContext.riskFactors.map(r => `• ${r}`).join('\n') : 'No major revenue risks identified'}
+${
+  healthScore.llmContext.riskFactors.length > 0
+    ? healthScore.llmContext.riskFactors.map((r) => `• ${r}`).join("\n")
+    : "No major revenue risks identified"
+}
 
 ## Expansion Opportunities:
-${healthScore.llmContext.opportunities.length > 0 ? healthScore.llmContext.opportunities.map(o => `• ${o}`).join('\n') : 'Limited expansion opportunities'}
+${
+  healthScore.llmContext.opportunities.length > 0
+    ? healthScore.llmContext.opportunities.map((o) => `• ${o}`).join("\n")
+    : "Limited expansion opportunities"
+}
 
 ---
 
@@ -226,10 +283,17 @@ export function formatForExternalLLM(
 /**
  * Generate a concise executive summary for leadership
  */
-export function generateExecutiveSummary(healthScore: HealthScoreResult): string {
-  const status = healthScore.scoreRange === 'healthy' ? '✅ HEALTHY' :
-                 healthScore.scoreRange === 'at-risk' ? '⚠️ AT RISK' :
-                 healthScore.scoreRange === 'warning' ? '🚨 WARNING' : '🔴 CRITICAL';
+export function generateExecutiveSummary(
+  healthScore: HealthScoreResult
+): string {
+  const status =
+    healthScore.scoreRange === "healthy"
+      ? "✅ HEALTHY"
+      : healthScore.scoreRange === "at-risk"
+      ? "⚠️ AT RISK"
+      : healthScore.scoreRange === "warning"
+      ? "🚨 WARNING"
+      : "🔴 CRITICAL";
 
   const topIssues = healthScore.llmContext.riskFactors.slice(0, 3);
   const topOpportunities = healthScore.llmContext.opportunities.slice(0, 3);
@@ -244,19 +308,48 @@ export function generateExecutiveSummary(healthScore: HealthScoreResult): string
 ${healthScore.llmContext.summary}
 
 ## Top Issues (${topIssues.length}):
-${topIssues.length > 0 ? topIssues.map((issue, i) => `${i + 1}. ${issue}`).join('\n') : 'No critical issues identified'}
+${
+  topIssues.length > 0
+    ? topIssues.map((issue, i) => `${i + 1}. ${issue}`).join("\n")
+    : "No critical issues identified"
+}
 
 ## Key Opportunities (${topOpportunities.length}):
-${topOpportunities.length > 0 ? topOpportunities.map((opp, i) => `${i + 1}. ${opp}`).join('\n') : 'Limited opportunities identified'}
+${
+  topOpportunities.length > 0
+    ? topOpportunities.map((opp, i) => `${i + 1}. ${opp}`).join("\n")
+    : "Limited opportunities identified"
+}
 
 ## Component Performance:
-- **Engagement:** ${healthScore.components.engagement.score}/100 (${healthScore.components.engagement.score >= 80 ? 'Strong' : healthScore.components.engagement.score >= 60 ? 'Adequate' : 'Weak'})
-- **Adoption:** ${healthScore.components.adoption.score}/100 (${healthScore.components.adoption.score >= 80 ? 'Strong' : healthScore.components.adoption.score >= 60 ? 'Adequate' : 'Weak'})
-- **Churn Risk:** ${healthScore.components.churnRisk.score}/100 (${healthScore.components.churnRisk.score >= 80 ? 'Low Risk' : healthScore.components.churnRisk.score >= 60 ? 'Moderate Risk' : 'High Risk'})
+- **Engagement:** ${healthScore.components.engagement.score}/100 (${
+    healthScore.components.engagement.score >= 80
+      ? "Strong"
+      : healthScore.components.engagement.score >= 60
+      ? "Adequate"
+      : "Weak"
+  })
+- **Adoption:** ${healthScore.components.adoption.score}/100 (${
+    healthScore.components.adoption.score >= 80
+      ? "Strong"
+      : healthScore.components.adoption.score >= 60
+      ? "Adequate"
+      : "Weak"
+  })
+- **Churn Risk:** ${healthScore.components.churnRisk.score}/100 (${
+    healthScore.components.churnRisk.score >= 80
+      ? "Low Risk"
+      : healthScore.components.churnRisk.score >= 60
+      ? "Moderate Risk"
+      : "High Risk"
+  })
 - **Account Context:** ${healthScore.components.accountContext.score}/100
 
 ## Recommended Next Steps:
-${healthScore.recommendations.slice(0, 3).map((rec, i) => `${i + 1}. ${rec}`).join('\n')}
+${healthScore.recommendations
+  .slice(0, 3)
+  .map((rec, i) => `${i + 1}. ${rec}`)
+  .join("\n")}
 
 ---
 *Generated: ${new Date().toISOString()}*
@@ -281,7 +374,7 @@ export interface BatchHealthScoreExport {
     user_id?: string;
     health_score: number;
     score_range: string;
-    llm_context: HealthScoreResult['llmContext'];
+    llm_context: HealthScoreResult["llmContext"];
     top_recommendations: string[];
   }>;
 }
@@ -294,7 +387,7 @@ export function prepareBatchExport(
 ): BatchHealthScoreExport {
   const distribution = {
     healthy: 0,
-    'at-risk': 0,
+    "at-risk": 0,
     warning: 0,
     critical: 0,
   };

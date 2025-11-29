@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChannelData {
@@ -41,7 +41,8 @@ export default function ChurnByChannelPage() {
 
     setLoading(true);
     try {
-      const response = await enhancedAnalyticsService.getChurnByChannel(
+      console.log("📦 Churn by Channel page using cached data");
+      const response = await centralizedData.getChurnByChannel(
         selectedProjectId
       );
 

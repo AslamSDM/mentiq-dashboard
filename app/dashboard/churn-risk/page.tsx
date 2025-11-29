@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,7 +34,7 @@ export default function ChurnRiskPage() {
 
     setIsLoading(true);
     try {
-      const response = await enhancedAnalyticsService.getChurnRisk(
+      const response = await centralizedData.getChurnRisk(
         selectedProjectId,
         threshold
       );

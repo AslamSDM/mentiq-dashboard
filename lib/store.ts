@@ -18,6 +18,7 @@ import {
   UserListResponse,
   SessionsOverview,
 } from "./api";
+import { centralizedData } from "./services/centralized-data";
 
 // Cache configuration
 const CACHE_TTL = {
@@ -262,6 +263,21 @@ export const useStore = create<AppState>()(
         set({ selectedProjectId: projectId });
         if (projectId) {
           apiClient.setProjectId(projectId);
+
+          // Prefetch all data for the selected project
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30); // Default 30 days
+
+          const dateRange = {
+            start: startDate.toISOString().split("T")[0],
+            end: endDate.toISOString().split("T")[0],
+          };
+
+          console.log("🚀 Triggering prefetch for project", projectId);
+          centralizedData
+            .prefetchAllData(projectId, dateRange)
+            .catch(console.error);
         }
       },
 

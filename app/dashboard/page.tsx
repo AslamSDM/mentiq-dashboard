@@ -55,7 +55,7 @@ import {
   getUniqueUsersValue,
   getTopEventsValue,
 } from "@/lib/api";
-import { projectService } from "@/lib/services/project";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
 import {
   Loader2,
@@ -156,6 +156,7 @@ export default function DashboardPage() {
 
     setLoadingEnhanced(true);
     try {
+      // Use centralized data service - it will use cache if available
       const [
         revenueMetricsRes,
         revenueAnalyticsRes,
@@ -163,29 +164,34 @@ export default function DashboardPage() {
         deviceRes,
         retentionRes,
       ] = await Promise.all([
-        projectService.getRevenueMetrics(selectedProjectId).catch(() => null),
-        projectService
+        centralizedData.getRevenueMetrics(selectedProjectId).catch(() => null),
+        centralizedData
           .getRevenueAnalytics(selectedProjectId, startDate, endDate)
           .catch(() => null),
-        enhancedAnalyticsService
-          .getLocationAnalytics(selectedProjectId)
+        centralizedData
+          .getLocationData(selectedProjectId, startDate, endDate)
           .catch(() => null),
-        enhancedAnalyticsService
-          .getDeviceAnalytics(selectedProjectId, startDate, endDate)
+        centralizedData
+          .getDeviceData(selectedProjectId, startDate, endDate)
           .catch(() => null),
         enhancedAnalyticsService
           .getRetentionCohorts(selectedProjectId, startDate, endDate)
+          .then((res) =>
+            res?.data?.cohorts
+              ? { cohorts: res.data.cohorts }
+              : res?.cohorts
+              ? { cohorts: res.cohorts }
+              : res?.data || res
+          )
           .catch(() => null),
       ]);
 
-      if (revenueMetricsRes?.status === "success")
-        setRevenueMetrics(revenueMetricsRes.data);
-      if (revenueAnalyticsRes?.status === "success")
-        setRevenueAnalytics(revenueAnalyticsRes.data);
-      if (locationRes?.data) setLocationData(locationRes.data);
-      if (deviceRes?.data) setDeviceData(deviceRes.data);
-      if (retentionRes?.cohorts) {
-        console.log("Retention API Response:", retentionRes);
+      if (revenueMetricsRes) setRevenueMetrics(revenueMetricsRes);
+      if (revenueAnalyticsRes) setRevenueAnalytics(revenueAnalyticsRes);
+      if (locationRes) setLocationData(locationRes);
+      if (deviceRes) setDeviceData(deviceRes);
+      if (retentionRes) {
+        console.log("📦 Cached Retention Data:", retentionRes);
         setRetentionData(retentionRes);
       }
     } catch (error) {
@@ -352,8 +358,6 @@ export default function DashboardPage() {
     const result = analyticsData.results.find(
       (r) => r.metric === engagementTab
     );
-    console.log(`📊 Engagement data for ${engagementTab}:`, result);
-    console.log(`📊 Time series for ${engagementTab}:`, result?.time_series);
     return result?.time_series || [];
   };
 
@@ -362,10 +366,6 @@ export default function DashboardPage() {
       console.log("⚠️ No analytics data available for engagement value");
       return 0;
     }
-    console.log(
-      `📊 Getting engagement value for ${engagementTab}`,
-      analyticsData
-    );
     switch (engagementTab) {
       case "dau":
         return getDAUValue(analyticsData);

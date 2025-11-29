@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorldMap } from "@/components/world-map";
 import { useStore } from "@/lib/store";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { Loader2, MapPin, Globe, TrendingUp } from "lucide-react";
 
 interface LocationData {
@@ -61,7 +61,7 @@ export default function LocationAnalyticsPage() {
 
     setIsLoading(true);
     try {
-      const response = await enhancedAnalyticsService.getLocationAnalytics(
+      const response = await centralizedData.getLocationData(
         selectedProjectId,
         dateRange.start,
         dateRange.end

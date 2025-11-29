@@ -48,10 +48,8 @@ import {
   Activity,
   Shield,
 } from "lucide-react";
-import {
-  enhancedAnalyticsService,
-  type ChurnData,
-} from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
+import type { ChurnData } from "@/lib/services/enhanced-analytics";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChurnRiskUser {
@@ -103,11 +101,12 @@ export default function ChurnAnalysisPage() {
 
     setIsLoading(true);
     try {
-      // Call real churn risk API
-      const response = await enhancedAnalyticsService.getChurnRisk(
+      // Use centralized cached data
+      const response = await centralizedData.getChurnRisk(
         selectedProjectId,
         70
       );
+      console.log("📦 Churn page using cached data");
 
       if (response.status === "success" && response.data) {
         const { at_risk_users, total_at_risk, churn_rate } = response.data;

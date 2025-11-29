@@ -27,10 +27,14 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
-import { cachedAnalyticsService } from "@/lib/services/cached-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 import { ChurnRiskCard } from "@/components/churn-risk-card";
-import { calculateHealthScore, type HealthScoreInputs, type HealthScoreResult } from "@/lib/health-score-calculator";
+import {
+  calculateHealthScore,
+  type HealthScoreInputs,
+  type HealthScoreResult,
+} from "@/lib/health-score-calculator";
 
 export default function HealthScorePage() {
   const { selectedProjectId } = useStore();
@@ -43,7 +47,8 @@ export default function HealthScorePage() {
   const [featureData, setFeatureData] = useState<any>(null);
   const [sessionData, setSessionData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [healthScoreResult, setHealthScoreResult] = useState<HealthScoreResult | null>(null);
+  const [healthScoreResult, setHealthScoreResult] =
+    useState<HealthScoreResult | null>(null);
 
   // Fetch health score data
   useEffect(() => {
@@ -57,80 +62,42 @@ export default function HealthScorePage() {
 
     setLoading(true);
     try {
-      // Check cache first
-      const cachedChurn = useStore
-        .getState()
-        .getCachedEnhancedData<any>("churnRisk");
-      const cachedFeature = useStore
-        .getState()
-        .getCachedEnhancedData<any>("featureAdoption");
-      const cachedSession = useStore
-        .getState()
-        .getCachedEnhancedData<any>("sessionAnalytics");
-
-      if (cachedChurn && cachedFeature && cachedSession) {
-        console.log("📦 Using all cached health data");
-        setChurnData(cachedChurn.at_risk_users || []);
-        setChurnStats({
-          at_risk_users: cachedChurn.total_at_risk || 0,
-          churn_rate_30d: cachedChurn.churn_rate || "0%",
-          total_users: 0,
-          churned_users: 0,
-          risk_breakdown: {},
-        });
-        setFeatureData(cachedFeature);
-        setSessionData(cachedSession);
-        setLoading(false);
-        return;
-      }
-
-      // Fetch fresh data if not cached (cached service handles caching internally)
+      // Use centralized data service - it handles caching automatically
       const [churnRes, featureRes, sessionRes] = await Promise.all([
-        cachedAnalyticsService
-          .getChurnRisk(selectedProjectId, 50)
-          .catch(() => null),
-        cachedAnalyticsService
-          .getFeatureAdoption(selectedProjectId)
-          .catch(() => null),
-        cachedAnalyticsService
+        centralizedData.getChurnRisk(selectedProjectId, 50).catch(() => null),
+        centralizedData.getFeatureAdoption(selectedProjectId).catch(() => null),
+        centralizedData
           .getSessionAnalytics(selectedProjectId)
           .catch(() => null),
       ]);
 
-      console.log("📡 Fetched fresh health data");
+      console.log("📦 Using centralized cached data");
 
-      if (churnRes && churnRes.data) {
-        const churnData = churnRes.data;
-        useStore.getState().setCachedEnhancedData("churnRisk", churnData);
-        setChurnData(churnData.at_risk_users || []);
+      if (churnRes) {
+        setChurnData(churnRes.at_risk_users || []);
         setChurnStats({
-          at_risk_users: churnData.total_at_risk || 0,
-          churn_rate_30d: churnData.churn_rate || "0%",
+          at_risk_users: churnRes.total_at_risk || 0,
+          churn_rate_30d: churnRes.churn_rate || "0%",
           total_users: 0,
           churned_users: 0,
           risk_breakdown: {},
         });
       }
 
-      if (featureRes?.data) {
-        useStore
-          .getState()
-          .setCachedEnhancedData("featureAdoption", featureRes.data);
-        setFeatureData(featureRes.data);
+      if (featureRes) {
+        setFeatureData(featureRes);
       }
 
-      if ((sessionRes as any)?.session_data) {
-        useStore
-          .getState()
-          .setCachedEnhancedData(
-            "sessionAnalytics",
-            (sessionRes as any).session_data
-          );
-        setSessionData((sessionRes as any).session_data);
+      if (sessionRes) {
+        setSessionData(sessionRes);
       }
 
       // Calculate health score using the new calculator after all data is loaded
-      if (churnRes?.data || featureRes?.data || (sessionRes as any)?.session_data) {
+      if (
+        churnRes?.data ||
+        featureRes?.data ||
+        (sessionRes as any)?.session_data
+      ) {
         const healthScoreInputs = prepareHealthScoreInputs(
           churnRes?.data,
           featureRes?.data,
@@ -163,36 +130,47 @@ export default function HealthScorePage() {
         dau: sessionData?.engagement?.dau,
         wau: sessionData?.engagement?.wau,
         mau: sessionData?.engagement?.mau,
-        stickinessRatio: sessionData?.engagement?.stickiness_ratio 
-          ? parseFloat(sessionData.engagement.stickiness_ratio) / 100 
+        stickinessRatio: sessionData?.engagement?.stickiness_ratio
+          ? parseFloat(sessionData.engagement.stickiness_ratio) / 100
           : undefined,
         sessionFrequency: sessionData?.engagement?.sessions_per_user,
         sessionLength: sessionData?.overview?.avg_duration,
       },
       adoption: {
-        coreFeatures: featureData?.features ? {
-          total: featureData.features.length,
-          used: featureData.features.filter((f: any) => f.adoption_rate > 0).length,
-        } : undefined,
-        adoptionRate: featureData?.features?.length > 0 
-          ? featureData.features.reduce((sum: number, f: any) => sum + (f.adoption_rate || 0), 0) / featureData.features.length
+        coreFeatures: featureData?.features
+          ? {
+              total: featureData.features.length,
+              used: featureData.features.filter((f: any) => f.adoption_rate > 0)
+                .length,
+            }
           : undefined,
-        featureDepth: featureData?.features?.length > 0
-          ? featureData.features.reduce((sum: number, f: any) => sum + (f.total_usage || 0), 0) / featureData.features.length
-          : undefined,
+        adoptionRate:
+          featureData?.features?.length > 0
+            ? featureData.features.reduce(
+                (sum: number, f: any) => sum + (f.adoption_rate || 0),
+                0
+              ) / featureData.features.length
+            : undefined,
+        featureDepth:
+          featureData?.features?.length > 0
+            ? featureData.features.reduce(
+                (sum: number, f: any) => sum + (f.total_usage || 0),
+                0
+              ) / featureData.features.length
+            : undefined,
       },
       churnRisk: {
         daysSinceLastLogin: undefined, // Would need to track this per user
         rageClickCount: 0, // Would need session recording data
         dropOffCount: 0, // Would need funnel data
         supportTicketsLast30Days: 0, // Would need support integration
-        bounceRate: sessionData?.overview?.bounce_rate 
+        bounceRate: sessionData?.overview?.bounce_rate
           ? parseFloat(sessionData.overview.bounce_rate) / 100
           : undefined,
         errorRate: 0, // Would need error tracking
       },
       accountContext: {
-        planTier: 'pro', // Would need to determine from user data
+        planTier: "pro", // Would need to determine from user data
         daysSinceSignup: undefined, // Would need user creation date
         isPaid: true, // Would need billing data
         mrr: undefined, // Would need Stripe integration
@@ -205,40 +183,66 @@ export default function HealthScorePage() {
   // Get overall health score from the calculated result
   const overallHealthScore = healthScoreResult?.overallScore || 0;
   // Calculate health metrics from real data using the health score components
-  const healthMetrics = healthScoreResult ? [
-    {
-      name: "Engagement Score",
-      score: Math.round(healthScoreResult.components.engagement.score),
-      weight: `${(healthScoreResult.components.engagement.weight * 100).toFixed(0)}%`,
-      trend: "N/A",
-      status: healthScoreResult.components.engagement.score >= 80 ? "good" 
-        : healthScoreResult.components.engagement.score >= 60 ? "warning" : "critical",
-    },
-    {
-      name: "Adoption Score",
-      score: Math.round(healthScoreResult.components.adoption.score),
-      weight: `${(healthScoreResult.components.adoption.weight * 100).toFixed(0)}%`,
-      trend: "N/A",
-      status: healthScoreResult.components.adoption.score >= 80 ? "good"
-        : healthScoreResult.components.adoption.score >= 60 ? "warning" : "critical",
-    },
-    {
-      name: "Churn Risk Score",
-      score: Math.round(healthScoreResult.components.churnRisk.score),
-      weight: `${(healthScoreResult.components.churnRisk.weight * 100).toFixed(0)}%`,
-      trend: "N/A",
-      status: healthScoreResult.components.churnRisk.score >= 80 ? "good"
-        : healthScoreResult.components.churnRisk.score >= 60 ? "warning" : "critical",
-    },
-    {
-      name: "Account Context",
-      score: Math.round(healthScoreResult.components.accountContext.score),
-      weight: `${(healthScoreResult.components.accountContext.weight * 100).toFixed(0)}%`,
-      trend: "N/A",
-      status: healthScoreResult.components.accountContext.score >= 80 ? "good"
-        : healthScoreResult.components.accountContext.score >= 60 ? "warning" : "critical",
-    },
-  ] : [];
+  const healthMetrics = healthScoreResult
+    ? [
+        {
+          name: "Engagement Score",
+          score: Math.round(healthScoreResult.components.engagement.score),
+          weight: `${(
+            healthScoreResult.components.engagement.weight * 100
+          ).toFixed(0)}%`,
+          trend: "N/A",
+          status:
+            healthScoreResult.components.engagement.score >= 80
+              ? "good"
+              : healthScoreResult.components.engagement.score >= 60
+              ? "warning"
+              : "critical",
+        },
+        {
+          name: "Adoption Score",
+          score: Math.round(healthScoreResult.components.adoption.score),
+          weight: `${(
+            healthScoreResult.components.adoption.weight * 100
+          ).toFixed(0)}%`,
+          trend: "N/A",
+          status:
+            healthScoreResult.components.adoption.score >= 80
+              ? "good"
+              : healthScoreResult.components.adoption.score >= 60
+              ? "warning"
+              : "critical",
+        },
+        {
+          name: "Churn Risk Score",
+          score: Math.round(healthScoreResult.components.churnRisk.score),
+          weight: `${(
+            healthScoreResult.components.churnRisk.weight * 100
+          ).toFixed(0)}%`,
+          trend: "N/A",
+          status:
+            healthScoreResult.components.churnRisk.score >= 80
+              ? "good"
+              : healthScoreResult.components.churnRisk.score >= 60
+              ? "warning"
+              : "critical",
+        },
+        {
+          name: "Account Context",
+          score: Math.round(healthScoreResult.components.accountContext.score),
+          weight: `${(
+            healthScoreResult.components.accountContext.weight * 100
+          ).toFixed(0)}%`,
+          trend: "N/A",
+          status:
+            healthScoreResult.components.accountContext.score >= 80
+              ? "good"
+              : healthScoreResult.components.accountContext.score >= 60
+              ? "warning"
+              : "critical",
+        },
+      ]
+    : [];
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
@@ -386,11 +390,17 @@ export default function HealthScorePage() {
             <h2 className="text-xl font-semibold tracking-tight">
               AI-Powered Insights & Recommendations
             </h2>
-            <Badge variant={
-              healthScoreResult.scoreRange === 'healthy' ? 'default' :
-              healthScoreResult.scoreRange === 'at-risk' ? 'secondary' :
-              healthScoreResult.scoreRange === 'warning' ? 'outline' : 'destructive'
-            }>
+            <Badge
+              variant={
+                healthScoreResult.scoreRange === "healthy"
+                  ? "default"
+                  : healthScoreResult.scoreRange === "at-risk"
+                  ? "secondary"
+                  : healthScoreResult.scoreRange === "warning"
+                  ? "outline"
+                  : "destructive"
+              }
+            >
               {healthScoreResult.scoreRange.toUpperCase()}
             </Badge>
           </div>
@@ -410,13 +420,15 @@ export default function HealthScorePage() {
                     {healthScoreResult.recommendations.map((rec, i) => (
                       <div key={i} className="flex gap-2">
                         <div className="flex-shrink-0 mt-0.5">
-                          <div className={`h-2 w-2 rounded-full ${
-                            rec.includes('URGENT') || rec.includes('Critical') 
-                              ? 'bg-red-600' 
-                              : rec.includes('High') 
-                              ? 'bg-yellow-600' 
-                              : 'bg-blue-600'
-                          }`} />
+                          <div
+                            className={`h-2 w-2 rounded-full ${
+                              rec.includes("URGENT") || rec.includes("Critical")
+                                ? "bg-red-600"
+                                : rec.includes("High")
+                                ? "bg-yellow-600"
+                                : "bg-blue-600"
+                            }`}
+                          />
                         </div>
                         <p className="text-sm">{rec}</p>
                       </div>
@@ -424,7 +436,8 @@ export default function HealthScorePage() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    No specific recommendations at this time. User is performing well.
+                    No specific recommendations at this time. User is performing
+                    well.
                   </p>
                 )}
               </CardContent>
@@ -442,32 +455,40 @@ export default function HealthScorePage() {
                 <div className="space-y-4">
                   {healthScoreResult.signals.positive.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-green-700 mb-2">✓ Positive Signals</p>
+                      <p className="text-sm font-medium text-green-700 mb-2">
+                        ✓ Positive Signals
+                      </p>
                       <div className="space-y-1">
                         {healthScoreResult.signals.positive.map((signal, i) => (
-                          <p key={i} className="text-sm text-muted-foreground">• {signal}</p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {healthScoreResult.signals.negative.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-red-700 mb-2">⚠ Negative Signals</p>
-                      <div className="space-y-1">
-                        {healthScoreResult.signals.negative.map((signal, i) => (
-                          <p key={i} className="text-sm text-muted-foreground">• {signal}</p>
+                          <p key={i} className="text-sm text-muted-foreground">
+                            • {signal}
+                          </p>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {healthScoreResult.signals.positive.length === 0 && 
-                   healthScoreResult.signals.negative.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      Insufficient data for signal analysis
-                    </p>
+                  {healthScoreResult.signals.negative.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-red-700 mb-2">
+                        ⚠ Negative Signals
+                      </p>
+                      <div className="space-y-1">
+                        {healthScoreResult.signals.negative.map((signal, i) => (
+                          <p key={i} className="text-sm text-muted-foreground">
+                            • {signal}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
                   )}
+
+                  {healthScoreResult.signals.positive.length === 0 &&
+                    healthScoreResult.signals.negative.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Insufficient data for signal analysis
+                      </p>
+                    )}
                 </div>
               </CardContent>
             </Card>
@@ -478,23 +499,30 @@ export default function HealthScorePage() {
             <CardHeader>
               <CardTitle>LLM-Ready Context</CardTitle>
               <CardDescription>
-                Structured data for AI-powered churn reduction and revenue optimization
+                Structured data for AI-powered churn reduction and revenue
+                optimization
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
                   <p className="text-sm font-medium mb-2">Summary</p>
-                  <p className="text-sm text-muted-foreground">{healthScoreResult.llmContext.summary}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {healthScoreResult.llmContext.summary}
+                  </p>
                 </div>
 
                 {healthScoreResult.llmContext.riskFactors.length > 0 && (
                   <div>
                     <p className="text-sm font-medium mb-2">Risk Factors</p>
                     <div className="space-y-1">
-                      {healthScoreResult.llmContext.riskFactors.map((risk, i) => (
-                        <p key={i} className="text-sm text-red-600">• {risk}</p>
-                      ))}
+                      {healthScoreResult.llmContext.riskFactors.map(
+                        (risk, i) => (
+                          <p key={i} className="text-sm text-red-600">
+                            • {risk}
+                          </p>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -503,9 +531,13 @@ export default function HealthScorePage() {
                   <div>
                     <p className="text-sm font-medium mb-2">Opportunities</p>
                     <div className="space-y-1">
-                      {healthScoreResult.llmContext.opportunities.map((opp, i) => (
-                        <p key={i} className="text-sm text-green-600">• {opp}</p>
-                      ))}
+                      {healthScoreResult.llmContext.opportunities.map(
+                        (opp, i) => (
+                          <p key={i} className="text-sm text-green-600">
+                            • {opp}
+                          </p>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
@@ -515,7 +547,11 @@ export default function HealthScorePage() {
                     View Full Metrics (JSON for LLM)
                   </summary>
                   <pre className="mt-2 text-xs bg-slate-900 text-slate-50 p-4 rounded overflow-auto max-h-96">
-                    {JSON.stringify(healthScoreResult.llmContext.metrics, null, 2)}
+                    {JSON.stringify(
+                      healthScoreResult.llmContext.metrics,
+                      null,
+                      2
+                    )}
                   </pre>
                 </details>
               </div>

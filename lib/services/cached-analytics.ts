@@ -164,8 +164,8 @@ export class CachedAnalyticsService {
       endDate
     );
 
-    if (response.data) {
-      useStore.getState().setCachedEnhancedData(cacheKey, response.data);
+    if (response.cohorts) {
+      useStore.getState().setCachedEnhancedData(cacheKey, response);
     }
 
     return response;

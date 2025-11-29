@@ -43,7 +43,7 @@ import {
 import { ChartContainer } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
 import { CreateExperimentRequest } from "@/lib/services/experiment";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 import { Target, AlertCircle, Clock, Loader2 } from "lucide-react";
 
@@ -129,7 +129,7 @@ export default function ABTestingPage() {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
 
-      const response = await enhancedAnalyticsService.getFeatureAdoption(
+      const response = await centralizedData.getFeatureAdoption(
         selectedProjectId,
         startDate.toISOString().split("T")[0],
         endDate.toISOString().split("T")[0]

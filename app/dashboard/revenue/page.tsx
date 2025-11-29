@@ -32,11 +32,12 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
-import {
-  projectService,
-  type RevenueMetrics,
-  type RevenueAnalytics,
-  type CustomerAnalytics,
+import { centralizedData } from "@/lib/services/centralized-data";
+import { projectService } from "@/lib/services/project";
+import type {
+  RevenueMetrics,
+  RevenueAnalytics,
+  CustomerAnalytics,
 } from "@/lib/services/project";
 import {
   Loader2,
@@ -143,27 +144,25 @@ export default function RevenuePage() {
 
     setIsLoading(true);
     try {
+      // Use centralized data service - returns cached data if available
       const [metrics, analytics, customers] = await Promise.all([
-        projectService.getRevenueMetrics(selectedProjectId).catch(() => null),
-        projectService
+        centralizedData.getRevenueMetrics(selectedProjectId).catch(() => null),
+        centralizedData
           .getRevenueAnalytics(
             selectedProjectId,
             dateRange.start,
             dateRange.end
           )
           .catch(() => null),
-        projectService
+        centralizedData
           .getCustomerAnalytics(selectedProjectId)
           .catch(() => null),
       ]);
 
-      setRevenueMetrics(metrics?.status === "success" ? metrics.data : null);
-      setRevenueAnalytics(
-        analytics?.status === "success" ? analytics.data : null
-      );
-      setCustomerAnalytics(
-        customers?.status === "success" ? customers.data : null
-      );
+      console.log("📦 Revenue page using cached data");
+      setRevenueMetrics(metrics);
+      setRevenueAnalytics(analytics);
+      setCustomerAnalytics(customers);
     } catch (error) {
       console.error("Error fetching revenue data:", error);
     } finally {

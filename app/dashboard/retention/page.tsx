@@ -36,7 +36,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2,
@@ -92,10 +92,19 @@ export default function RetentionPage() {
     setIsLoading(true);
     try {
       // Fetch real cohort data from API
-      const response = await enhancedAnalyticsService.getRetentionCohorts(
+      const response = await centralizedData.getRetentionData(
         selectedProjectId
       );
+      console.log("📊 Retention API Response:", response);
+      console.log("📊 Response structure:", {
+        hasCohorts: !!response?.cohorts,
+        hasDataCohorts: !!response?.data?.cohorts,
+        cohortsLength:
+          response?.cohorts?.length || response?.data?.cohorts?.length || 0,
+        fullResponse: JSON.stringify(response, null, 2),
+      });
       const apiCohorts = response?.cohorts || response?.data?.cohorts || [];
+      console.log("📊 API Cohorts extracted:", apiCohorts);
 
       // Transform API response to match our UI format
       const transformedCohorts: CohortData[] = apiCohorts.map((cohort: any) => {

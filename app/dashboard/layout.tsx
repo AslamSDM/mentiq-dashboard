@@ -32,7 +32,7 @@ export default function DashboardLayout({
     if (isAuthenticated && token) {
       fetchProjects();
     }
-  }, [isAuthenticated, fetchProjects]);
+  }, [isAuthenticated, fetchProjects, token]);
 
   if (status === "loading") {
     return (

@@ -38,7 +38,8 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
-import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { useStore } from "@/lib/store";
+import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
 
 interface DeviceAnalytics {
@@ -93,7 +94,7 @@ export default function DeviceAnalyticsPage() {
       startDate.setDate(startDate.getDate() - 30);
 
       // Fetch real data from API
-      const response = await enhancedAnalyticsService.getDeviceAnalytics(
+      const response = await centralizedData.getDeviceData(
         selectedProjectId,
         startDate.toISOString().split("T")[0],
         endDate.toISOString().split("T")[0]

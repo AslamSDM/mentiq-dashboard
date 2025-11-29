@@ -175,9 +175,7 @@ class EnhancedAnalyticsService extends BaseHttpService {
     startDate?: string,
     endDate?: string
   ): Promise<{
-    data: {
-      cohorts: CohortData[];
-    };
+    cohorts: CohortData[];
   }> {
     const params = new URLSearchParams();
     if (startDate) params.append("start_date", startDate);
