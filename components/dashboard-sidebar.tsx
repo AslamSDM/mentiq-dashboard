@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Bell,
@@ -27,6 +28,8 @@ import {
   AlertTriangle,
   GitMerge,
   TrendingDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const navigation = [
@@ -64,6 +67,11 @@ const navigation = [
     name: "Churn Analysis",
     href: "/dashboard/churn",
     icon: <Bell className="h-5 w-5" />,
+  },
+  {
+    name: "Feature Adoption",
+    href: "/dashboard/adoption",
+    icon: <Zap className="h-5 w-5" />,
   },
   // {
   //   name: "Heatmaps",
@@ -120,20 +128,42 @@ const navigation = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/signin" });
   };
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-slate-800 bg-[#0f172a] text-slate-300">
-      <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-          <Activity className="h-5 w-5" />
+    <div
+      className={cn(
+        "flex h-full flex-col border-r border-slate-800 bg-[#0f172a] text-slate-300 transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
+      <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+        <div className="flex items-center justify-start gap-3 overflow-hidden -ml-2">
+          <img
+            src="/logo.png"
+            alt="Mentiq Logo"
+            className={cn(
+              "object-contain transition-all duration-300",
+              isCollapsed ? "hidden" : "h-30 w-auto"
+            )}
+          />
         </div>
-        <span className="text-lg font-bold text-white tracking-wide">
-          MENTIQ
-        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 shrink-0"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {
@@ -146,17 +176,19 @@ export function DashboardSidebar() {
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+                  : "text-slate-400 hover:bg-slate-800/50 hover:text-white",
+                isCollapsed && "justify-center px-2"
               )}
+              title={isCollapsed ? item.name : undefined}
             >
-              {item.icon}
-              {item.name}
+              <div className={cn(isCollapsed && "scale-90")}>{item.icon}</div>
+              {!isCollapsed && item.name}
             </Link>
           );
         })}
       </nav>
       <div className="border-t border-slate-800 p-4 space-y-3">
-        {session?.user && (
+        {session?.user && !isCollapsed && (
           <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-900/50">
             <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
               <span className="text-sm font-medium">
@@ -173,13 +205,28 @@ export function DashboardSidebar() {
             </div>
           </div>
         )}
+        {session?.user && isCollapsed && (
+          <div className="flex justify-center">
+            <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm">
+              <span className="text-base font-medium">
+                {session.user.name?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          </div>
+        )}
         <Button
           variant="ghost"
-          className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-800"
+          className={cn(
+            "w-full text-slate-400 hover:text-white hover:bg-slate-800",
+            isCollapsed ? "justify-center px-0" : "justify-start"
+          )}
           onClick={handleSignOut}
+          title={isCollapsed ? "Sign Out" : undefined}
         >
-          <LogOut className="mr-2 h-5 w-5" />
-          Sign Out
+          <LogOut
+            className={cn("h-5 w-5", !isCollapsed ? "mr-2" : "scale-125")}
+          />
+          {!isCollapsed && "Sign Out"}
         </Button>
       </div>
     </div>

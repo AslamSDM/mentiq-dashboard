@@ -184,7 +184,10 @@ export default function DashboardPage() {
         setRevenueAnalytics(revenueAnalyticsRes.data);
       if (locationRes?.data) setLocationData(locationRes.data);
       if (deviceRes?.data) setDeviceData(deviceRes.data);
-      if (retentionRes?.data) setRetentionData(retentionRes.data);
+      if (retentionRes?.cohorts) {
+        console.log("Retention API Response:", retentionRes);
+        setRetentionData(retentionRes);
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast({
@@ -236,6 +239,54 @@ export default function DashboardPage() {
         code: getCountryCode(location.country),
       }))
       .sort((a: any, b: any) => b.users - a.users);
+  };
+
+  // Process Retention Data
+  const getRetentionMetrics = () => {
+    if (!retentionData?.cohorts || !Array.isArray(retentionData.cohorts)) {
+      return [];
+    }
+
+    // Calculate average retention for Day 1, Day 3, Day 7
+    const days = [1, 3, 7];
+    const metrics = days.map((d) => {
+      let totalRate = 0;
+      let count = 0;
+
+      retentionData.cohorts.forEach((c: any) => {
+        // Check if retention exists and has the day key
+        if (c.retention && typeof c.retention[`day_${d}`] === "number") {
+          totalRate += c.retention[`day_${d}`];
+          count++;
+        }
+      });
+
+      return {
+        period: `Day ${d}`,
+        rate: count > 0 ? totalRate / count : 0,
+      };
+    });
+
+    return metrics;
+  };
+
+  // Get overall retention rate (average day_1_retention from all cohorts)
+  const getOverallRetentionRate = () => {
+    if (!retentionData?.cohorts || !Array.isArray(retentionData.cohorts)) {
+      return 0;
+    }
+
+    let totalRate = 0;
+    let count = 0;
+
+    retentionData.cohorts.forEach((c: any) => {
+      if (typeof c.day_1_retention === "number") {
+        totalRate += c.day_1_retention;
+        count++;
+      }
+    });
+
+    return count > 0 ? totalRate / count : 0;
   };
 
   function getCountryCode(country: string): string {
@@ -650,33 +701,29 @@ export default function DashboardPage() {
               ) : retentionData?.cohorts && retentionData.cohorts.length > 0 ? (
                 <div className="space-y-4">
                   <div className="text-3xl font-bold">
-                    {retentionData.cohorts[0]?.retention_rate?.toFixed(1) || 0}%
+                    {getOverallRetentionRate().toFixed(1)}%
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Current retention rate
+                    Day 1 Retention (Avg across {retentionData.cohorts.length}{" "}
+                    cohorts)
                   </p>
                   <div className="space-y-2">
-                    {retentionData.cohorts
-                      .slice(0, 3)
-                      .map((cohort: any, idx: number) => (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between text-sm"
-                        >
-                          <span className="text-muted-foreground">
-                            {cohort.cohort_period || `Week ${idx + 1}`}
+                    {getRetentionMetrics().map((metric, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-muted-foreground">
+                          {metric.period}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Progress value={metric.rate} className="w-24 h-2" />
+                          <span className="font-medium w-12 text-right">
+                            {metric.rate.toFixed(1)}%
                           </span>
-                          <div className="flex items-center gap-2">
-                            <Progress
-                              value={cohort.retention_rate || 0}
-                              className="w-24 h-2"
-                            />
-                            <span className="font-medium w-12 text-right">
-                              {cohort.retention_rate?.toFixed(1) || 0}%
-                            </span>
-                          </div>
                         </div>
-                      ))}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (
