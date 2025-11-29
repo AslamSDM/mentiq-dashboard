@@ -71,7 +71,11 @@ export default function HealthScorePage() {
           .catch(() => null),
       ]);
 
-      console.log("📦 Using centralized cached data");
+      console.log("📦 Using centralized cached data", {
+        churnRes,
+        featureRes,
+        sessionRes,
+      });
 
       if (churnRes) {
         setChurnData(churnRes.at_risk_users || []);
@@ -93,14 +97,10 @@ export default function HealthScorePage() {
       }
 
       // Calculate health score using the new calculator after all data is loaded
-      if (
-        churnRes?.data ||
-        featureRes?.data ||
-        (sessionRes as any)?.session_data
-      ) {
+      if (churnRes || featureRes || (sessionRes as any)?.session_data) {
         const healthScoreInputs = prepareHealthScoreInputs(
-          churnRes?.data,
-          featureRes?.data,
+          churnRes,
+          featureRes,
           (sessionRes as any)?.session_data
         );
         const result = calculateHealthScore(healthScoreInputs);

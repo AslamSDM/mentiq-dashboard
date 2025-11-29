@@ -106,10 +106,16 @@ export default function ChurnAnalysisPage() {
         selectedProjectId,
         70
       );
-      console.log("📦 Churn page using cached data");
+      console.log("📦 Churn page using cached data", response);
 
-      if (response.status === "success" && response.data) {
-        const { at_risk_users, total_at_risk, churn_rate } = response.data;
+      if (response) {
+        const { at_risk_users, total_at_risk, churn_rate } = response;
+        console.log(
+          "Fetched churn data:",
+          at_risk_users,
+          total_at_risk,
+          churn_rate
+        );
 
         // Parse churn rate (comes as "2.7%")
         const parsedChurnRate = parseFloat(churn_rate?.replace("%", "") || "0");

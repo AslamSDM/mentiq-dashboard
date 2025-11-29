@@ -20,7 +20,7 @@ const CACHE_CONFIG = {
 };
 
 // Cache version - increment this to invalidate all caches
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 interface CacheEntry<T> {
   data: T;
@@ -417,7 +417,9 @@ class CentralizedDataService {
     endDate?: string
   ): Promise<any> {
     const cacheKey =
-      startDate && endDate ? `${startDate}_${endDate}` : "default";
+      startDate && endDate
+        ? `feature_${startDate}_${endDate}`
+        : "feature_default";
     return this.getCachedOrFetch(
       cacheKey,
       "featureAdoption",
@@ -428,7 +430,7 @@ class CentralizedDataService {
           startDate,
           endDate
         );
-        return response.data;
+        return response;
       },
       projectId
     );
@@ -455,7 +457,10 @@ class CentralizedDataService {
     startDate?: string,
     endDate?: string
   ): Promise<any> {
-    const cacheKey = `${startDate || ""}_${endDate || ""}`;
+    const cacheKey =
+      startDate && endDate
+        ? `churn_channel_${startDate}_${endDate}`
+        : "churn_channel_default";
     return this.getCachedOrFetch(
       cacheKey,
       "churnByChannel",
@@ -478,7 +483,9 @@ class CentralizedDataService {
     endDate?: string
   ): Promise<any> {
     const cacheKey =
-      startDate && endDate ? `${startDate}_${endDate}` : "default";
+      startDate && endDate
+        ? `session_${startDate}_${endDate}`
+        : "session_default";
     return this.getCachedOrFetch(
       cacheKey,
       "sessionAnalytics",
@@ -500,7 +507,7 @@ class CentralizedDataService {
     startDate: string,
     endDate: string
   ): Promise<any> {
-    const cacheKey = `${startDate}_${endDate}`;
+    const cacheKey = `cohort_${startDate}_${endDate}`;
     return this.getCachedOrFetch(
       cacheKey,
       "cohortData",
