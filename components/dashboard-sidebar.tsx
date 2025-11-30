@@ -30,6 +30,7 @@ import {
   TrendingDown,
   ChevronLeft,
   ChevronRight,
+  DollarSign,
 } from "lucide-react";
 
 const navigation = [
@@ -72,6 +73,11 @@ const navigation = [
     name: "Feature Adoption",
     href: "/dashboard/adoption",
     icon: <Zap className="h-5 w-5" />,
+  },
+  {
+    name: "Feature Tracking",
+    href: "/dashboard/features",
+    icon: <Activity className="h-5 w-5" />,
   },
   // {
   //   name: "Heatmaps",
@@ -126,7 +132,7 @@ const navigation = [
   {
     name: "Pricing",
     href: "/dashboard/pricing",
-    icon: <Settings className="h-5 w-5" />,
+    icon: <DollarSign className="h-5 w-5" />,
   },
 ];
 

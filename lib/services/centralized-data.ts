@@ -582,6 +582,63 @@ class CentralizedDataService {
     );
   }
 
+  // ==================== FEATURE TRACKING APIS ====================
+
+  async getFeatureUsage(
+    projectId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> {
+    const cacheKey = `features_${startDate}_${endDate}`;
+    return this.getCachedOrFetch(
+      cacheKey,
+      "featureAdoption",
+      CACHE_CONFIG.ENHANCED,
+      async () => {
+        const { apiClient } = await import("../api-clean");
+        return apiClient.get(
+          `/api/v1/projects/${projectId}/features/usage?start_date=${startDate}&end_date=${endDate}`
+        );
+      },
+      projectId
+    );
+  }
+
+  async getOnboardingStats(
+    projectId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> {
+    const cacheKey = `onboarding_${startDate}_${endDate}`;
+    return this.getCachedOrFetch(
+      cacheKey,
+      "funnelData",
+      CACHE_CONFIG.ENHANCED,
+      async () => {
+        const { apiClient } = await import("../api-clean");
+        return apiClient.get(
+          `/api/v1/projects/${projectId}/onboarding/stats?start_date=${startDate}&end_date=${endDate}`
+        );
+      },
+      projectId
+    );
+  }
+
+  async getUserJourney(projectId: string, userId: string): Promise<any> {
+    return this.getCachedOrFetch(
+      `journey_${userId}`,
+      "users",
+      CACHE_CONFIG.SESSIONS,
+      async () => {
+        const { apiClient } = await import("../api-clean");
+        return apiClient.get(
+          `/api/v1/projects/${projectId}/users/${userId}/journey`
+        );
+      },
+      projectId
+    );
+  }
+
   // ==================== EXPERIMENTS APIS ====================
 
   async getExperiments(projectId: string): Promise<any[]> {

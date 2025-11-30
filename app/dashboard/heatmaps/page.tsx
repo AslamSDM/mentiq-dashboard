@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import {
   Card,
@@ -21,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, MousePointer, Scroll, Eye } from "lucide-react";
+import { Loader2, MousePointer, Scroll, Eye, ExternalLink } from "lucide-react";
 
 export default function HeatmapsPage() {
   const {
@@ -41,6 +41,9 @@ export default function HeatmapsPage() {
   const [heatmapType, setHeatmapType] = useState<"click" | "scroll" | "move">(
     "click"
   );
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [overlayEnabled, setOverlayEnabled] = useState(true);
 
   useEffect(() => {
     if (selectedProjectId) {
@@ -65,6 +68,7 @@ export default function HeatmapsPage() {
 
   useEffect(() => {
     if (selectedProjectId && selectedPage) {
+      console.log("🔍 Fetching heatmap data for:", { selectedPage, heatmapType });
       fetchHeatmapData({ url: selectedPage, type: heatmapType }).catch(
         (error) => {
           console.error("Error fetching heatmap data:", error);
@@ -77,6 +81,21 @@ export default function HeatmapsPage() {
       );
     }
   }, [selectedProjectId, selectedPage, heatmapType, fetchHeatmapData, toast]);
+
+  // Log heatmap data changes
+  useEffect(() => {
+    if (heatmapData) {
+      console.log("📊 Heatmap data received:", {
+        url: heatmapData.url,
+        clicksCount: heatmapData.clicks?.length || 0,
+        scrollsCount: heatmapData.scrolls?.length || 0,
+        mouseMovesCount: heatmapData.mouseMoves?.length || 0,
+        totalSessions: heatmapData.totalSessions,
+        clicks: heatmapData.clicks,
+        scrolls: heatmapData.scrolls,
+      });
+    }
+  }, [heatmapData]);
 
   if (!selectedProjectId) {
     return (
@@ -214,7 +233,7 @@ export default function HeatmapsPage() {
                   value={selectedPage}
                   onValueChange={(value) => setSelectedPage(value)}
                 >
-                  <SelectTrigger className="w-[200px]">
+                  <SelectTrigger className="w-[280px]">
                     <SelectValue placeholder="Select page" />
                   </SelectTrigger>
                   <SelectContent>
@@ -225,7 +244,7 @@ export default function HeatmapsPage() {
                     ) : heatmapPages?.length > 0 ? (
                       heatmapPages.map((page) => (
                         <SelectItem key={page.id} value={page.url}>
-                          {page.title}
+                          {page.title || page.url}
                         </SelectItem>
                       ))
                     ) : (
@@ -235,9 +254,20 @@ export default function HeatmapsPage() {
                     )}
                   </SelectContent>
                 </Select>
+                {selectedPage && (
+                  <Button
+                    onClick={() => window.open(selectedPage, "_blank")}
+                    variant="ghost"
+                    size="sm"
+                    title="Open page in new tab"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   onClick={() => {
                     if (selectedPage) {
+                      setIframeLoaded(false);
                       fetchHeatmapData({
                         url: selectedPage,
                         type: heatmapType,
@@ -268,75 +298,104 @@ export default function HeatmapsPage() {
               </TabsList>
 
               <TabsContent value="click" className="space-y-4">
-                <div
-                  className="relative bg-muted rounded-lg overflow-hidden"
-                  style={{ height: "500px" }}
-                >
-                  {loadingHeatmapData ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      Loading heatmap...
+                {!heatmapData?.clicks || heatmapData.clicks.length === 0 ? (
+                  <div
+                    className="relative bg-muted rounded-lg overflow-hidden flex items-center justify-center"
+                    style={{ height: "600px" }}
+                  >
+                    <div className="text-center space-y-2">
+                      <MousePointer className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm font-medium">
+                        No Click Data Available
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Page: {selectedPage || "None selected"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Start tracking user interactions to see click heatmaps
+                      </p>
                     </div>
-                  ) : (
-                    <>
-                      {!heatmapData?.clicks ||
-                      heatmapData.clicks.length === 0 ? (
-                        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                          <div className="text-center space-y-2">
-                            <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                            <p className="text-sm font-medium">
-                              No Click Data Available
-                            </p>
-                            <p className="text-xs">Page: {selectedPage}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Start tracking user interactions to see click
-                              heatmaps
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                            <div className="text-center space-y-2">
-                              <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                              <p className="text-sm font-medium">
-                                Click Heatmap
-                              </p>
-                              <p className="text-xs">Page: {selectedPage}</p>
-                            </div>
-                          </div>
+                  </div>
+                ) : (
+                  <div
+                    className="relative bg-background rounded-lg overflow-hidden border"
+                    style={{ height: "600px" }}
+                  >
+                    {/* Iframe with actual website */}
+                    <iframe
+                      ref={iframeRef}
+                      src={selectedPage}
+                      className="w-full h-full"
+                      onLoad={() => setIframeLoaded(true)}
+                      style={{ border: "none" }}
+                    />
+                    
+                    {/* Heatmap overlay */}
+                    {iframeLoaded && overlayEnabled && (
+                      <div className="absolute inset-0 pointer-events-none">
+                        <svg className="w-full h-full">
                           {heatmapData.clicks.map((click, i) => {
-                            // Normalize intensity based on max count
                             const maxCount = Math.max(
                               ...heatmapData.clicks.map((c) => c.count)
                             );
-                            const intensity =
-                              maxCount > 0 ? click.count / maxCount : 0;
+                            const intensity = maxCount > 0 ? click.count / maxCount : 0;
+                            const radius = 30 + intensity * 40;
 
                             return (
-                              <div
-                                key={i}
-                                className="absolute rounded-full blur-xl"
-                                style={{
-                                  left: `${click.x}px`,
-                                  top: `${click.y}px`,
-                                  width: `${60 + intensity * 40}px`,
-                                  height: `${60 + intensity * 40}px`,
-                                  backgroundColor: `rgba(239, 68, 68, ${
-                                    intensity * 0.8
-                                  })`,
-                                  transform: "translate(-50%, -50%)",
-                                }}
-                                title={`${click.count} clicks${
-                                  click.element ? ` on ${click.element}` : ""
-                                }`}
-                              />
+                              <g key={i}>
+                                <defs>
+                                  <radialGradient id={`heat-${i}`}>
+                                    <stop
+                                      offset="0%"
+                                      stopColor={`rgba(239, 68, 68, ${intensity * 0.9})`}
+                                    />
+                                    <stop
+                                      offset="50%"
+                                      stopColor={`rgba(239, 68, 68, ${intensity * 0.5})`}
+                                    />
+                                    <stop
+                                      offset="100%"
+                                      stopColor="rgba(239, 68, 68, 0)"
+                                    />
+                                  </radialGradient>
+                                </defs>
+                                <circle
+                                  cx={click.x}
+                                  cy={click.y}
+                                  r={radius}
+                                  fill={`url(#heat-${i})`}
+                                  filter="blur(15px)"
+                                />
+                                <title>
+                                  {click.count} clicks
+                                  {click.element ? ` on ${click.element}` : ""}
+                                </title>
+                              </g>
                             );
                           })}
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Toggle overlay button */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setOverlayEnabled(!overlayEnabled)}
+                      >
+                        {overlayEnabled ? "Hide" : "Show"} Overlay
+                      </Button>
+                    </div>
+
+                    {/* Loading indicator */}
+                    {!iframeLoaded && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                   <div className="flex items-center gap-4">
                     <span className="text-sm font-medium">Heat Intensity:</span>
@@ -361,43 +420,76 @@ export default function HeatmapsPage() {
 
               <TabsContent value="scroll" className="space-y-4">
                 {!heatmapData?.scrolls || heatmapData.scrolls.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
-                    <Scroll className="h-12 w-12 text-muted-foreground" />
-                    <div>
-                      <h3 className="text-lg font-medium">
+                  <div
+                    className="relative bg-muted rounded-lg overflow-hidden flex items-center justify-center"
+                    style={{ height: "600px" }}
+                  >
+                    <div className="text-center space-y-2">
+                      <Scroll className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm font-medium">
                         No Scroll Data Available
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Start tracking user scroll behavior to see depth
-                        analytics
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Start tracking user scroll behavior to see depth analytics
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="text-sm text-muted-foreground">
-                      Percentage of users who scrolled to each depth
-                    </div>
-                    {heatmapData.scrolls.map((scroll, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">
-                            {scroll.depth}% of page
-                          </span>
-                          <span className="text-muted-foreground">
-                            {scroll.percentage}% of users ({scroll.count} users)
-                          </span>
+                    {/* Iframe with scroll depth overlay */}
+                    <div
+                      className="relative bg-background rounded-lg overflow-hidden border"
+                      style={{ height: "600px" }}
+                    >
+                      <iframe
+                        src={selectedPage}
+                        className="w-full h-full"
+                        style={{ border: "none" }}
+                      />
+                      
+                      {/* Scroll depth overlay */}
+                      {overlayEnabled && (
+                        <div className="absolute inset-0 pointer-events-none">
+                          {heatmapData.scrolls.map((scroll, i) => {
+                            const yPosition = (scroll.depth / 100) * 600;
+                            const opacity = scroll.percentage / 100;
+                            
+                            return (
+                              <div
+                                key={i}
+                                className="absolute w-full"
+                                style={{
+                                  top: `${yPosition}px`,
+                                  height: "2px",
+                                  backgroundColor: `rgba(59, 130, 246, ${opacity})`,
+                                  boxShadow: `0 0 10px rgba(59, 130, 246, ${opacity * 0.8})`,
+                                }}
+                              >
+                                <div
+                                  className="absolute right-2 -top-2 text-xs font-medium bg-blue-500 text-white px-2 py-1 rounded"
+                                  style={{ opacity }}
+                                >
+                                  {scroll.depth}% - {scroll.percentage}% users
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        <div className="h-8 w-full bg-muted rounded-lg overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-end px-3 text-xs font-medium text-white"
-                            style={{ width: `${scroll.percentage}%` }}
-                          >
-                            {scroll.percentage}%
-                          </div>
-                        </div>
+                      )}
+
+                      {/* Toggle overlay button */}
+                      <div className="absolute top-4 right-4 z-10">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setOverlayEnabled(!overlayEnabled)}
+                        >
+                          {overlayEnabled ? "Hide" : "Show"} Overlay
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Stats */}
                     <div className="p-4 bg-muted rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
@@ -427,100 +519,106 @@ export default function HeatmapsPage() {
               </TabsContent>
 
               <TabsContent value="move" className="space-y-4">
-                <div
-                  className="relative bg-muted rounded-lg overflow-hidden"
-                  style={{ height: "500px" }}
-                >
-                  {!heatmapData?.mouseMoves ||
-                  heatmapData.mouseMoves.length === 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                      <div className="text-center space-y-2">
-                        <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                        <p className="text-sm font-medium">
-                          No Mouse Movement Data
-                        </p>
-                        <p className="text-xs">Page: {selectedPage}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Enable mouse tracking to see movement patterns
-                        </p>
-                      </div>
+                {!heatmapData?.mouseMoves ||
+                heatmapData.mouseMoves.length === 0 ? (
+                  <div
+                    className="relative bg-muted rounded-lg overflow-hidden flex items-center justify-center"
+                    style={{ height: "600px" }}
+                  >
+                    <div className="text-center space-y-2">
+                      <Eye className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm font-medium">
+                        No Mouse Movement Data
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Enable mouse tracking to see movement patterns
+                      </p>
                     </div>
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        <div className="text-center space-y-2">
-                          <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                          <p className="text-sm font-medium">
-                            Mouse Movement Patterns
-                          </p>
-                          <p className="text-xs">Page: {selectedPage}</p>
-                        </div>
+                  </div>
+                ) : (
+                  <div
+                    className="relative bg-background rounded-lg overflow-hidden border"
+                    style={{ height: "600px" }}
+                  >
+                    <iframe
+                      src={selectedPage}
+                      className="w-full h-full"
+                      style={{ border: "none" }}
+                    />
+                    
+                    {/* Mouse movement overlay */}
+                    {overlayEnabled && (
+                      <div className="absolute inset-0 pointer-events-none">
+                        <svg className="w-full h-full">
+                          <defs>
+                            <linearGradient
+                              id="pathGradient"
+                              x1="0%"
+                              y1="0%"
+                              x2="100%"
+                              y2="100%"
+                            >
+                              <stop
+                                offset="0%"
+                                stopColor="rgb(59, 130, 246)"
+                                stopOpacity="0.8"
+                              />
+                              <stop
+                                offset="100%"
+                                stopColor="rgb(147, 51, 234)"
+                                stopOpacity="0.4"
+                              />
+                            </linearGradient>
+                          </defs>
+                          {heatmapData.mouseMoves.map((moveData, i) => (
+                            <g key={i}>
+                              {/* Draw path lines */}
+                              {moveData.path && moveData.path.length > 1 && (
+                                <path
+                                  d={`M ${moveData.path[0].x} ${
+                                    moveData.path[0].y
+                                  } ${moveData.path
+                                    .slice(1)
+                                    .map((point) => `L ${point.x} ${point.y}`)
+                                    .join(" ")}`}
+                                  stroke="url(#pathGradient)"
+                                  strokeWidth="2"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  opacity={0.6}
+                                />
+                              )}
+                              {/* Draw density heatmap */}
+                              {moveData.density?.map((density, j) => (
+                                <circle
+                                  key={j}
+                                  cx={density.x}
+                                  cy={density.y}
+                                  r={5 + density.intensity * 10}
+                                  fill={`rgba(239, 68, 68, ${
+                                    density.intensity * 0.5
+                                  })`}
+                                  filter="blur(4px)"
+                                />
+                              ))}
+                            </g>
+                          ))}
+                        </svg>
                       </div>
-                      <svg
-                        className="absolute inset-0 w-full h-full"
-                        style={{ opacity: 0.8 }}
+                    )}
+
+                    {/* Toggle overlay button */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setOverlayEnabled(!overlayEnabled)}
                       >
-                        <defs>
-                          <linearGradient
-                            id="pathGradient"
-                            x1="0%"
-                            y1="0%"
-                            x2="100%"
-                            y2="100%"
-                          >
-                            <stop
-                              offset="0%"
-                              style={{
-                                stopColor: "rgb(59, 130, 246)",
-                                stopOpacity: 0.8,
-                              }}
-                            />
-                            <stop
-                              offset="100%"
-                              style={{
-                                stopColor: "rgb(147, 51, 234)",
-                                stopOpacity: 0.4,
-                              }}
-                            />
-                          </linearGradient>
-                        </defs>
-                        {heatmapData.mouseMoves.map((moveData, i) => (
-                          <g key={i}>
-                            {/* Draw path lines */}
-                            {moveData.path.length > 1 && (
-                              <path
-                                d={`M ${moveData.path[0].x} ${
-                                  moveData.path[0].y
-                                } ${moveData.path
-                                  .slice(1)
-                                  .map((point) => `L ${point.x} ${point.y}`)
-                                  .join(" ")}`}
-                                stroke="url(#pathGradient)"
-                                strokeWidth="2"
-                                fill="none"
-                                strokeLinecap="round"
-                                opacity={0.6}
-                              />
-                            )}
-                            {/* Draw density heatmap */}
-                            {moveData.density?.map((density, j) => (
-                              <circle
-                                key={j}
-                                cx={density.x}
-                                cy={density.y}
-                                r={5 + density.intensity * 10}
-                                fill={`rgba(239, 68, 68, ${
-                                  density.intensity * 0.5
-                                })`}
-                                className="blur-sm"
-                              />
-                            ))}
-                          </g>
-                        ))}
-                      </svg>
-                    </>
-                  )}
-                </div>
+                        {overlayEnabled ? "Hide" : "Show"} Overlay
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <div className="p-4 bg-muted rounded-lg">
                   <div className="grid grid-cols-3 gap-4">
                     <div>

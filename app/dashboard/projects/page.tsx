@@ -165,75 +165,78 @@ export default function ProjectsPage() {
               Create and manage projects to track analytics
             </p>
           </div>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2 h-4 w-4"
-                >
-                  <path d="M5 12h14" />
-                  <path d="M12 5v14" />
-                </svg>
-                Create Project
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Project</DialogTitle>
-                <DialogDescription>
-                  Add a new project to start tracking analytics
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="project-name">Project Name</Label>
-                  <Input
-                    id="project-name"
-                    placeholder="My Awesome App"
-                    value={newProject.name}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="project-description">Description</Label>
-                  <Input
-                    id="project-description"
-                    placeholder="Brief description of your project"
-                    value={newProject.description}
-                    onChange={(e) =>
-                      setNewProject({
-                        ...newProject,
-                        description: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsCreateOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleCreateProject}
-                  disabled={!newProject.name}
-                >
+          {/* Hide create project button for non-enterprise users (only 1 project allowed) */}
+          {projects.length === 0 && (
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2 h-4 w-4"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5v14" />
+                  </svg>
                   Create Project
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Project</DialogTitle>
+                  <DialogDescription>
+                    Add a new project to start tracking analytics
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="project-name">Project Name</Label>
+                    <Input
+                      id="project-name"
+                      placeholder="My Awesome App"
+                      value={newProject.name}
+                      onChange={(e) =>
+                        setNewProject({ ...newProject, name: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="project-description">Description</Label>
+                    <Input
+                      id="project-description"
+                      placeholder="Brief description of your project"
+                      value={newProject.description}
+                      onChange={(e) =>
+                        setNewProject({
+                          ...newProject,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCreateOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleCreateProject}
+                    disabled={!newProject.name}
+                  >
+                    Create Project
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="grid gap-4">
@@ -581,19 +584,71 @@ export default function ProjectsPage() {
             <div className="space-y-2">
               <Label>Installation</Label>
               <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                npm install @mentiq/analytics
+                npm install mentiq-sdk
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Initialize SDK</Label>
+              <Label>React/Next.js Setup</Label>
               <div className="bg-muted p-4 rounded-lg font-mono text-sm whitespace-pre-wrap">
-                {`import { MentiQAnalytics } from '@mentiq/analytics';
+                {`import { AnalyticsProvider } from 'mentiq-sdk';
 
-const analytics = new MentiQAnalytics({
-  apiKey: 'YOUR_API_KEY',
-  apiUrl: 'https://api.mentiq.com'
-});`}
+function App() {
+  return (
+    <AnalyticsProvider
+      config={{
+        apiKey: 'YOUR_API_KEY',
+        projectId: 'YOUR_PROJECT_ID',
+        endpoint: 'https://app.trymentiq.com/api/v1/events',
+        enableHeatmapTracking: true,
+        enableSessionRecording: true,
+      }}
+    >
+      <YourApp />
+    </AnalyticsProvider>
+  );
+}`}
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Track Events</Label>
+              <div className="bg-muted p-4 rounded-lg font-mono text-sm whitespace-pre-wrap">
+                {`import { useAnalytics } from 'mentiq-sdk';
+
+function MyComponent() {
+  const { track } = useAnalytics();
+
+  const handleClick = () => {
+    track('button_clicked', {
+      button_id: 'hero-cta',
+      user_plan: 'premium'
+    });
+  };
+
+  return <button onClick={handleClick}>Track Me!</button>;
+}`}
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground mt-4">
+              <p className="font-medium mb-2">Features:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Event tracking with custom properties</li>
+                <li>Heatmap tracking (clicks, hovers, scrolls)</li>
+                <li>Session recording with rrweb</li>
+                <li>Onboarding funnel tracking</li>
+                <li>A/B testing support</li>
+                <li>Error tracking and performance monitoring</li>
+              </ul>
+              <p className="mt-3">
+                📚 Full documentation:{" "}
+                <a
+                  href="https://github.com/AslamSDM/mentiq-sdk#readme"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  GitHub README
+                </a>
+              </p>
             </div>
           </CardContent>
         </Card>

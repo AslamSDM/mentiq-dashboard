@@ -20,6 +20,12 @@ export function ProjectSelector() {
     isAuthenticated,
   } = useStore();
 
+  // Hide project selector for non-enterprise users
+  // Multiple projects only available in enterprise plan
+  if (projects.length <= 1) {
+    return null;
+  }
+
   useEffect(() => {
     if (isAuthenticated && !projectsLoaded) {
       fetchProjects();
