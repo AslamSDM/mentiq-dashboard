@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView, useAnimation, Variant } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { JSX, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 type AnimatedTextProps = {
@@ -136,7 +136,7 @@ export const FadeIn = ({
       transition: {
         duration,
         delay,
-        ease: [0.21, 0.47, 0.32, 0.98],
+        ease: [0.21, 0.47, 0.32, 0.98] as [number, number, number, number],
       },
     },
   };

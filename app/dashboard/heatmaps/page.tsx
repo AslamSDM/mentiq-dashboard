@@ -68,7 +68,10 @@ export default function HeatmapsPage() {
 
   useEffect(() => {
     if (selectedProjectId && selectedPage) {
-      console.log("🔍 Fetching heatmap data for:", { selectedPage, heatmapType });
+      console.log("🔍 Fetching heatmap data for:", {
+        selectedPage,
+        heatmapType,
+      });
       fetchHeatmapData({ url: selectedPage, type: heatmapType }).catch(
         (error) => {
           console.error("Error fetching heatmap data:", error);
@@ -329,7 +332,7 @@ export default function HeatmapsPage() {
                       onLoad={() => setIframeLoaded(true)}
                       style={{ border: "none" }}
                     />
-                    
+
                     {/* Heatmap overlay */}
                     {iframeLoaded && overlayEnabled && (
                       <div className="absolute inset-0 pointer-events-none">
@@ -338,7 +341,8 @@ export default function HeatmapsPage() {
                             const maxCount = Math.max(
                               ...heatmapData.clicks.map((c) => c.count)
                             );
-                            const intensity = maxCount > 0 ? click.count / maxCount : 0;
+                            const intensity =
+                              maxCount > 0 ? click.count / maxCount : 0;
                             const radius = 30 + intensity * 40;
 
                             return (
@@ -347,11 +351,15 @@ export default function HeatmapsPage() {
                                   <radialGradient id={`heat-${i}`}>
                                     <stop
                                       offset="0%"
-                                      stopColor={`rgba(239, 68, 68, ${intensity * 0.9})`}
+                                      stopColor={`rgba(239, 68, 68, ${
+                                        intensity * 0.9
+                                      })`}
                                     />
                                     <stop
                                       offset="50%"
-                                      stopColor={`rgba(239, 68, 68, ${intensity * 0.5})`}
+                                      stopColor={`rgba(239, 68, 68, ${
+                                        intensity * 0.5
+                                      })`}
                                     />
                                     <stop
                                       offset="100%"
@@ -430,7 +438,8 @@ export default function HeatmapsPage() {
                         No Scroll Data Available
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Start tracking user scroll behavior to see depth analytics
+                        Start tracking user scroll behavior to see depth
+                        analytics
                       </p>
                     </div>
                   </div>
@@ -446,14 +455,14 @@ export default function HeatmapsPage() {
                         className="w-full h-full"
                         style={{ border: "none" }}
                       />
-                      
+
                       {/* Scroll depth overlay */}
                       {overlayEnabled && (
                         <div className="absolute inset-0 pointer-events-none">
                           {heatmapData.scrolls.map((scroll, i) => {
                             const yPosition = (scroll.depth / 100) * 600;
                             const opacity = scroll.percentage / 100;
-                            
+
                             return (
                               <div
                                 key={i}
@@ -462,7 +471,9 @@ export default function HeatmapsPage() {
                                   top: `${yPosition}px`,
                                   height: "2px",
                                   backgroundColor: `rgba(59, 130, 246, ${opacity})`,
-                                  boxShadow: `0 0 10px rgba(59, 130, 246, ${opacity * 0.8})`,
+                                  boxShadow: `0 0 10px rgba(59, 130, 246, ${
+                                    opacity * 0.8
+                                  })`,
                                 }}
                               >
                                 <div
@@ -545,7 +556,7 @@ export default function HeatmapsPage() {
                       className="w-full h-full"
                       style={{ border: "none" }}
                     />
-                    
+
                     {/* Mouse movement overlay */}
                     {overlayEnabled && (
                       <div className="absolute inset-0 pointer-events-none">

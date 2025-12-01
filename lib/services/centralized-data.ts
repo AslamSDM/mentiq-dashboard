@@ -595,10 +595,9 @@ class CentralizedDataService {
       "featureAdoption",
       CACHE_CONFIG.ENHANCED,
       async () => {
-        const { apiClient } = await import("../api-clean");
-        return apiClient.get(
+        return fetch(
           `/api/v1/projects/${projectId}/features/usage?start_date=${startDate}&end_date=${endDate}`
-        );
+        ).then((res) => res.json());
       },
       projectId
     );
@@ -616,9 +615,9 @@ class CentralizedDataService {
       CACHE_CONFIG.ENHANCED,
       async () => {
         const { apiClient } = await import("../api-clean");
-        return apiClient.get(
+        return fetch(
           `/api/v1/projects/${projectId}/onboarding/stats?start_date=${startDate}&end_date=${endDate}`
-        );
+        ).then((res) => res.json());
       },
       projectId
     );
@@ -631,9 +630,9 @@ class CentralizedDataService {
       CACHE_CONFIG.SESSIONS,
       async () => {
         const { apiClient } = await import("../api-clean");
-        return apiClient.get(
+        return fetch(
           `/api/v1/projects/${projectId}/users/${userId}/journey`
-        );
+        ).then((res) => res.json());
       },
       projectId
     );

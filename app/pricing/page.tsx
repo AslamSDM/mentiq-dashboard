@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -21,113 +22,30 @@ import {
   Building2,
   Crown,
   ArrowRight,
-  ArrowLeft,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
 
-// Pricing tiers configuration
-const PRICING_TIERS = [
-  {
-    id: "launch",
-    name: "Launch",
-    range: [1, 100],
-    icon: <Zap className="h-6 w-6" />,
-    color: "from-blue-500 to-cyan-500",
-    basePrice: 49,
-    description: "Perfect for startups getting started",
-    features: [
-      "Up to 100 paid users",
-      "Core analytics dashboard",
-      "Session replay",
-      "Basic retention cohorts",
-      "Email support",
-      "7-day data retention",
-    ],
-  },
-  {
-    id: "traction",
-    name: "Traction",
-    range: [101, 500],
-    icon: <TrendingUp className="h-6 w-6" />,
-    color: "from-purple-500 to-pink-500",
-    basePrice: 149,
-    description: "For growing teams finding PMF",
-    features: [
-      "Up to 500 paid users",
-      "Advanced analytics",
-      "Unlimited session replays",
-      "Retention & churn analysis",
-      "Feature adoption tracking",
-      "Priority email support",
-      "30-day data retention",
-      "Custom events",
-    ],
-    popular: true,
-  },
-  {
-    id: "momentum",
-    name: "Momentum",
-    range: [501, 1000],
-    icon: <Rocket className="h-6 w-6" />,
-    color: "from-orange-500 to-red-500",
-    basePrice: 299,
-    description: "Scaling fast with proven growth",
-    features: [
-      "Up to 1,000 paid users",
-      "Everything in Traction",
-      "A/B testing & experiments",
-      "Revenue analytics",
-      "Health score tracking",
-      "API access",
-      "90-day data retention",
-      "Slack integration",
-      "Custom dashboards",
-    ],
-  },
-  {
-    id: "scale",
-    name: "Scale",
-    range: [1001, 5000],
-    icon: <Building2 className="h-6 w-6" />,
-    color: "from-green-500 to-emerald-500",
-    basePrice: 699,
-    description: "Enterprise-ready for rapid expansion",
-    features: [
-      "Up to 5,000 paid users",
-      "Everything in Momentum",
-      "Advanced segmentation",
-      "Predictive churn modeling",
-      "Multi-project support",
-      "Priority support (< 4hr response)",
-      "1-year data retention",
-      "SSO authentication",
-      "Custom integrations",
-      "Dedicated account manager",
-    ],
-  },
-  {
-    id: "expansion",
-    name: "Expansion",
-    range: [5001, 10000],
-    icon: <Crown className="h-6 w-6" />,
-    color: "from-yellow-500 to-amber-500",
-    basePrice: 1499,
-    description: "Maximum scale with premium support",
-    features: [
-      "Up to 10,000 paid users",
-      "Everything in Scale",
-      "White-label options",
-      "Custom ML models",
-      "Unlimited projects",
-      "24/7 premium support",
-      "Unlimited data retention",
-      "On-premise deployment option",
-      "Custom SLA",
-      "Quarterly business reviews",
-    ],
-  },
-];
+// Icon mapping for tiers
+const TIER_ICONS: Record<string, React.ReactNode> = {
+  launch: <Zap className="h-6 w-6" />,
+  traction: <TrendingUp className="h-6 w-6" />,
+  momentum: <Rocket className="h-6 w-6" />,
+  scale: <Building2 className="h-6 w-6" />,
+  expansion: <Crown className="h-6 w-6" />,
+  enterprise: <Crown className="h-6 w-6" />,
+};
+
+// Color mapping for tiers
+const TIER_COLORS: Record<string, string> = {
+  launch: "from-blue-500 to-cyan-500",
+  traction: "from-purple-500 to-pink-500",
+  momentum: "from-orange-500 to-red-500",
+  scale: "from-green-500 to-emerald-500",
+  expansion: "from-yellow-500 to-amber-500",
+  enterprise: "from-yellow-500 to-amber-500",
+};
 
 export default function PricingPage() {
   const { toast } = useToast();
@@ -136,15 +54,7 @@ export default function PricingPage() {
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const cardRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Determine current tier based on user count
-  const getCurrentTier = () => {
-    if (userCount > 10000) return null; // Enterprise/Demo
-    return PRICING_TIERS.find(
-      (tier) => userCount >= tier.range[0] && userCount <= tier.range[1]
-    );
-  };
-
-  const currentTier = getCurrentTier();
+  const currentTier = getTierByUserCount(userCount);
 
   // Auto-scroll to selected tier card
   React.useEffect(() => {
@@ -173,7 +83,7 @@ export default function PricingPage() {
   }, [currentTier]);
 
   // Use fixed pricing for all tiers
-  const calculatePrice = (tier: (typeof PRICING_TIERS)[0]) => {
+  const calculatePrice = (tier: (typeof PRICING_TIERS)[number]) => {
     return tier.basePrice;
   };
 
@@ -193,17 +103,31 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-slate-800">
+      <header className="border-b border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Mentiq" className="h-8 w-auto" />
+            <div className="relative h-10 w-10">
+              <Image
+                src="/logo.png"
+                alt="Mentiq Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/signin">
-              <Button variant="ghost">Sign In</Button>
+              <Button
+                variant="ghost"
+                className="text-gray-400 hover:text-white"
+              >
+                Sign In
+              </Button>
             </Link>
             <Link href="/signup">
-              <Button>Get Started</Button>
+              <Button className="bg-primary hover:bg-primary/90">
+                Get Started
+              </Button>
             </Link>
           </div>
         </div>
@@ -264,7 +188,9 @@ export default function PricingPage() {
                 <div className="flex items-center justify-center gap-3 text-sm animate-in fade-in-50 duration-500">
                   <Badge
                     variant="secondary"
-                    className={`px-4 py-2 text-base font-semibold transition-all duration-300 bg-gradient-to-r ${currentTier.color} text-white border-0 shadow-lg`}
+                    className={`px-4 py-2 text-base font-semibold transition-all duration-300 bg-gradient-to-r ${
+                      TIER_COLORS[currentTier.id]
+                    } text-white border-0 shadow-lg`}
                   >
                     {currentTier.name} Tier
                   </Badge>
@@ -297,116 +223,118 @@ export default function PricingPage() {
                 ref={carouselRef}
                 className="flex gap-6 overflow-x-auto pb-8 pt-8 px-4 snap-x snap-mandatory scrollbar-hide min-h-[750px]"
               >
-                {PRICING_TIERS.map((tier) => {
-                  const isCurrentTier = currentTier?.id === tier.id;
-                  const price = calculatePrice(tier);
-                  const isInRange =
-                    userCount >= tier.range[0] && userCount <= tier.range[1];
+                {PRICING_TIERS.filter((tier) => tier.id !== "enterprise").map(
+                  (tier) => {
+                    const isCurrentTier = currentTier?.id === tier.id;
+                    const price = calculatePrice(tier);
+                    const isInRange =
+                      userCount >= tier.range[0] && userCount <= tier.range[1];
 
-                  return (
-                    <Card
-                      key={tier.id}
-                      ref={(el) => {
-                        cardRefs.current[tier.id] = el;
-                      }}
-                      className={`relative overflow-hidden transition-all duration-500 ease-out transform flex-shrink-0 w-[350px] snap-center ${
-                        isCurrentTier
-                          ? "ring-4 ring-blue-500 shadow-2xl scale-105 border-blue-500"
-                          : isInRange
-                          ? "ring-2 ring-slate-600 shadow-lg scale-100 opacity-90"
-                          : "opacity-60 scale-95 hover:opacity-80"
-                      } ${
-                        tier.popular ? "border-purple-500" : ""
-                      } hover:shadow-xl`}
-                    >
-                      {tier.popular && (
-                        <div className="absolute top-0 right-0 z-10">
-                          <Badge
-                            className={`rounded-none rounded-bl-lg bg-purple-500 transition-all duration-300 ${
-                              isCurrentTier ? "animate-pulse shadow-lg" : ""
-                            }`}
-                          >
-                            Most Popular
-                          </Badge>
-                        </div>
-                      )}
-
-                      <CardHeader>
-                        <div
-                          className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r ${
-                            tier.color
-                          } mb-4 transition-all duration-500 ${
-                            isCurrentTier
-                              ? "scale-110 shadow-lg animate-bounce"
-                              : ""
-                          }`}
-                        >
-                          {tier.icon}
-                        </div>
-                        <CardTitle
-                          className={`text-2xl transition-colors duration-300 ${
-                            isCurrentTier ? "text-blue-400" : ""
-                          }`}
-                        >
-                          {tier.name}
-                        </CardTitle>
-                        <CardDescription>{tier.description}</CardDescription>
-                        <div className="mt-4">
-                          <div className="flex items-baseline gap-2">
-                            <span
-                              className={`text-4xl font-bold transition-all duration-300 ${
-                                isCurrentTier ? "text-blue-400 scale-110" : ""
+                    return (
+                      <Card
+                        key={tier.id}
+                        ref={(el) => {
+                          cardRefs.current[tier.id] = el;
+                        }}
+                        className={`relative overflow-hidden transition-all duration-500 ease-out transform flex-shrink-0 w-[350px] snap-center ${
+                          isCurrentTier
+                            ? "ring-4 ring-blue-500 shadow-2xl scale-105 border-blue-500"
+                            : isInRange
+                            ? "ring-2 ring-slate-600 shadow-lg scale-100 opacity-90"
+                            : "opacity-60 scale-95 hover:opacity-80"
+                        } ${
+                          (tier as any).popular ? "border-purple-500" : ""
+                        } hover:shadow-xl`}
+                      >
+                        {(tier as any).popular && (
+                          <div className="absolute top-0 right-0 z-10">
+                            <Badge
+                              className={`rounded-none rounded-bl-lg bg-purple-500 transition-all duration-300 ${
+                                isCurrentTier ? "animate-pulse shadow-lg" : ""
                               }`}
                             >
-                              ${price}
-                            </span>
-                            <span className="text-muted-foreground">
-                              /month
-                            </span>
+                              Most Popular
+                            </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {tier.range[0].toLocaleString()} -{" "}
-                            {tier.range[1].toLocaleString()} users
-                          </p>
-                        </div>
-                      </CardHeader>
+                        )}
 
-                      <CardContent className="space-y-4">
-                        <Button
-                          className="w-full"
-                          variant={isCurrentTier ? "default" : "outline"}
-                          onClick={() => handleGetStarted(tier.id)}
-                        >
-                          {isCurrentTier ? (
-                            <>
-                              Get Started{" "}
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </>
-                          ) : (
-                            "Select Plan"
-                          )}
-                        </Button>
-
-                        <div className="space-y-3 pt-4">
-                          <p className="text-sm font-semibold">
-                            What's included:
-                          </p>
-                          {tier.features.map((feature, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-3 text-sm"
-                            >
-                              <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                        <CardHeader>
+                          <div
+                            className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r ${
+                              TIER_COLORS[tier.id]
+                            } mb-4 transition-all duration-500 ${
+                              isCurrentTier
+                                ? "scale-110 shadow-lg animate-bounce"
+                                : ""
+                            }`}
+                          >
+                            {TIER_ICONS[tier.id]}
+                          </div>
+                          <CardTitle
+                            className={`text-2xl transition-colors duration-300 ${
+                              isCurrentTier ? "text-blue-400" : ""
+                            }`}
+                          >
+                            {tier.name}
+                          </CardTitle>
+                          <CardDescription>{tier.description}</CardDescription>
+                          <div className="mt-4">
+                            <div className="flex items-baseline gap-2">
+                              <span
+                                className={`text-4xl font-bold transition-all duration-300 ${
+                                  isCurrentTier ? "text-blue-400 scale-110" : ""
+                                }`}
+                              >
+                                ${price}
+                              </span>
                               <span className="text-muted-foreground">
-                                {feature}
+                                /month
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {tier.range[0].toLocaleString()} -{" "}
+                              {tier.range[1].toLocaleString()} users
+                            </p>
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="space-y-4">
+                          <Button
+                            className="w-full"
+                            variant={isCurrentTier ? "default" : "outline"}
+                            onClick={() => handleGetStarted(tier.id)}
+                          >
+                            {isCurrentTier ? (
+                              <>
+                                Get Started{" "}
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </>
+                            ) : (
+                              "Select Plan"
+                            )}
+                          </Button>
+
+                          <div className="space-y-3 pt-4">
+                            <p className="text-sm font-semibold">
+                              What's included:
+                            </p>
+                            {tier.features.map((feature, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3 text-sm"
+                              >
+                                <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                                <span className="text-muted-foreground">
+                                  {feature}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  }
+                )}
               </div>
 
               {/* Carousel Hint */}
