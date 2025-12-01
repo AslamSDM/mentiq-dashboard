@@ -538,7 +538,7 @@ export default function DashboardPage() {
                   Daily revenue from Stripe charges over the last 30 days
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-2">
                 <ChartContainer
                   config={{
                     revenue: {
@@ -548,74 +548,61 @@ export default function DashboardPage() {
                   }}
                   className="h-[300px] w-full"
                 >
-                  <AreaChart data={revenueAnalytics.time_series}>
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-muted"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      className="text-xs"
-                      tickFormatter={(value) =>
-                        new Date(value).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                    />
-                    <YAxis
-                      className="text-xs"
-                      tickFormatter={(value) => `$${value.toLocaleString()}`}
-                    />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value) => [
-                            `$${Number(value).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`,
-                            "Revenue",
-                          ]}
-                          labelFormatter={(value) =>
-                            new Date(value).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          }
-                        />
-                      }
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                    />
-                  </AreaChart>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={revenueAnalytics.time_series}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-muted/20"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        className="text-xs text-muted-foreground"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        minTickGap={30}
+                        tickFormatter={(value) =>
+                          new Date(value).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                      />
+                      <YAxis
+                        className="text-xs text-muted-foreground"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        tickFormatter={(value) => `$${value.toLocaleString()}`}
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            formatter={(value) => [
+                              `$${Number(value).toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}`,
+                              "Revenue",
+                            ]}
+                            labelFormatter={(value) =>
+                              new Date(value).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            }
+                          />
+                        }
+                      />
+                      <Bar
+                        dataKey="revenue"
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -818,7 +805,7 @@ export default function DashboardPage() {
                   : "Monthly Active Users"}
               </p>
             </div>
-            <div className="h-[350px] w-full">
+            <div className="h-[350px] w-full px-2">
               {loadingAnalytics ? (
                 <div className="h-full w-full flex items-center justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -833,74 +820,56 @@ export default function DashboardPage() {
                   }}
                   className="h-full w-full"
                 >
-                  <AreaChart data={getEngagementData()}>
-                    <defs>
-                      <linearGradient
-                        id="colorUsers"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-muted/20"
-                      vertical={false}
-                    />
-                    <XAxis
-                      dataKey="date"
-                      className="text-xs text-muted-foreground"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      minTickGap={30}
-                      tickFormatter={(value) =>
-                        new Date(value).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                    />
-                    <YAxis
-                      className="text-xs text-muted-foreground"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                    />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          labelFormatter={(value) =>
-                            new Date(value).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          }
-                        />
-                      }
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorUsers)"
-                    />
-                  </AreaChart>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={getEngagementData()}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        className="stroke-muted/20"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        className="text-xs text-muted-foreground"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                        minTickGap={30}
+                        tickFormatter={(value) =>
+                          new Date(value).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                      />
+                      <YAxis
+                        className="text-xs text-muted-foreground"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={10}
+                      />
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            labelFormatter={(value) =>
+                              new Date(value).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            }
+                          />
+                        }
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#8b5cf6"
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-muted-foreground">

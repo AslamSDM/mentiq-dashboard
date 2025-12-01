@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { apiClient, type Project, type ApiKey } from "@/lib/api";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProjectsPage() {
   // Zustand store
@@ -47,6 +48,8 @@ export default function ProjectsPage() {
     deleteApiKey,
     updateApiKey,
   } = useStore();
+
+  const { toast } = useToast();
 
   // Local state
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
@@ -74,8 +77,30 @@ export default function ProjectsPage() {
       await createProject(newProject.name, newProject.description);
       setNewProject({ name: "", description: "" });
       setIsCreateOpen(false);
-    } catch (error) {
+      toast({
+        title: "Project created",
+        description: "Your project has been created successfully.",
+      });
+    } catch (error: any) {
       console.error("Failed to create project:", error);
+
+      // Check if it's a project limit error
+      if (error?.response?.status === 403) {
+        toast({
+          title: "Project limit reached",
+          description:
+            "Upgrade to Enterprise plan to create multiple projects.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Failed to create project",
+          description:
+            error?.message || "An error occurred while creating the project.",
+          variant: "destructive",
+        });
+      }
+
       setNewProject({ name: "", description: "" });
       setIsCreateOpen(false);
     }
@@ -151,6 +176,222 @@ export default function ProjectsPage() {
     );
   }
 
+  // Empty state when no projects exist
+  if (!projects || projects.length === 0) {
+    return (
+      <div className="flex flex-col h-full">
+        <DashboardHeader
+          title="Projects"
+          description="Manage your projects and API keys"
+        />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <Card className="max-w-2xl w-full">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-12 w-12 text-primary"
+                  >
+                    <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+                    <path d="M17 18h1" />
+                    <path d="M12 18h1" />
+                    <path d="M7 18h1" />
+                  </svg>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-bold">
+                    Create Your First Project
+                  </h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Get started by creating a project to track analytics,
+                    monitor user behavior, and gain insights into your
+                    application's performance.
+                  </p>
+                </div>
+                <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="mt-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="mr-2 h-5 w-5"
+                      >
+                        <path d="M5 12h14" />
+                        <path d="M12 5v14" />
+                      </svg>
+                      Create Your First Project
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Project</DialogTitle>
+                      <DialogDescription>
+                        Add a new project to start tracking analytics
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="project-name">Project Name</Label>
+                        <Input
+                          id="project-name"
+                          placeholder="My Awesome App"
+                          value={newProject.name}
+                          onChange={(e) =>
+                            setNewProject({
+                              ...newProject,
+                              name: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="project-description">Description</Label>
+                        <Input
+                          id="project-description"
+                          placeholder="Brief description of your project"
+                          value={newProject.description}
+                          onChange={(e) =>
+                            setNewProject({
+                              ...newProject,
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsCreateOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleCreateProject}
+                        disabled={!newProject.name}
+                      >
+                        Create Project
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <div className="pt-4 border-t w-full">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    What you'll get with your project:
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 text-green-600 dark:text-green-400"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">API Keys</p>
+                        <p className="text-xs text-muted-foreground">
+                          Secure access to your analytics
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 text-green-600 dark:text-green-400"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Event Tracking</p>
+                        <p className="text-xs text-muted-foreground">
+                          Monitor user interactions
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 text-green-600 dark:text-green-400"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Session Recording</p>
+                        <p className="text-xs text-muted-foreground">
+                          Watch user sessions replay
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="h-6 w-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center flex-shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4 text-green-600 dark:text-green-400"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          Analytics Dashboard
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Comprehensive data insights
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <DashboardHeader
@@ -165,78 +406,6 @@ export default function ProjectsPage() {
               Create and manage projects to track analytics
             </p>
           </div>
-          {/* Hide create project button for non-enterprise users (only 1 project allowed) */}
-          {!projects?.length && projects?.length === 0 && (
-            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mr-2 h-4 w-4"
-                  >
-                    <path d="M5 12h14" />
-                    <path d="M12 5v14" />
-                  </svg>
-                  Create Project
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                  <DialogDescription>
-                    Add a new project to start tracking analytics
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="project-name">Project Name</Label>
-                    <Input
-                      id="project-name"
-                      placeholder="My Awesome App"
-                      value={newProject.name}
-                      onChange={(e) =>
-                        setNewProject({ ...newProject, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="project-description">Description</Label>
-                    <Input
-                      id="project-description"
-                      placeholder="Brief description of your project"
-                      value={newProject.description}
-                      onChange={(e) =>
-                        setNewProject({
-                          ...newProject,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsCreateOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleCreateProject}
-                    disabled={!newProject.name}
-                  >
-                    Create Project
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
         </div>
 
         <div className="grid gap-4">

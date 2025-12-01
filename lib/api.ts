@@ -48,6 +48,8 @@ export const apiClient = {
   // Project methods
   getProjects: projectService.getProjects.bind(projectService),
   createProject: projectService.createProject.bind(projectService),
+  updateProject: projectService.updateProject.bind(projectService),
+  deleteProject: projectService.deleteProject.bind(projectService),
   getProject: projectService.getProject.bind(projectService),
   updateProject: projectService.updateProject.bind(projectService),
   deleteProject: projectService.deleteProject.bind(projectService),

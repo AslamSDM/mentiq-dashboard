@@ -51,9 +51,11 @@ interface AppState {
   apiClient: typeof apiClient;
   // Auth
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
-  setToken: (token: string | null) => void;
+  setToken: (token: string | null, refreshToken?: string | null) => void;
   logout: () => void;
+  refreshAccessToken: () => Promise<boolean>;
 
   // Projects
   projects: Project[];
@@ -172,16 +174,45 @@ export const useStore = create<AppState>()(
       apiClient: apiClient,
       // Auth state
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
-      setToken: (token) => {
+      setToken: (token, refreshToken) => {
         console.log("Zustand: Setting token", token);
         setAuthToken(token);
-        set({ token, isAuthenticated: !!token });
+        set({
+          token,
+          refreshToken:
+            refreshToken !== undefined ? refreshToken : get().refreshToken,
+          isAuthenticated: !!token,
+        });
+      },
+      refreshAccessToken: async () => {
+        const currentRefreshToken = get().refreshToken;
+        if (!currentRefreshToken) {
+          console.log("No refresh token available");
+          return false;
+        }
+
+        try {
+          const { authService } = await import("./api");
+          const response = await authService.refreshToken(currentRefreshToken);
+
+          // Update tokens
+          get().setToken(response.accessToken, response.refreshToken);
+          console.log("Access token refreshed successfully");
+          return true;
+        } catch (error) {
+          console.error("Failed to refresh access token:", error);
+          // Clear tokens and redirect to login
+          get().logout();
+          return false;
+        }
       },
       logout: () => {
         // Clear all caches on logout
         set({
           token: null,
+          refreshToken: null,
           isAuthenticated: false,
           projects: [],
           selectedProjectId: null,
@@ -236,6 +267,10 @@ export const useStore = create<AppState>()(
           set((state) => ({
             projects: [...state.projects, projectWithDescription],
           }));
+
+          // Automatically select the newly created project
+          get().setSelectedProjectId(projectWithDescription.id);
+
           return projectWithDescription;
         } catch (error) {
           console.error("Zustand: Failed to create project", error);
@@ -940,6 +975,7 @@ export const useStore = create<AppState>()(
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
       partialize: (state) => ({
         token: state.token,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
         selectedProjectId: state.selectedProjectId,
         selectedExperimentId: state.selectedExperimentId,

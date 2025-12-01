@@ -20,6 +20,8 @@ export default function DashboardLayout({
     isAuthenticated,
     projects,
     projectsLoaded,
+    selectedProjectId,
+    setSelectedProjectId,
   } = useStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -28,15 +30,29 @@ export default function DashboardLayout({
     console.log("Session status changed:", status, session);
     console.log("Current token in Zustand:", token);
     console.log("Session access token:", session?.accessToken);
+    console.log("Session project ID:", session?.projectId);
 
     if (status === "authenticated" && session?.accessToken) {
       console.log("Setting token from session:", session.accessToken);
-      setToken(session.accessToken);
+      setToken(session.accessToken, session.refreshToken);
+
+      // Set selected project ID from session if available and not already set
+      if (session.projectId) {
+        console.log("Setting project ID from session:", session.projectId);
+        setSelectedProjectId(session.projectId);
+      }
     } else if (status === "unauthenticated") {
       console.log("Unauthenticated, clearing token");
-      setToken(null);
+      setToken(null, null);
     }
-  }, [status, session, setToken, token]);
+  }, [
+    status,
+    session,
+    setToken,
+    token,
+    selectedProjectId,
+    setSelectedProjectId,
+  ]);
 
   useEffect(() => {
     if (isAuthenticated && token) {

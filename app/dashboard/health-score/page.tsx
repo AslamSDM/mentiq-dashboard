@@ -921,17 +921,17 @@ export default function HealthScorePage() {
                     <Line
                       type="monotone"
                       dataKey="sessions"
-                      stroke="var(--color-sessions)"
-                      strokeWidth={2}
-                      dot={{ fill: "var(--color-sessions)", r: 4 }}
+                      stroke="#8b5cf6"
+                      strokeWidth={2.5}
+                      dot={false}
                       activeDot={{ r: 6 }}
                     />
                     <Line
                       type="monotone"
                       dataKey="users"
-                      stroke="var(--color-users)"
-                      strokeWidth={2}
-                      dot={{ fill: "var(--color-users)", r: 4 }}
+                      stroke="#06b6d4"
+                      strokeWidth={2.5}
+                      dot={false}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>

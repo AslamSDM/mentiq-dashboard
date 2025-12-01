@@ -9,8 +9,13 @@ export interface AuthUser {
 }
 
 export interface AuthResponse {
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  projectId?: string;
   user: AuthUser;
+  // Legacy support
+  token?: string;
 }
 
 export class AuthService extends BaseHttpService {
@@ -41,9 +46,11 @@ export class AuthService extends BaseHttpService {
     setAuthToken(null);
   }
 
-  async refreshToken(): Promise<AuthResponse> {
-    return this.request("/auth/refresh", {
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    return this.request("/refresh", {
       method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      requireAuth: false,
     });
   }
 

@@ -25,16 +25,23 @@ export const authOptions: NextAuthOptions = {
 
           console.log("Login response:", response);
 
-          if (response.token && response.user) {
+          // Support both old (token) and new (accessToken) formats
+          const token = response.accessToken || response.token;
+          const refreshToken = response.refreshToken;
+          const projectId = response.projectId;
+
+          if (token && response.user) {
             console.log("Login successful, setting token");
             // Set the token immediately in the API client
-            setAuthToken(response.token);
+            setAuthToken(token);
 
             return {
               id: response.user.id,
               email: response.user.email,
               name: response.user.name,
-              accessToken: response.token,
+              accessToken: token,
+              refreshToken: refreshToken,
+              projectId: projectId,
             };
           }
           return null;
@@ -50,6 +57,8 @@ export const authOptions: NextAuthOptions = {
       if (user && user.accessToken) {
         console.log("JWT callback: Setting accessToken in token");
         token.accessToken = user.accessToken;
+        token.refreshToken = user.refreshToken;
+        token.projectId = user.projectId;
       }
       return token;
     },
@@ -57,6 +66,8 @@ export const authOptions: NextAuthOptions = {
       if (token.accessToken) {
         console.log("Session callback: Setting accessToken in session");
         session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
+        session.projectId = token.projectId;
         // Set the token in the API client
         setAuthToken(token.accessToken as string);
       }
