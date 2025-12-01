@@ -48,7 +48,7 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative h-30 w-30">
+            <div className="relative h-10 w-10">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"

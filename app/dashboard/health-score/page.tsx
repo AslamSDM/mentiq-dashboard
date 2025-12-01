@@ -836,7 +836,7 @@ export default function HealthScorePage() {
                 "Daily sessions and unique users over time"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2">
             {loading ? (
               <div className="flex items-center justify-center h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -859,17 +859,27 @@ export default function HealthScorePage() {
                   <LineChart data={sessionData?.time_series || []}>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      className="stroke-muted"
+                      className="stroke-muted/20"
+                      vertical={false}
                     />
                     <XAxis
                       dataKey="date"
-                      className="text-xs"
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      minTickGap={30}
                       tickFormatter={(value) => {
                         const date = new Date(value);
                         return `${date.getMonth() + 1}/${date.getDate()}`;
                       }}
                     />
-                    <YAxis className="text-xs" />
+                    <YAxis
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                    />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -913,16 +923,16 @@ export default function HealthScorePage() {
                       dataKey="sessions"
                       stroke="var(--color-sessions)"
                       strokeWidth={2}
-                      dot={{ fill: "var(--color-sessions)", r: 3 }}
-                      activeDot={{ r: 5 }}
+                      dot={{ fill: "var(--color-sessions)", r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
                     <Line
                       type="monotone"
                       dataKey="users"
                       stroke="var(--color-users)"
                       strokeWidth={2}
-                      dot={{ fill: "var(--color-users)", r: 3 }}
-                      activeDot={{ r: 5 }}
+                      dot={{ fill: "var(--color-users)", r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>

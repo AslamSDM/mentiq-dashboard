@@ -430,7 +430,7 @@ export default function RevenuePage() {
                         Monthly Recurring Revenue over time
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="px-2">
                       <ChartContainer
                         config={{
                           mrr: {
@@ -441,13 +441,35 @@ export default function RevenuePage() {
                         className="h-[300px]"
                       >
                         <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={revenueAnalytics.time_series}>
+                          <BarChart data={revenueAnalytics.time_series}>
                             <CartesianGrid
                               strokeDasharray="3 3"
-                              className="stroke-muted"
+                              className="stroke-muted/20"
+                              vertical={false}
                             />
-                            <XAxis dataKey="date" className="text-xs" />
-                            <YAxis className="text-xs" />
+                            <XAxis
+                              dataKey="date"
+                              className="text-xs text-muted-foreground"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              minTickGap={30}
+                              tickFormatter={(value) =>
+                                new Date(value).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })
+                              }
+                            />
+                            <YAxis
+                              className="text-xs text-muted-foreground"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              tickFormatter={(value) =>
+                                `$${value.toLocaleString()}`
+                              }
+                            />
                             <ChartTooltip
                               content={<ChartTooltipContent />}
                               formatter={(value) => [
@@ -455,15 +477,12 @@ export default function RevenuePage() {
                                 "MRR",
                               ]}
                             />
-                            <Area
-                              type="monotone"
+                            <Bar
                               dataKey="mrr"
-                              stroke="var(--color-mrr)"
                               fill="var(--color-mrr)"
-                              fillOpacity={0.3}
-                              strokeWidth={2}
+                              radius={[4, 4, 0, 0]}
                             />
-                          </AreaChart>
+                          </BarChart>
                         </ResponsiveContainer>
                       </ChartContainer>
                     </CardContent>
@@ -478,7 +497,7 @@ export default function RevenuePage() {
                           Number of active subscriptions over time
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="px-2">
                         <ChartContainer
                           config={{
                             active_subscriptions: {
@@ -492,16 +511,40 @@ export default function RevenuePage() {
                             <LineChart data={revenueAnalytics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-muted"
+                                className="stroke-muted/20"
+                                vertical={false}
                               />
-                              <XAxis dataKey="date" className="text-xs" />
-                              <YAxis className="text-xs" />
+                              <XAxis
+                                dataKey="date"
+                                className="text-xs text-muted-foreground"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={10}
+                                minTickGap={30}
+                                tickFormatter={(value) =>
+                                  new Date(value).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                }
+                              />
+                              <YAxis
+                                className="text-xs text-muted-foreground"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={10}
+                              />
                               <ChartTooltip content={<ChartTooltipContent />} />
                               <Line
                                 type="monotone"
                                 dataKey="active_subscriptions"
                                 stroke="var(--color-active_subscriptions)"
                                 strokeWidth={2}
+                                dot={{
+                                  fill: "var(--color-active_subscriptions)",
+                                  r: 4,
+                                }}
+                                activeDot={{ r: 6 }}
                               />
                             </LineChart>
                           </ResponsiveContainer>
@@ -516,7 +559,7 @@ export default function RevenuePage() {
                           Percentage of customers churning over time
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="px-2">
                         <ChartContainer
                           config={{
                             churn_rate: {
@@ -530,10 +573,29 @@ export default function RevenuePage() {
                             <LineChart data={revenueAnalytics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-muted"
+                                className="stroke-muted/20"
+                                vertical={false}
                               />
-                              <XAxis dataKey="date" className="text-xs" />
-                              <YAxis className="text-xs" />
+                              <XAxis
+                                dataKey="date"
+                                className="text-xs text-muted-foreground"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={10}
+                                minTickGap={30}
+                                tickFormatter={(value) =>
+                                  new Date(value).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                }
+                              />
+                              <YAxis
+                                className="text-xs text-muted-foreground"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={10}
+                              />
                               <ChartTooltip
                                 content={<ChartTooltipContent />}
                                 formatter={(value) => [
@@ -546,6 +608,8 @@ export default function RevenuePage() {
                                 dataKey="churn_rate"
                                 stroke="var(--color-churn_rate)"
                                 strokeWidth={2}
+                                dot={{ fill: "var(--color-churn_rate)", r: 4 }}
+                                activeDot={{ r: 6 }}
                               />
                             </LineChart>
                           </ResponsiveContainer>

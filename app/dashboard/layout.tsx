@@ -3,6 +3,7 @@
 import type React from "react";
 import { useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 
@@ -12,7 +13,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
-  const { token, setToken, fetchProjects, isAuthenticated } = useStore();
+  const {
+    token,
+    setToken,
+    fetchProjects,
+    isAuthenticated,
+    projects,
+    projectsLoaded,
+  } = useStore();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     console.log("Session status changed:", status, session);
@@ -34,7 +44,27 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated, fetchProjects, token]);
 
+  // Redirect to projects page if no projects exist and not already on projects page
+  useEffect(() => {
+    if (
+      projectsLoaded &&
+      (!projects || projects.length === 0) &&
+      pathname !== "/dashboard/projects"
+    ) {
+      router.push("/dashboard/projects");
+    }
+  }, [projectsLoaded, projects, pathname, router]);
+
   if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Show loading while fetching projects
+  if (!projectsLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
