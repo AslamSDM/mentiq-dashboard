@@ -52,9 +52,7 @@ function SignUpForm() {
   const preselectedPlanId = searchParams.get("plan");
   const preselectedUsers = searchParams.get("users");
 
-  const [step, setStep] = useState<"plan" | "details">(
-    preselectedPlanId ? "details" : "plan"
-  );
+  const [step, setStep] = useState<"details" | "plan">("details");
   const [selectedPlan, setSelectedPlan] = useState(preselectedPlanId || "");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,11 +63,20 @@ function SignUpForm() {
 
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
-    setStep("details");
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleContinueToPlans = () => {
+    if (fullName && companyName && email && password && password.length >= 8) {
+      setStep("plan");
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!selectedPlan) {
+      setError("Please select a plan");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -202,23 +209,6 @@ function SignUpForm() {
           <div className="flex items-center gap-4 mb-8">
             <div
               className={`flex items-center gap-2 ${
-                step === "plan" ? "text-primary" : "text-gray-400"
-              }`}
-            >
-              <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
-                  step === "plan"
-                    ? "border-primary bg-primary/10"
-                    : "border-gray-600 bg-white/5"
-                }`}
-              >
-                1
-              </div>
-              <span className="font-medium">Choose Plan</span>
-            </div>
-            <div className="flex-1 h-px bg-white/10"></div>
-            <div
-              className={`flex items-center gap-2 ${
                 step === "details" ? "text-primary" : "text-gray-400"
               }`}
             >
@@ -229,15 +219,206 @@ function SignUpForm() {
                     : "border-gray-600 bg-white/5"
                 }`}
               >
-                2
+                1
               </div>
               <span className="font-medium">Account Details</span>
             </div>
+            <div className="flex-1 h-px bg-white/10"></div>
+            <div
+              className={`flex items-center gap-2 ${
+                step === "plan" ? "text-primary" : "text-gray-400"
+              }`}
+            >
+              <div
+                className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
+                  step === "plan"
+                    ? "border-primary bg-primary/10"
+                    : "border-gray-600 bg-white/5"
+                }`}
+              >
+                2
+              </div>
+              <span className="font-medium">Choose Plan</span>
+            </div>
           </div>
 
-          {/* Step 1: Plan Selection */}
+          {/* Step 1: Account Details */}
+          {step === "details" && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold">Create your account</h2>
+                <p className="text-gray-400">
+                  Fill in your details to get started
+                </p>
+              </div>
+
+              {error && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="fullName"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Full name
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="companyName"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Company name
+                  </Label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input
+                      id="companyName"
+                      type="text"
+                      placeholder="Acme Inc."
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      required
+                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-300"
+                >
+                  Work email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-300"
+                >
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="At least 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                <p className="text-xs text-gray-400">
+                  Use 8 or more characters with a mix of letters, numbers &
+                  symbols
+                </p>
+              </div>
+
+              <Button
+                onClick={handleContinueToPlans}
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                disabled={
+                  !fullName ||
+                  !companyName ||
+                  !email ||
+                  !password ||
+                  password.length < 8
+                }
+              >
+                Continue to plan selection
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+
+              <p className="text-xs text-center text-gray-400">
+                By creating an account, you agree to our{" "}
+                <Link href="#" className="text-primary hover:underline">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="#" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>
+              </p>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-black text-gray-400">
+                    Already have an account?
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-black text-gray-400">
+                    Already have an account?
+                  </span>
+                </div>
+              </div>
+
+              <Link href="/signin">
+                <Button
+                  variant="outline"
+                  className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                >
+                  Sign in instead
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Step 2: Plan Selection */}
           {step === "plan" && (
             <div className="space-y-6">
+              <button
+                onClick={() => setStep("details")}
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to account details
+              </button>
+
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold">Choose your plan</h2>
                 <p className="text-gray-400">
@@ -245,6 +426,12 @@ function SignUpForm() {
                   anytime.
                 </p>
               </div>
+
+              {error && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                  {error}
+                </div>
+              )}
 
               <div className="grid gap-4">
                 {PRICING_TIERS.filter((tier) => tier.id !== "enterprise").map(
@@ -296,7 +483,13 @@ function SignUpForm() {
                             )}
                           </div>
                         </div>
-                        <ArrowRight className="h-5 w-5 text-gray-400 flex-shrink-0 mt-2" />
+                        <Check
+                          className={`h-6 w-6 flex-shrink-0 mt-2 ${
+                            selectedPlan === tier.id
+                              ? "text-primary"
+                              : "text-transparent"
+                          }`}
+                        />
                       </div>
                     </button>
                   )
@@ -325,208 +518,21 @@ function SignUpForm() {
                   </div>
                 </Link>
               </div>
-            </div>
-          )}
 
-          {/* Step 2: Account Details */}
-          {step === "details" && (
-            <div className="space-y-6">
-              <button
-                onClick={() => setStep("plan")}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              <Button
+                onClick={handleSignUp}
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                disabled={!selectedPlan || isLoading}
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to plan selection
-              </button>
-
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Create your account</h2>
-                <p className="text-gray-400">
-                  Fill in your details to get started
-                </p>
-              </div>
-
-              {/* Selected Plan Summary */}
-              {selectedTier && (
-                <div className="p-4 rounded-xl border border-primary/30 bg-primary/5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`h-10 w-10 rounded-lg bg-gradient-to-r ${
-                          TIER_COLORS[selectedTier.id]
-                        } flex items-center justify-center`}
-                      >
-                        {TIER_ICONS[selectedTier.id]}
-                      </div>
-                      <div>
-                        <div className="font-bold text-lg">
-                          {selectedTier.name} Plan
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {selectedTier.basePrice &&
-                            `$${selectedTier.basePrice}/month`}
-                          {selectedTier.trialDays === 3 && (
-                            <span className="ml-2 text-green-400">
-                              • 3-day free trial
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setStep("plan")}
-                      className="text-sm text-primary hover:text-primary/80"
-                    >
-                      Change
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <form onSubmit={handleSignUp} className="space-y-6">
-                {error && (
-                  <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
-                    {error}
-                  </div>
+                {isLoading ? (
+                  "Creating account..."
+                ) : (
+                  <>
+                    Create account
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
                 )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="fullName"
-                      className="text-sm font-medium text-gray-300"
-                    >
-                      Full name
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="fullName"
-                        type="text"
-                        placeholder="John Doe"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required
-                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="companyName"
-                      className="text-sm font-medium text-gray-300"
-                    >
-                      Company name
-                    </Label>
-                    <div className="relative">
-                      <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <Input
-                        id="companyName"
-                        type="text"
-                        placeholder="Acme Inc."
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        required
-                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium text-gray-300"
-                  >
-                    Work email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-gray-300"
-                  >
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="At least 8 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={8}
-                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    Use 8 or more characters with a mix of letters, numbers &
-                    symbols
-                  </p>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    "Creating account..."
-                  ) : (
-                    <>
-                      Create account
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-xs text-center text-gray-400">
-                  By creating an account, you agree to our{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Privacy Policy
-                  </Link>
-                </p>
-              </form>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-black text-gray-400">
-                    Already have an account?
-                  </span>
-                </div>
-              </div>
-
-              <Link href="/signin">
-                <Button
-                  variant="outline"
-                  className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
-                >
-                  Sign in instead
-                </Button>
-              </Link>
+              </Button>
             </div>
           )}
         </div>
