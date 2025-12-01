@@ -166,7 +166,7 @@ export default function ProjectsPage() {
             </p>
           </div>
           {/* Hide create project button for non-enterprise users (only 1 project allowed) */}
-          {projects.length === 0 && (
+          {projects?.length === 0 && (
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
               <DialogTrigger asChild>
                 <Button>

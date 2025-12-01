@@ -22,9 +22,6 @@ export function ProjectSelector() {
 
   // Hide project selector for non-enterprise users
   // Multiple projects only available in enterprise plan
-  if (projects.length <= 1) {
-    return null;
-  }
 
   useEffect(() => {
     if (isAuthenticated && !projectsLoaded) {
@@ -32,20 +29,23 @@ export function ProjectSelector() {
     }
   }, [isAuthenticated, projectsLoaded, fetchProjects]);
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const selectedProject = projects?.find((p) => p.id === selectedProjectId);
 
+  if (!projects?.length || projects.length <= 1) {
+    return null;
+  }
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Project:</span>
       <Select
         value={selectedProjectId || ""}
         onValueChange={(value) => setSelectedProjectId(value)}
-        disabled={projects.length === 0}
+        disabled={projects?.length === 0}
       >
         <SelectTrigger className="w-[200px]">
           <SelectValue
             placeholder={
-              projects.length === 0 ? "No projects" : "Select a project"
+              projects?.length === 0 ? "No projects" : "Select a project"
             }
           >
             {selectedProject ? selectedProject.name : "Select a project"}
