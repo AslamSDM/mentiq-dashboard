@@ -3,7 +3,7 @@ import { apiClient } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, companyName } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(

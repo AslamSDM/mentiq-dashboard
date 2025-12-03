@@ -13,7 +13,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          console.error("Missing email or password");
+          throw new Error("Missing email or password");
         }
 
         try {
@@ -23,7 +24,7 @@ export const authOptions: NextAuthOptions = {
             credentials.password
           );
 
-          console.log("Login response:", response);
+          console.log("Login response:", JSON.stringify(response, null, 2));
 
           // Support both old (token) and new (accessToken) formats
           const token = response.accessToken || response.token;
@@ -44,10 +45,12 @@ export const authOptions: NextAuthOptions = {
               projectId: projectId,
             };
           }
-          return null;
-        } catch (error) {
-          console.error("Authentication error:", error);
-          return null;
+          
+          console.error("Invalid response format - missing token or user");
+          throw new Error("Invalid response from server");
+        } catch (error: any) {
+          console.error("Authentication error:", error.message || error);
+          throw new Error(error.message || "Authentication failed");
         }
       },
     }),
@@ -80,4 +83,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };

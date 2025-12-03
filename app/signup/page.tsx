@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import * as React from "react";
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
@@ -11,6 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   ArrowRight,
   Mail,
@@ -24,8 +32,9 @@ import {
   Rocket,
   Building2,
   Crown,
+  Loader2,
 } from "lucide-react";
-import { PRICING_TIERS, getTierById } from "@/lib/constants";
+import { PRICING_TIERS, getTierById, getTierByUserCount } from "@/lib/constants";
 
 const TIER_ICONS: Record<string, React.ReactNode> = {
   launch: <Zap className="h-5 w-5" />,
@@ -53,27 +62,36 @@ function SignUpForm() {
   const preselectedUsers = searchParams.get("users");
 
   const [step, setStep] = useState<"details" | "plan">("details");
-  const [selectedPlan, setSelectedPlan] = useState(preselectedPlanId || "");
+  const [userCount, setUserCount] = useState(
+    preselectedUsers ? parseInt(preselectedUsers) : 250
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [userId, setUserId] = useState("");
 
-  const handlePlanSelect = (planId: string) => {
-    setSelectedPlan(planId);
-  };
+  const currentTier = getTierByUserCount(userCount);
 
-  const handleContinueToPlans = () => {
-    if (fullName && companyName && email && password && password.length >= 8) {
+  // Check if user canceled payment
+  React.useEffect(() => {
+    const canceled = searchParams.get("canceled");
+    if (canceled === "true") {
+      setError("Payment was canceled. Please try again.");
       setStep("plan");
     }
+  }, [searchParams]);
+
+  const calculatePrice = (tier: typeof PRICING_TIERS[number]) => {
+    return tier.basePrice;
   };
 
-  const handleSignUp = async () => {
-    if (!selectedPlan) {
-      setError("Please select a plan");
+  const handleRegisterUser = async () => {
+    if (!fullName || !companyName || !email || !password || password.length < 8) {
+      setError("Please fill in all fields correctly");
       return;
     }
 
@@ -91,8 +109,6 @@ function SignUpForm() {
           email,
           password,
           companyName,
-          planId: selectedPlan,
-          expectedUsers: preselectedUsers,
         }),
       });
 
@@ -103,7 +119,7 @@ function SignUpForm() {
         return;
       }
 
-      // Automatically sign in after successful signup
+      // Sign in the user after registration
       const result = await signIn("credentials", {
         email,
         password,
@@ -111,7 +127,9 @@ function SignUpForm() {
       });
 
       if (result?.ok) {
-        window.location.href = "/dashboard";
+        setIsRegistered(true);
+        setUserId(data.id || email);
+        setStep("plan");
       } else {
         setError(
           "Account created but failed to sign in. Please try signing in manually."
@@ -124,7 +142,46 @@ function SignUpForm() {
     }
   };
 
-  const selectedTier = getTierById(selectedPlan);
+  const handleCheckout = async () => {
+    if (!currentTier || userCount > 10000) {
+      setError("Please select a valid plan");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/stripe/signup-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tierId: currentTier.id,
+          userCount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Failed to create checkout session");
+        return;
+      }
+
+      // Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen flex bg-black text-white">
@@ -350,18 +407,28 @@ function SignUpForm() {
               </div>
 
               <Button
-                onClick={handleContinueToPlans}
+                onClick={handleRegisterUser}
                 className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
                 disabled={
                   !fullName ||
                   !companyName ||
                   !email ||
                   !password ||
-                  password.length < 8
+                  password.length < 8 ||
+                  isLoading
                 }
               >
-                Continue to plan selection
-                <ArrowRight className="ml-2 h-5 w-5" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  <>
+                    Continue to plan selection
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
+                )}
               </Button>
 
               <p className="text-xs text-center text-gray-400">
@@ -411,19 +478,10 @@ function SignUpForm() {
           {/* Step 2: Plan Selection */}
           {step === "plan" && (
             <div className="space-y-6">
-              <button
-                onClick={() => setStep("details")}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to account details
-              </button>
-
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold">Choose your plan</h2>
                 <p className="text-gray-400">
-                  Select the plan that fits your current needs. You can upgrade
-                  anytime.
+                  Select the number of paid users you have
                 </p>
               </div>
 
@@ -433,106 +491,133 @@ function SignUpForm() {
                 </div>
               )}
 
-              <div className="grid gap-4">
-                {PRICING_TIERS.filter((tier) => tier.id !== "enterprise").map(
-                  (tier) => (
-                    <button
-                      key={tier.id}
-                      onClick={() => handlePlanSelect(tier.id)}
-                      className={`relative p-6 rounded-xl border-2 transition-all text-left hover:scale-[1.02] ${
-                        selectedPlan === tier.id
-                          ? "border-primary bg-primary/5 shadow-lg shadow-primary/20"
-                          : "border-white/10 bg-white/5 hover:border-white/20"
-                      }`}
-                    >
-                      {(tier as any)?.popular && (
-                        <Badge className="absolute top-4 right-4 bg-purple-500">
-                          Most Popular
-                        </Badge>
-                      )}
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={`h-12 w-12 rounded-lg bg-gradient-to-r ${
-                            TIER_COLORS[tier.id]
-                          } flex items-center justify-center flex-shrink-0`}
-                        >
-                          {TIER_ICONS[tier.id]}
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white">How many paid users do you have?</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Slide to select your current or expected user count
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-400">
+                        1 user
+                      </span>
+                      <div className="text-center transition-all duration-300">
+                        <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                          {userCount.toLocaleString()}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-baseline gap-3 mb-2">
-                            <h3 className="text-2xl font-bold">{tier.name}</h3>
-                            <span className="text-3xl font-bold text-primary">
-                              ${tier.basePrice}
-                            </span>
-                            <span className="text-gray-400">/month</span>
-                          </div>
-                          <p className="text-gray-400 mb-3">
-                            {tier.description}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm">
-                            <span className="text-gray-400">
-                              {tier.range[0]}-{tier.range[1]} users
-                            </span>
-                            {tier.trialDays === 3 && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-green-500/10 text-green-400 border-green-500/20"
-                              >
-                                {tier.trialDays}-day free trial
-                              </Badge>
-                            )}
-                          </div>
+                        <div className="text-sm text-gray-400 mt-2">
+                          paid users
                         </div>
-                        <Check
-                          className={`h-6 w-6 flex-shrink-0 mt-2 ${
-                            selectedPlan === tier.id
-                              ? "text-primary"
-                              : "text-transparent"
-                          }`}
-                        />
                       </div>
-                    </button>
-                  )
-                )}
-
-                {/* Enterprise Option */}
-                <Link
-                  href="/pricing"
-                  className="relative p-6 rounded-xl border-2 border-white/10 bg-white/5 hover:border-white/20 transition-all text-left hover:scale-[1.02] block"
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`h-12 w-12 rounded-lg bg-gradient-to-r from-yellow-500 to-amber-500 flex items-center justify-center flex-shrink-0`}
-                    >
-                      <Crown className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                      <p className="text-gray-400 mb-3">
-                        Custom solutions for 10,000+ users
-                      </p>
-                      <span className="text-sm text-primary">
-                        View pricing & book demo →
+                      <span className="text-sm font-medium text-gray-400">
+                        10,000+ users
                       </span>
                     </div>
+                    <div className="px-2">
+                      <Slider
+                        value={[userCount]}
+                        onValueChange={(value: number[]) => setUserCount(value[0])}
+                        min={1}
+                        max={11000}
+                        step={10}
+                        className="w-full"
+                      />
+                    </div>
                   </div>
-                </Link>
-              </div>
+
+                  {currentTier && userCount <= 10000 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-3 text-sm animate-in fade-in-50 duration-500">
+                        <Badge
+                          variant="secondary"
+                          className={`px-4 py-2 text-base font-semibold transition-all duration-300 bg-gradient-to-r ${
+                            TIER_COLORS[currentTier.id]
+                          } text-white border-0 shadow-lg`}
+                        >
+                          {currentTier.name} Tier
+                        </Badge>
+                        <span className="text-lg font-bold text-white">
+                          ${calculatePrice(currentTier)}/month
+                        </span>
+                      </div>
+
+                      {currentTier.trialDays && (
+                        <div className="text-center">
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-500/10 text-green-400 border-green-500/20"
+                          >
+                            {currentTier.trialDays}-day free trial included
+                          </Badge>
+                        </div>
+                      )}
+
+                      <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                        <p className="text-sm font-semibold text-white mb-3">
+                          What's included:
+                        </p>
+                        {currentTier.features.slice(0, 5).map((feature, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 text-sm"
+                          >
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-gray-300">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {userCount > 10000 && (
+                    <div className="text-center space-y-4">
+                      <Badge
+                        variant="secondary"
+                        className="px-4 py-2 text-base font-semibold bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg"
+                      >
+                        Enterprise
+                      </Badge>
+                      <p className="text-white">
+                        For 10,000+ users, please contact our sales team for custom pricing.
+                      </p>
+                      <Link href="/pricing">
+                        <Button
+                          variant="outline"
+                          className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                        >
+                          View Enterprise Options
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <Button
-                onClick={handleSignUp}
+                onClick={handleCheckout}
                 className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
-                disabled={!selectedPlan || isLoading}
+                disabled={!currentTier || userCount > 10000 || isLoading}
               >
                 {isLoading ? (
-                  "Creating account..."
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processing...
+                  </>
                 ) : (
                   <>
-                    Create account
+                    Continue to Payment
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}
               </Button>
+
+              <p className="text-xs text-center text-gray-400">
+                You'll be redirected to Stripe for secure payment processing.
+                After payment, you'll be able to create your first project.
+              </p>
             </div>
           )}
         </div>

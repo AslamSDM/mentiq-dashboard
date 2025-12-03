@@ -25,22 +25,34 @@ export default function SignInPage() {
     setError("");
 
     try {
+      console.log("Attempting sign in with:", email);
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
+      console.log("Sign in result:", result);
+
       if (result?.error) {
         console.error("Sign in error:", result.error);
-        setError("Invalid credentials. Please try again.");
+        // Parse the error message if it's a JSON string
+        try {
+          const errorObj = JSON.parse(result.error);
+          setError(errorObj.message || "Invalid credentials. Please try again.");
+        } catch {
+          setError(result.error || "Invalid credentials. Please try again.");
+        }
       } else if (result?.ok) {
+        console.log("Sign in successful, redirecting to dashboard");
         // Force a hard navigation to ensure session cookies are picked up correctly
         window.location.href = "/dashboard";
+      } else {
+        setError("Authentication failed. Please check your credentials.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sign in exception:", error);
-      setError("An error occurred. Please try again.");
+      setError(error.message || "An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }

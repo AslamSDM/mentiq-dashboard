@@ -72,6 +72,20 @@ export default function ProjectsPage() {
     }
   }, [fetchProjects, projectsLoaded]);
 
+  // Check for successful payment from Stripe
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      toast({
+        title: "Payment successful! 🎉",
+        description: "Your subscription is active. Create your first project to get started.",
+        duration: 5000,
+      });
+      // Clean up URL
+      window.history.replaceState({}, "", "/dashboard/projects");
+    }
+  }, [toast]);
+
   const handleCreateProject = async () => {
     try {
       await createProject(newProject.name, newProject.description);
