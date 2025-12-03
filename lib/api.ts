@@ -51,8 +51,6 @@ export const apiClient = {
   updateProject: projectService.updateProject.bind(projectService),
   deleteProject: projectService.deleteProject.bind(projectService),
   getProject: projectService.getProject.bind(projectService),
-  updateProject: projectService.updateProject.bind(projectService),
-  deleteProject: projectService.deleteProject.bind(projectService),
 
   // API Keys
   createApiKeys: projectService.createApiKeys.bind(projectService),
