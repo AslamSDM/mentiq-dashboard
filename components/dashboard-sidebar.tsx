@@ -32,6 +32,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  DollarSign,
 } from "lucide-react";
 
 const navigation = [
@@ -130,11 +131,11 @@ const navigation = [
     href: "/dashboard/projects",
     icon: <FolderKanban className="h-5 w-5" />,
   },
-  {
-    name: "Pricing",
-    href: "/dashboard/pricing",
-    icon: <Settings className="h-5 w-5" />,
-  },
+  // {
+  //   name: "Pricing",
+  //   href: "/dashboard/pricing",
+  //   icon: <Settings className="h-5 w-5" />,
+  // },
 ];
 
 export function DashboardSidebar() {
