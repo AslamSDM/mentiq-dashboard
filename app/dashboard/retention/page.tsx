@@ -230,21 +230,34 @@ export default function RetentionPage() {
 
   // Prepare trend data for selected period
   const trendData = cohortData
-    ?.map((cohort) => ({
-      date: cohort.cohort_date,
-      retention:
-        selectedPeriod === "1"
-          ? cohort.day_1
-          : selectedPeriod === "7"
-          ? cohort.day_7
-          : selectedPeriod === "30"
-          ? cohort.day_30
-          : selectedPeriod === "90"
-          ? cohort.day_90
-          : cohort.day_180,
-      cohort_size: cohort.cohort_size,
-    }))
-    .filter((item) => item.retention > 0);
+    ?.map((cohort) => {
+      let retention = 0;
+      switch (selectedPeriod) {
+        case "1":
+          retention = cohort.day_1 || 0;
+          break;
+        case "7":
+          retention = cohort.day_7 || 0;
+          break;
+        case "30":
+          retention = cohort.day_30 || 0;
+          break;
+        case "90":
+          retention = cohort.day_90 || 0;
+          break;
+        case "180":
+          retention = cohort.day_180 || 0;
+          break;
+        default:
+          retention = cohort.day_30 || 0;
+      }
+      return {
+        date: cohort.cohort_date,
+        retention: retention,
+        cohort_size: cohort.cohort_size,
+      };
+    })
+    .filter((item) => item.cohort_size > 0); // Filter by cohort size instead of retention
 
   if (!selectedProjectId) {
     return (
@@ -645,6 +658,9 @@ export default function RetentionPage() {
                               stroke="var(--color-retention)"
                               strokeWidth={3}
                               dot={{ r: 6 }}
+                              animationDuration={1500}
+                              animationBegin={0}
+                              animationEasing="ease-in-out"
                             />
                           </LineChart>
                         </ResponsiveContainer>

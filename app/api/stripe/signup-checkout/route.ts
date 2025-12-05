@@ -77,7 +77,12 @@ export async function POST(req: NextRequest) {
         isSignupFlow: "true",
       },
       subscription_data: {
-        trial_period_days: tierConfig.name === "Launch" || tierConfig.name === "Traction" || tierConfig.name === "Momentum" ? 3 : 14,
+        trial_period_days:
+          tierConfig.name === "Launch" ||
+          tierConfig.name === "Traction" ||
+          tierConfig.name === "Momentum"
+            ? 3
+            : 14,
         metadata: {
           accountId: (session.user as any).id || session.user.email!,
           tier: tierId,

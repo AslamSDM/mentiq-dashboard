@@ -6,7 +6,11 @@ export { experimentService } from "./services/experiment";
 export { userService } from "./services/user";
 
 // Export token management
-export { setAuthToken, getAuthToken } from "./services/base";
+export {
+  setAuthToken,
+  getAuthToken,
+  isInvalidTokenError,
+} from "./services/base";
 
 // Export all types
 export * from "./types";

@@ -11,6 +11,20 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Cell,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
 import { getAuthToken } from "@/lib/services/base";
 import {
@@ -22,6 +36,7 @@ import {
   Clock,
   BarChart3,
   Zap,
+  Target,
 } from "lucide-react";
 
 interface FeatureUsageStats {
@@ -68,6 +83,7 @@ export default function FeatureTrackingDashboard() {
   const [onboarding, setOnboarding] = useState<OnboardingFunnelStats | null>(
     null
   );
+  const [selectedStep, setSelectedStep] = useState<OnboardingStep | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
   const [dateRange, setDateRange] = useState("30"); // days
 
@@ -126,6 +142,10 @@ export default function FeatureTrackingDashboard() {
         const onboardingData = await onboardingResponse.json();
         // Backend returns funnel stats directly
         setOnboarding(onboardingData);
+        // Set first step as selected
+        if (onboardingData?.steps && onboardingData.steps.length > 0) {
+          setSelectedStep(onboardingData.steps[0]);
+        }
       } else {
         console.error(
           "Onboarding stats request failed:",
@@ -449,57 +469,294 @@ export default function FeatureTrackingDashboard() {
               </div>
 
               {/* Onboarding Funnel */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Onboarding Funnel</CardTitle>
-                  <CardDescription>
-                    Step-by-step breakdown of user progression
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {onboarding.steps.map((step, index) => (
-                    <div key={step.step_name} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <div className="font-medium">{step.step_name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {step.users_completed} / {step.users_reached}{" "}
-                              users completed
+              <div className="space-y-4">
+                {/* Step Selector */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Select Funnel Step</CardTitle>
+                    <CardDescription>
+                      Choose a step to view detailed metrics
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {onboarding.steps.map((step, index) => (
+                        <button
+                          key={step.step_name}
+                          onClick={() => setSelectedStep(step)}
+                          className={`p-4 rounded-lg border-2 transition-all text-left ${
+                            selectedStep?.step_name === step.step_name
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <div
+                              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+                                selectedStep?.step_name === step.step_name
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {index + 1}
                             </div>
+                            {step.completion_rate >= 80 ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            ) : step.completion_rate < 50 ? (
+                              <XCircle className="h-4 w-4 text-destructive" />
+                            ) : null}
                           </div>
+                          <div className="text-sm font-medium line-clamp-2 mb-1">
+                            {step.step_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {Math.round(step.completion_rate)}% complete
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Horizontal Bar Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Onboarding Funnel Overview</CardTitle>
+                    <CardDescription>
+                      Completion rates across all steps
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer
+                      config={{
+                        completion_rate: {
+                          label: "Completion Rate",
+                          color: "hsl(var(--chart-1))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={onboarding.steps}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="step_name"
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            interval={0}
+                            tick={{ fontSize: 12 }}
+                          />
+                          <YAxis domain={[0, 100]} />
+                          <ChartTooltip
+                            content={<ChartTooltipContent />}
+                            formatter={(value) => [
+                              `${Number(value)?.toFixed(1)}%`,
+                              "Completion Rate",
+                            ]}
+                          />
+                          <Bar
+                            dataKey="completion_rate"
+                            fill="var(--color-completion_rate)"
+                            radius={[8, 8, 0, 0]}
+                            animationDuration={1500}
+                            animationBegin={0}
+                            animationEasing="ease-out"
+                            onClick={(data) => setSelectedStep(data)}
+                            cursor="pointer"
+                          >
+                            {onboarding.steps.map((entry, index) => (
+                              <Cell
+                                key={`cell-${index}`}
+                                fill={
+                                  entry.step_name === selectedStep?.step_name
+                                    ? "hsl(var(--primary))"
+                                    : entry.completion_rate >= 80
+                                    ? "#22c55e"
+                                    : entry.completion_rate >= 60
+                                    ? "#84cc16"
+                                    : entry.completion_rate >= 40
+                                    ? "#eab308"
+                                    : "#ef4444"
+                                }
+                                opacity={
+                                  entry.step_name === selectedStep?.step_name
+                                    ? 1
+                                    : 0.8
+                                }
+                              />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Step Details Section */}
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Step Details Card */}
+                {selectedStep && (
+                  <Card>
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-lg font-medium">
+                          {selectedStep.step_index + 1}
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-2">
+                        <div>
+                          <CardTitle>{selectedStep.step_name}</CardTitle>
+                          <CardDescription>
+                            Step {selectedStep.step_index + 1} of{" "}
+                            {onboarding.steps.length}
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Key Metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Completion Rate
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {Math.round(selectedStep.completion_rate)}%
+                            </p>
                             <Badge
                               variant={
-                                step.completion_rate > 80
+                                selectedStep.completion_rate > 80
                                   ? "default"
-                                  : step.completion_rate > 50
+                                  : selectedStep.completion_rate > 50
                                   ? "secondary"
                                   : "destructive"
                               }
+                              className="mt-2"
                             >
-                              {Math.round(step.completion_rate)}%
+                              {selectedStep.completion_rate > 80
+                                ? "Excellent"
+                                : selectedStep.completion_rate > 50
+                                ? "Good"
+                                : "Needs Attention"}
                             </Badge>
-                            {step.dropoff_rate > 30 && (
-                              <Badge variant="destructive">High Dropoff</Badge>
+                          </div>
+                          <div className="p-4 border rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Dropoff Rate
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {Math.round(selectedStep.dropoff_rate)}%
+                            </p>
+                            {selectedStep.dropoff_rate > 30 && (
+                              <Badge variant="destructive" className="mt-2">
+                                High Dropoff
+                              </Badge>
                             )}
                           </div>
-                          <div className="text-sm text-muted-foreground mt-1">
-                            Avg: {formatDuration(step.avg_time_to_complete)}
+                        </div>
+
+                        {/* User Metrics */}
+                        <div className="space-y-3 border-t pt-4">
+                          <h4 className="font-medium">User Progress</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Users Reached
+                              </span>
+                              <span className="text-sm font-bold">
+                                {selectedStep.users_reached.toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress value={100} className="h-2" />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Users Completed
+                              </span>
+                              <span className="text-sm font-bold">
+                                {selectedStep.users_completed.toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress
+                              value={selectedStep.completion_rate}
+                              className="h-2"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Users Dropped Off
+                              </span>
+                              <span className="text-sm font-bold text-destructive">
+                                {(
+                                  selectedStep.users_reached -
+                                  selectedStep.users_completed
+                                ).toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress
+                              value={selectedStep.dropoff_rate}
+                              className="h-2 bg-destructive/20"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Additional Metrics */}
+                        <div className="border-t pt-4 space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                Avg time to complete
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatDuration(
+                                selectedStep.avg_time_to_complete
+                              )}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">First seen</span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatDate(selectedStep.first_seen)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">Last seen</span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatDate(selectedStep.last_seen)}
+                            </span>
                           </div>
                         </div>
                       </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                      <Progress value={step.completion_rate} className="h-2" />
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                {!selectedStep && onboarding.steps.length > 0 && (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center h-[400px]">
+                      <Target className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground text-center">
+                        Select a step above or click on the chart to see
+                        detailed metrics
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
 
               {/* Dropoff Points */}
               {onboarding.dropoff_points.length > 0 && (

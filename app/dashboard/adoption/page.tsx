@@ -22,6 +22,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  Cell,
 } from "recharts";
 import {
   ChartContainer,
@@ -310,94 +311,254 @@ export default function FeatureAdoptionPage() {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Feature Adoption Overview</CardTitle>
-                  <CardDescription>
-                    Adoption rates and user engagement for all tracked features
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <div className="flex items-center justify-center h-40">
-                      <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {adoptionData?.map((feature) => {
-                        const adoptionStatus = getAdoptionStatus(
-                          feature.adoption_rate
-                        );
-                        const stickinessStatus = getStickinessStatus(
-                          feature.stickiness
-                        );
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Vertical Bar Chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Feature Adoption Funnel</CardTitle>
+                    <CardDescription>
+                      Click on any bar to see detailed metrics
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoading ? (
+                      <div className="flex items-center justify-center h-[400px]">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                      </div>
+                    ) : (
+                      <ChartContainer
+                        config={{
+                          adoption_rate: {
+                            label: "Adoption Rate",
+                            color: "hsl(var(--chart-1))",
+                          },
+                        }}
+                        className="h-[400px]"
+                      >
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={adoptionData}
+                            layout="vertical"
+                            margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis type="number" domain={[0, 100]} />
+                            <YAxis
+                              dataKey="feature_name"
+                              type="category"
+                              width={90}
+                            />
+                            <ChartTooltip
+                              content={<ChartTooltipContent />}
+                              formatter={(value) => [
+                                `${Number(value)?.toFixed(1)}%`,
+                                "Adoption Rate",
+                              ]}
+                            />
+                            <Bar
+                              dataKey="adoption_rate"
+                              fill="var(--color-adoption_rate)"
+                              radius={[0, 8, 8, 0]}
+                              animationDuration={1500}
+                              animationBegin={0}
+                              animationEasing="ease-out"
+                              onClick={(data) =>
+                                setSelectedFeature(data.feature_name)
+                              }
+                              cursor="pointer"
+                            >
+                              {adoptionData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={
+                                    entry.feature_name === selectedFeature
+                                      ? "hsl(var(--primary))"
+                                      : entry.adoption_rate >= 80
+                                      ? "#22c55e"
+                                      : entry.adoption_rate >= 60
+                                      ? "#84cc16"
+                                      : entry.adoption_rate >= 40
+                                      ? "#eab308"
+                                      : "#ef4444"
+                                  }
+                                  opacity={
+                                    entry.feature_name === selectedFeature
+                                      ? 1
+                                      : 0.8
+                                  }
+                                />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </ChartContainer>
+                    )}
+                  </CardContent>
+                </Card>
 
-                        return (
-                          <div key={feature.feature_name} className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-1">
-                                <h4 className="font-medium">
-                                  {feature.feature_name}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  <Badge variant={adoptionStatus.color as any}>
-                                    {feature.adoption_rate?.toFixed(1)}%
-                                    adoption
-                                  </Badge>
-                                  <Badge
-                                    variant={stickinessStatus.color as any}
-                                  >
-                                    {feature.stickiness?.toFixed(1)}% stickiness
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-3 gap-6 text-right text-sm">
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Adopted Users
-                                  </p>
-                                  <p className="font-medium">
-                                    {feature.adopted_users.toLocaleString()}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Daily Active
-                                  </p>
-                                  <p className="font-medium">
-                                    {feature.daily_active.toLocaleString()}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="text-muted-foreground">
-                                    Dropoff Rate
-                                  </p>
-                                  <p className="font-medium">
-                                    {feature.dropoff_after_first?.toFixed(1)}%
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span>Adoption Progress</span>
-                                <span>
-                                  {feature.adopted_users.toLocaleString()} /{" "}
-                                  {feature.total_users.toLocaleString()}
-                                </span>
-                              </div>
-                              <Progress
-                                value={feature.adoption_rate}
-                                className="h-2"
-                              />
-                            </div>
+                {/* Feature Details Card */}
+                {selectedFeatureData && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{selectedFeatureData.feature_name}</CardTitle>
+                      <CardDescription>
+                        Detailed adoption and engagement metrics
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Key Metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 border rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Adoption Rate
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {selectedFeatureData.adoption_rate?.toFixed(1)}%
+                            </p>
+                            <Badge
+                              variant={
+                                getAdoptionStatus(
+                                  selectedFeatureData.adoption_rate
+                                ).color as any
+                              }
+                              className="mt-2"
+                            >
+                              {
+                                getAdoptionStatus(
+                                  selectedFeatureData.adoption_rate
+                                ).status
+                              }
+                            </Badge>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                          <div className="p-4 border rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Stickiness
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {selectedFeatureData.stickiness?.toFixed(1)}%
+                            </p>
+                            <Badge
+                              variant={
+                                getStickinessStatus(
+                                  selectedFeatureData.stickiness
+                                ).color as any
+                              }
+                              className="mt-2"
+                            >
+                              {
+                                getStickinessStatus(
+                                  selectedFeatureData.stickiness
+                                ).status
+                              }
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* User Metrics */}
+                        <div className="space-y-3 border-t pt-4">
+                          <h4 className="font-medium">Active Users</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Daily Active Users
+                              </span>
+                              <span className="text-sm font-bold">
+                                {selectedFeatureData.daily_active.toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                (selectedFeatureData.daily_active /
+                                  selectedFeatureData.monthly_active) *
+                                100
+                              }
+                              className="h-2"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Weekly Active Users
+                              </span>
+                              <span className="text-sm font-bold">
+                                {selectedFeatureData.weekly_active.toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress
+                              value={
+                                (selectedFeatureData.weekly_active /
+                                  selectedFeatureData.monthly_active) *
+                                100
+                              }
+                              className="h-2"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">
+                                Monthly Active Users
+                              </span>
+                              <span className="text-sm font-bold">
+                                {selectedFeatureData.monthly_active.toLocaleString()}
+                              </span>
+                            </div>
+                            <Progress value={100} className="h-2" />
+                          </div>
+                        </div>
+
+                        {/* Additional Metrics */}
+                        <div className="border-t pt-4 space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">Time to first use</span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {selectedFeatureData.time_to_first_use} days
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                Dropoff after first use
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {selectedFeatureData.dropoff_after_first?.toFixed(
+                                1
+                              )}
+                              %
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm">Total adopted users</span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {selectedFeatureData.adopted_users.toLocaleString()}{" "}
+                              / {selectedFeatureData.total_users.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {!selectedFeatureData && (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center h-[400px]">
+                      <Target className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground text-center">
+                        Click on any feature in the chart to see detailed metrics
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="trends" className="space-y-4">
@@ -446,6 +607,9 @@ export default function FeatureAdoptionPage() {
                             stroke="var(--color-adoption_rate)"
                             strokeWidth={2}
                             dot={{ r: 4 }}
+                            animationDuration={1500}
+                            animationBegin={0}
+                            animationEasing="ease-in-out"
                           />
                         </LineChart>
                       </ResponsiveContainer>

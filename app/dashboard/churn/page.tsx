@@ -539,6 +539,9 @@ export default function ChurnAnalysisPage() {
                           <Bar
                             dataKey="impact_score"
                             fill="var(--color-impact_score)"
+                            animationDuration={1500}
+                            animationBegin={0}
+                            animationEasing="ease-out"
                           />
                         </BarChart>
                       </ResponsiveContainer>
@@ -625,6 +628,9 @@ export default function ChurnAnalysisPage() {
                           stroke="var(--color-churn_rate)"
                           strokeWidth={3}
                           dot={{ r: 6 }}
+                          animationDuration={1500}
+                          animationBegin={0}
+                          animationEasing="ease-in-out"
                         />
                       </LineChart>
                     </ResponsiveContainer>

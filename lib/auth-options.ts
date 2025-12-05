@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
               projectId: projectId,
             };
           }
-          
+
           console.error("Invalid response format - missing token or user");
           throw new Error("Invalid response from server");
         } catch (error: any) {

@@ -34,7 +34,11 @@ import {
   Crown,
   Loader2,
 } from "lucide-react";
-import { PRICING_TIERS, getTierById, getTierByUserCount } from "@/lib/constants";
+import {
+  PRICING_TIERS,
+  getTierById,
+  getTierByUserCount,
+} from "@/lib/constants";
 
 const TIER_ICONS: Record<string, React.ReactNode> = {
   launch: <Zap className="h-5 w-5" />,
@@ -85,12 +89,18 @@ function SignUpForm() {
     }
   }, [searchParams]);
 
-  const calculatePrice = (tier: typeof PRICING_TIERS[number]) => {
+  const calculatePrice = (tier: (typeof PRICING_TIERS)[number]) => {
     return tier.basePrice;
   };
 
   const handleRegisterUser = async () => {
-    if (!fullName || !companyName || !email || !password || password.length < 8) {
+    if (
+      !fullName ||
+      !companyName ||
+      !email ||
+      !password ||
+      password.length < 8
+    ) {
       setError("Please fill in all fields correctly");
       return;
     }
@@ -180,8 +190,6 @@ function SignUpForm() {
       setIsLoading(false);
     }
   };
-
-
 
   return (
     <div className="min-h-screen flex bg-black text-white">
@@ -493,7 +501,9 @@ function SignUpForm() {
 
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-white">How many paid users do you have?</CardTitle>
+                  <CardTitle className="text-white">
+                    How many paid users do you have?
+                  </CardTitle>
                   <CardDescription className="text-gray-400">
                     Slide to select your current or expected user count
                   </CardDescription>
@@ -519,7 +529,9 @@ function SignUpForm() {
                     <div className="px-2">
                       <Slider
                         value={[userCount]}
-                        onValueChange={(value: number[]) => setUserCount(value[0])}
+                        onValueChange={(value: number[]) =>
+                          setUserCount(value[0])
+                        }
                         min={1}
                         max={11000}
                         step={10}
@@ -559,15 +571,17 @@ function SignUpForm() {
                         <p className="text-sm font-semibold text-white mb-3">
                           What's included:
                         </p>
-                        {currentTier.features.slice(0, 5).map((feature, index) => (
-                          <div
-                            key={index}
-                            className="flex items-start gap-3 text-sm"
-                          >
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-gray-300">{feature}</span>
-                          </div>
-                        ))}
+                        {currentTier.features
+                          .slice(0, 5)
+                          .map((feature, index) => (
+                            <div
+                              key={index}
+                              className="flex items-start gap-3 text-sm"
+                            >
+                              <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                              <span className="text-gray-300">{feature}</span>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   )}
@@ -581,7 +595,8 @@ function SignUpForm() {
                         Enterprise
                       </Badge>
                       <p className="text-white">
-                        For 10,000+ users, please contact our sales team for custom pricing.
+                        For 10,000+ users, please contact our sales team for
+                        custom pricing.
                       </p>
                       <Link href="/pricing">
                         <Button

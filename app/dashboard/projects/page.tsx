@@ -78,7 +78,8 @@ export default function ProjectsPage() {
     if (params.get("success") === "true") {
       toast({
         title: "Payment successful! 🎉",
-        description: "Your subscription is active. Create your first project to get started.",
+        description:
+          "Your subscription is active. Create your first project to get started.",
         duration: 5000,
       });
       // Clean up URL

@@ -39,6 +39,19 @@ export const getAuthToken = (): string | null => {
   return null;
 };
 
+// Utility function to check if an error is an invalid token error
+export const isInvalidTokenError = (error: any): boolean => {
+  if (!error) return false;
+
+  const errorMessage = error.message || error.error || "";
+  return (
+    errorMessage.includes("Invalid token") ||
+    errorMessage.includes("Unauthorized") ||
+    errorMessage.includes("Token expired") ||
+    error.status === 401
+  );
+};
+
 export interface RequestOptions extends Omit<RequestInit, "headers"> {
   headers?: Record<string, string>;
   requireAuth?: boolean;

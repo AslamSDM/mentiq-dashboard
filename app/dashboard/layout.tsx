@@ -35,30 +35,48 @@ export default function DashboardLayout({
     if (status === "authenticated" && session?.accessToken) {
       console.log("Setting token from session:", session.accessToken);
       setToken(session.accessToken, session.refreshToken);
-
-      // Set selected project ID from session if available and not already set
-      if (session.projectId) {
-        console.log("Setting project ID from session:", session.projectId);
-        setSelectedProjectId(session.projectId);
-      }
     } else if (status === "unauthenticated") {
       console.log("Unauthenticated, clearing token");
       setToken(null, null);
     }
-  }, [
-    status,
-    session,
-    setToken,
-    token,
-    selectedProjectId,
-    setSelectedProjectId,
-  ]);
+  }, [status, session, setToken, token]);
 
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchProjects();
     }
   }, [isAuthenticated, fetchProjects, token]);
+
+  // Set project ID from session after projects are loaded
+  useEffect(() => {
+    if (
+      projectsLoaded &&
+      session?.projectId &&
+      !selectedProjectId &&
+      projects.length > 0
+    ) {
+      console.log(
+        "Projects loaded, setting project ID from session:",
+        session.projectId
+      );
+      // Check if the session project ID exists in the projects list
+      const projectExists = projects.some((p) => p.id === session.projectId);
+      if (projectExists) {
+        setSelectedProjectId(session.projectId);
+      } else {
+        console.log(
+          "Session project not found in projects list, using first project"
+        );
+        setSelectedProjectId(projects[0].id);
+      }
+    }
+  }, [
+    projectsLoaded,
+    session?.projectId,
+    selectedProjectId,
+    projects,
+    setSelectedProjectId,
+  ]);
 
   // Redirect to projects page if no projects exist and not already on projects page
   useEffect(() => {

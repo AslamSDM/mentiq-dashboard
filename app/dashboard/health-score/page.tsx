@@ -925,6 +925,9 @@ export default function HealthScorePage() {
                       strokeWidth={2.5}
                       dot={false}
                       activeDot={{ r: 6 }}
+                      animationDuration={1500}
+                      animationBegin={0}
+                      animationEasing="ease-in-out"
                     />
                     <Line
                       type="monotone"
@@ -933,6 +936,9 @@ export default function HealthScorePage() {
                       strokeWidth={2.5}
                       dot={false}
                       activeDot={{ r: 6 }}
+                      animationDuration={1500}
+                      animationBegin={200}
+                      animationEasing="ease-in-out"
                     />
                   </LineChart>
                 </ResponsiveContainer>
