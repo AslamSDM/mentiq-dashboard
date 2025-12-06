@@ -39,7 +39,9 @@ export default function SignInPage() {
         // Parse the error message if it's a JSON string
         try {
           const errorObj = JSON.parse(result.error);
-          setError(errorObj.message || "Invalid credentials. Please try again.");
+          setError(
+            errorObj.message || "Invalid credentials. Please try again."
+          );
         } catch {
           setError(result.error || "Invalid credentials. Please try again.");
         }

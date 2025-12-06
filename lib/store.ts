@@ -248,9 +248,8 @@ export const useStore = create<AppState>()(
           const projects = await apiClient.getProjects();
           console.log("Zustand: Projects fetched", projects);
           set({ projects, projectsLoaded: true });
-          if (projects?.length > 0 && !get().selectedProjectId) {
-            get().setSelectedProjectId(projects[0].id);
-          }
+          // Don't auto-select here - let the dashboard layout handle it
+          // to prioritize session projectId over first project
         } catch (error) {
           console.error("Zustand: Failed to fetch projects", error);
           set({ projectsLoaded: true });

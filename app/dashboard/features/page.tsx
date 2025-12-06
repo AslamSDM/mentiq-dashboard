@@ -28,13 +28,10 @@ import {
 import { useStore } from "@/lib/store";
 import { getAuthToken } from "@/lib/services/base";
 import {
-  TrendingUp,
-  Users,
   Activity,
   CheckCircle2,
   XCircle,
   Clock,
-  BarChart3,
   Zap,
   Target,
 } from "lucide-react";
