@@ -71,11 +71,11 @@ const navigation = [
     href: "/dashboard/churn",
     icon: <Bell className="h-5 w-5" />,
   },
-  {
-    name: "Feature Adoption",
-    href: "/dashboard/adoption",
-    icon: <Zap className="h-5 w-5" />,
-  },
+  // {
+  //   name: "Feature Adoption",
+  //   href: "/dashboard/adoption",
+  //   icon: <Zap className="h-5 w-5" />,
+  // },
   {
     name: "Feature Tracking",
     href: "/dashboard/features",
