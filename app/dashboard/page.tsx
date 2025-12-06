@@ -418,7 +418,7 @@ export default function DashboardPage() {
         />
         <div className="flex items-center space-x-2">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[130px] m-1">
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>

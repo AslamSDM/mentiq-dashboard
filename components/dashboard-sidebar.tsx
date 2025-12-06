@@ -177,13 +177,13 @@ export function DashboardSidebar() {
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
-          <div className="flex items-center justify-start gap-3 overflow-hidden -ml-2">
+          <div className="flex items-center justify-start gap-3 overflow-hidden -ml-3">
             <img
               src="/logo.png"
               alt="Mentiq Logo"
               className={cn(
                 "object-contain transition-all duration-300",
-                isCollapsed ? "hidden" : "h-10 w-10"
+                isCollapsed ? "hidden" : "h-30 w-30"
               )}
             />
           </div>
