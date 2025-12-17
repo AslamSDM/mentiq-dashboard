@@ -13,28 +13,43 @@ export async function middleware(req: NextRequest) {
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
-  
+
   // Enhanced logging for debugging
   console.log("🔐 Middleware Debug:", {
     path: req.nextUrl.pathname,
     hasToken: !!token,
     tokenEmail: token?.email || "N/A",
+    hasActiveSubscription: token?.hasActiveSubscription || false,
+    subscriptionStatus: token?.subscriptionStatus || "none",
     hasSecret: !!process.env.NEXTAUTH_SECRET,
   });
 
   const isAuth = !!token;
+  const hasActiveSubscription = token?.hasActiveSubscription === true;
+  const isAdmin = token?.isAdmin === true;
   const isAuthPage =
     req.nextUrl.pathname.startsWith("/signin") ||
     req.nextUrl.pathname.startsWith("/signup");
+  const isPricingPage = req.nextUrl.pathname.startsWith("/pricing");
+  const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
 
+  // Allow auth pages for non-authenticated users
   if (isAuthPage) {
     if (isAuth) {
+      // If authenticated but no subscription, redirect to pricing
+      if (!hasActiveSubscription && !isAdmin) {
+        return NextResponse.redirect(
+          new URL("/pricing?required=true", req.url)
+        );
+      }
+      // If authenticated with subscription, redirect to dashboard
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return null;
   }
 
-  if (!isAuth && req.nextUrl.pathname.startsWith("/dashboard")) {
+  // Redirect unauthenticated users trying to access dashboard
+  if (!isAuth && isDashboardPage) {
     let from = req.nextUrl.pathname;
     if (req.nextUrl.search) {
       from += req.nextUrl.search;
@@ -45,9 +60,17 @@ export async function middleware(req: NextRequest) {
     );
   }
 
+  // Check subscription for authenticated users accessing dashboard (except admins)
+  if (isAuth && isDashboardPage && !hasActiveSubscription && !isAdmin) {
+    console.log(
+      "⚠️ User authenticated but no active subscription, redirecting to pricing"
+    );
+    return NextResponse.redirect(new URL("/pricing?required=true", req.url));
+  }
+
   return null;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/signin", "/signup"],
+  matcher: ["/dashboard/:path*", "/signin", "/signup", "/pricing"],
 };

@@ -46,9 +46,20 @@ export default function SignInPage() {
           setError(result.error || "Invalid credentials. Please try again.");
         }
       } else if (result?.ok) {
-        console.log("Sign in successful, redirecting to dashboard");
-        // Force a hard navigation to ensure session cookies are picked up correctly
-        window.location.href = "/dashboard";
+        console.log("Sign in successful, checking subscription status");
+
+        // Get the session to check subscription status
+        const sessionResponse = await fetch("/api/auth/session");
+        const sessionData = await sessionResponse.json();
+
+        // Redirect to pricing if no active subscription, otherwise to dashboard
+        if (sessionData?.hasActiveSubscription) {
+          console.log("User has active subscription, redirecting to dashboard");
+          window.location.href = "/dashboard";
+        } else {
+          console.log("No active subscription, redirecting to pricing");
+          window.location.href = "/pricing?required=true";
+        }
       } else {
         setError("Authentication failed. Please check your credentials.");
       }

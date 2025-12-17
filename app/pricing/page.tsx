@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -22,10 +24,16 @@ import {
   Building2,
   Crown,
   ArrowRight,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
+import {
+  PRICING_TIERS,
+  getTierByUserCount,
+  getVisibleTiers,
+} from "@/lib/constants";
 
 // Icon mapping for tiers
 const TIER_ICONS: Record<string, React.ReactNode> = {
@@ -50,7 +58,17 @@ const TIER_COLORS: Record<string, string> = {
 export default function PricingPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [userCount, setUserCount] = useState(250);
+  const [isRequired, setIsRequired] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Check if subscription is required
+    const required = searchParams.get("required");
+    setIsRequired(required === "true");
+  }, [searchParams]);
   const carouselRef = React.useRef<HTMLDivElement>(null);
   const cardRefs = React.useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -87,9 +105,59 @@ export default function PricingPage() {
     return tier.basePrice;
   };
 
-  const handleGetStarted = (tierId: string) => {
-    // Redirect to signup/login with selected plan
-    router.push(`/signup?plan=${tierId}&users=${userCount}`);
+  const handleGetStarted = async (tierId: string) => {
+    // If user is authenticated, create checkout session
+    if (session) {
+      if (userCount > 10000) {
+        toast({
+          title: "Contact Sales",
+          description: "Please contact our sales team for enterprise pricing.",
+          variant: "default",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/stripe/signup-checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            tierId,
+            userCount,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          toast({
+            title: "Error",
+            description: data.error || "Failed to create checkout session",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Redirect to Stripe Checkout
+        if (data.url) {
+          window.location.href = data.url;
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Redirect to signup/login with selected plan
+      router.push(`/signup?plan=${tierId}&users=${userCount}`);
+    }
   };
 
   const handleBookDemo = () => {
@@ -136,6 +204,22 @@ export default function PricingPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-7xl space-y-8">
+          {/* Subscription Required Alert */}
+          {isRequired && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-yellow-500">
+                  Active Subscription Required
+                </h3>
+                <p className="text-sm text-yellow-500/80 mt-1">
+                  To access the dashboard and create projects, you need an
+                  active subscription. Choose a plan below to get started.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Hero */}
           <div className="text-center space-y-4">
             <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -303,8 +387,14 @@ export default function PricingPage() {
                             className="w-full"
                             variant={isCurrentTier ? "default" : "outline"}
                             onClick={() => handleGetStarted(tier.id)}
+                            disabled={isLoading}
                           >
-                            {isCurrentTier ? (
+                            {isLoading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : isCurrentTier ? (
                               <>
                                 Get Started{" "}
                                 <ArrowRight className="ml-2 h-4 w-4" />

@@ -6,6 +6,15 @@ declare module "next-auth" {
     accessToken?: string;
     refreshToken?: string;
     projectId?: string;
+    isAdmin?: boolean;
+    hasActiveSubscription?: boolean;
+    subscriptionStatus?: string;
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
   }
 
   interface User {
@@ -15,6 +24,9 @@ declare module "next-auth" {
     accessToken?: string;
     refreshToken?: string;
     projectId?: string;
+    isAdmin?: boolean;
+    hasActiveSubscription?: boolean;
+    subscriptionStatus?: string;
   }
 }
 
@@ -23,5 +35,8 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     refreshToken?: string;
     projectId?: string;
+    isAdmin?: boolean;
+    hasActiveSubscription?: boolean;
+    subscriptionStatus?: string;
   }
 }

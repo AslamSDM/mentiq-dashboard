@@ -7,6 +7,7 @@ export type {
   WebhookTestResult,
   StorageMetrics,
 } from "./services/project";
+export type { AdminUser, UserEventData } from "./services/admin";
 export type {
   StripeMetrics,
   StripeAnalytics,

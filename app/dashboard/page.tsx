@@ -528,9 +528,8 @@ export default function DashboardPage() {
         )}
 
         {/* Revenue Chart */}
-        {revenueAnalytics &&
-          revenueAnalytics.time_series &&
-          revenueAnalytics.time_series.length > 0 && (
+        {((revenueAnalytics?.time_series && revenueAnalytics.time_series.length > 0) ||
+          (revenueMetrics?.time_series && revenueMetrics.time_series.length > 0)) && (
             <Card>
               <CardHeader>
                 <CardTitle>Revenue Trend</CardTitle>
@@ -549,7 +548,7 @@ export default function DashboardPage() {
                   className="h-[300px] w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={revenueAnalytics.time_series}>
+                    <BarChart data={revenueAnalytics?.time_series || revenueMetrics?.time_series || []}>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         className="stroke-muted/20"

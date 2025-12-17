@@ -268,6 +268,14 @@ export interface RevenueMetrics {
   customer_lifetime_value: number;
   trial_to_pay_conversion_rate: number;
   last_updated: string;
+  time_series?: Array<{
+    date: string;
+    revenue: number;
+  }>;
+  date_range?: {
+    start: string;
+    end: string;
+  };
 }
 
 export interface RevenueAnalytics {

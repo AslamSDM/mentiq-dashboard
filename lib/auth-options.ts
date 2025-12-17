@@ -43,6 +43,10 @@ export const authOptions: NextAuthOptions = {
               accessToken: token,
               refreshToken: refreshToken,
               projectId: projectId,
+              isAdmin: response.user.isAdmin || false,
+              hasActiveSubscription:
+                response.user.hasActiveSubscription || false,
+              subscriptionStatus: response.user.subscriptionStatus || "none",
             };
           }
 
@@ -62,6 +66,9 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
         token.projectId = user.projectId;
+        token.isAdmin = user.isAdmin;
+        token.hasActiveSubscription = user.hasActiveSubscription;
+        token.subscriptionStatus = user.subscriptionStatus;
       }
       return token;
     },
@@ -71,6 +78,9 @@ export const authOptions: NextAuthOptions = {
         session.accessToken = token.accessToken;
         session.refreshToken = token.refreshToken;
         session.projectId = token.projectId;
+        session.isAdmin = token.isAdmin as boolean;
+        session.hasActiveSubscription = token.hasActiveSubscription as boolean;
+        session.subscriptionStatus = token.subscriptionStatus as string;
         // Set the token in the API client
         setAuthToken(token.accessToken as string);
       }

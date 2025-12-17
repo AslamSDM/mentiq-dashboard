@@ -33,6 +33,7 @@ import {
   Menu,
   X,
   DollarSign,
+  Shield,
 } from "lucide-react";
 
 const navigation = [
@@ -138,6 +139,14 @@ const navigation = [
   // },
 ];
 
+const adminNavigation = [
+  {
+    name: "Admin - Users",
+    href: "/dashboard/admin/users",
+    icon: <Shield className="h-5 w-5" />,
+  },
+];
+
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -230,6 +239,38 @@ export function DashboardSidebar() {
               </Link>
             );
           })}
+
+          {/* Admin Section - Only visible to admins */}
+          {session?.isAdmin && (
+            <>
+              {!isCollapsed && (
+                <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-4">
+                  Admin
+                </div>
+              )}
+              {adminNavigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-slate-800 text-white shadow-sm"
+                        : "text-slate-400 hover:bg-slate-800/50 hover:text-white",
+                      isCollapsed && "justify-center px-2"
+                    )}
+                    title={isCollapsed ? item.name : undefined}
+                  >
+                    <div className={cn(isCollapsed && "scale-90")}>{item.icon}</div>
+                    {!isCollapsed && item.name}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
         <div className="border-t border-slate-800 p-4 space-y-3">
           {session?.user && !isCollapsed && (

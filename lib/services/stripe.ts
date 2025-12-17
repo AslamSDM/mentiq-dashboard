@@ -18,6 +18,14 @@ export interface StripeMetrics {
   trial_to_pay_conversion_rate: number;
   date: string;
   last_updated: string;
+  time_series?: Array<{
+    date: string;
+    revenue: number;
+  }>;
+  date_range?: {
+    start: string;
+    end: string;
+  };
 }
 
 export interface StripeAnalytics {

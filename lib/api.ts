@@ -4,6 +4,7 @@ export { projectService } from "./services/project";
 export { analyticsService } from "./services/analytics";
 export { experimentService } from "./services/experiment";
 export { userService } from "./services/user";
+export { adminService } from "./services/admin";
 
 // Export token management
 export {

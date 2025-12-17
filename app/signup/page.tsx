@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -77,6 +78,7 @@ function SignUpForm() {
   const [error, setError] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [userId, setUserId] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const currentTier = getTierByUserCount(userCount);
 
@@ -102,6 +104,11 @@ function SignUpForm() {
       password.length < 8
     ) {
       setError("Please fill in all fields correctly");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setError("Please accept the Terms and Conditions to continue");
       return;
     }
 
@@ -244,10 +251,20 @@ function SignUpForm() {
 
           <div className="flex items-center gap-8 text-sm text-gray-400">
             <span>© 2025 Mentiq</span>
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link
+              href="/docs/Privacy Policy MENTIQ.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
               Privacy
             </Link>
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link
+              href="/docs/Terms of Service MENTIQ.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
               Terms
             </Link>
           </div>
@@ -414,6 +431,59 @@ function SignUpForm() {
                 </p>
               </div>
 
+              <div className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-lg">
+                <Checkbox
+                  id="terms"
+                  checked={acceptedTerms}
+                  onCheckedChange={(checked) =>
+                    setAcceptedTerms(checked as boolean)
+                  }
+                  className="mt-1 border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-xs text-gray-300 leading-relaxed cursor-pointer"
+                >
+                  By creating an account, I agree to the{" "}
+                  <Link
+                    href="/docs/Terms of Service MENTIQ.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and acknowledge the{" "}
+                  <Link
+                    href="/docs/Privacy Policy MENTIQ.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                  ,{" "}
+                  <Link
+                    href="/docs/COOKIES MENTIQ.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Cookie Policy
+                  </Link>
+                  , and{" "}
+                  <Link
+                    href="/docs/DPA MENTIQ.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Data Processing Addendum
+                  </Link>
+                  .
+                </label>
+              </div>
+
               <Button
                 onClick={handleRegisterUser}
                 className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
@@ -423,6 +493,7 @@ function SignUpForm() {
                   !email ||
                   !password ||
                   password.length < 8 ||
+                  !acceptedTerms ||
                   isLoading
                 }
               >
@@ -438,28 +509,6 @@ function SignUpForm() {
                   </>
                 )}
               </Button>
-
-              <p className="text-xs text-center text-gray-400">
-                By creating an account, you agree to our{" "}
-                <Link href="#" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="#" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </p>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-black text-gray-400">
-                    Already have an account?
-                  </span>
-                </div>
-              </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
