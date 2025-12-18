@@ -51,7 +51,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function RevenuePage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
 
   const [stripeApiKey, setStripeApiKey] = useState("");

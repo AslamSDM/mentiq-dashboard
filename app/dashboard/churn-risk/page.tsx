@@ -17,7 +17,8 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ChurnRiskPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [churnData, setChurnData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -61,7 +61,8 @@ interface AdoptionTrend {
 }
 
 export default function FeatureAdoptionPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [adoptionData, setAdoptionData] = useState<FeatureAdoptionData[]>([]);
   const [trendData, setTrendData] = useState<AdoptionTrend[]>([]);
@@ -535,11 +536,14 @@ export default function FeatureAdoptionPage() {
                           <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                             <div className="flex items-center gap-2">
                               <Users className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">Total adopted users</span>
+                              <span className="text-sm">
+                                Total adopted users
+                              </span>
                             </div>
                             <span className="text-sm font-medium">
                               {selectedFeatureData.adopted_users.toLocaleString()}{" "}
-                              / {selectedFeatureData.total_users.toLocaleString()}
+                              /{" "}
+                              {selectedFeatureData.total_users.toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -553,7 +557,8 @@ export default function FeatureAdoptionPage() {
                     <CardContent className="flex flex-col items-center justify-center h-[400px]">
                       <Target className="h-12 w-12 text-muted-foreground mb-4" />
                       <p className="text-muted-foreground text-center">
-                        Click on any feature in the chart to see detailed metrics
+                        Click on any feature in the chart to see detailed
+                        metrics
                       </p>
                     </CardContent>
                   </Card>

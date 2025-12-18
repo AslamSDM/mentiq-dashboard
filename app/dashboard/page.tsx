@@ -43,6 +43,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { WorldMap } from "@/components/world-map";
 import {
   getMetricValue,
@@ -80,13 +81,13 @@ import {
 
 export default function DashboardPage() {
   const {
-    selectedProjectId,
     analyticsData,
     loadingAnalytics,
     events,
     fetchAnalytics,
     fetchEvents,
   } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
   const { toast } = useToast();
 
   // State for all analytics data
@@ -102,7 +103,7 @@ export default function DashboardPage() {
 
   // Fetch analytics data
   useEffect(() => {
-    if (selectedProjectId) {
+    if (effectiveProjectId) {
       const endDate = new Date();
       const startDate = new Date();
 
@@ -135,7 +136,7 @@ export default function DashboardPage() {
       // Fetch enhanced analytics
       fetchAllData(startDateStr, endDateStr);
     }
-  }, [selectedProjectId, fetchAnalytics, fetchEvents, dateRange]);
+  }, [effectiveProjectId, fetchAnalytics, fetchEvents, dateRange]);
 
   // Update bounce rate when analytics data changes
   useEffect(() => {
@@ -152,7 +153,7 @@ export default function DashboardPage() {
   }, [analyticsData]);
 
   const fetchAllData = async (startDate: string, endDate: string) => {
-    if (!selectedProjectId) return;
+    if (!effectiveProjectId) return;
 
     setLoadingEnhanced(true);
     try {
@@ -164,18 +165,18 @@ export default function DashboardPage() {
         deviceRes,
         retentionRes,
       ] = await Promise.all([
-        centralizedData.getRevenueMetrics(selectedProjectId).catch(() => null),
+        centralizedData.getRevenueMetrics(effectiveProjectId).catch(() => null),
         centralizedData
-          .getRevenueAnalytics(selectedProjectId, startDate, endDate)
+          .getRevenueAnalytics(effectiveProjectId, startDate, endDate)
           .catch(() => null),
         centralizedData
-          .getLocationData(selectedProjectId, startDate, endDate)
+          .getLocationData(effectiveProjectId, startDate, endDate)
           .catch(() => null),
         centralizedData
-          .getDeviceData(selectedProjectId, startDate, endDate)
+          .getDeviceData(effectiveProjectId, startDate, endDate)
           .catch(() => null),
         enhancedAnalyticsService
-          .getRetentionCohorts(selectedProjectId, startDate, endDate)
+          .getRetentionCohorts(effectiveProjectId, startDate, endDate)
           .then((res: any) =>
             res?.data?.cohorts
               ? { cohorts: res.data.cohorts }
@@ -385,7 +386,7 @@ export default function DashboardPage() {
     ? getTotalSessionsValue(analyticsData)
     : 0;
 
-  if (!selectedProjectId) {
+  if (!effectiveProjectId) {
     return (
       <div className="flex flex-col h-full">
         <DashboardHeader
@@ -528,84 +529,92 @@ export default function DashboardPage() {
         )}
 
         {/* Revenue Chart */}
-        {((revenueAnalytics?.time_series && revenueAnalytics.time_series.length > 0) ||
-          (revenueMetrics?.time_series && revenueMetrics.time_series.length > 0)) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Revenue Trend</CardTitle>
-                <CardDescription>
-                  Daily revenue from Stripe charges over the last 30 days
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-2">
-                <ChartContainer
-                  config={{
-                    revenue: {
-                      label: "Revenue",
-                      color: "hsl(var(--primary))",
-                    },
-                  }}
-                  className="h-[300px] w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={revenueAnalytics?.time_series || revenueMetrics?.time_series || []}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-muted/20"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        className="text-xs text-muted-foreground"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        minTickGap={30}
-                        tickFormatter={(value) =>
-                          new Date(value).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })
-                        }
-                      />
-                      <YAxis
-                        className="text-xs text-muted-foreground"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        tickFormatter={(value) => `$${value.toLocaleString()}`}
-                      />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            formatter={(value) => [
-                              `$${Number(value).toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}`,
-                              "Revenue",
-                            ]}
-                            labelFormatter={(value) =>
-                              new Date(value).toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              })
-                            }
-                          />
-                        }
-                      />
-                      <Bar
-                        dataKey="revenue"
-                        fill="hsl(var(--primary))"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          )}
+        {((revenueAnalytics?.time_series &&
+          revenueAnalytics.time_series.length > 0) ||
+          (revenueMetrics?.time_series &&
+            revenueMetrics.time_series.length > 0)) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue Trend</CardTitle>
+              <CardDescription>
+                Daily revenue from Stripe charges over the last 30 days
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-2">
+              <ChartContainer
+                config={{
+                  revenue: {
+                    label: "Revenue",
+                    color: "hsl(var(--primary))",
+                  },
+                }}
+                className="h-[300px] w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={
+                      revenueAnalytics?.time_series ||
+                      revenueMetrics?.time_series ||
+                      []
+                    }
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="stroke-muted/20"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      minTickGap={30}
+                      tickFormatter={(value) =>
+                        new Date(value).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })
+                      }
+                    />
+                    <YAxis
+                      className="text-xs text-muted-foreground"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={10}
+                      tickFormatter={(value) => `$${value.toLocaleString()}`}
+                    />
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value) => [
+                            `$${Number(value).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`,
+                            "Revenue",
+                          ]}
+                          labelFormatter={(value) =>
+                            new Date(value).toLocaleDateString("en-US", {
+                              month: "long",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          }
+                        />
+                      }
+                    />
+                    <Bar
+                      dataKey="revenue"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* 2. General Analytics (DAU, MAU, WAU) */}

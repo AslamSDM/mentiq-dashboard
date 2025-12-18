@@ -87,7 +87,8 @@ interface ChurnTrend {
 }
 
 export default function ChurnAnalysisPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [churnMetrics, setChurnMetrics] = useState<ChurnMetrics | null>(null);
   const [riskUsers, setRiskUsers] = useState<ChurnRiskUser[]>([]);

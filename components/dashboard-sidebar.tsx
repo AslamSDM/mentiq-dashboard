@@ -264,7 +264,9 @@ export function DashboardSidebar() {
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
-                    <div className={cn(isCollapsed && "scale-90")}>{item.icon}</div>
+                    <div className={cn(isCollapsed && "scale-90")}>
+                      {item.icon}
+                    </div>
                     {!isCollapsed && item.name}
                   </Link>
                 );

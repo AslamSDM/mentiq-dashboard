@@ -27,21 +27,49 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { adminService, type AdminUser, type UserEventData } from "@/lib/services/admin";
+import { adminService, type AdminUser } from "@/lib/services/admin";
+import { useStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, Calendar, Activity, MousePointer } from "lucide-react";
+import {
+  Loader2,
+  Eye,
+  Calendar,
+  Activity,
+  MousePointer,
+  BarChart3,
+  Globe,
+  Laptop,
+  ExternalLink,
+} from "lucide-react";
+
+interface UserWithProjects extends AdminUser {
+  projects: any[];
+}
 
 export default function AdminUsersPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { toast } = useToast();
+  const { setImpersonatedProject } = useStore();
 
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [usersWithProjects, setUsersWithProjects] = useState<
+    UserWithProjects[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [userData, setUserData] = useState<UserEventData | null>(null);
-  const [loadingUserData, setLoadingUserData] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserWithProjects | null>(
+    null
+  );
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [projectData, setProjectData] = useState<any>(null);
+  const [loadingProjectData, setLoadingProjectData] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Check if user is admin
@@ -56,17 +84,19 @@ export default function AdminUsersPage() {
     }
   }, [session, router, toast]);
 
-  // Fetch users
+  // Fetch all users with their projects efficiently
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (!session?.user?.id) return;
-
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await adminService.getAccountUsers(session.user.id);
-        setUsers(data);
+
+        // Get all users with their projects in a single efficient call
+        const usersWithProjectsData =
+          await adminService.getAllUsersWithProjects();
+
+        setUsersWithProjects(usersWithProjectsData);
       } catch (error: any) {
-        console.error("Failed to fetch users:", error);
+        console.error("Failed to fetch data:", error);
         toast({
           title: "Error",
           description: "Failed to load users. Please try again.",
@@ -78,29 +108,57 @@ export default function AdminUsersPage() {
     };
 
     if (session?.isAdmin) {
-      fetchUsers();
+      fetchData();
     }
   }, [session, toast]);
 
-  // Fetch user data when a user is selected
-  const handleViewUser = async (user: AdminUser) => {
+  // Open dialog and set user
+  const handleViewUser = (user: UserWithProjects) => {
     setSelectedUser(user);
+    setSelectedProject("");
+    setProjectData(null);
     setIsDialogOpen(true);
-    setLoadingUserData(true);
+  };
+
+  // Fetch project data when a project is selected
+  const handleProjectSelect = async (projectId: string) => {
+    if (!projectId) {
+      setSelectedProject("");
+      setProjectData(null);
+      return;
+    }
+
+    setSelectedProject(projectId);
+    setLoadingProjectData(true);
 
     try {
-      const data = await adminService.getUserData(user.id);
-      setUserData(data);
+      const data = await adminService.getProjectData(projectId);
+      setProjectData(data);
     } catch (error: any) {
-      console.error("Failed to fetch user data:", error);
+      console.error("Failed to fetch project data:", error);
       toast({
         title: "Error",
-        description: "Failed to load user data. Please try again.",
+        description: "Failed to load project data. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoadingUserData(false);
+      setLoadingProjectData(false);
     }
+  };
+
+  // Navigate to dashboard with impersonated project
+  const handleViewDashboard = (
+    projectId: string,
+    projectName: string,
+    userEmail: string
+  ) => {
+    setImpersonatedProject(projectId, projectName, userEmail);
+    toast({
+      title: "Viewing as user",
+      description: `Now viewing ${projectName} dashboard for ${userEmail}`,
+    });
+    setIsDialogOpen(false);
+    router.push("/dashboard");
   };
 
   const formatDate = (dateString: string) => {
@@ -123,7 +181,7 @@ export default function AdminUsersPage() {
           <CardHeader>
             <CardTitle>All Users</CardTitle>
             <CardDescription>
-              Total users: {users.length}
+              Total users: {usersWithProjects.length}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -131,7 +189,7 @@ export default function AdminUsersPage() {
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
               </div>
-            ) : users.length === 0 ? (
+            ) : usersWithProjects.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-slate-400">
                 <p>No users found</p>
               </div>
@@ -141,29 +199,44 @@ export default function AdminUsersPage() {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead>User ID</TableHead>
-                    <TableHead>Account ID</TableHead>
+                    <TableHead>Projects</TableHead>
                     <TableHead>Created At</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => (
+                  {usersWithProjects.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
+                      <TableCell className="font-medium">
+                        {user.email}
+                      </TableCell>
                       <TableCell className="font-mono text-xs text-slate-500">
                         {user.id}
                       </TableCell>
-                      <TableCell className="font-mono text-xs text-slate-500">
-                        {user.accountId}
+                      <TableCell>
+                        {user.projects.length > 0 ? (
+                          <div className="flex gap-2 flex-wrap">
+                            {user.projects.map((project) => (
+                              <Badge key={project.id} variant="secondary">
+                                {project.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-sm">
+                            No projects
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-slate-600">
-                        {formatDate(user.createdAt)}
+                        {formatDate(user.created_at)}
                       </TableCell>
                       <TableCell>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewUser(user)}
+                          disabled={user.projects.length === 0}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Data
@@ -178,157 +251,292 @@ export default function AdminUsersPage() {
         </Card>
       </div>
 
-      {/* User Data Dialog */}
+      {/* Project Data Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>
-              {selectedUser?.email} - {selectedUser?.id}
-            </DialogDescription>
+            <DialogTitle>User Analytics</DialogTitle>
+            <DialogDescription>{selectedUser?.email}</DialogDescription>
           </DialogHeader>
 
-          {loadingUserData ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-            </div>
-          ) : userData ? (
+          {selectedUser && (
             <div className="space-y-6">
-              {/* Summary Cards */}
-              <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Activity className="h-4 w-4" />
-                      Total Events
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{userData.totalEvents}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <MousePointer className="h-4 w-4" />
-                      Total Sessions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{userData.totalSessions}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Event Types
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">
-                      {userData.eventBreakdown.length}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Event Breakdown */}
+              {/* Project Selector */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Event Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {userData.eventBreakdown.map((event, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 rounded-lg border"
-                      >
-                        <span className="font-medium">{event.eventType}</span>
-                        <Badge variant="secondary">{event.count} events</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Events */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Events</CardTitle>
+                  <CardTitle className="text-base">Select Project</CardTitle>
                   <CardDescription>
-                    Last {userData.recentEvents.length} events
+                    Choose a project to view detailed analytics or view the full
+                    dashboard
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Event Type</TableHead>
-                        <TableHead>Timestamp</TableHead>
-                        <TableHead>Properties</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {userData.recentEvents.map((event) => (
-                        <TableRow key={event.id}>
-                          <TableCell className="font-medium">
-                            {event.eventType}
-                          </TableCell>
-                          <TableCell className="text-sm text-slate-600">
-                            {formatDate(event.timestamp)}
-                          </TableCell>
-                          <TableCell>
-                            <code className="text-xs bg-slate-100 px-2 py-1 rounded">
-                              {event.properties
-                                ? JSON.stringify(event.properties).slice(0, 50) +
-                                  "..."
-                                : "{}"}
-                            </code>
-                          </TableCell>
-                        </TableRow>
+                <CardContent className="space-y-4">
+                  <Select
+                    value={selectedProject}
+                    onValueChange={handleProjectSelect}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a project" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedUser.projects.map((project) => (
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name} ({project.id})
+                        </SelectItem>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </SelectContent>
+                  </Select>
+
+                  {selectedProject && (
+                    <Button
+                      onClick={() => {
+                        const project = selectedUser.projects.find(
+                          (p) => p.id === selectedProject
+                        );
+                        if (project) {
+                          handleViewDashboard(
+                            project.id,
+                            project.name,
+                            selectedUser.email
+                          );
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Full Dashboard as This User
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Sessions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sessions</CardTitle>
-                  <CardDescription>
-                    Total sessions: {userData.sessions.length}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {userData.sessions.slice(0, 10).map((session, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 rounded-lg border"
-                      >
-                        <span className="font-mono text-sm">
-                          {session.sessionId}
-                        </span>
-                        <Badge variant="outline">{session.count} events</Badge>
-                      </div>
-                    ))}
-                    {userData.sessions.length > 10 && (
-                      <p className="text-sm text-slate-500 text-center pt-2">
-                        ... and {userData.sessions.length - 10} more sessions
-                      </p>
-                    )}
+              {/* Project Analytics */}
+              {loadingProjectData ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                </div>
+              ) : projectData ? (
+                <div className="space-y-6">
+                  {/* Summary Stats */}
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Total Events
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {projectData.total_events}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <MousePointer className="h-4 w-4" />
+                          Unique Users
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {projectData.unique_users}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          Sessions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {projectData.unique_sessions}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4" />
+                          Event Types
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {projectData.event_breakdown?.length || 0}
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-slate-400">
-              No data available
+
+                  {/* Breakdowns Grid */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Event Breakdown */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Event Types</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {projectData.event_breakdown?.map(
+                            (item: any, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 rounded-lg border"
+                              >
+                                <span className="font-medium text-sm">
+                                  {item.event_type}
+                                </span>
+                                <Badge variant="secondary">{item.count}</Badge>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Device Breakdown */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Laptop className="h-4 w-4" />
+                          Devices
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {projectData.device_breakdown?.map(
+                            (item: any, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 rounded-lg border"
+                              >
+                                <span className="font-medium text-sm">
+                                  {item.device}
+                                </span>
+                                <Badge variant="secondary">{item.count}</Badge>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Browser Breakdown */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Browsers</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {projectData.browser_breakdown?.map(
+                            (item: any, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 rounded-lg border"
+                              >
+                                <span className="font-medium text-sm">
+                                  {item.browser}
+                                </span>
+                                <Badge variant="secondary">{item.count}</Badge>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Country Breakdown */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          Countries
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {projectData.country_breakdown?.map(
+                            (item: any, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-center justify-between p-2 rounded-lg border"
+                              >
+                                <span className="font-medium text-sm">
+                                  {item.country}
+                                </span>
+                                <Badge variant="secondary">{item.count}</Badge>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Recent Events */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Recent Events</CardTitle>
+                      <CardDescription>
+                        Last {projectData.recent_events?.length || 0} events (
+                        {projectData.start_date} to {projectData.end_date})
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-96 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Type</TableHead>
+                              <TableHead>User ID</TableHead>
+                              <TableHead>Session</TableHead>
+                              <TableHead>Timestamp</TableHead>
+                              <TableHead>Device</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {projectData.recent_events?.map((event: any) => (
+                              <TableRow key={event.event_id}>
+                                <TableCell className="font-medium text-sm">
+                                  {event.event_type}
+                                </TableCell>
+                                <TableCell className="font-mono text-xs text-slate-500">
+                                  {event.user_id?.slice(0, 8)}...
+                                </TableCell>
+                                <TableCell className="font-mono text-xs text-slate-500">
+                                  {event.session_id?.slice(0, 8)}...
+                                </TableCell>
+                                <TableCell className="text-xs text-slate-600">
+                                  {formatDate(event.timestamp)}
+                                </TableCell>
+                                <TableCell className="text-xs">
+                                  {event.device || "-"}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : selectedProject ? (
+                <div className="text-center py-12 text-slate-400">
+                  No data available for this project
+                </div>
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  Please select a project to view analytics
+                </div>
+              )}
             </div>
           )}
         </DialogContent>

@@ -77,7 +77,8 @@ interface BrowserData {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export default function DeviceAnalyticsPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const [deviceData, setDeviceData] = useState<DeviceAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();

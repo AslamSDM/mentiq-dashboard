@@ -37,7 +37,12 @@ import {
 } from "@/lib/health-score-calculator";
 
 export default function HealthScorePage() {
-  const { selectedProjectId } = useStore();
+  const {
+    getEffectiveProjectId,
+    impersonatedProjectId,
+    selectedProjectId: storeProjectId,
+  } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
 
   // State for health score data
@@ -50,12 +55,20 @@ export default function HealthScorePage() {
   const [healthScoreResult, setHealthScoreResult] =
     useState<HealthScoreResult | null>(null);
 
-  // Fetch health score data
+  // Fetch health score data - depend on both impersonatedProjectId and storeProjectId to detect changes
   useEffect(() => {
     if (selectedProjectId) {
+      // Clear previous data when project changes
+      setHealthData(null);
+      setChurnData(null);
+      setChurnStats(null);
+      setFeatureData(null);
+      setSessionData(null);
+      setHealthScoreResult(null);
+
       fetchHealthData();
     }
-  }, [selectedProjectId]);
+  }, [selectedProjectId, impersonatedProjectId, storeProjectId]);
 
   const fetchHealthData = async () => {
     if (!selectedProjectId) return;

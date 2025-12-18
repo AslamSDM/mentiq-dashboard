@@ -8,8 +8,24 @@ import { centralizedData } from "@/lib/services/centralized-data";
 import { useStore } from "@/lib/store";
 
 export function useCentralizedData() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
   const [loading, setLoading] = useState(false);
+  const [lastProjectId, setLastProjectId] = useState<string | null>(null);
+
+  // Use the centralized getEffectiveProjectId function
+  const effectiveProjectId = getEffectiveProjectId();
+
+  // Detect project ID changes and clear cache
+  useEffect(() => {
+    if (effectiveProjectId !== lastProjectId) {
+      console.log("🔄 Effective project ID changed, clearing cache");
+      if (lastProjectId) {
+        // Clear cache for old project
+        centralizedData.clearProjectCache(lastProjectId);
+      }
+      setLastProjectId(effectiveProjectId);
+    }
+  }, [effectiveProjectId, lastProjectId]);
 
   /**
    * Get revenue metrics (cached)
@@ -19,15 +35,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getRevenueMetrics(selectedProjectId)
+        .getRevenueMetrics(effectiveProjectId)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId]);
+    }, [effectiveProjectId]);
 
     return { data, loading };
   };
@@ -40,15 +56,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getRevenueAnalytics(selectedProjectId, startDate, endDate)
+        .getRevenueAnalytics(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -61,15 +77,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getLocationData(selectedProjectId, startDate, endDate)
+        .getLocationData(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -82,15 +98,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getDeviceData(selectedProjectId, startDate, endDate)
+        .getDeviceData(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -103,15 +119,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getRetentionData(selectedProjectId, startDate, endDate)
+        .getRetentionData(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -124,15 +140,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getFeatureAdoption(selectedProjectId, startDate, endDate)
+        .getFeatureAdoption(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -143,17 +159,17 @@ export function useCentralizedData() {
   const useChurnRisk = (threshold = 50) => {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-
+    console.log("useChurnRisk: effectiveProjectId =", effectiveProjectId);
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getChurnRisk(selectedProjectId, threshold)
+        .getChurnRisk(effectiveProjectId, threshold)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, threshold]);
+    }, [effectiveProjectId, threshold]);
 
     return { data, loading };
   };
@@ -166,15 +182,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getSessionAnalytics(selectedProjectId, startDate, endDate)
+        .getSessionAnalytics(effectiveProjectId, startDate, endDate)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId, startDate, endDate]);
+    }, [effectiveProjectId, startDate, endDate]);
 
     return { data, loading };
   };
@@ -187,15 +203,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getSessions(selectedProjectId)
+        .getSessions(effectiveProjectId)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId]);
+    }, [effectiveProjectId]);
 
     return { data, loading };
   };
@@ -208,15 +224,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getUsers(selectedProjectId)
+        .getUsers(effectiveProjectId)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId]);
+    }, [effectiveProjectId]);
 
     return { data, loading };
   };
@@ -229,15 +245,15 @@ export function useCentralizedData() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (!selectedProjectId) return;
+      if (!effectiveProjectId) return;
 
       setLoading(true);
       centralizedData
-        .getExperiments(selectedProjectId)
+        .getExperiments(effectiveProjectId)
         .then(setData)
         .catch(console.error)
         .finally(() => setLoading(false));
-    }, [selectedProjectId]);
+    }, [effectiveProjectId]);
 
     return { data, loading };
   };
@@ -246,7 +262,7 @@ export function useCentralizedData() {
    * Trigger prefetch manually
    */
   const prefetchData = async (dateRange?: { start: string; end: string }) => {
-    if (!selectedProjectId) return;
+    if (!effectiveProjectId) return;
 
     const endDate = new Date();
     const startDate = new Date();
@@ -258,7 +274,7 @@ export function useCentralizedData() {
     };
 
     setLoading(true);
-    await centralizedData.prefetchAllData(selectedProjectId, range);
+    await centralizedData.prefetchAllData(effectiveProjectId, range);
     setLoading(false);
   };
 
@@ -299,7 +315,7 @@ export function useCentralizedData() {
     clearCache,
     getCacheStats,
     loading,
-    selectedProjectId,
+    effectiveProjectId,
   };
 }
 

@@ -48,12 +48,13 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="relative h-10 w-10">
-              <Image
+            <div className="relative h-30 w-30">
+              <img
                 src="/logo.png"
                 alt="Mentiq Logo"
-                fill
-                className="object-contain"
+                className={
+                  "object-contain transition-all duration-300" + "h-30 w-30"
+                }
               />
             </div>
           </div>
@@ -98,10 +99,8 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Stop guessing why users leave.{" "}
-              <span className="text-white font-medium">
-                Know exactly how to make them stay.
-              </span>
+              Cut Monthly Churn in HALF{" "}
+              <span className="text-white font-medium">within 90 day</span>
             </p>
           </div>
 
@@ -510,7 +509,7 @@ export default function Home() {
       <footer className="py-12 border-t border-white/10 bg-black">
         <div className="container px-4 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="relative h-10 w-10 opacity-70">
+            <div className="relative  h-30 w-30 opacity-70">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"

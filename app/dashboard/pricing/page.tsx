@@ -130,7 +130,8 @@ const PRICING_TIERS = [
 
 export default function HealthScorePage() {
   const { toast } = useToast();
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const [userCount, setUserCount] = useState(250);
   const [isProcessing, setIsProcessing] = useState(false);
   const carouselRef = React.useRef<HTMLDivElement>(null);

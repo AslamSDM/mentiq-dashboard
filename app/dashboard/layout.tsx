@@ -6,6 +6,8 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { Button } from "@/components/ui/button";
+import { X, Eye } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -22,6 +24,10 @@ export default function DashboardLayout({
     projectsLoaded,
     selectedProjectId,
     setSelectedProjectId,
+    impersonatedProjectId,
+    impersonatedProjectName,
+    impersonatedUserEmail,
+    clearImpersonation,
   } = useStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -107,9 +113,35 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <DashboardSidebar />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+    <div className="flex h-screen overflow-hidden flex-col">
+      {/* Admin Impersonation Banner */}
+      {impersonatedProjectId && (
+        <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between z-50">
+          <div className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Viewing as: <strong>{impersonatedUserEmail}</strong> - Project:{" "}
+              <strong>{impersonatedProjectName}</strong>
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              clearImpersonation();
+              router.push("/dashboard/admin/users");
+            }}
+            className="hover:bg-amber-600 text-amber-950"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Exit View
+          </Button>
+        </div>
+      )}
+      <div className="flex flex-1 overflow-hidden">
+        <DashboardSidebar />
+        <main className="flex-1 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }

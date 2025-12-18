@@ -24,7 +24,8 @@ interface ChannelData {
 }
 
 export default function ChurnByChannelPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
 
   const [channelChurnData, setChannelChurnData] = useState<any>(null);

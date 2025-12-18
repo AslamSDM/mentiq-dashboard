@@ -57,6 +57,18 @@ interface AppState {
   logout: () => void;
   refreshAccessToken: () => Promise<boolean>;
 
+  // Admin Impersonation
+  impersonatedProjectId: string | null;
+  impersonatedProjectName: string | null;
+  impersonatedUserEmail: string | null;
+  setImpersonatedProject: (
+    projectId: string | null,
+    projectName?: string | null,
+    userEmail?: string | null
+  ) => void;
+  clearImpersonation: () => void;
+  getEffectiveProjectId: () => string | null;
+
   // Projects
   projects: Project[];
   selectedProjectId: string | null;
@@ -217,6 +229,10 @@ export const useStore = create<AppState>()(
           projects: [],
           selectedProjectId: null,
           projectsLoaded: false,
+          // Clear impersonation
+          impersonatedProjectId: null,
+          impersonatedProjectName: null,
+          impersonatedUserEmail: null,
           // Clear all caches
           analyticsCache: {},
           eventsCache: null,
@@ -231,6 +247,62 @@ export const useStore = create<AppState>()(
         });
         setAuthToken(null);
         console.log("🗑️ Cleared all caches on logout");
+      },
+
+      // Admin Impersonation state
+      impersonatedProjectId: null,
+      impersonatedProjectName: null,
+      impersonatedUserEmail: null,
+      setImpersonatedProject: (
+        projectId,
+        projectName = null,
+        userEmail = null
+      ) => {
+        console.log(
+          "🔄 Setting impersonated project:",
+          projectId,
+          projectName,
+          userEmail
+        );
+        // Clear caches when switching to impersonated project
+        set({
+          impersonatedProjectId: projectId,
+          impersonatedProjectName: projectName,
+          impersonatedUserEmail: userEmail,
+          // Clear data caches so they reload with new project
+          analyticsCache: {},
+          eventsCache: null,
+          sessionsCache: null,
+          usersCache: null,
+          sessionsOverviewCache: null,
+          heatmapPagesCache: null,
+          heatmapDataCache: {},
+          enhancedAnalyticsCache: {},
+        });
+        // Also clear centralized cache
+        centralizedData.clearCache();
+      },
+      clearImpersonation: () => {
+        console.log("🔄 Clearing impersonation");
+        set({
+          impersonatedProjectId: null,
+          impersonatedProjectName: null,
+          impersonatedUserEmail: null,
+          // Clear caches to reload with original project
+          analyticsCache: {},
+          eventsCache: null,
+          sessionsCache: null,
+          usersCache: null,
+          sessionsOverviewCache: null,
+          heatmapPagesCache: null,
+          heatmapDataCache: {},
+          enhancedAnalyticsCache: {},
+        });
+        centralizedData.clearCache();
+      },
+      getEffectiveProjectId: () => {
+        const state = get();
+        return state.impersonatedProjectId || state.selectedProjectId;
       },
 
       // Projects state
@@ -454,15 +526,17 @@ export const useStore = create<AppState>()(
       },
 
       fetchAnalytics: async (params, forceRefresh = false) => {
-        const { selectedProjectId, isAuthenticated, analyticsCache } = get();
-        if (!selectedProjectId || !isAuthenticated) {
+        const { isAuthenticated, analyticsCache, getEffectiveProjectId } =
+          get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId || !isAuthenticated) {
           console.warn(
             "Cannot fetch analytics: no project or not authenticated"
           );
           return;
         }
 
-        const cacheKey = `${selectedProjectId}_${params.startDate}_${
+        const cacheKey = `${effectiveProjectId}_${params.startDate}_${
           params.endDate
         }_${params.groupBy || "none"}`;
 
@@ -481,7 +555,7 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh analytics with params:", params);
         set({ loadingAnalytics: true });
         try {
-          apiClient.setProjectId(selectedProjectId);
+          apiClient.setProjectId(effectiveProjectId);
           const data = await apiClient.getAnalyticsGlobal(params);
           console.log("✅ Fetched analytics data:", data);
 
@@ -505,8 +579,9 @@ export const useStore = create<AppState>()(
       },
 
       fetchEvents: async (forceRefresh = false) => {
-        const { selectedProjectId, eventsCache } = get();
-        if (!selectedProjectId) return;
+        const { eventsCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
         // Check cache unless force refresh
         if (!forceRefresh && eventsCache) {
@@ -522,13 +597,13 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh events");
         set({ loadingEvents: true });
         try {
-          const events = await apiClient.getEvents(selectedProjectId);
+          const events = await apiClient.getEvents(effectiveProjectId);
           set({
             events,
             eventsCache: {
               data: events,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingEvents: false,
           });
@@ -548,8 +623,9 @@ export const useStore = create<AppState>()(
       loadingHeatmapData: false,
 
       fetchHeatmapPages: async (forceRefresh = false) => {
-        const { selectedProjectId, heatmapPagesCache } = get();
-        if (!selectedProjectId) {
+        const { heatmapPagesCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) {
           set({ heatmapPages: [] });
           return;
         }
@@ -568,13 +644,13 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh heatmap pages");
         set({ loadingHeatmapPages: true });
         try {
-          const pages = await apiClient.getHeatmapPages(selectedProjectId);
+          const pages = await apiClient.getHeatmapPages(effectiveProjectId);
           set({
             heatmapPages: pages,
             heatmapPagesCache: {
               data: pages,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingHeatmapPages: false,
           });
@@ -586,10 +662,11 @@ export const useStore = create<AppState>()(
       },
 
       fetchHeatmapData: async (params, forceRefresh = false) => {
-        const { selectedProjectId, heatmapDataCache } = get();
-        if (!selectedProjectId) return;
+        const { heatmapDataCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
-        const cacheKey = `${selectedProjectId}_${params.url}_${params.type}`;
+        const cacheKey = `${effectiveProjectId}_${params.url}_${params.type}`;
 
         // Check cache unless force refresh
         if (!forceRefresh) {
@@ -606,7 +683,7 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh heatmap data");
         set({ loadingHeatmapData: true });
         try {
-          const data = await apiClient.getHeatmaps(selectedProjectId, params);
+          const data = await apiClient.getHeatmaps(effectiveProjectId, params);
           set((state) => ({
             heatmapData: data,
             heatmapDataCache: {
@@ -649,8 +726,9 @@ export const useStore = create<AppState>()(
       loadingSessionsOverview: true,
 
       fetchExperiments: async (forceRefresh = false) => {
-        const { selectedProjectId, experimentsCache } = get();
-        if (!selectedProjectId) {
+        const { experimentsCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) {
           set({ experiments: [] });
           return;
         }
@@ -675,13 +753,15 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh experiments");
         set({ loadingExperiments: true });
         try {
-          const experiments = await apiClient.getExperiments(selectedProjectId);
+          const experiments = await apiClient.getExperiments(
+            effectiveProjectId
+          );
           set({
             experiments,
             experimentsCache: {
               data: experiments,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingExperiments: false,
           });
@@ -696,10 +776,11 @@ export const useStore = create<AppState>()(
       },
 
       fetchExperimentResults: async (experimentId, forceRefresh = false) => {
-        const { selectedProjectId, experimentResultsCache } = get();
-        if (!selectedProjectId) return;
+        const { experimentResultsCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
-        const cacheKey = `${selectedProjectId}_${experimentId}`;
+        const cacheKey = `${effectiveProjectId}_${experimentId}`;
 
         // Check cache unless force refresh
         if (!forceRefresh) {
@@ -717,7 +798,7 @@ export const useStore = create<AppState>()(
         set({ loadingExperimentResults: true });
         try {
           const results = await apiClient.getExperimentResults(
-            selectedProjectId,
+            effectiveProjectId,
             experimentId
           );
           set((state) => ({
@@ -739,12 +820,13 @@ export const useStore = create<AppState>()(
         }
       },
       createExperiment: async (experiment) => {
-        const { selectedProjectId } = get();
-        if (!selectedProjectId) return;
+        const { getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
         try {
           const newExperiment = await apiClient.createExperiment(
-            selectedProjectId,
+            effectiveProjectId,
             experiment
           );
           set((state) => ({
@@ -758,10 +840,11 @@ export const useStore = create<AppState>()(
         set({ selectedExperimentId: experimentId });
       },
       updateExperimentStatus: async (experimentId, status) => {
-        const { selectedProjectId, fetchExperiments, apiClient } = get();
-        if (!selectedProjectId) return;
+        const { fetchExperiments, apiClient, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
         try {
-          await apiClient.updateExperiment(selectedProjectId, experimentId, {
+          await apiClient.updateExperiment(effectiveProjectId, experimentId, {
             status,
           });
           await fetchExperiments();
@@ -772,8 +855,9 @@ export const useStore = create<AppState>()(
 
       // Sessions & Users actions with caching
       fetchSessions: async (forceRefresh = false) => {
-        const { selectedProjectId, apiClient, sessionsCache } = get();
-        if (!selectedProjectId) return;
+        const { apiClient, sessionsCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
         // Check cache unless force refresh
         if (!forceRefresh && sessionsCache) {
@@ -789,13 +873,13 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh sessions");
         set({ loadingSessions: true });
         try {
-          const sessions = await apiClient.getSessions(selectedProjectId);
+          const sessions = await apiClient.getSessions(effectiveProjectId);
           set({
             sessions,
             sessionsCache: {
               data: sessions,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingSessions: false,
           });
@@ -807,8 +891,9 @@ export const useStore = create<AppState>()(
       },
 
       fetchUsers: async (forceRefresh = false) => {
-        const { selectedProjectId, apiClient, usersCache } = get();
-        if (!selectedProjectId) return;
+        const { apiClient, usersCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
         // Check cache unless force refresh
         if (!forceRefresh && usersCache) {
@@ -824,7 +909,7 @@ export const useStore = create<AppState>()(
         console.log("📡 Fetching fresh users");
         set({ loadingUsers: true });
         try {
-          const response = await apiClient.getUsers(selectedProjectId);
+          const response = await apiClient.getUsers(effectiveProjectId);
           // Extract users array from UserListResponse
           const users = response.users?.map((profile: UserProfile) => ({
             id: profile.userId,
@@ -835,7 +920,7 @@ export const useStore = create<AppState>()(
             totalEvents: profile.totalEvents,
             avgSessionDuration: 0, // Not provided in UserProfile
             properties: profile.customProperties,
-            projectId: selectedProjectId,
+            projectId: effectiveProjectId,
             createdAt: profile.firstSeen,
             updatedAt: profile.lastSeen,
           }));
@@ -844,7 +929,7 @@ export const useStore = create<AppState>()(
             usersCache: {
               data: users,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingUsers: false,
           });
@@ -856,8 +941,10 @@ export const useStore = create<AppState>()(
       },
 
       fetchSessionsOverview: async (forceRefresh = false) => {
-        const { selectedProjectId, apiClient, sessionsOverviewCache } = get();
-        if (!selectedProjectId) return;
+        const { apiClient, sessionsOverviewCache, getEffectiveProjectId } =
+          get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) return;
 
         // Check cache unless force refresh
         if (!forceRefresh && sessionsOverviewCache) {
@@ -877,14 +964,14 @@ export const useStore = create<AppState>()(
         set({ loadingSessionsOverview: true });
         try {
           const overview = await apiClient.getSessionsOverview(
-            selectedProjectId
+            effectiveProjectId
           );
           set({
             sessionsOverview: overview,
             sessionsOverviewCache: {
               data: overview,
               timestamp: Date.now(),
-              key: selectedProjectId,
+              key: effectiveProjectId,
             },
             loadingSessionsOverview: false,
           });
@@ -897,12 +984,13 @@ export const useStore = create<AppState>()(
       selectSession: async (session) => {
         set({ selectedSession: session });
         if (session) {
-          const { selectedProjectId, apiClient } = get();
-          if (!selectedProjectId) return;
+          const { apiClient, getEffectiveProjectId } = get();
+          const effectiveProjectId = getEffectiveProjectId();
+          if (!effectiveProjectId) return;
           console.log(session);
           try {
             const fullSession = await apiClient.getSession(
-              selectedProjectId,
+              effectiveProjectId,
               session.id
             );
             set({ selectedSession: fullSession });

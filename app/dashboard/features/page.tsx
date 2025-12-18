@@ -74,7 +74,8 @@ interface OnboardingFunnelStats {
 }
 
 export default function FeatureTrackingDashboard() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const [loading, setLoading] = useState(true);
   const [features, setFeatures] = useState<FeatureUsageStats[]>([]);
   const [onboarding, setOnboarding] = useState<OnboardingFunnelStats | null>(

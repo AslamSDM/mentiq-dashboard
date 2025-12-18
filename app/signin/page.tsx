@@ -80,7 +80,7 @@ export default function SignInPage() {
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-12 w-12">
+            <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"
@@ -122,7 +122,7 @@ export default function SignInPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="relative h-10 w-10">
+            <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"

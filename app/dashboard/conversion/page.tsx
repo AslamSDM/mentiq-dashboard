@@ -81,7 +81,8 @@ interface ConversionTrend {
 }
 
 export default function ConversionFunnelPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [funnelAnalysis, setFunnelAnalysis] = useState<FunnelAnalysis | null>(
     null

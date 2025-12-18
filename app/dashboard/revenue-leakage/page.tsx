@@ -16,8 +16,9 @@ import { stripeService } from "@/lib/services/stripe";
 import { useToast } from "@/hooks/use-toast";
 
 export default function RevenueLeakagePage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
   const { toast } = useToast();
+  const selectedProjectId = getEffectiveProjectId();
 
   const [revenueData, setRevenueData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

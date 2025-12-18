@@ -76,7 +76,8 @@ interface CohortHeatmapData {
 }
 
 export default function RetentionPage() {
-  const { selectedProjectId } = useStore();
+  const { getEffectiveProjectId } = useStore();
+  const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [cohortData, setCohortData] = useState<CohortData[]>([]);
   const [retentionMetrics, setRetentionMetrics] =
