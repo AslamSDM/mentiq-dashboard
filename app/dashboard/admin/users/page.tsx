@@ -158,7 +158,8 @@ export default function AdminUsersPage() {
       description: `Now viewing ${projectName} dashboard for ${userEmail}`,
     });
     setIsDialogOpen(false);
-    router.push("/dashboard");
+    // Reload the page to force fresh data
+    window.location.href = "/dashboard";
   };
 
   const formatDate = (dateString: string) => {

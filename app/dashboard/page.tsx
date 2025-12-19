@@ -129,9 +129,9 @@ export default function DashboardPage() {
         startDate: startDateStr,
         endDate: endDateStr,
         groupBy: "day",
-      });
+      }, true); // Force refresh when project changes
 
-      fetchEvents();
+      fetchEvents(true); // Force refresh when project changes
 
       // Fetch enhanced analytics
       fetchAllData(startDateStr, endDateStr);

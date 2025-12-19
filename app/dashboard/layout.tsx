@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { OnboardingTaskBanner } from "@/components/onboarding-task-banner";
 import { Button } from "@/components/ui/button";
 import { X, Eye } from "lucide-react";
 
@@ -129,7 +130,8 @@ export default function DashboardLayout({
             size="sm"
             onClick={() => {
               clearImpersonation();
-              router.push("/dashboard/admin/users");
+              // Reload the page to force fresh data
+              window.location.href = "/dashboard/admin/users";
             }}
             className="hover:bg-amber-600 text-amber-950"
           >
@@ -140,7 +142,12 @@ export default function DashboardLayout({
       )}
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            <OnboardingTaskBanner />
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

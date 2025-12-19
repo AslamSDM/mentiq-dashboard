@@ -233,6 +233,20 @@ export const useStore = create<AppState>()(
           impersonatedProjectId: null,
           impersonatedProjectName: null,
           impersonatedUserEmail: null,
+          // Clear all data
+          analyticsData: null,
+          events: [],
+          heatmapPages: [],
+          heatmapData: null,
+          experiments: [],
+          experimentResults: null,
+          selectedExperimentId: null,
+          sessions: [],
+          users: [],
+          sessionsOverview: null,
+          selectedSession: null,
+          selectedUser: null,
+          apiKeys: {},
           // Clear all caches
           analyticsCache: {},
           eventsCache: null,
@@ -244,9 +258,17 @@ export const useStore = create<AppState>()(
           heatmapPagesCache: null,
           heatmapDataCache: {},
           enhancedAnalyticsCache: {},
+          loadingApiKeys: {},
         });
         setAuthToken(null);
-        console.log("🗑️ Cleared all caches on logout");
+        // Clear centralized cache
+        centralizedData.clearAllCache();
+        // SECURITY: Clear localStorage to prevent cross-account data leaks
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("selectedProjectId");
+          localStorage.removeItem("impersonatedProjectId");
+        }
+        console.log("🗑️ Cleared all project data, caches, and localStorage on logout");
       },
 
       // Admin Impersonation state
@@ -280,7 +302,7 @@ export const useStore = create<AppState>()(
           enhancedAnalyticsCache: {},
         });
         // Also clear centralized cache
-        centralizedData.clearCache();
+        centralizedData.clearAllCache();
       },
       clearImpersonation: () => {
         console.log("🔄 Clearing impersonation");
@@ -298,7 +320,7 @@ export const useStore = create<AppState>()(
           heatmapDataCache: {},
           enhancedAnalyticsCache: {},
         });
-        centralizedData.clearCache();
+        centralizedData.clearAllCache();
       },
       getEffectiveProjectId: () => {
         const state = get();
@@ -336,7 +358,9 @@ export const useStore = create<AppState>()(
             description: description || "",
           };
           set((state) => ({
-            projects: [...state.projects, projectWithDescription],
+            projects: Array.isArray(state.projects)
+              ? [...state.projects, projectWithDescription]
+              : [projectWithDescription],
           }));
 
           // Automatically select the newly created project
@@ -366,6 +390,28 @@ export const useStore = create<AppState>()(
       },
       setSelectedProjectId: (projectId) => {
         console.log("Zustand: Setting project ID", projectId);
+
+        // SECURITY: Validate project belongs to current account
+        if (projectId) {
+          const projects = get().projects;
+          const projectExists = projects.find((p) => p.id === projectId);
+          if (!projectExists && projects.length > 0) {
+            console.error(
+              "🚨 SECURITY: Attempted to select project not in account's project list",
+              projectId
+            );
+            console.log("Available projects:", projects.map((p) => p.id));
+            // Select first available project instead
+            if (projects[0]) {
+              projectId = projects[0].id;
+              console.log("✅ Switched to first available project:", projectId);
+            } else {
+              console.error("❌ No projects available");
+              return;
+            }
+          }
+        }
+
         set({ selectedProjectId: projectId });
         if (projectId) {
           apiClient.setProjectId(projectId);
@@ -583,11 +629,12 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh
-        if (!forceRefresh && eventsCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && eventsCache && eventsCache.key === effectiveProjectId) {
           if (Date.now() - eventsCache.timestamp < CACHE_TTL.EVENTS) {
             console.log("✅ Using cached events", {
               age: (Date.now() - eventsCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ events: eventsCache.data });
             return;
@@ -630,11 +677,12 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh
-        if (!forceRefresh && heatmapPagesCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && heatmapPagesCache && heatmapPagesCache.key === effectiveProjectId) {
           if (Date.now() - heatmapPagesCache.timestamp < CACHE_TTL.HEATMAPS) {
             console.log("✅ Using cached heatmap pages", {
               age: (Date.now() - heatmapPagesCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ heatmapPages: heatmapPagesCache.data });
             return;
@@ -733,11 +781,12 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh
-        if (!forceRefresh && experimentsCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && experimentsCache && experimentsCache.key === effectiveProjectId) {
           if (Date.now() - experimentsCache.timestamp < CACHE_TTL.EXPERIMENTS) {
             console.log("✅ Using cached experiments", {
               age: (Date.now() - experimentsCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ experiments: experimentsCache.data });
             if (
@@ -859,11 +908,12 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh
-        if (!forceRefresh && sessionsCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && sessionsCache && sessionsCache.key === effectiveProjectId) {
           if (Date.now() - sessionsCache.timestamp < CACHE_TTL.SESSIONS) {
             console.log("✅ Using cached sessions", {
               age: (Date.now() - sessionsCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ sessions: sessionsCache.data });
             return;
@@ -895,11 +945,12 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh
-        if (!forceRefresh && usersCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && usersCache && usersCache.key === effectiveProjectId) {
           if (Date.now() - usersCache.timestamp < CACHE_TTL.USERS) {
             console.log("✅ Using cached users", {
               age: (Date.now() - usersCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ users: usersCache.data });
             return;
@@ -946,14 +997,15 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh
-        if (!forceRefresh && sessionsOverviewCache) {
+        // Check cache unless force refresh - also verify project ID matches
+        if (!forceRefresh && sessionsOverviewCache && sessionsOverviewCache.key === effectiveProjectId) {
           if (
             Date.now() - sessionsOverviewCache.timestamp <
             CACHE_TTL.SESSIONS
           ) {
             console.log("✅ Using cached sessions overview", {
               age: (Date.now() - sessionsOverviewCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
             });
             set({ sessionsOverview: sessionsOverviewCache.data });
             return;
@@ -1060,12 +1112,15 @@ export const useStore = create<AppState>()(
     {
       name: "mentiq-storage", // name of the item in the storage (must be unique)
       storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      // Persist auth tokens and impersonation state
       partialize: (state) => ({
         token: state.token,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
-        selectedProjectId: state.selectedProjectId,
-        selectedExperimentId: state.selectedExperimentId,
+        // Persist impersonation state so it survives page refresh
+        impersonatedProjectId: state.impersonatedProjectId,
+        impersonatedProjectName: state.impersonatedProjectName,
+        impersonatedUserEmail: state.impersonatedUserEmail,
       }),
     }
   )

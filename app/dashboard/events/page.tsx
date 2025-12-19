@@ -41,6 +41,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { EventData } from "@/lib/api";
 
 const eventVolumeData = [
@@ -53,16 +54,17 @@ const eventVolumeData = [
 ];
 
 export default function EventsPage() {
-  const { selectedProjectId, events, loadingEvents, fetchEvents } = useStore();
+  const { events, loadingEvents, fetchEvents } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
 
   useEffect(() => {
-    if (selectedProjectId) {
-      fetchEvents();
+    if (effectiveProjectId) {
+      fetchEvents(true); // Force refresh when project changes
     }
-  }, [selectedProjectId, fetchEvents]);
+  }, [effectiveProjectId, fetchEvents]);
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch =
@@ -72,11 +74,11 @@ export default function EventsPage() {
     const matchesFilter = eventFilter === "all" || event.name === eventFilter;
     return matchesSearch && matchesFilter;
   });
-
   const eventTypes = Array.from(new Set(events?.map((e) => e.name)));
 
-  if (!selectedProjectId) {
+  if (!effectiveProjectId) {
     return (
+      <div className="flex flex-col h-full">
       <div className="flex flex-col h-full">
         <DashboardHeader
           title="Event Analytics"

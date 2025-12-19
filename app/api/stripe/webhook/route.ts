@@ -154,6 +154,26 @@ export async function POST(req: NextRequest) {
           });
         }
 
+        // Initialize onboarding status for new signup
+        if (session.metadata?.isSignupFlow === "true") {
+          try {
+            await fetch(`${BACKEND_URL}/api/v1/onboarding/status`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.BACKEND_API_KEY || ""}`,
+                "X-Account-ID": accountId,
+              },
+              body: JSON.stringify({
+                account_id: accountId,
+                data_connection_shown: false,
+              }),
+            });
+          } catch (error) {
+            console.error("Failed to initialize onboarding status:", error);
+          }
+        }
+
         break;
       }
 

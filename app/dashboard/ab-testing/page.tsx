@@ -42,6 +42,7 @@ import {
 } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { CreateExperimentRequest } from "@/lib/services/experiment";
 import { centralizedData } from "@/lib/services/centralized-data";
 import { useToast } from "@/hooks/use-toast";
@@ -60,7 +61,6 @@ interface FeatureAdoptionData {
 
 export default function ABTestingPage() {
   const {
-    selectedProjectId,
     experiments,
     loadingExperiments,
     selectedExperimentId,
@@ -72,6 +72,7 @@ export default function ABTestingPage() {
     updateExperimentStatus,
     setSelectedExperimentId,
   } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
   const { toast } = useToast();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -108,11 +109,11 @@ export default function ABTestingPage() {
   });
 
   useEffect(() => {
-    if (selectedProjectId) {
-      fetchExperiments();
+    if (effectiveProjectId) {
+      fetchExperiments(true); // Force refresh when project changes
       fetchAdoptionData();
     }
-  }, [selectedProjectId, fetchExperiments]);
+  }, [effectiveProjectId, fetchExperiments]);
 
   useEffect(() => {
     if (selectedExperimentId) {
@@ -121,7 +122,7 @@ export default function ABTestingPage() {
   }, [selectedExperimentId, fetchExperimentResults]);
 
   const fetchAdoptionData = async () => {
-    if (!selectedProjectId) return;
+    if (!effectiveProjectId) return;
 
     setLoadingAdoption(true);
     try {
@@ -129,8 +130,8 @@ export default function ABTestingPage() {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 30);
 
-      const response = await centralizedData.getFeatureAdoption(
-        selectedProjectId,
+      const data = await centralizedData.getFeatureAdoption(
+        effectiveProjectId,
         startDate.toISOString().split("T")[0],
         endDate.toISOString().split("T")[0]
       );

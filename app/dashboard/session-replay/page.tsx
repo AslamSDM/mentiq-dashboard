@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import type { Session } from "@/lib/types";
 import rrwebPlayer from "rrweb-player";
 import "rrweb-player/dist/style.css";
@@ -27,16 +28,18 @@ export default function SessionReplayPage() {
     loadingSessions,
     fetchSessions,
     selectSession,
-    selectedProjectId,
   } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
 
   const [sessionMetrics, setSessionMetrics] = useState<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
 
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    if (effectiveProjectId) {
+      fetchSessions(true); // Force refresh when project changes
+    }
+  }, [effectiveProjectId, fetchSessions]);
 
   // Initialize rrweb player when session changes
   useEffect(() => {

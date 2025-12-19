@@ -20,12 +20,12 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MousePointer, Scroll, Eye, ExternalLink } from "lucide-react";
 
 export default function HeatmapsPage() {
   const {
-    selectedProjectId,
     heatmapPages,
     loadingHeatmapPages,
     heatmapData,
@@ -33,6 +33,7 @@ export default function HeatmapsPage() {
     fetchHeatmapPages,
     fetchHeatmapData,
   } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
   const { toast } = useToast();
 
   const [selectedPage, setSelectedPage] = useState<string | undefined>(
@@ -46,8 +47,8 @@ export default function HeatmapsPage() {
   const [overlayEnabled, setOverlayEnabled] = useState(true);
 
   useEffect(() => {
-    if (selectedProjectId) {
-      fetchHeatmapPages().catch((error) => {
+    if (effectiveProjectId) {
+      fetchHeatmapPages(true).catch((error) => { // Force refresh when project changes
         console.error("Error fetching heatmap pages:", error);
         toast({
           title: "Error",
@@ -56,7 +57,7 @@ export default function HeatmapsPage() {
         });
       });
     }
-  }, [selectedProjectId, fetchHeatmapPages, toast]);
+  }, [effectiveProjectId, fetchHeatmapPages, toast]);
 
   useEffect(() => {
     if (heatmapPages.length > 0 && !selectedPage) {
@@ -67,12 +68,12 @@ export default function HeatmapsPage() {
   }, [heatmapPages, selectedPage]);
 
   useEffect(() => {
-    if (selectedProjectId && selectedPage) {
+    if (effectiveProjectId && selectedPage) {
       console.log("🔍 Fetching heatmap data for:", {
         selectedPage,
         heatmapType,
       });
-      fetchHeatmapData({ url: selectedPage, type: heatmapType }).catch(
+      fetchHeatmapData({ url: selectedPage, type: heatmapType }, true).catch( // Force refresh when project changes
         (error) => {
           console.error("Error fetching heatmap data:", error);
           toast({
@@ -83,7 +84,7 @@ export default function HeatmapsPage() {
         }
       );
     }
-  }, [selectedProjectId, selectedPage, heatmapType, fetchHeatmapData, toast]);
+  }, [effectiveProjectId, selectedPage, heatmapType, fetchHeatmapData, toast]);
 
   // Log heatmap data changes
   useEffect(() => {
@@ -100,7 +101,7 @@ export default function HeatmapsPage() {
     }
   }, [heatmapData]);
 
-  if (!selectedProjectId) {
+  if (!effectiveProjectId) {
     return (
       <div className="flex flex-col h-full">
         <DashboardHeader

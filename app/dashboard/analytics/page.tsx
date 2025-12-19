@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import {
   getDAUValue,
   getWAUValue,
@@ -60,7 +61,6 @@ const getCountryFlag = (countryName: string): string => {
 
 export default function AnalyticsPage() {
   const {
-    selectedProjectId,
     analyticsData,
     loadingAnalytics,
     events,
@@ -68,11 +68,12 @@ export default function AnalyticsPage() {
     fetchEvents,
     isAuthenticated,
   } = useStore();
+  const effectiveProjectId = useEffectiveProjectId();
 
   const [dateRange, setDateRange] = useState<string>("7d");
 
   useEffect(() => {
-    if (!selectedProjectId || !isAuthenticated) return;
+    if (!effectiveProjectId || !isAuthenticated) return;
 
     // Calculate date range
     const endDate = new Date();
@@ -95,10 +96,10 @@ export default function AnalyticsPage() {
     fetchAnalytics({
       startDate: startDate.toISOString().split("T")[0],
       endDate: endDate.toISOString().split("T")[0],
-    });
-    fetchEvents();
+    }, true); // Force refresh when project changes
+    fetchEvents(true); // Force refresh when project changes
   }, [
-    selectedProjectId,
+    effectiveProjectId,
     dateRange,
     fetchAnalytics,
     fetchEvents,
