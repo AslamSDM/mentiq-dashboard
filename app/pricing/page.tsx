@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -30,11 +30,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import {
-  PRICING_TIERS,
-  getTierByUserCount,
-  getVisibleTiers,
-} from "@/lib/constants";
+import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
 
 // Icon mapping for tiers
 const TIER_ICONS: Record<string, React.ReactNode> = {
@@ -56,7 +52,7 @@ const TIER_COLORS: Record<string, string> = {
   enterprise: "from-yellow-500 to-amber-500",
 };
 
-export default function PricingPage() {
+function PricingContent() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -266,7 +262,9 @@ export default function PricingPage() {
           {/* User Count Selector */}
           <Card className="bg-white/5 border-white/10 backdrop-blur-sm shadow-2xl shadow-primary/10">
             <CardHeader>
-              <CardTitle className="text-white">How many paid users do you have?</CardTitle>
+              <CardTitle className="text-white">
+                How many paid users do you have?
+              </CardTitle>
               <CardDescription className="text-gray-400">
                 Slide to select your current or expected user count
               </CardDescription>
@@ -281,9 +279,7 @@ export default function PricingPage() {
                     <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-400">
                       {userCount.toLocaleString()}
                     </div>
-                    <div className="text-sm text-gray-400 mt-2">
-                      paid users
-                    </div>
+                    <div className="text-sm text-gray-400 mt-2">paid users</div>
                   </div>
                   <span className="text-sm font-medium text-gray-400">
                     10,000+ users
@@ -394,7 +390,9 @@ export default function PricingPage() {
                           >
                             {tier.name}
                           </CardTitle>
-                          <CardDescription className="text-gray-400">{tier.description}</CardDescription>
+                          <CardDescription className="text-gray-400">
+                            {tier.description}
+                          </CardDescription>
                           <div className="mt-4">
                             <div className="flex items-baseline gap-2">
                               <span
@@ -404,9 +402,7 @@ export default function PricingPage() {
                               >
                                 ${price}
                               </span>
-                              <span className="text-gray-400">
-                                /month
-                              </span>
+                              <span className="text-gray-400">/month</span>
                             </div>
                             <p className="text-sm text-gray-400 mt-1">
                               {tier.range[0].toLocaleString()} -{" "}
@@ -447,9 +443,7 @@ export default function PricingPage() {
                                 className="flex items-start gap-3 text-sm"
                               >
                                 <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                                <span className="text-gray-300">
-                                  {feature}
-                                </span>
+                                <span className="text-gray-300">{feature}</span>
                               </div>
                             ))}
                           </div>
@@ -472,14 +466,18 @@ export default function PricingPage() {
                 <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 mb-4">
                   <Crown className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl text-white">Enterprise</CardTitle>
+                <CardTitle className="text-3xl text-white">
+                  Enterprise
+                </CardTitle>
                 <CardDescription className="text-lg text-gray-300">
                   Custom solutions for large-scale operations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center py-4">
-                  <p className="text-5xl font-bold mb-2 text-white">Let's Talk</p>
+                  <p className="text-5xl font-bold mb-2 text-white">
+                    Let's Talk
+                  </p>
                   <p className="text-gray-400">
                     Custom pricing based on your needs
                   </p>
@@ -492,11 +490,15 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Custom deployment options</span>
+                    <span className="text-gray-300">
+                      Custom deployment options
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Dedicated infrastructure</span>
+                    <span className="text-gray-300">
+                      Dedicated infrastructure
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
@@ -504,11 +506,15 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Custom SLA & guarantees</span>
+                    <span className="text-gray-300">
+                      Custom SLA & guarantees
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Dedicated success team</span>
+                    <span className="text-gray-300">
+                      Dedicated success team
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
@@ -516,7 +522,9 @@ export default function PricingPage() {
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Custom feature development</span>
+                    <span className="text-gray-300">
+                      Custom feature development
+                    </span>
                   </div>
                 </div>
 
@@ -596,5 +604,13 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <PricingContent />
+    </Suspense>
   );
 }

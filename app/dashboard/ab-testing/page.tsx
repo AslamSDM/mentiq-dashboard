@@ -136,9 +136,9 @@ export default function ABTestingPage() {
         endDate.toISOString().split("T")[0]
       );
 
-      if (response?.data?.features) {
+      if (data?.data?.features) {
         const transformedData: FeatureAdoptionData[] =
-          response.data.features.map((feature: any) => ({
+          data.data.features.map((feature: any) => ({
             feature_name: feature.feature_name,
             total_users: feature.unique_users || 0,
             adopted_users: feature.unique_users || 0,
