@@ -79,7 +79,6 @@ export default function EventsPage() {
   if (!effectiveProjectId) {
     return (
       <div className="flex flex-col h-full">
-      <div className="flex flex-col h-full">
         <DashboardHeader
           title="Event Analytics"
           description="Track and analyze custom events from your application"
