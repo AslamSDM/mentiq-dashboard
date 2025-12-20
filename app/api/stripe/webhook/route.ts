@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import crypto from "crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-11-17.clover",
@@ -8,18 +9,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET!;
+
+// Helper function to generate HMAC signature for webhook requests
+function generateWebhookSignature(payload: string): string {
+  const hmac = crypto.createHmac("sha256", WEBHOOK_SECRET);
+  hmac.update(payload);
+  return hmac.digest("hex");
+}
 
 // Helper function to update subscription in backend
 async function updateSubscription(data: any) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/subscriptions`, {
+    const payload = JSON.stringify(data);
+    const signature = generateWebhookSignature(payload);
+
+    const response = await fetch(`${BACKEND_URL}/webhook/subscription`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Add admin API key for internal operations
-        Authorization: `Bearer ${process.env.BACKEND_API_KEY || ""}`,
+        "X-Webhook-Signature": signature,
       },
-      body: JSON.stringify(data),
+      body: payload,
     });
 
     if (!response.ok) {
@@ -38,13 +49,16 @@ async function updateSubscription(data: any) {
 // Helper function to record payment
 async function recordPayment(data: any) {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/v1/payments`, {
+    const payload = JSON.stringify(data);
+    const signature = generateWebhookSignature(payload);
+
+    const response = await fetch(`${BACKEND_URL}/webhook/payment`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.BACKEND_API_KEY || ""}`,
+        "X-Webhook-Signature": signature,
       },
-      body: JSON.stringify(data),
+      body: payload,
     });
 
     if (!response.ok) {

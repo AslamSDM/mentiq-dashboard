@@ -94,10 +94,13 @@ export function OnboardingTaskBanner() {
     dismissed ||
     !tasks ||
     tasks.onboarding_complete ||
-    tasks.pending.length === 0
+    (tasks.pending.length === 0 && !tasks.platform_selected)
   ) {
     return null;
   }
+
+  // Show incomplete onboarding banner if skipped
+  const wasSkipped = tasks.pending.length > 0 || !tasks.platform_selected;
 
   const completionPercentage =
     (tasks.completed.length / (tasks.completed.length + tasks.pending.length)) *
@@ -125,12 +128,20 @@ export function OnboardingTaskBanner() {
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-white">
-                          Complete your setup
+                          {wasSkipped
+                            ? "Complete your setup"
+                            : "Complete your setup"}
                         </h3>
                         <p className="text-sm text-gray-400">
-                          {tasks.pending.length} task
-                          {tasks.pending.length !== 1 ? "s" : ""} remaining to
-                          unlock full analytics power
+                          {wasSkipped
+                            ? `You skipped onboarding. ${
+                                tasks.pending.length
+                              } task${
+                                tasks.pending.length !== 1 ? "s" : ""
+                              } remaining`
+                            : `${tasks.pending.length} task${
+                                tasks.pending.length !== 1 ? "s" : ""
+                              } remaining to unlock full analytics power`}
                         </p>
                       </div>
                     </div>

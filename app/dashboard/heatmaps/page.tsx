@@ -48,7 +48,8 @@ export default function HeatmapsPage() {
 
   useEffect(() => {
     if (effectiveProjectId) {
-      fetchHeatmapPages(true).catch((error) => { // Force refresh when project changes
+      fetchHeatmapPages(true).catch((error) => {
+        // Force refresh when project changes
         console.error("Error fetching heatmap pages:", error);
         toast({
           title: "Error",
@@ -73,7 +74,8 @@ export default function HeatmapsPage() {
         selectedPage,
         heatmapType,
       });
-      fetchHeatmapData({ url: selectedPage, type: heatmapType }, true).catch( // Force refresh when project changes
+      fetchHeatmapData({ url: selectedPage, type: heatmapType }, true).catch(
+        // Force refresh when project changes
         (error) => {
           console.error("Error fetching heatmap data:", error);
           toast({

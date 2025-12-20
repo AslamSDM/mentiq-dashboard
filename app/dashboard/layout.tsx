@@ -87,6 +87,7 @@ export default function DashboardLayout({
 
   // Redirect to projects page if no projects exist and not already on projects page
   useEffect(() => {
+    if (pathname === "/dashboard/onboarding") return;
     if (
       projectsLoaded &&
       (!projects || projects.length === 0) &&
@@ -143,10 +144,8 @@ export default function DashboardLayout({
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar />
         <main className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            <OnboardingTaskBanner />
-            {children}
-          </div>
+          <OnboardingTaskBanner />
+          {children}
         </main>
       </div>
     </div>

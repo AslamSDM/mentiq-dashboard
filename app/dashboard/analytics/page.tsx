@@ -93,10 +93,13 @@ export default function AnalyticsPage() {
         break;
     }
 
-    fetchAnalytics({
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-    }, true); // Force refresh when project changes
+    fetchAnalytics(
+      {
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+      },
+      true
+    ); // Force refresh when project changes
     fetchEvents(true); // Force refresh when project changes
   }, [
     effectiveProjectId,

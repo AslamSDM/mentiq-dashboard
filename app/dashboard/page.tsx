@@ -125,11 +125,14 @@ export default function DashboardPage() {
       const startDateStr = startDate.toISOString().split("T")[0];
       const endDateStr = endDate.toISOString().split("T")[0];
 
-      fetchAnalytics({
-        startDate: startDateStr,
-        endDate: endDateStr,
-        groupBy: "day",
-      }, true); // Force refresh when project changes
+      fetchAnalytics(
+        {
+          startDate: startDateStr,
+          endDate: endDateStr,
+          groupBy: "day",
+        },
+        true
+      ); // Force refresh when project changes
 
       fetchEvents(true); // Force refresh when project changes
 

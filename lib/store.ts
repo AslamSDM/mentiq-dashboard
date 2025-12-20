@@ -268,7 +268,9 @@ export const useStore = create<AppState>()(
           localStorage.removeItem("selectedProjectId");
           localStorage.removeItem("impersonatedProjectId");
         }
-        console.log("🗑️ Cleared all project data, caches, and localStorage on logout");
+        console.log(
+          "🗑️ Cleared all project data, caches, and localStorage on logout"
+        );
       },
 
       // Admin Impersonation state
@@ -400,7 +402,10 @@ export const useStore = create<AppState>()(
               "🚨 SECURITY: Attempted to select project not in account's project list",
               projectId
             );
-            console.log("Available projects:", projects.map((p) => p.id));
+            console.log(
+              "Available projects:",
+              projects.map((p) => p.id)
+            );
             // Select first available project instead
             if (projects[0]) {
               projectId = projects[0].id;
@@ -630,7 +635,11 @@ export const useStore = create<AppState>()(
         if (!effectiveProjectId) return;
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && eventsCache && eventsCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          eventsCache &&
+          eventsCache.key === effectiveProjectId
+        ) {
           if (Date.now() - eventsCache.timestamp < CACHE_TTL.EVENTS) {
             console.log("✅ Using cached events", {
               age: (Date.now() - eventsCache.timestamp) / 1000 + "s",
@@ -678,7 +687,11 @@ export const useStore = create<AppState>()(
         }
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && heatmapPagesCache && heatmapPagesCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          heatmapPagesCache &&
+          heatmapPagesCache.key === effectiveProjectId
+        ) {
           if (Date.now() - heatmapPagesCache.timestamp < CACHE_TTL.HEATMAPS) {
             console.log("✅ Using cached heatmap pages", {
               age: (Date.now() - heatmapPagesCache.timestamp) / 1000 + "s",
@@ -782,7 +795,11 @@ export const useStore = create<AppState>()(
         }
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && experimentsCache && experimentsCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          experimentsCache &&
+          experimentsCache.key === effectiveProjectId
+        ) {
           if (Date.now() - experimentsCache.timestamp < CACHE_TTL.EXPERIMENTS) {
             console.log("✅ Using cached experiments", {
               age: (Date.now() - experimentsCache.timestamp) / 1000 + "s",
@@ -909,7 +926,11 @@ export const useStore = create<AppState>()(
         if (!effectiveProjectId) return;
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && sessionsCache && sessionsCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          sessionsCache &&
+          sessionsCache.key === effectiveProjectId
+        ) {
           if (Date.now() - sessionsCache.timestamp < CACHE_TTL.SESSIONS) {
             console.log("✅ Using cached sessions", {
               age: (Date.now() - sessionsCache.timestamp) / 1000 + "s",
@@ -946,7 +967,11 @@ export const useStore = create<AppState>()(
         if (!effectiveProjectId) return;
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && usersCache && usersCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          usersCache &&
+          usersCache.key === effectiveProjectId
+        ) {
           if (Date.now() - usersCache.timestamp < CACHE_TTL.USERS) {
             console.log("✅ Using cached users", {
               age: (Date.now() - usersCache.timestamp) / 1000 + "s",
@@ -998,7 +1023,11 @@ export const useStore = create<AppState>()(
         if (!effectiveProjectId) return;
 
         // Check cache unless force refresh - also verify project ID matches
-        if (!forceRefresh && sessionsOverviewCache && sessionsOverviewCache.key === effectiveProjectId) {
+        if (
+          !forceRefresh &&
+          sessionsOverviewCache &&
+          sessionsOverviewCache.key === effectiveProjectId
+        ) {
           if (
             Date.now() - sessionsOverviewCache.timestamp <
             CACHE_TTL.SESSIONS

@@ -60,12 +60,22 @@ export async function middleware(req: NextRequest) {
     );
   }
 
-  // Check subscription for authenticated users accessing dashboard (except admins)
-  if (isAuth && isDashboardPage && !hasActiveSubscription && !isAdmin) {
+  // Allow onboarding page to load even without subscription (needed for payment callback)
+  const isOnboardingPage = req.nextUrl.pathname.startsWith("/dashboard/onboarding");
+  const hasSuccessParam = req.nextUrl.searchParams.get("success") === "true";
+
+  // Check subscription for authenticated users accessing dashboard (except admins and onboarding)
+  if (isAuth && isDashboardPage && !hasActiveSubscription && !isAdmin && !isOnboardingPage) {
     console.log(
       "⚠️ User authenticated but no active subscription, redirecting to pricing"
     );
     return NextResponse.redirect(new URL("/pricing?required=true", req.url));
+  }
+
+  // Allow onboarding page with success parameter to refresh session
+  if (isOnboardingPage && hasSuccessParam) {
+    console.log("✅ Allowing onboarding page for payment callback");
+    return null;
   }
 
   return null;
