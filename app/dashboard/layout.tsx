@@ -93,9 +93,25 @@ export default function DashboardLayout({
       (!projects || projects.length === 0) &&
       pathname !== "/dashboard/projects"
     ) {
-      router.push("/dashboard/projects");
+      router.push("/dashboard/onboarding");
     }
   }, [projectsLoaded, projects, pathname, router]);
+
+  // SECURITY: Clear impersonation if user is not an admin
+  useEffect(() => {
+    if (status === "authenticated" && session && impersonatedProjectId) {
+      if (!session.isAdmin) {
+        console.warn(
+          "🚨 SECURITY: Non-admin user has impersonation set, clearing it"
+        );
+        clearImpersonation();
+        // Also clear from localStorage
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("mentiq-storage");
+        }
+      }
+    }
+  }, [status, session, impersonatedProjectId, clearImpersonation]);
 
   if (status === "loading") {
     return (
@@ -116,8 +132,8 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden flex-col">
-      {/* Admin Impersonation Banner */}
-      {impersonatedProjectId && (
+      {/* Admin Impersonation Banner - Only shown for admin users */}
+      {session?.isAdmin && impersonatedProjectId && (
         <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between z-50">
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4" />
