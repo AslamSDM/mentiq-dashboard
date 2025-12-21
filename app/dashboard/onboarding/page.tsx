@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useStore } from "@/lib/store";
@@ -50,6 +50,7 @@ export default function OnboardingPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "" });
+  const paymentPollingStarted = useRef(false);
 
   // Check if user already has projects, skip to ready step
   useEffect(() => {
@@ -61,7 +62,10 @@ export default function OnboardingPage() {
   // Refresh session after successful payment
   useEffect(() => {
     const success = searchParams.get("success");
-    if (success === "true" && update) {
+
+    // Prevent multiple polling attempts
+    if (success === "true" && update && !paymentPollingStarted.current) {
+      paymentPollingStarted.current = true;
       console.log(
         "💳 Payment successful - waiting for subscription to be created..."
       );
@@ -98,9 +102,11 @@ export default function OnboardingPage() {
             setTimeout(checkAndUpdateSession, pollInterval);
           } else {
             console.log(
-              "⏱️ Timeout waiting for subscription - please refresh the page"
+              "⏱️ Timeout waiting for subscription - redirecting anyway..."
             );
             setLoading(false);
+            // Redirect to dashboard even on timeout - subscription should be active
+            router.push("/dashboard");
           }
         } catch (error) {
           console.error("Error checking subscription:", error);
@@ -108,6 +114,8 @@ export default function OnboardingPage() {
             setTimeout(checkAndUpdateSession, pollInterval);
           } else {
             setLoading(false);
+            // Redirect to dashboard even on error
+            router.push("/dashboard");
           }
         }
       };
@@ -205,7 +213,7 @@ export default function OnboardingPage() {
   };
 
   const handleInviteDeveloper = () => {
-    router.push("/dashboard/settings?tab=team");
+    router.push("/dashboard/team");
   };
 
   const handleSkip = async () => {
