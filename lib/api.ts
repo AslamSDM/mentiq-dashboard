@@ -5,6 +5,8 @@ export { analyticsService } from "./services/analytics";
 export { experimentService } from "./services/experiment";
 export { userService } from "./services/user";
 export { adminService } from "./services/admin";
+export { teamService } from "./services/team";
+export type { TeamMember, Invitation, TeamMembersResponse, InvitationsResponse } from "./services/team";
 
 // Export token management
 export {

@@ -9,6 +9,7 @@ export const PRICING_TIERS = [
     description: "Perfect for startups getting started",
     features: [
       "Up to 100 paid users",
+      "2 team members",
       "Core analytics dashboard",
       "Session replay",
       "Basic retention cohorts",
@@ -25,6 +26,7 @@ export const PRICING_TIERS = [
     description: "For growing teams finding PMF",
     features: [
       "Up to 500 paid users",
+      "4 team members",
       "Advanced analytics",
       "Unlimited session replays",
       "Retention & churn analysis",
@@ -44,6 +46,7 @@ export const PRICING_TIERS = [
     description: "Scaling fast with proven growth",
     features: [
       "Up to 1,000 paid users",
+      "Unlimited team members",
       "Everything in Traction",
       "A/B testing & experiments",
       "Revenue analytics",
@@ -63,6 +66,7 @@ export const PRICING_TIERS = [
     description: "Enterprise-ready for rapid expansion",
     features: [
       "Up to 5,000 paid users",
+      "Unlimited team members",
       "Everything in Momentum",
       "Advanced segmentation",
       "Predictive churn modeling",
@@ -83,6 +87,7 @@ export const PRICING_TIERS = [
     description: "Maximum scale with premium support",
     features: [
       "Up to 10,000 paid users",
+      "Unlimited team members",
       "Everything in Scale",
       "White-label options",
       "Custom ML models",
@@ -103,6 +108,7 @@ export const PRICING_TIERS = [
     description: "Custom solutions for large-scale operations",
     features: [
       "Unlimited paid users",
+      "Unlimited team members",
       "Custom deployment options",
       "Dedicated infrastructure",
       "24/7 premium support",

@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useStore } from "@/lib/store";
 import {
   LayoutDashboard,
   Bell,
@@ -132,6 +133,11 @@ const navigation = [
     href: "/dashboard/projects",
     icon: <FolderKanban className="h-5 w-5" />,
   },
+  {
+    name: "Team",
+    href: "/dashboard/team",
+    icon: <Users className="h-5 w-5" />,
+  },
   // {
   //   name: "Pricing",
   //   href: "/dashboard/pricing",
@@ -152,8 +158,21 @@ export function DashboardSidebar() {
   const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { logout } = useStore();
 
   const handleSignOut = async () => {
+    // Clear all Zustand state (tokens, projects, caches, impersonation)
+    logout();
+
+    // Clear all localStorage items that could leak between sessions
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mentiq-storage"); // Zustand persisted state
+      localStorage.removeItem("selectedProjectId");
+      localStorage.removeItem("impersonatedProjectId");
+      localStorage.removeItem("onboarding_banner_dismissed");
+    }
+
+    // Sign out from NextAuth
     await signOut({ callbackUrl: "/signin" });
   };
 

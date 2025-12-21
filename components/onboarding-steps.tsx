@@ -395,8 +395,8 @@ export function SDKSetup({
   onComplete,
   onSkip,
 }: SDKSetupProps) {
-  const installCode = `npm install @mentiq/sdk`;
-  const setupCode = `import Mentiq from '@mentiq/sdk';
+  const installCode = `npm install @mentiq-sdk`;
+  const setupCode = `import Mentiq from '@mentiq-sdk';
 
 Mentiq.init({
   projectId: '${projectId}',
