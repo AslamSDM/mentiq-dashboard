@@ -267,6 +267,7 @@ export async function POST(req: NextRequest) {
           const subscription = await stripe.subscriptions.retrieve(
             (invoice as any).subscription
           );
+          console.log("Retrieved subscription for invoice:", subscription);
           accountId = subscription.metadata?.accountId;
         }
 
