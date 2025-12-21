@@ -5,7 +5,7 @@ import * as React from "react";
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,6 @@ import {
   User,
   Building,
   Check,
-  ArrowLeft,
   Zap,
   TrendingUp,
   Rocket,
@@ -35,11 +34,7 @@ import {
   Crown,
   Loader2,
 } from "lucide-react";
-import {
-  PRICING_TIERS,
-  getTierById,
-  getTierByUserCount,
-} from "@/lib/constants";
+import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
 
 const TIER_ICONS: Record<string, React.ReactNode> = {
   launch: <Zap className="h-5 w-5" />,
@@ -60,7 +55,6 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 function SignUpForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const preselectedPlanId = searchParams.get("plan");
