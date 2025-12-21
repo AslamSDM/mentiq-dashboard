@@ -72,13 +72,16 @@ export default function OnboardingPage() {
       setLoading(true);
 
       let attempts = 0;
-      const maxAttempts = 15; // 30 seconds total
-      const pollInterval = 2000; // 2 seconds
+      const maxAttempts = 5; // 5 retries max
+
+      // Exponential backoff: 2s, 4s, 8s, 16s, 32s (total ~62 seconds)
+      const getBackoffDelay = (attempt: number) => Math.pow(2, attempt) * 1000;
 
       const checkAndUpdateSession = async () => {
         attempts++;
+        const delay = getBackoffDelay(attempts);
         console.log(
-          `🔄 Checking subscription status (${attempts}/${maxAttempts})...`
+          `🔄 Checking subscription status (${attempts}/${maxAttempts}), next delay: ${delay / 1000}s...`
         );
 
         try {
@@ -99,31 +102,41 @@ export default function OnboardingPage() {
           }
 
           if (attempts < maxAttempts) {
-            setTimeout(checkAndUpdateSession, pollInterval);
+            setTimeout(checkAndUpdateSession, delay);
           } else {
             console.log(
-              "⏱️ Timeout waiting for subscription - redirecting anyway..."
+              "⏱️ Max retries reached - subscription not confirmed yet"
             );
             setLoading(false);
-            // Redirect to dashboard even on timeout - subscription should be active
-            router.push("/dashboard");
+            // Show error toast instead of redirect loop
+            toast({
+              title: "Payment processing",
+              description:
+                "Your payment is still being processed. Please refresh the page in a few moments or contact support if this persists.",
+              variant: "destructive",
+            });
           }
         } catch (error) {
           console.error("Error checking subscription:", error);
           if (attempts < maxAttempts) {
-            setTimeout(checkAndUpdateSession, pollInterval);
+            setTimeout(checkAndUpdateSession, delay);
           } else {
             setLoading(false);
-            // Redirect to dashboard even on error
-            router.push("/dashboard");
+            // Show error toast instead of redirect loop
+            toast({
+              title: "Payment verification failed",
+              description:
+                "We couldn't verify your subscription. Please refresh the page or contact support.",
+              variant: "destructive",
+            });
           }
         }
       };
 
-      // Start checking after 3 seconds to allow webhook to process
-      setTimeout(checkAndUpdateSession, 3000);
+      // Start checking after 2 seconds to allow webhook to process
+      setTimeout(checkAndUpdateSession, 2000);
     }
-  }, [searchParams, update, router]);
+  }, [searchParams, update, router, toast]);
 
   useEffect(() => {
     if (effectiveProjectId) {
