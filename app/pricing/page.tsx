@@ -61,6 +61,25 @@ function PricingContent() {
   const [isRequired, setIsRequired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Create checkpoints from tier ranges (midpoint of each range)
+  const checkpoints = PRICING_TIERS.filter((t) => t.id !== "enterprise").map(
+    (tier) => {
+      const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
+      return {
+        value: midpoint,
+        label: tier.range[1].toLocaleString(),
+        tierName: tier.name,
+        range: tier.range,
+      };
+    }
+  );
+  checkpoints.push({
+    value: 11000,
+    label: "10,000+",
+    tierName: "Enterprise",
+    range: [10001, Infinity],
+  });
+
   useEffect(() => {
     // Check if subscription is required
     const required = searchParams.get("required");
@@ -271,29 +290,57 @@ function PricingContent() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-400">
-                    1 user
-                  </span>
-                  <div className="text-center transition-all duration-300">
-                    <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-400">
-                      {userCount.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-gray-400 mt-2">paid users</div>
+                <div className="text-center transition-all duration-300">
+                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-400">
+                    {userCount > 10000 ? "10,000+" : userCount.toLocaleString()}
                   </div>
-                  <span className="text-sm font-medium text-gray-400">
-                    10,000+ users
-                  </span>
+                  <div className="text-sm text-gray-400 mt-2">
+                    {currentTier && userCount <= 10000 && (
+                      <span>
+                        up to {currentTier.range[1].toLocaleString()} Paid Users
+                      </span>
+                    )}
+                    {userCount > 10000 && <span>Unlimited Paid Users</span>}
+                  </div>
                 </div>
-                <div className="px-2">
-                  <Slider
-                    value={[userCount]}
-                    onValueChange={(value: number[]) => setUserCount(value[0])}
-                    min={1}
-                    max={11000}
-                    step={10}
-                    className="w-full"
-                  />
+                <div className="space-y-3">
+                  <div className="relative px-2">
+                    <Slider
+                      value={[
+                        checkpoints.findIndex((cp) => cp.value === userCount) >=
+                        0
+                          ? checkpoints.findIndex(
+                              (cp) => cp.value === userCount
+                            )
+                          : 0,
+                      ]}
+                      onValueChange={(value: number[]) =>
+                        setUserCount(checkpoints[value[0]].value)
+                      }
+                      min={0}
+                      max={checkpoints.length - 1}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="relative px-2">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      {checkpoints.map((cp, idx) => (
+                        <div
+                          key={idx}
+                          className="flex flex-col items-center"
+                          style={{
+                            position: "absolute",
+                            left: `${(idx / (checkpoints.length - 1)) * 100}%`,
+                            transform: "translateX(-50%)",
+                          }}
+                        >
+                          <div className="h-2 w-0.5 bg-gray-600 mb-1"></div>
+                          <span className="whitespace-nowrap">{cp.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -486,7 +533,7 @@ function PricingContent() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Unlimited paid users</span>
+                    <span className="text-gray-300">Unlimited Paid Users</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
@@ -609,7 +656,13 @@ function PricingContent() {
 
 export default function PricingPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          Loading...
+        </div>
+      }
+    >
       <PricingContent />
     </Suspense>
   );

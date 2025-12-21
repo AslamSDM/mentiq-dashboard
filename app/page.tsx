@@ -100,7 +100,7 @@ export default function Home() {
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
               Cut Monthly Churn in HALF{" "}
-              <span className="text-white font-medium">within 90 day</span>
+              <span className="text-white font-medium">Within 90 days</span>
             </p>
           </div>
 
