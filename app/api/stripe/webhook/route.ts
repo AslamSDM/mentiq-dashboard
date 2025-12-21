@@ -9,13 +9,31 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET!;
+
+// Get webhook secret at runtime to ensure it's loaded
+function getWebhookSecret(): string {
+  const secret = process.env.WEBHOOK_SECRET;
+  if (!secret) {
+    console.error("🚨 WEBHOOK_SECRET environment variable is not set!");
+    throw new Error("WEBHOOK_SECRET is required");
+  }
+  return secret;
+}
 
 // Helper function to generate HMAC signature for webhook requests
 function generateWebhookSignature(payload: string): string {
-  const hmac = crypto.createHmac("sha256", WEBHOOK_SECRET);
+  const secret = getWebhookSecret();
+  const hmac = crypto.createHmac("sha256", secret);
   hmac.update(payload);
-  return hmac.digest("hex");
+  const signature = hmac.digest("hex");
+
+  // Debug logging
+  console.log("🔐 Generating webhook signature:");
+  console.log("   Secret length:", secret.length);
+  console.log("   Payload length:", payload.length);
+  console.log("   Generated signature:", signature);
+
+  return signature;
 }
 
 // Helper function to update subscription in backend
@@ -23,6 +41,9 @@ async function updateSubscription(data: any) {
   try {
     const payload = JSON.stringify(data);
     const signature = generateWebhookSignature(payload);
+
+    console.log("📤 Sending to backend:", `${BACKEND_URL}/webhook/subscription`);
+    console.log("   Payload:", payload.substring(0, 200) + "...");
 
     const response = await fetch(`${BACKEND_URL}/webhook/subscription`, {
       method: "POST",
@@ -36,9 +57,11 @@ async function updateSubscription(data: any) {
     if (!response.ok) {
       const error = await response.text();
       console.error("Failed to update subscription:", error);
+      console.error("Response status:", response.status);
       return false;
     }
 
+    console.log("✅ Subscription updated successfully");
     return true;
   } catch (error) {
     console.error("Error updating subscription:", error);
@@ -116,12 +139,31 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Fetch subscription details from Stripe
+        // Fetch subscription details from Stripe and update its metadata
         let subscription: Stripe.Subscription | null = null;
         if (session.subscription && typeof session.subscription === "string") {
-          subscription = await stripe.subscriptions.retrieve(
-            session.subscription
+          // Update subscription metadata with accountId so invoice events can find it
+          subscription = await stripe.subscriptions.update(
+            session.subscription,
+            {
+              metadata: {
+                accountId,
+                tier,
+                userCount: userCount || "0",
+              },
+            }
           );
+        }
+
+        // Also update customer metadata for fallback lookups
+        if (session.customer && typeof session.customer === "string") {
+          try {
+            await stripe.customers.update(session.customer, {
+              metadata: { accountId },
+            });
+          } catch (e) {
+            console.error("Failed to update customer metadata:", e);
+          }
         }
 
         // Create or update subscription in database
@@ -206,6 +248,17 @@ export async function POST(req: NextRequest) {
           break;
         }
 
+        // Ensure subscription metadata has accountId (in case it was missing)
+        if (accountId && subscription.id) {
+          try {
+            await stripe.subscriptions.update(subscription.id, {
+              metadata: { accountId },
+            });
+          } catch (e) {
+            console.error("Failed to update subscription metadata:", e);
+          }
+        }
+
         // Update subscription status and billing period
         await updateSubscription({
           account_id: accountId,
@@ -256,10 +309,13 @@ export async function POST(req: NextRequest) {
         console.log("Invoice payment succeeded:", {
           invoiceId: invoice.id,
           subscriptionId: (invoice as any).subscription,
+          customerId: invoice.customer,
         });
 
-        // Get subscription to find account ID
+        // Get account ID from subscription metadata, falling back to customer metadata
         let accountId: string | undefined;
+
+        // Try subscription metadata first
         if (
           (invoice as any).subscription &&
           typeof (invoice as any).subscription === "string"
@@ -267,12 +323,26 @@ export async function POST(req: NextRequest) {
           const subscription = await stripe.subscriptions.retrieve(
             (invoice as any).subscription
           );
-          console.log("Retrieved subscription for invoice:", subscription);
           accountId = subscription.metadata?.accountId;
         }
 
+        // Fallback: try customer metadata
+        if (!accountId && invoice.customer) {
+          const customerId = typeof invoice.customer === "string"
+            ? invoice.customer
+            : invoice.customer.id;
+          try {
+            const customer = await stripe.customers.retrieve(customerId);
+            if (customer && !customer.deleted) {
+              accountId = (customer as Stripe.Customer).metadata?.accountId;
+            }
+          } catch (e) {
+            console.error("Failed to retrieve customer:", e);
+          }
+        }
+
         if (!accountId) {
-          console.error("Could not find accountId for invoice");
+          console.error("Could not find accountId for invoice:", invoice.id);
           break;
         }
 
@@ -312,10 +382,13 @@ export async function POST(req: NextRequest) {
         console.log("Invoice payment failed:", {
           invoiceId: invoice.id,
           subscriptionId: (invoice as any).subscription,
+          customerId: invoice.customer,
         });
 
-        // Get subscription to find account ID
+        // Get account ID from subscription metadata, falling back to customer metadata
         let accountId: string | undefined;
+
+        // Try subscription metadata first
         if (
           (invoice as any).subscription &&
           typeof (invoice as any).subscription === "string"
@@ -326,8 +399,23 @@ export async function POST(req: NextRequest) {
           accountId = subscription.metadata?.accountId;
         }
 
+        // Fallback: try customer metadata
+        if (!accountId && invoice.customer) {
+          const customerId = typeof invoice.customer === "string"
+            ? invoice.customer
+            : invoice.customer.id;
+          try {
+            const customer = await stripe.customers.retrieve(customerId);
+            if (customer && !customer.deleted) {
+              accountId = (customer as Stripe.Customer).metadata?.accountId;
+            }
+          } catch (e) {
+            console.error("Failed to retrieve customer:", e);
+          }
+        }
+
         if (!accountId) {
-          console.error("Could not find accountId for invoice");
+          console.error("Could not find accountId for invoice:", invoice.id);
           break;
         }
 
@@ -355,6 +443,22 @@ export async function POST(req: NextRequest) {
 
         break;
       }
+
+      // Events we acknowledge but don't need to handle
+      case "customer.created":
+      case "customer.updated":
+      case "customer.subscription.created":
+      case "customer.subscription.trial_will_end":
+      case "invoice.created":
+      case "invoice.finalized":
+      case "invoice.paid":
+      case "invoice.upcoming":
+      case "payment_intent.created":
+      case "payment_intent.succeeded":
+      case "charge.succeeded":
+        // These events are informational - no action needed
+        console.log(`Acknowledged event: ${event.type}`);
+        break;
 
       default:
         console.log(`Unhandled event type: ${event.type}`);
