@@ -255,40 +255,42 @@ export function HeatmapsView() {
 
             <TabsContent value="click" className="space-y-4">
               <div
-                className="relative bg-muted rounded-lg overflow-hidden"
-                style={{ height: "500px" }}
+                className="relative bg-muted rounded-lg overflow-hidden border"
+                style={{ height: "600px" }}
               >
                 {loadingHeatmapData ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    Loading heatmap...
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
                   <>
-                    {!heatmapData?.clicks || heatmapData.clicks.length === 0 ? (
-                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                        <div className="text-center space-y-2">
-                          <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                          <p className="text-sm font-medium">
-                            No Click Data Available
-                          </p>
-                          <p className="text-xs">Page: {selectedPage}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Start tracking user interactions to see click
-                            heatmaps
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                          <div className="text-center space-y-2">
-                            <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                            <p className="text-sm font-medium">Click Heatmap</p>
-                            <p className="text-xs">Page: {selectedPage}</p>
+                    {/* Site Preview iframe */}
+                    {selectedPage && (
+                      <iframe
+                        src={selectedPage}
+                        className="absolute inset-0 w-full h-full border-0"
+                        style={{ pointerEvents: "none" }}
+                        title="Site Preview"
+                        sandbox="allow-same-origin allow-scripts"
+                      />
+                    )}
+
+                    {/* Heatmap overlay */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {!heatmapData?.clicks || heatmapData.clicks.length === 0 ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                          <div className="text-center space-y-2 bg-card p-6 rounded-lg shadow-lg border">
+                            <MousePointer className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
+                            <p className="text-sm font-medium">
+                              No Click Data Available
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Start tracking user interactions to see click heatmaps
+                            </p>
                           </div>
                         </div>
-                        {heatmapData.clicks.map((click, i) => {
-                          // Normalize intensity based on max count
+                      ) : (
+                        heatmapData.clicks.map((click, i) => {
                           const maxCount = Math.max(
                             ...heatmapData.clicks.map((c) => c.count)
                           );
@@ -305,7 +307,7 @@ export function HeatmapsView() {
                                 width: `${60 + intensity * 40}px`,
                                 height: `${60 + intensity * 40}px`,
                                 backgroundColor: `rgba(239, 68, 68, ${
-                                  intensity * 0.8
+                                  0.3 + intensity * 0.5
                                 })`,
                                 transform: "translate(-50%, -50%)",
                               }}
@@ -314,8 +316,17 @@ export function HeatmapsView() {
                               }`}
                             />
                           );
-                        })}
-                      </>
+                        })
+                      )}
+                    </div>
+
+                    {/* Page URL badge */}
+                    {selectedPage && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+                          {selectedPage}
+                        </Badge>
+                      </div>
                     )}
                   </>
                 )}
@@ -410,34 +421,36 @@ export function HeatmapsView() {
 
             <TabsContent value="move" className="space-y-4">
               <div
-                className="relative bg-muted rounded-lg overflow-hidden"
-                style={{ height: "500px" }}
+                className="relative bg-muted rounded-lg overflow-hidden border"
+                style={{ height: "600px" }}
               >
-                {!heatmapData?.mouseMoves ||
-                heatmapData.mouseMoves.length === 0 ? (
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                    <div className="text-center space-y-2">
-                      <MousePointer className="h-12 w-12 mx-auto mb-2" />
-                      <p className="text-sm font-medium">
-                        No Mouse Movement Data
-                      </p>
-                      <p className="text-xs">Page: {selectedPage}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Enable mouse tracking to see movement patterns
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                      <div className="text-center space-y-2">
-                        <MousePointer className="h-12 w-12 mx-auto mb-2" />
+                {/* Site Preview iframe */}
+                {selectedPage && (
+                  <iframe
+                    src={selectedPage}
+                    className="absolute inset-0 w-full h-full border-0"
+                    style={{ pointerEvents: "none" }}
+                    title="Site Preview"
+                    sandbox="allow-same-origin allow-scripts"
+                  />
+                )}
+
+                {/* Mouse movement overlay */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {!heatmapData?.mouseMoves ||
+                  heatmapData.mouseMoves.length === 0 ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                      <div className="text-center space-y-2 bg-card p-6 rounded-lg shadow-lg border">
+                        <MousePointer className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
                         <p className="text-sm font-medium">
-                          Mouse Movement Patterns
+                          No Mouse Movement Data
                         </p>
-                        <p className="text-xs">Page: {selectedPage}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Enable mouse tracking to see movement patterns
+                        </p>
                       </div>
                     </div>
+                  ) : (
                     <svg
                       className="absolute inset-0 w-full h-full"
                       style={{ opacity: 0.8 }}
@@ -468,7 +481,6 @@ export function HeatmapsView() {
                       </defs>
                       {heatmapData.mouseMoves.map((moveData, i) => (
                         <g key={i}>
-                          {/* Draw path lines */}
                           {moveData.path.length > 1 && (
                             <path
                               d={`M ${moveData.path[0].x} ${
@@ -484,7 +496,6 @@ export function HeatmapsView() {
                               opacity={0.6}
                             />
                           )}
-                          {/* Draw density heatmap */}
                           {moveData.density?.map((density, j) => (
                             <circle
                               key={j}
@@ -500,7 +511,16 @@ export function HeatmapsView() {
                         </g>
                       ))}
                     </svg>
-                  </>
+                  )}
+                </div>
+
+                {/* Page URL badge */}
+                {selectedPage && (
+                  <div className="absolute top-2 left-2 z-10">
+                    <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+                      {selectedPage}
+                    </Badge>
+                  </div>
                 )}
               </div>
               <div className="p-4 bg-muted rounded-lg">

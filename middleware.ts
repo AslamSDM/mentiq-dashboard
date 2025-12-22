@@ -32,6 +32,19 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname.startsWith("/signup");
   const isPricingPage = req.nextUrl.pathname.startsWith("/pricing");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
+  const isAdminPage = req.nextUrl.pathname.startsWith("/dashboard/admin");
+
+  // SECURITY: Protect admin routes at middleware level
+  if (isAdminPage) {
+    if (!isAuth) {
+      console.warn("🚫 Unauthenticated user attempted to access admin page");
+      return NextResponse.redirect(new URL("/signin", req.url));
+    }
+    if (!isAdmin) {
+      console.warn("🚫 Non-admin user attempted to access admin page:", token?.email);
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+  }
 
   // Allow auth pages for non-authenticated users
   if (isAuthPage) {

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useStore } from "@/lib/store";
 import {
   LayoutDashboard,
@@ -158,9 +158,10 @@ export function DashboardSidebar() {
   const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { logout } = useStore();
+  // Use selector for fine-grained subscription
+  const logout = useStore((state) => state.logout);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     // Clear all Zustand state (tokens, projects, caches, impersonation)
     logout();
 
@@ -174,7 +175,7 @@ export function DashboardSidebar() {
 
     // Sign out from NextAuth
     await signOut({ callbackUrl: "/signin" });
-  };
+  }, [logout]);
 
   return (
     <>

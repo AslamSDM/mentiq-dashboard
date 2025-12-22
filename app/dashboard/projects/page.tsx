@@ -32,6 +32,7 @@ import {
 import { apiClient, type Project, type ApiKey } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "next-auth/react";
 
 export default function ProjectsPage() {
   // Zustand store
@@ -50,6 +51,7 @@ export default function ProjectsPage() {
   } = useStore();
 
   const { toast } = useToast();
+  const { data: session } = useSession();
 
   // Local state
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
@@ -65,14 +67,15 @@ export default function ProjectsPage() {
   const [copiedItem, setCopiedItem] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Get role from session, default to "owner" for backward compatibility
+  const currentUserRole = session?.role || "owner";
+
   useEffect(() => {
     if (!projectsLoaded) {
       setLoading(true);
       fetchProjects().finally(() => setLoading(false));
     }
-  }, [fetchProjects, projectsLoaded]);
-
-  // Check for successful payment from Stripe
+  }, [fetchProjects, projectsLoaded]); // Check for successful payment from Stripe
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") {
@@ -522,27 +525,29 @@ export default function ProjectsPage() {
                     {expandedProjects.has(project.id) ? "Hide" : "Show"} API
                     Keys
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeleteProject(project.id)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="mr-2 h-4 w-4"
+                  {currentUserRole === "owner" && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteProject(project.id)}
                     >
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    </svg>
-                    Delete
-                  </Button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="mr-2 h-4 w-4"
+                      >
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      </svg>
+                      Delete
+                    </Button>
+                  )}
                 </div>
 
                 {/* Collapsible API Keys Section */}
@@ -563,7 +568,15 @@ export default function ProjectsPage() {
                         }
                       >
                         <DialogTrigger asChild>
-                          <Button size="sm">
+                          <Button
+                            size="sm"
+                            disabled={currentUserRole === "viewer"}
+                            title={
+                              currentUserRole === "viewer"
+                                ? "Viewers cannot create API keys"
+                                : "Create new API key"
+                            }
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
@@ -724,6 +737,12 @@ export default function ProjectsPage() {
                                           !key.isActive
                                         )
                                       }
+                                      disabled={currentUserRole === "viewer"}
+                                      title={
+                                        currentUserRole === "viewer"
+                                          ? "Viewers cannot modify API keys"
+                                          : ""
+                                      }
                                     >
                                       {key.isActive ? "Disable" : "Enable"}
                                     </Button>
@@ -732,6 +751,12 @@ export default function ProjectsPage() {
                                       size="sm"
                                       onClick={() =>
                                         handleDeleteApiKey(project.id, key.id)
+                                      }
+                                      disabled={currentUserRole === "viewer"}
+                                      title={
+                                        currentUserRole === "viewer"
+                                          ? "Viewers cannot delete API keys"
+                                          : ""
                                       }
                                     >
                                       Delete

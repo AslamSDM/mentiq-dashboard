@@ -44,6 +44,7 @@ export const authOptions: NextAuthOptions = {
               refreshToken: refreshToken,
               projectId: projectId,
               isAdmin: response.user.isAdmin || false,
+              role: response.user.role || "owner",
               hasActiveSubscription:
                 response.user.hasActiveSubscription || false,
               subscriptionStatus: response.user.subscriptionStatus || "none",
@@ -68,6 +69,7 @@ export const authOptions: NextAuthOptions = {
         token.refreshToken = user.refreshToken;
         token.projectId = user.projectId;
         token.isAdmin = user.isAdmin;
+        token.role = user.role;
         token.hasActiveSubscription = user.hasActiveSubscription;
         token.subscriptionStatus = user.subscriptionStatus;
         // Store user ID in token.sub (NextAuth standard)
@@ -76,10 +78,14 @@ export const authOptions: NextAuthOptions = {
 
       // Manual session update - refetch subscription status from backend
       if (trigger === "update" && token.accessToken) {
-        console.log("JWT callback: Refetching subscription status from backend");
+        console.log(
+          "JWT callback: Refetching subscription status from backend"
+        );
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/api/v1/me`,
+            `${
+              process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"
+            }/api/v1/me`,
             {
               headers: {
                 Authorization: `Bearer ${token.accessToken}`,
@@ -111,6 +117,7 @@ export const authOptions: NextAuthOptions = {
         session.refreshToken = token.refreshToken;
         session.projectId = token.projectId;
         session.isAdmin = token.isAdmin as boolean;
+        session.role = token.role as string;
         session.hasActiveSubscription = token.hasActiveSubscription as boolean;
         session.subscriptionStatus = token.subscriptionStatus as string;
         // IMPORTANT: Set the user ID in session.user

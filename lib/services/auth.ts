@@ -5,6 +5,7 @@ export interface AuthUser {
   name: string;
   email: string;
   isAdmin?: boolean;
+  role?: string;
   hasActiveSubscription?: boolean;
   subscriptionStatus?: string;
   createdAt: string;

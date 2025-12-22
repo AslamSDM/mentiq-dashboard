@@ -19,6 +19,12 @@ import {
   SessionsOverview,
 } from "./api";
 import { centralizedData } from "./services/centralized-data";
+import {
+  playbooksService,
+  Playbook,
+  PlaybooksSummary,
+  CreatePlaybookRequest,
+} from "./services/playbooks";
 
 // Cache configuration
 const CACHE_TTL = {
@@ -29,6 +35,7 @@ const CACHE_TTL = {
   EXPERIMENTS: 5 * 60 * 1000, // 5 minutes
   HEATMAPS: 10 * 60 * 1000, // 10 minutes
   ENHANCED_ANALYTICS: 5 * 60 * 1000, // 5 minutes
+  PLAYBOOKS: 5 * 60 * 1000, // 5 minutes
 };
 
 interface CacheEntry<T> {
@@ -73,7 +80,7 @@ interface AppState {
   projects: Project[];
   selectedProjectId: string | null;
   projectsLoaded: boolean;
-  fetchProjects: () => Promise<void>;
+  fetchProjects: (retryCount?: number) => Promise<void>;
   createProject: (name: string, description?: string) => Promise<Project>;
   deleteProject: (projectId: string) => Promise<void>;
   setSelectedProjectId: (projectId: string | null) => void;
@@ -178,6 +185,21 @@ interface AppState {
   fetchSessionsOverview: (forceRefresh?: boolean) => Promise<void>;
   selectSession: (session: Session | null) => Promise<void>;
   selectUser: (user: User | null) => void;
+
+  // Playbooks
+  playbooks: Playbook[];
+  playbooksCache: CacheEntry<Playbook[]> | null;
+  playbooksSummary: PlaybooksSummary | null;
+  playbooksSummaryCache: CacheEntry<PlaybooksSummary> | null;
+  loadingPlaybooks: boolean;
+  fetchPlaybooks: (forceRefresh?: boolean) => Promise<void>;
+  fetchPlaybooksSummary: (forceRefresh?: boolean) => Promise<void>;
+  createPlaybook: (data: CreatePlaybookRequest) => Promise<Playbook>;
+  updatePlaybookStatus: (
+    playbookId: string,
+    status: "draft" | "active" | "paused" | "archived"
+  ) => Promise<Playbook>;
+  deletePlaybook: (playbookId: string) => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -247,6 +269,11 @@ export const useStore = create<AppState>()(
           selectedSession: null,
           selectedUser: null,
           apiKeys: {},
+          // Clear playbooks
+          playbooks: [],
+          playbooksCache: null,
+          playbooksSummary: null,
+          playbooksSummaryCache: null,
           // Clear all caches
           analyticsCache: {},
           eventsCache: null,
@@ -302,6 +329,8 @@ export const useStore = create<AppState>()(
           heatmapPagesCache: null,
           heatmapDataCache: {},
           enhancedAnalyticsCache: {},
+          playbooksCache: null,
+          playbooksSummaryCache: null,
         });
         // Also clear centralized cache
         centralizedData.clearAllCache();
@@ -321,6 +350,8 @@ export const useStore = create<AppState>()(
           heatmapPagesCache: null,
           heatmapDataCache: {},
           enhancedAnalyticsCache: {},
+          playbooksCache: null,
+          playbooksSummaryCache: null,
         });
         centralizedData.clearAllCache();
       },
@@ -337,18 +368,32 @@ export const useStore = create<AppState>()(
       // API Keys state
       apiKeys: {},
       loadingApiKeys: {},
-      fetchProjects: async () => {
-        if (!get().isAuthenticated) return;
-        console.log("Zustand: Fetching projects...");
+      fetchProjects: async (retryCount?: number) => {
+        const currentRetry = retryCount ?? 0;
+        const { isAuthenticated, token } = get();
+        
+        if (!isAuthenticated || !token) {
+          console.warn("Zustand: Cannot fetch projects - not authenticated or no token");
+          return;
+        }
+        
+        console.log("Zustand: Fetching projects...", currentRetry > 0 ? `(retry ${currentRetry})` : "");
         try {
           const projects = await apiClient.getProjects();
           console.log("Zustand: Projects fetched", projects);
           set({ projects, projectsLoaded: true });
-          // Don't auto-select here - let the dashboard layout handle it
-          // to prioritize session projectId over first project
         } catch (error) {
           console.error("Zustand: Failed to fetch projects", error);
-          set({ projectsLoaded: true });
+          
+          // Retry up to 3 times with exponential backoff
+          if (currentRetry < 3) {
+            const delay = Math.pow(2, currentRetry) * 1000;
+            console.log(`Zustand: Retrying in ${delay}ms...`);
+            setTimeout(() => get().fetchProjects(currentRetry + 1), delay);
+          } else {
+            console.error("Zustand: All project fetch retries failed");
+            set({ projectsLoaded: true });
+          }
         }
       },
       createProject: async (name, description) => {
@@ -1084,6 +1129,132 @@ export const useStore = create<AppState>()(
         set({ selectedUser: user });
       },
 
+      // Playbooks state
+      playbooks: [],
+      playbooksCache: null,
+      playbooksSummary: null,
+      playbooksSummaryCache: null,
+      loadingPlaybooks: false,
+
+      fetchPlaybooks: async (forceRefresh = false) => {
+        const { playbooksCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) {
+          set({ playbooks: [] });
+          return;
+        }
+
+        // Check cache unless force refresh
+        if (
+          !forceRefresh &&
+          playbooksCache &&
+          playbooksCache.key === effectiveProjectId
+        ) {
+          if (Date.now() - playbooksCache.timestamp < CACHE_TTL.PLAYBOOKS) {
+            console.log("✅ Using cached playbooks", {
+              age: (Date.now() - playbooksCache.timestamp) / 1000 + "s",
+              projectId: effectiveProjectId,
+            });
+            set({ playbooks: playbooksCache.data });
+            return;
+          }
+        }
+
+        console.log("📡 Fetching fresh playbooks");
+        set({ loadingPlaybooks: true });
+        try {
+          const playbooks = await playbooksService.getPlaybooks(effectiveProjectId);
+          set({
+            playbooks,
+            playbooksCache: {
+              data: playbooks,
+              timestamp: Date.now(),
+              key: effectiveProjectId,
+            },
+            loadingPlaybooks: false,
+          });
+          console.log("✅ Fetched and cached playbooks");
+        } catch (error) {
+          console.error("❌ Failed to fetch playbooks:", error);
+          set({ loadingPlaybooks: false, playbooks: [] });
+        }
+      },
+
+      fetchPlaybooksSummary: async (forceRefresh = false) => {
+        const { playbooksSummaryCache, getEffectiveProjectId } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) {
+          set({ playbooksSummary: null });
+          return;
+        }
+
+        // Check cache unless force refresh
+        if (
+          !forceRefresh &&
+          playbooksSummaryCache &&
+          playbooksSummaryCache.key === effectiveProjectId
+        ) {
+          if (Date.now() - playbooksSummaryCache.timestamp < CACHE_TTL.PLAYBOOKS) {
+            console.log("✅ Using cached playbooks summary");
+            set({ playbooksSummary: playbooksSummaryCache.data });
+            return;
+          }
+        }
+
+        try {
+          const summary = await playbooksService.getPlaybooksSummary(effectiveProjectId);
+          set({
+            playbooksSummary: summary,
+            playbooksSummaryCache: {
+              data: summary,
+              timestamp: Date.now(),
+              key: effectiveProjectId,
+            },
+          });
+        } catch (error) {
+          console.error("❌ Failed to fetch playbooks summary:", error);
+        }
+      },
+
+      createPlaybook: async (data) => {
+        const { getEffectiveProjectId, fetchPlaybooks, fetchPlaybooksSummary } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) throw new Error("No project selected");
+
+        const playbook = await playbooksService.createPlaybook(effectiveProjectId, data);
+        // Refresh playbooks list
+        await fetchPlaybooks(true);
+        await fetchPlaybooksSummary(true);
+        return playbook;
+      },
+
+      updatePlaybookStatus: async (playbookId, status) => {
+        const { getEffectiveProjectId, fetchPlaybooks, fetchPlaybooksSummary } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) throw new Error("No project selected");
+
+        const playbook = await playbooksService.updatePlaybookStatus(
+          effectiveProjectId,
+          playbookId,
+          status
+        );
+        // Refresh playbooks list
+        await fetchPlaybooks(true);
+        await fetchPlaybooksSummary(true);
+        return playbook;
+      },
+
+      deletePlaybook: async (playbookId) => {
+        const { getEffectiveProjectId, fetchPlaybooks, fetchPlaybooksSummary } = get();
+        const effectiveProjectId = getEffectiveProjectId();
+        if (!effectiveProjectId) throw new Error("No project selected");
+
+        await playbooksService.deletePlaybook(effectiveProjectId, playbookId);
+        // Refresh playbooks list
+        await fetchPlaybooks(true);
+        await fetchPlaybooksSummary(true);
+      },
+
       // Global cache management functions
       clearAllCaches: () => {
         set({
@@ -1097,6 +1268,8 @@ export const useStore = create<AppState>()(
           heatmapPagesCache: null,
           heatmapDataCache: {},
           enhancedAnalyticsCache: {},
+          playbooksCache: null,
+          playbooksSummaryCache: null,
         });
         console.log("🗑️ Cleared all caches");
       },
@@ -1154,3 +1327,114 @@ export const useStore = create<AppState>()(
     }
   )
 );
+
+// ==================== SELECTOR HOOKS ====================
+// Use these for fine-grained subscriptions to prevent unnecessary re-renders
+
+import { useShallow } from "zustand/react/shallow";
+
+/**
+ * Selector for auth-related state
+ */
+export const useAuthState = () =>
+  useStore(
+    useShallow((state) => ({
+      isAuthenticated: state.isAuthenticated,
+      token: state.token,
+      logout: state.logout,
+      refreshAccessToken: state.refreshAccessToken,
+    }))
+  );
+
+/**
+ * Selector for projects state
+ */
+export const useProjectsState = () =>
+  useStore(
+    useShallow((state) => ({
+      projects: state.projects,
+      selectedProjectId: state.selectedProjectId,
+      projectsLoaded: state.projectsLoaded,
+      setSelectedProjectId: state.setSelectedProjectId,
+      fetchProjects: state.fetchProjects,
+    }))
+  );
+
+/**
+ * Selector for effective project ID only
+ */
+export const useEffectiveProjectId = () =>
+  useStore((state) => state.getEffectiveProjectId());
+
+/**
+ * Selector for impersonation state (admin only)
+ */
+export const useImpersonationState = () =>
+  useStore(
+    useShallow((state) => ({
+      impersonatedProjectId: state.impersonatedProjectId,
+      impersonatedProjectName: state.impersonatedProjectName,
+      impersonatedUserEmail: state.impersonatedUserEmail,
+      setImpersonatedProject: state.setImpersonatedProject,
+      clearImpersonation: state.clearImpersonation,
+    }))
+  );
+
+/**
+ * Selector for sessions state
+ */
+export const useSessionsState = () =>
+  useStore(
+    useShallow((state) => ({
+      sessions: state.sessions,
+      loadingSessions: state.loadingSessions,
+      selectedSession: state.selectedSession,
+      fetchSessions: state.fetchSessions,
+      selectSession: state.selectSession,
+    }))
+  );
+
+/**
+ * Selector for users state
+ */
+export const useUsersState = () =>
+  useStore(
+    useShallow((state) => ({
+      users: state.users,
+      loadingUsers: state.loadingUsers,
+      selectedUser: state.selectedUser,
+      fetchUsers: state.fetchUsers,
+      selectUser: state.selectUser,
+    }))
+  );
+
+/**
+ * Selector for experiments state
+ */
+export const useExperimentsState = () =>
+  useStore(
+    useShallow((state) => ({
+      experiments: state.experiments,
+      loadingExperiments: state.loadingExperiments,
+      selectedExperimentId: state.selectedExperimentId,
+      fetchExperiments: state.fetchExperiments,
+      setSelectedExperimentId: state.setSelectedExperimentId,
+    }))
+  );
+
+/**
+ * Selector for playbooks state
+ */
+export const usePlaybooksState = () =>
+  useStore(
+    useShallow((state) => ({
+      playbooks: state.playbooks,
+      playbooksSummary: state.playbooksSummary,
+      loadingPlaybooks: state.loadingPlaybooks,
+      fetchPlaybooks: state.fetchPlaybooks,
+      fetchPlaybooksSummary: state.fetchPlaybooksSummary,
+      createPlaybook: state.createPlaybook,
+      updatePlaybookStatus: state.updatePlaybookStatus,
+      deletePlaybook: state.deletePlaybook,
+    }))
+  );

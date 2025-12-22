@@ -56,6 +56,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (projectsLoaded && projects && projects.length > 0) {
       setStep("ready");
+      router.push("/dashboard");
     }
   }, [projectsLoaded, projects]);
 
@@ -81,7 +82,9 @@ export default function OnboardingPage() {
         attempts++;
         const delay = getBackoffDelay(attempts);
         console.log(
-          `🔄 Checking subscription status (${attempts}/${maxAttempts}), next delay: ${delay / 1000}s...`
+          `🔄 Checking subscription status (${attempts}/${maxAttempts}), next delay: ${
+            delay / 1000
+          }s...`
         );
 
         try {

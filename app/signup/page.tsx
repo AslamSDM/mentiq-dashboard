@@ -75,16 +75,26 @@ function SignUpForm() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Create checkpoints from tier ranges (midpoint of each range)
-  const checkpoints = PRICING_TIERS.filter(t => t.id !== "enterprise").map(tier => {
+  const checkpoints: {
+    value: number;
+    label: string;
+    tierName: string;
+    range: readonly [number, number];
+  }[] = PRICING_TIERS.filter((t) => t.id !== "enterprise").map((tier) => {
     const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
-    return { 
-      value: midpoint, 
-      label: tier.range[1].toLocaleString(), 
+    return {
+      value: midpoint,
+      label: tier.range[1].toLocaleString(),
       tierName: tier.name,
-      range: tier.range
+      range: tier.range,
     };
   });
-  checkpoints.push({ value: 11000, label: "10,000+", tierName: "Enterprise", range: [10001, Infinity] });
+  checkpoints.push({
+    value: 11000,
+    label: "10,000+",
+    tierName: "Enterprise",
+    range: [10001, Infinity],
+  });
 
   const currentTier = getTierByUserCount(userCount);
 
@@ -567,11 +577,16 @@ function SignUpForm() {
                   <div className="space-y-6">
                     <div className="text-center transition-all duration-300">
                       <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                        {userCount > 10000 ? "10,000+" : userCount.toLocaleString()}
+                        {userCount > 10000
+                          ? "10,000+"
+                          : userCount.toLocaleString()}
                       </div>
                       <div className="text-sm text-gray-400 mt-2">
                         {currentTier && userCount <= 10000 && (
-                          <span>up to {currentTier.range[1].toLocaleString()} paid users</span>
+                          <span>
+                            up to {currentTier.range[1].toLocaleString()} paid
+                            users
+                          </span>
                         )}
                         {userCount > 10000 && <span>unlimited paid users</span>}
                       </div>
@@ -579,7 +594,15 @@ function SignUpForm() {
                     <div className="space-y-3">
                       <div className="relative px-2">
                         <Slider
-                          value={[checkpoints.findIndex(cp => cp.value === userCount) >= 0 ? checkpoints.findIndex(cp => cp.value === userCount) : 0]}
+                          value={[
+                            checkpoints.findIndex(
+                              (cp) => cp.value === userCount
+                            ) >= 0
+                              ? checkpoints.findIndex(
+                                  (cp) => cp.value === userCount
+                                )
+                              : 0,
+                          ]}
                           onValueChange={(value: number[]) =>
                             setUserCount(checkpoints[value[0]].value)
                           }
@@ -592,13 +615,21 @@ function SignUpForm() {
                       <div className="relative px-2 h-12">
                         <div className="flex justify-between text-xs text-gray-500">
                           {checkpoints.map((cp, idx) => (
-                            <div key={idx} className="flex flex-col items-center" style={{ 
-                              position: 'absolute',
-                              left: `${(idx / (checkpoints.length - 1)) * 100}%`,
-                              transform: 'translateX(-50%)'
-                            }}>
+                            <div
+                              key={idx}
+                              className="flex flex-col items-center"
+                              style={{
+                                position: "absolute",
+                                left: `${
+                                  (idx / (checkpoints.length - 1)) * 100
+                                }%`,
+                                transform: "translateX(-50%)",
+                              }}
+                            >
                               <div className="h-2 w-0.5 bg-gray-600 mb-1"></div>
-                              <span className="whitespace-nowrap">{cp.label}</span>
+                              <span className="whitespace-nowrap">
+                                {cp.label}
+                              </span>
                             </div>
                           ))}
                         </div>

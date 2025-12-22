@@ -42,12 +42,23 @@ export function OnboardingTaskBanner() {
   const router = useRouter();
   const [tasks, setTasks] = useState<OnboardingTasksResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dismissed, setDismissed] = useState(false);
+  // Initialize dismissed state from localStorage immediately to prevent flash
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("onboarding_banner_dismissed") === "true";
+    }
+    return false;
+  });
   const [minimized, setMinimized] = useState(false);
 
   useEffect(() => {
+    // Skip API call if already dismissed
+    if (dismissed) {
+      setLoading(false);
+      return;
+    }
     fetchTasks();
-  }, []);
+  }, [dismissed]);
 
   const fetchTasks = async () => {
     try {
@@ -78,13 +89,7 @@ export function OnboardingTaskBanner() {
     localStorage.setItem("onboarding_banner_dismissed", "true");
   };
 
-  // Check if previously dismissed
-  useEffect(() => {
-    const wasDismissed = localStorage.getItem("onboarding_banner_dismissed");
-    if (wasDismissed === "true") {
-      setDismissed(true);
-    }
-  }, []);
+  // Note: Dismiss check is now done in useState initializer to prevent flash
 
   if (loading) {
     return null;
@@ -127,12 +132,12 @@ export function OnboardingTaskBanner() {
                         <Zap className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">
+                        <h3 className="text-lg font-bold text-foreground">
                           {wasSkipped
                             ? "Complete your setup"
                             : "Complete your setup"}
                         </h3>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           {wasSkipped
                             ? `You skipped onboarding. ${
                                 tasks.pending.length
@@ -150,7 +155,7 @@ export function OnboardingTaskBanner() {
                         size="sm"
                         variant="ghost"
                         onClick={() => setMinimized(true)}
-                        className="text-gray-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         Minimize
                       </Button>
@@ -158,7 +163,7 @@ export function OnboardingTaskBanner() {
                         size="sm"
                         variant="ghost"
                         onClick={handleDismiss}
-                        className="text-gray-400 hover:text-white"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -168,12 +173,12 @@ export function OnboardingTaskBanner() {
                   {/* Progress Bar */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Progress</span>
-                      <span className="text-white font-medium">
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="text-foreground font-medium">
                         {Math.round(completionPercentage)}%
                       </span>
                     </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${completionPercentage}%` }}
@@ -183,17 +188,47 @@ export function OnboardingTaskBanner() {
                     </div>
                   </div>
 
-                  {/* Task List */}
+                  {/* Task List - Show both completed and pending */}
                   <div className="grid md:grid-cols-3 gap-3">
-                    {tasks.pending.map((task, index) => (
+                    {/* Completed Tasks */}
+                    {tasks.completed.map((task, index) => (
                       <motion.div
                         key={task.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 * index }}
                       >
+                        <Card className="bg-green-500/10 border-green-500/30">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center border border-green-500">
+                                <Check className="h-4 w-4 text-white" />
+                              </div>
+                              <Badge variant="secondary" className="bg-green-500/20 text-green-600 border-green-500/30 text-xs">
+                                Done
+                              </Badge>
+                            </div>
+                            <h4 className="text-sm font-semibold text-foreground mb-1">
+                              {task.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              {task.description}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+
+                    {/* Pending Tasks */}
+                    {tasks.pending.map((task, index) => (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 * (index + tasks.completed.length) }}
+                      >
                         <Card
-                          className="group cursor-pointer bg-white/5 border-white/10 hover:border-primary/50 hover:bg-white/10 transition-all"
+                          className="group cursor-pointer bg-card/50 border-border hover:border-primary/50 hover:bg-card transition-all"
                           onClick={() => handleTaskClick(task)}
                         >
                           <CardContent className="p-4">
@@ -203,12 +238,12 @@ export function OnboardingTaskBanner() {
                                   <Check className="h-4 w-4 text-primary group-hover:text-white" />
                                 )}
                               </div>
-                              <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-primary transition-colors" />
+                              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
-                            <h4 className="text-sm font-semibold text-white mb-1">
+                            <h4 className="text-sm font-semibold text-foreground mb-1">
                               {task.title}
                             </h4>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-muted-foreground">
                               {task.description}
                             </p>
                           </CardContent>
@@ -216,19 +251,6 @@ export function OnboardingTaskBanner() {
                       </motion.div>
                     ))}
                   </div>
-
-                  {/* Completed Tasks (if any) */}
-                  {tasks.completed.length > 0 && (
-                    <div className="pt-3 border-t border-white/10">
-                      <div className="flex items-center gap-2 text-sm text-gray-400">
-                        <Check className="h-4 w-4 text-green-500" />
-                        <span>
-                          {tasks.completed.length} task
-                          {tasks.completed.length !== 1 ? "s" : ""} completed
-                        </span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ) : (
                 // Minimized view
@@ -238,7 +260,7 @@ export function OnboardingTaskBanner() {
                       <Zap className="h-4 w-4 text-primary" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-foreground">
                         Setup Progress
                       </span>
                       <Badge
@@ -247,8 +269,16 @@ export function OnboardingTaskBanner() {
                       >
                         {tasks.pending.length} pending
                       </Badge>
+                      {tasks.completed.length > 0 && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-500/20 text-green-600 border-green-500/30"
+                        >
+                          {tasks.completed.length} done
+                        </Badge>
+                      )}
                     </div>
-                    <div className="hidden sm:block w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="hidden sm:block w-32 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-primary to-purple-500"
                         style={{ width: `${completionPercentage}%` }}
@@ -260,7 +290,7 @@ export function OnboardingTaskBanner() {
                       size="sm"
                       variant="outline"
                       onClick={() => setMinimized(false)}
-                      className="border-primary/30 bg-primary/10 text-white hover:bg-primary hover:text-white"
+                      className="border-primary/30 bg-primary/10 text-foreground hover:bg-primary hover:text-white"
                     >
                       Show Tasks
                     </Button>
@@ -268,7 +298,7 @@ export function OnboardingTaskBanner() {
                       size="sm"
                       variant="ghost"
                       onClick={handleDismiss}
-                      className="text-gray-400 hover:text-white"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       <X className="h-4 w-4" />
                     </Button>

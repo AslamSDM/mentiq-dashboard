@@ -55,7 +55,7 @@ interface UserWithProjects extends AdminUser {
 }
 
 export default function AdminUsersPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const { setImpersonatedProject } = useStore();
@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
 
   // Check if user is admin
   useEffect(() => {
-    if (session && !session.isAdmin) {
+    if (status === "authenticated" && session && !session.isAdmin) {
       toast({
         title: "Access Denied",
         description: "You do not have permission to access this page.",
@@ -82,7 +82,7 @@ export default function AdminUsersPage() {
       });
       router.push("/dashboard");
     }
-  }, [session, router, toast]);
+  }, [session, status, router, toast]);
 
   // Fetch all users with their projects efficiently
   useEffect(() => {
@@ -107,10 +107,10 @@ export default function AdminUsersPage() {
       }
     };
 
-    if (session?.isAdmin) {
+    if (status === "authenticated" && session?.isAdmin) {
       fetchData();
     }
-  }, [session, toast]);
+  }, [session, status, toast]);
 
   // Open dialog and set user
   const handleViewUser = (user: UserWithProjects) => {
@@ -165,6 +165,15 @@ export default function AdminUsersPage() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
+
+  // Show loading while checking session
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+      </div>
+    );
+  }
 
   if (!session?.isAdmin) {
     return null;

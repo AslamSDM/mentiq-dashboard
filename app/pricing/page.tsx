@@ -62,17 +62,20 @@ function PricingContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Create checkpoints from tier ranges (midpoint of each range)
-  const checkpoints = PRICING_TIERS.filter((t) => t.id !== "enterprise").map(
-    (tier) => {
-      const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
-      return {
-        value: midpoint,
-        label: tier.range[1].toLocaleString(),
-        tierName: tier.name,
-        range: tier.range,
-      };
-    }
-  );
+  const checkpoints: {
+    value: number;
+    label: string;
+    tierName: string;
+    range: readonly [number, number];
+  }[] = PRICING_TIERS.filter((t) => t.id !== "enterprise").map((tier) => {
+    const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
+    return {
+      value: midpoint,
+      label: tier.range[1].toLocaleString(),
+      tierName: tier.name,
+      range: tier.range,
+    };
+  });
   checkpoints.push({
     value: 11000,
     label: "10,000+",

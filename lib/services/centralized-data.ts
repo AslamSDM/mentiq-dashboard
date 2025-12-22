@@ -102,19 +102,14 @@ class CentralizedDataService {
 
     // Check if cache is valid (not expired and correct version)
     if (cached && cached.expiresAt > now && cached.version === CACHE_VERSION) {
-      console.log(`✅ Cache hit: ${cachePath}/${fullKey}`);
       return cached.data;
     }
 
     if (cached && cached.version !== CACHE_VERSION) {
-      console.log(
-        `🔄 Cache version mismatch: ${cachePath}/${fullKey} - Invalidating...`
-      );
       delete cacheStore[fullKey];
     }
 
     // Fetch fresh data
-    console.log(`📡 Cache miss: ${cachePath}/${fullKey} - Fetching...`);
     const fetchPromise = fetchFn()
       .then((data) => {
         const entry: CacheEntry<T> = {
@@ -150,12 +145,10 @@ class CentralizedDataService {
     dateRange: { start: string; end: string }
   ) {
     if (this.prefetchInProgress) {
-      console.log("⏳ Prefetch already in progress, skipping...");
       return;
     }
 
     this.prefetchInProgress = true;
-    console.log(`🚀 Prefetching all data for project ${projectId}...`);
 
     try {
       // Fetch everything in parallel
@@ -186,8 +179,6 @@ class CentralizedDataService {
         // Experiments
         this.getExperiments(projectId),
       ]);
-
-      console.log(`✅ Prefetch complete for project ${projectId}`);
     } catch (error) {
       console.error("❌ Error during prefetch:", error);
     } finally {
@@ -201,7 +192,6 @@ class CentralizedDataService {
   clearAllCache() {
     this.cache = {};
     this.fetchPromises.clear();
-    console.log("🗑️ All cache cleared");
   }
 
   /**
@@ -219,7 +209,6 @@ class CentralizedDataService {
         });
       }
     });
-    console.log(`🗑️ Cache cleared for project ${projectId}`);
   }
 
   /**
@@ -403,7 +392,6 @@ class CentralizedDataService {
           startDate,
           endDate
         );
-        console.log("🔍 Retention raw API response:", response);
         // The API returns { cohorts: [...] }
         return response;
       },

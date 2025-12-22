@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "@/components/dashboard-header";
 import {
   Card,
@@ -10,104 +12,218 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { usePlaybooksState, useStore } from "@/lib/store";
+import { useEffectiveProjectId } from "@/hooks/use-effective-project";
+import { useToast } from "@/hooks/use-toast";
+import { Playbook } from "@/lib/services/playbooks";
+import {
+  Zap,
+  Play,
+  Pause,
+  Trash2,
+  Settings,
+  Users,
+  TrendingUp,
+  Clock,
+  Loader2,
+  Plus,
+  Sparkles,
+} from "lucide-react";
 
 export default function PlaybooksPage() {
-  const playbooks = [
-    {
-      id: "1",
-      name: "Onboarding Acceleration",
-      description: "Guide new users to their first value moment faster",
-      status: "Active",
-      triggered: 245,
-      completed: 187,
-      impact: "+32% activation",
-      steps: 5,
-    },
-    {
-      id: "2",
-      name: "Feature Adoption Push",
-      description: "Increase adoption of underutilized premium features",
-      status: "Active",
-      triggered: 128,
-      completed: 89,
-      impact: "+18% feature usage",
-      steps: 4,
-    },
-    {
-      id: "3",
-      name: "At-Risk User Recovery",
-      description: "Re-engage users showing signs of churn",
-      status: "Active",
-      triggered: 67,
-      completed: 42,
-      impact: "+24% retention",
-      steps: 6,
-    },
-    {
-      id: "4",
-      name: "Upsell Opportunity",
-      description: "Convert power users to higher tier plans",
-      status: "Draft",
-      triggered: 0,
-      completed: 0,
-      impact: "Est. +$15K MRR",
-      steps: 3,
-    },
-    {
-      id: "5",
-      name: "Trial Conversion",
-      description: "Maximize trial-to-paid conversions",
-      status: "Paused",
-      triggered: 542,
-      completed: 298,
-      impact: "+14% conversion",
-      steps: 7,
-    },
-  ];
+  const router = useRouter();
+  const effectiveProjectId = useEffectiveProjectId();
+  const { toast } = useToast();
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
 
-  const recentTriggers = [
-    {
-      id: "1",
-      playbook: "Onboarding Acceleration",
-      user: "john@startup.com",
-      trigger: "Sign up completed",
-      status: "In Progress",
-      step: "3/5",
-      time: "5 minutes ago",
-    },
-    {
-      id: "2",
-      playbook: "At-Risk User Recovery",
-      user: "sarah@company.com",
-      trigger: "No login 14 days",
-      status: "Completed",
-      step: "6/6",
-      time: "2 hours ago",
-    },
-    {
-      id: "3",
-      playbook: "Feature Adoption Push",
-      user: "mike@enterprise.com",
-      trigger: "Premium unused 30 days",
-      status: "In Progress",
-      step: "2/4",
-      time: "3 hours ago",
-    },
-  ];
+  const {
+    playbooks,
+    playbooksSummary,
+    loadingPlaybooks,
+    fetchPlaybooks,
+    fetchPlaybooksSummary,
+    createPlaybook,
+    updatePlaybookStatus,
+    deletePlaybook,
+  } = usePlaybooksState();
+
+  // Dialog states
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedPlaybook, setSelectedPlaybook] = useState<Playbook | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form states
+  const [newPlaybookName, setNewPlaybookName] = useState("");
+  const [newPlaybookDescription, setNewPlaybookDescription] = useState("");
+  const [newPlaybookType, setNewPlaybookType] = useState<
+    "churn_prevention" | "growth_expansion" | "onboarding" | "engagement"
+  >("onboarding");
+
+  // Fetch data on mount and project change
+  useEffect(() => {
+    if (!effectiveProjectId || !isAuthenticated) return;
+    fetchPlaybooks(true);
+    fetchPlaybooksSummary(true);
+  }, [effectiveProjectId, fetchPlaybooks, fetchPlaybooksSummary, isAuthenticated]);
+
+  const handleCreatePlaybook = async () => {
+    if (!newPlaybookName.trim()) {
+      toast({
+        title: "Error",
+        description: "Playbook name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const playbook = await createPlaybook({
+        name: newPlaybookName,
+        description: newPlaybookDescription,
+        type: newPlaybookType,
+      });
+      toast({
+        title: "Playbook created",
+        description: `"${playbook.name}" has been created successfully.`,
+      });
+      setIsCreateOpen(false);
+      setNewPlaybookName("");
+      setNewPlaybookDescription("");
+      setNewPlaybookType("onboarding");
+      // Navigate to the playbook detail page
+      router.push(`/dashboard/playbooks/${playbook.id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create playbook. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleStatusChange = async (
+    playbook: Playbook,
+    newStatus: "active" | "paused" | "archived"
+  ) => {
+    try {
+      await updatePlaybookStatus(playbook.id, newStatus);
+      toast({
+        title: "Status updated",
+        description: `"${playbook.name}" is now ${newStatus}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update playbook status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedPlaybook) return;
+
+    setIsSubmitting(true);
+    try {
+      await deletePlaybook(selectedPlaybook.id);
+      toast({
+        title: "Playbook deleted",
+        description: `"${selectedPlaybook.name}" has been deleted.`,
+      });
+      setIsDeleteOpen(false);
+      setSelectedPlaybook(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete playbook.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
-    if (status === "Active")
-      return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-    if (status === "Draft")
-      return <Badge className="bg-gray-100 text-gray-800">Draft</Badge>;
-    return <Badge className="bg-yellow-100 text-yellow-800">Paused</Badge>;
+    switch (status) {
+      case "active":
+        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+      case "draft":
+        return <Badge className="bg-gray-100 text-gray-800">Draft</Badge>;
+      case "paused":
+        return <Badge className="bg-yellow-100 text-yellow-800">Paused</Badge>;
+      case "archived":
+        return <Badge className="bg-red-100 text-red-800">Archived</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
-  const getTriggerStatus = (status: string) => {
-    if (status === "Completed")
-      return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
-    return <Badge className="bg-blue-100 text-blue-800">In Progress</Badge>;
+  const getTypeBadge = (type: string) => {
+    const typeLabels: Record<string, string> = {
+      churn_prevention: "Churn Prevention",
+      growth_expansion: "Growth",
+      onboarding: "Onboarding",
+      engagement: "Engagement",
+    };
+    return (
+      <Badge variant="outline" className="text-xs">
+        {typeLabels[type] || type}
+      </Badge>
+    );
   };
+
+  const getSourceBadge = (source: string) => {
+    if (source === "llm_generated") {
+      return (
+        <Badge variant="secondary" className="text-xs gap-1">
+          <Sparkles className="h-3 w-3" />
+          AI Generated
+        </Badge>
+      );
+    }
+    return null;
+  };
+
+  if (loadingPlaybooks) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -116,71 +232,65 @@ export default function PlaybooksPage() {
         description="Automated workflows to drive user engagement and growth"
       />
 
+      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">
-              Active Playbooks
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Playbooks</CardTitle>
+            <Zap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {playbooks.filter((p) => p.status === "Active").length}
+              {playbooksSummary?.active_playbooks ??
+                playbooks.filter((p) => p.status === "active").length}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              currently running
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">currently running</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">
-              Total Triggers
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Triggers</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {playbooks.reduce((sum, p) => sum + p.triggered, 0)}
+              {playbooksSummary?.total_triggers ?? 0}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">this month</p>
+            <p className="text-xs text-muted-foreground mt-1">configured triggers</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">
-              Completion Rate
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(
-                (playbooks.reduce((sum, p) => sum + p.completed, 0) /
-                  playbooks.reduce((sum, p) => sum + p.triggered, 0)) *
-                100
-              )?.toFixed(1)}
-              %
+              {playbooksSummary?.completion_rate?.toFixed(1) ?? 0}%
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              average completion
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">average completion</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">127</div>
+            <div className="text-2xl font-bold">
+              {playbooksSummary?.in_progress ?? 0}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              active users in playbooks
+              active enrollments
             </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Playbooks List */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -190,129 +300,238 @@ export default function PlaybooksPage() {
                 Manage your automated growth workflows
               </CardDescription>
             </div>
-            <Button>Create Playbook</Button>
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Playbook
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Playbook</DialogTitle>
+                  <DialogDescription>
+                    Set up a new automated workflow to engage your users.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Onboarding Flow"
+                      value={newPlaybookName}
+                      onChange={(e) => setNewPlaybookName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Describe what this playbook does..."
+                      value={newPlaybookDescription}
+                      onChange={(e) => setNewPlaybookDescription(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Select
+                      value={newPlaybookType}
+                      onValueChange={(v) => setNewPlaybookType(v as any)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="onboarding">Onboarding</SelectItem>
+                        <SelectItem value="engagement">Engagement</SelectItem>
+                        <SelectItem value="churn_prevention">
+                          Churn Prevention
+                        </SelectItem>
+                        <SelectItem value="growth_expansion">
+                          Growth & Expansion
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCreateOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreatePlaybook} disabled={isSubmitting}>
+                    {isSubmitting && (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    )}
+                    Create Playbook
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {playbooks?.map((playbook) => (
-              <div key={playbook.id} className="border rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-semibold">{playbook.name}</h3>
-                      {getStatusBadge(playbook.status)}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {playbook.description}
-                    </p>
-                    <div className="flex items-center gap-6 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Steps: </span>
-                        <span className="font-medium">{playbook.steps}</span>
+          {playbooks.length === 0 ? (
+            <div className="text-center py-12">
+              <Zap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No playbooks yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Create your first playbook to automate user engagement.
+              </p>
+              <Button onClick={() => setIsCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Playbook
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {playbooks.map((playbook) => (
+                <div
+                  key={playbook.id}
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3
+                          className="font-semibold cursor-pointer hover:text-primary"
+                          onClick={() =>
+                            router.push(`/dashboard/playbooks/${playbook.id}`)
+                          }
+                        >
+                          {playbook.name}
+                        </h3>
+                        {getStatusBadge(playbook.status)}
+                        {getTypeBadge(playbook.type)}
+                        {getSourceBadge(playbook.source)}
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">
-                          Triggered:{" "}
-                        </span>
-                        <span className="font-medium">
-                          {playbook.triggered}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">
-                          Completed:{" "}
-                        </span>
-                        <span className="font-medium">
-                          {playbook.completed}
-                        </span>
-                      </div>
-                      {playbook.triggered > 0 && (
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {playbook.description || "No description"}
+                      </p>
+                      <div className="flex items-center gap-6 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Rate: </span>
+                          <span className="text-muted-foreground">Steps: </span>
                           <span className="font-medium">
-                            {(
-                              (playbook.completed / playbook.triggered) *
-                              100
-                            )?.toFixed(1)}
-                            %
+                            {playbook.steps?.length ?? 0}
                           </span>
                         </div>
-                      )}
+                        <div>
+                          <span className="text-muted-foreground">
+                            Enrolled:{" "}
+                          </span>
+                          <span className="font-medium">
+                            {playbook.total_enrolled ?? 0}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Completed:{" "}
+                          </span>
+                          <span className="font-medium">
+                            {playbook.completed_count ?? 0}
+                          </span>
+                        </div>
+                        {(playbook.total_enrolled ?? 0) > 0 && (
+                          <div>
+                            <span className="text-muted-foreground">Rate: </span>
+                            <span className="font-medium">
+                              {(
+                                ((playbook.completed_count ?? 0) /
+                                  (playbook.total_enrolled ?? 1)) *
+                                100
+                              ).toFixed(1)}
+                              %
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="ml-4 text-right">
-                    <Badge
-                      variant="outline"
-                      className="text-green-600 border-green-300 mb-2"
-                    >
-                      {playbook.impact}
-                    </Badge>
-                    <div className="flex gap-2 mt-2">
-                      <Button variant="outline" size="sm">
+                    <div className="ml-4 flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          router.push(`/dashboard/playbooks/${playbook.id}`)
+                        }
+                      >
+                        <Settings className="h-4 w-4 mr-1" />
                         Edit
                       </Button>
-                      {playbook.status === "Active" && (
-                        <Button variant="outline" size="sm">
+                      {playbook.status === "active" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStatusChange(playbook, "paused")}
+                        >
+                          <Pause className="h-4 w-4 mr-1" />
                           Pause
                         </Button>
                       )}
-                      {playbook.status === "Paused" && (
-                        <Button variant="outline" size="sm">
+                      {playbook.status === "paused" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStatusChange(playbook, "active")}
+                        >
+                          <Play className="h-4 w-4 mr-1" />
                           Resume
                         </Button>
                       )}
-                      {playbook.status === "Draft" && (
-                        <Button size="sm">Activate</Button>
+                      {playbook.status === "draft" && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleStatusChange(playbook, "active")}
+                        >
+                          <Play className="h-4 w-4 mr-1" />
+                          Activate
+                        </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setSelectedPlaybook(playbook);
+                          setIsDeleteOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
-            Latest playbook triggers and completions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentTriggers?.map((trigger) => (
-              <div
-                key={trigger.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="font-medium">{trigger.playbook}</p>
-                    {getTriggerStatus(trigger.status)}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {trigger.user}
-                  </p>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
-                    <span>Trigger: {trigger.trigger}</span>
-                    <span>•</span>
-                    <span>{trigger.time}</span>
-                  </div>
-                </div>
-                <div className="text-right ml-4">
-                  <p className="text-sm font-medium">Step {trigger.step}</p>
-                  <Button variant="link" size="sm" className="h-auto p-0 mt-1">
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Playbook</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedPlaybook?.name}"? This
+              action cannot be undone. All steps, triggers, and enrollment data
+              will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

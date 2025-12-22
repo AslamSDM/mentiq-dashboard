@@ -3,13 +3,13 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { teamService } from "@/lib/api";
-import { CheckCircle2, AlertCircle, Loader2, Mail } from "lucide-react";
-import Link from "next/link";
+import { CheckCircle2, AlertCircle, Loader2, Mail, Lock, User, ArrowRight } from "lucide-react";
 
 function AcceptInvitationContent() {
   const searchParams = useSearchParams();
@@ -91,126 +91,203 @@ function AcceptInvitationContent() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <CardTitle>Invalid Invitation</CardTitle>
-            <CardDescription>
-              No invitation token was provided in the URL
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
+      <div className="min-h-screen flex bg-black text-white">
+        <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+          <div className="w-full max-w-md text-center space-y-6">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
+            <h2 className="text-3xl font-bold">Invalid Invitation</h2>
+            <p className="text-gray-400">
+              No invitation token was provided in the URL or the token is invalid.
+            </p>
             <Link href="/signin">
-              <Button>Go to Sign In</Button>
+              <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90">
+                Go to Sign In
+              </Button>
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <CardTitle>Welcome to the Team!</CardTitle>
-            <CardDescription>
-              Your account has been created successfully
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Redirecting you to the dashboard...
+      <div className="min-h-screen flex bg-black text-white">
+        <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+          <div className="w-full max-w-md text-center space-y-6">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
+            <h2 className="text-3xl font-bold">Welcome to the Team!</h2>
+            <p className="text-gray-400">
+              Your account has been created successfully.
             </p>
-            <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-          </CardContent>
-        </Card>
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Redirecting to dashboard...</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
-            <Mail className="h-6 w-6 text-white" />
+    <div className="min-h-screen flex bg-black text-white">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-black"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative h-30 w-30">
+              <Image
+                src="/logo.png"
+                alt="Mentiq Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-2xl font-bold">Mentiq</span>
+          </Link>
+
+          <div className="space-y-6">
+            <h1 className="text-5xl font-bold leading-tight">
+              Join the
+              <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary">
+                Winning Team
+              </span>
+            </h1>
+            <p className="text-xl text-gray-400 max-w-md">
+              Accept your invitation to collaborate, analyze, and drive growth with Mentiq.
+            </p>
           </div>
-          <CardTitle>Accept Team Invitation</CardTitle>
-          <CardDescription>
-            Create your account to join the team on MentiQ
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <div className="flex items-center gap-8 text-sm text-gray-400">
+            <span>© 2025 Mentiq</span>
+            <Link href="#" className="hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <Link href="#" className="hover:text-white transition-colors">
+              Terms
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+        <div className="w-full max-w-md space-y-8">
+          <div className="lg:hidden flex items-center gap-3 mb-8">
+            <div className="relative h-30 w-30">
+              <Image
+                src="/logo.png"
+                alt="Mentiq Logo"
+                fill
+                className="object-contain"
+              />
+            </div>
+            <span className="text-xl font-bold">Mentiq</span>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold">Accept Invitation</h2>
+            <p className="text-gray-400">
+              Set up your account to join the team
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+              <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                <span>{error}</span>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                disabled={loading}
-                required
-              />
+              <Label htmlFor="fullName" className="text-sm font-medium text-gray-300">
+                Full Name
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={loading}
+                  required
+                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Min. 8 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-                required
-                minLength={8}
-              />
+              <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Min. 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                  minLength={8}
+                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Re-enter password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading}
-                required
-                minLength={8}
-              />
+              <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
+                Confirm Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Re-enter password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                  minLength={8}
+                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+              </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Creating Account...
                 </>
               ) : (
-                "Accept Invitation"
+                <>
+                  Accept Invitation
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </>
               )}
             </Button>
-
-            <p className="text-xs text-center text-muted-foreground">
+            
+            <p className="text-xs text-center text-gray-500 mt-4">
               By accepting, you agree to our Terms of Service and Privacy Policy
             </p>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
@@ -218,8 +295,8 @@ function AcceptInvitationContent() {
 export default function AcceptInvitationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <AcceptInvitationContent />

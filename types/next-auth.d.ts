@@ -7,6 +7,7 @@ declare module "next-auth" {
     refreshToken?: string;
     projectId?: string;
     isAdmin?: boolean;
+    role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
     user: {
@@ -25,6 +26,7 @@ declare module "next-auth" {
     refreshToken?: string;
     projectId?: string;
     isAdmin?: boolean;
+    role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
   }
@@ -36,6 +38,7 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     projectId?: string;
     isAdmin?: boolean;
+    role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
   }
