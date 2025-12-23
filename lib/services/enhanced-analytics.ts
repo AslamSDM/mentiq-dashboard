@@ -251,6 +251,77 @@ class EnhancedAnalyticsService extends BaseHttpService {
   }
 
   /**
+   * Export at-risk users as CSV for email campaigns
+   */
+  async exportChurnRiskCSV(
+    projectId: string,
+    riskLevel: "all" | "high" | "medium" | "critical" = "all",
+    threshold?: number
+  ): Promise<Blob> {
+    const params = new URLSearchParams();
+    params.append("risk_level", riskLevel);
+    params.append("format", "csv");
+    if (threshold) params.append("risk_threshold", threshold.toString());
+
+    const queryString = params.toString();
+    const endpoint = `/api/v1/projects/${projectId}/analytics/churn/export?${queryString}`;
+
+    // Use fetch directly for blob response
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}${endpoint}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.statusText}`);
+    }
+
+    return response.blob();
+  }
+
+  /**
+   * Export at-risk users as JSON for programmatic use
+   */
+  async exportChurnRiskJSON(
+    projectId: string,
+    riskLevel: "all" | "high" | "medium" | "critical" = "all",
+    threshold?: number
+  ): Promise<{
+    status: string;
+    total_users: number;
+    risk_level: string;
+    users: Array<{
+      user_id: string;
+      email?: string;
+      risk_score: string;
+      risk_category: string;
+      last_active: string;
+      days_inactive: number;
+    }>;
+  }> {
+    const params = new URLSearchParams();
+    params.append("risk_level", riskLevel);
+    params.append("format", "json");
+    if (threshold) params.append("risk_threshold", threshold.toString());
+
+    const queryString = params.toString();
+    const endpoint = `/api/v1/projects/${projectId}/analytics/churn/export?${queryString}`;
+
+    return this.request(endpoint, {
+      method: "GET",
+      projectId,
+    });
+  }
+
+  /**
    * Get conversion funnel analytics
    */
   async getConversionFunnel(

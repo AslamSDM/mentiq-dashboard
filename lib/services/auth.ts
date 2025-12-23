@@ -8,6 +8,7 @@ export interface AuthUser {
   role?: string;
   hasActiveSubscription?: boolean;
   subscriptionStatus?: string;
+  emailVerified?: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useStore } from "@/lib/store";
 import { centralizedData } from "@/lib/services/centralized-data";
-import { Loader2 } from "lucide-react";
+import { enhancedAnalyticsService } from "@/lib/services/enhanced-analytics";
+import { Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ChurnRiskPage() {
@@ -22,6 +23,7 @@ export default function ChurnRiskPage() {
   const { toast } = useToast();
   const [churnData, setChurnData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [threshold, setThreshold] = useState(50);
 
   useEffect(() => {
@@ -49,6 +51,45 @@ export default function ChurnRiskPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const exportAtRiskUsers = async (
+    riskLevel: "all" | "high" | "medium" | "critical" = "all"
+  ) => {
+    if (!selectedProjectId) return;
+
+    setIsExporting(true);
+    try {
+      const blob = await enhancedAnalyticsService.exportChurnRiskCSV(
+        selectedProjectId,
+        riskLevel,
+        threshold
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `at_risk_users_${riskLevel}_${new Date().toISOString().split("T")[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Export Successful",
+        description: `Exported ${riskLevel === "all" ? "all" : riskLevel + " risk"} users to CSV`,
+      });
+    } catch (error) {
+      console.error("Error exporting at-risk users:", error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export at-risk users",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -303,17 +344,32 @@ export default function ChurnRiskPage() {
                     Users requiring immediate attention
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={fetchChurnData}
-                  disabled={isLoading}
-                  variant="outline"
-                  size="sm"
-                >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Refresh
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => exportAtRiskUsers("high")}
+                    disabled={isExporting || !churnData?.at_risk_users?.length}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isExporting ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="mr-2 h-4 w-4" />
+                    )}
+                    Export Email List
+                  </Button>
+                  <Button
+                    onClick={fetchChurnData}
+                    disabled={isLoading}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Refresh
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
