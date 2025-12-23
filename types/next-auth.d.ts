@@ -10,6 +10,7 @@ declare module "next-auth" {
     role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
+    emailVerified?: boolean;
     user: {
       id: string;
       name?: string | null;
@@ -29,6 +30,7 @@ declare module "next-auth" {
     role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
+    emailVerified?: boolean;
   }
 }
 
@@ -41,5 +43,6 @@ declare module "next-auth/jwt" {
     role?: string;
     hasActiveSubscription?: boolean;
     subscriptionStatus?: string;
+    emailVerified?: boolean;
   }
 }

@@ -19,12 +19,14 @@ export async function middleware(req: NextRequest) {
     path: req.nextUrl.pathname,
     hasToken: !!token,
     tokenEmail: token?.email || "N/A",
+    emailVerified: token?.emailVerified ?? true,
     hasActiveSubscription: token?.hasActiveSubscription || false,
     subscriptionStatus: token?.subscriptionStatus || "none",
     hasSecret: !!process.env.NEXTAUTH_SECRET,
   });
 
   const isAuth = !!token;
+  const emailVerified = token?.emailVerified !== false; // Default to true for backwards compatibility
   const hasActiveSubscription = token?.hasActiveSubscription === true;
   const isAdmin = token?.isAdmin === true;
   const isAuthPage =
@@ -33,6 +35,13 @@ export async function middleware(req: NextRequest) {
   const isPricingPage = req.nextUrl.pathname.startsWith("/pricing");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
   const isAdminPage = req.nextUrl.pathname.startsWith("/dashboard/admin");
+  const isVerifyPendingPage = req.nextUrl.pathname.startsWith("/verify-pending");
+  const isVerifyEmailPage = req.nextUrl.pathname.startsWith("/verify-email");
+
+  // Allow verify-email page for token verification
+  if (isVerifyEmailPage) {
+    return null;
+  }
 
   // SECURITY: Protect admin routes at middleware level
   if (isAdminPage) {
@@ -46,9 +55,29 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Handle verify-pending page
+  if (isVerifyPendingPage) {
+    if (!isAuth) {
+      // Need to be logged in to see verify-pending
+      return NextResponse.redirect(new URL("/signin", req.url));
+    }
+    if (emailVerified) {
+      // Already verified, redirect to dashboard or pricing
+      if (!hasActiveSubscription && !isAdmin) {
+        return NextResponse.redirect(new URL("/pricing?required=true", req.url));
+      }
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return null; // Allow access to verify-pending
+  }
+
   // Allow auth pages for non-authenticated users
   if (isAuthPage) {
     if (isAuth) {
+      // If authenticated but email not verified, redirect to verify-pending
+      if (!emailVerified) {
+        return NextResponse.redirect(new URL("/verify-pending", req.url));
+      }
       // If authenticated but no subscription, redirect to pricing
       if (!hasActiveSubscription && !isAdmin) {
         return NextResponse.redirect(
@@ -73,6 +102,12 @@ export async function middleware(req: NextRequest) {
     );
   }
 
+  // Check email verification for authenticated users accessing dashboard
+  if (isAuth && isDashboardPage && !emailVerified) {
+    console.log("⚠️ User authenticated but email not verified, redirecting to verify-pending");
+    return NextResponse.redirect(new URL("/verify-pending", req.url));
+  }
+
   // Allow onboarding page to load even without subscription (needed for payment callback)
   const isOnboardingPage = req.nextUrl.pathname.startsWith("/dashboard/onboarding");
   const hasSuccessParam = req.nextUrl.searchParams.get("success") === "true";
@@ -95,5 +130,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/signin", "/signup", "/pricing"],
+  matcher: ["/dashboard/:path*", "/signin", "/signup", "/pricing", "/verify-pending", "/verify-email"],
 };
+

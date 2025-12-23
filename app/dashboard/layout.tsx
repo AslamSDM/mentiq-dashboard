@@ -85,6 +85,13 @@ export default function DashboardLayout({
     setSelectedProjectId,
   ]);
 
+  // Redirect to verify-email page if email is not verified
+  useEffect(() => {
+    if (status === "authenticated" && session?.emailVerified === false) {
+      router.push("/verify-email");
+    }
+  }, [status, session?.emailVerified, router]);
+
   // Redirect to projects page if no projects exist and not already on projects page
   useEffect(() => {
     if (pathname === "/dashboard/onboarding") return;

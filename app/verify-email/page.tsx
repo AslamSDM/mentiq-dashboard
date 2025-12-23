@@ -2,27 +2,28 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Mail, RefreshCw } from "lucide-react";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: session, status: sessionStatus, update: updateSession } = useSession();
   const token = searchParams.get("token");
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
+  const [status, setStatus] = useState<"loading" | "success" | "error" | "pending">(
+    token ? "loading" : "pending"
   );
   const [message, setMessage] = useState("");
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Handle token verification
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("No verification token provided");
-      return;
-    }
+    if (!token) return;
 
     const verifyEmail = async () => {
       try {
@@ -35,6 +36,15 @@ function VerifyEmailContent() {
         if (response.ok && data.verified) {
           setStatus("success");
           setMessage(data.message || "Your email has been verified successfully!");
+
+          // If user is logged in, update their session
+          if (session) {
+            await updateSession();
+            // Redirect to dashboard after short delay
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 2000);
+          }
         } else {
           setStatus("error");
           setMessage(data.error || "Failed to verify email. The link may have expired.");
@@ -47,7 +57,76 @@ function VerifyEmailContent() {
     };
 
     verifyEmail();
-  }, [token]);
+  }, [token, session, updateSession, router]);
+
+  // Cooldown timer for resend button
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  // Poll for verification status when in pending state
+  useEffect(() => {
+    if (status !== "pending" || !session?.user?.email) return;
+
+    const checkVerification = async () => {
+      try {
+        // Trigger a session update to check if email was verified
+        await updateSession();
+      } catch (error) {
+        console.error("Error checking verification status:", error);
+      }
+    };
+
+    // Check every 5 seconds
+    const interval = setInterval(checkVerification, 5000);
+    return () => clearInterval(interval);
+  }, [status, session?.user?.email, updateSession]);
+
+  // Redirect to dashboard if session shows emailVerified
+  useEffect(() => {
+    if (session?.emailVerified === true) {
+      router.push("/dashboard");
+    }
+  }, [session?.emailVerified, router]);
+
+  const handleResendVerification = async () => {
+    if (!session?.user?.email || isResending || resendCooldown > 0) return;
+
+    setIsResending(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/resend-verification`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: session.user.email }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Verification email sent! Please check your inbox.");
+        setResendCooldown(60); // 60 second cooldown
+      } else {
+        setMessage(data.error || "Failed to resend verification email.");
+      }
+    } catch (error) {
+      console.error("Resend error:", error);
+      setMessage("An error occurred. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/signin" });
+  };
 
   return (
     <div className="min-h-screen flex bg-black text-white">
@@ -125,6 +204,63 @@ function VerifyEmailContent() {
               </>
             )}
 
+            {status === "pending" && (
+              <>
+                <div className="flex justify-center">
+                  <div className="h-20 w-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                    <Mail className="h-10 w-10 text-yellow-500" />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold text-yellow-400">
+                  Verify Your Email
+                </h2>
+                <p className="text-gray-400">
+                  We sent a verification email to{" "}
+                  <span className="text-white font-medium">
+                    {session?.user?.email || "your email"}
+                  </span>
+                  . Please check your inbox and click the verification link.
+                </p>
+                {message && (
+                  <p className="text-sm text-green-400">{message}</p>
+                )}
+                <div className="space-y-3 pt-4">
+                  <Button
+                    onClick={handleResendVerification}
+                    disabled={isResending || resendCooldown > 0}
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                  >
+                    {isResending ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Sending...
+                      </>
+                    ) : resendCooldown > 0 ? (
+                      <>
+                        <RefreshCw className="mr-2 h-5 w-5" />
+                        Resend in {resendCooldown}s
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="mr-2 h-5 w-5" />
+                        Resend Verification Email
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={handleSignOut}
+                    variant="outline"
+                    className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                  >
+                    Sign out
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500">
+                  Once verified, you will be automatically redirected to the dashboard.
+                </p>
+              </>
+            )}
+
             {status === "success" && (
               <>
                 <div className="flex justify-center">
@@ -136,12 +272,18 @@ function VerifyEmailContent() {
                   Email Verified!
                 </h2>
                 <p className="text-gray-400">{message}</p>
-                <Button
-                  onClick={() => router.push("/signin")}
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
-                >
-                  Sign in to your account
-                </Button>
+                {session ? (
+                  <p className="text-sm text-gray-500">
+                    Redirecting to dashboard...
+                  </p>
+                ) : (
+                  <Button
+                    onClick={() => router.push("/signin")}
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                  >
+                    Sign in to your account
+                  </Button>
+                )}
               </>
             )}
 

@@ -53,6 +53,7 @@ export const authOptions: NextAuthOptions = {
               hasActiveSubscription:
                 response.user.hasActiveSubscription || false,
               subscriptionStatus: response.user.subscriptionStatus || "none",
+              emailVerified: response.user.emailVerified ?? true,
             };
           }
 
@@ -95,6 +96,7 @@ export const authOptions: NextAuthOptions = {
           (user as any).role = data.user?.role || "owner";
           (user as any).hasActiveSubscription = data.user?.hasActiveSubscription || false;
           (user as any).subscriptionStatus = data.user?.subscriptionStatus || "none";
+          (user as any).emailVerified = true; // Google accounts are always verified
           (user as any).id = data.user?.id;
 
           return true;
@@ -116,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role;
         token.hasActiveSubscription = (user as any).hasActiveSubscription;
         token.subscriptionStatus = (user as any).subscriptionStatus;
+        token.emailVerified = (user as any).emailVerified ?? true;
         // Store user ID in token.sub (NextAuth standard)
         token.sub = (user as any).id || user.id;
       }
@@ -164,6 +167,7 @@ export const authOptions: NextAuthOptions = {
         session.role = token.role as string;
         session.hasActiveSubscription = token.hasActiveSubscription as boolean;
         session.subscriptionStatus = token.subscriptionStatus as string;
+        session.emailVerified = token.emailVerified as boolean;
         // IMPORTANT: Set the user ID in session.user
         if (token.sub) {
           session.user.id = token.sub;

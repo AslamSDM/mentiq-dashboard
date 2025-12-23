@@ -85,11 +85,18 @@ export default function SignInPage() {
           }
         }
       } else if (result?.ok) {
-        console.log("Sign in successful, checking subscription status");
+        console.log("Sign in successful, checking verification and subscription status");
 
-        // Get the session to check subscription status
+        // Get the session to check email verification and subscription status
         const sessionResponse = await fetch("/api/auth/session");
         const sessionData = await sessionResponse.json();
+
+        // Check email verification first
+        if (sessionData?.emailVerified === false) {
+          console.log("Email not verified, redirecting to verify-pending");
+          window.location.href = "/verify-pending";
+          return;
+        }
 
         // Redirect to pricing if no active subscription, otherwise to dashboard
         if (sessionData?.hasActiveSubscription) {
@@ -159,7 +166,6 @@ export default function SignInPage() {
                 className="object-contain"
               />
             </div>
-            <span className="text-2xl font-bold">Mentiq</span>
           </Link>
 
           <div className="space-y-6">
