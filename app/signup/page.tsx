@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { UserCountSlider, TIER_COLORS } from "@/components/user-count-slider";
 import {
   Card,
   CardContent,
@@ -68,15 +68,6 @@ const TIER_ICONS: Record<string, React.ReactNode> = {
   enterprise: <Crown className="h-5 w-5" />,
 };
 
-const TIER_COLORS: Record<string, string> = {
-  launch: "from-blue-500 to-cyan-500",
-  traction: "from-purple-500 to-pink-500",
-  momentum: "from-orange-500 to-red-500",
-  scale: "from-green-500 to-emerald-500",
-  expansion: "from-yellow-500 to-amber-500",
-  enterprise: "from-yellow-500 to-amber-500",
-};
-
 
 function SignUpForm() {
   const searchParams = useSearchParams();
@@ -98,28 +89,6 @@ function SignUpForm() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [userId, setUserId] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-
-  // Create checkpoints from tier ranges (midpoint of each range)
-  const checkpoints: {
-    value: number;
-    label: string;
-    tierName: string;
-    range: readonly [number, number];
-  }[] = PRICING_TIERS.filter((t) => t.id !== "enterprise").map((tier) => {
-    const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
-    return {
-      value: midpoint,
-      label: tier.range[1].toLocaleString(),
-      tierName: tier.name,
-      range: tier.range,
-    };
-  });
-  checkpoints.push({
-    value: 11000,
-    label: "10,000+",
-    tierName: "Enterprise",
-    range: [10001, Infinity],
-  });
 
   const currentTier = getTierByUserCount(userCount);
 
@@ -276,7 +245,6 @@ function SignUpForm() {
                 className="object-contain"
               />
             </div>
-            <span className="text-2xl font-bold">Mentiq</span>
           </Link>
 
           <div className="space-y-6">
@@ -701,85 +669,14 @@ function SignUpForm() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-6">
-                    <div className="text-center transition-all duration-300">
-                      <div className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                        {userCount > 10000
-                          ? "10,000+"
-                          : userCount.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-gray-400 mt-2">
-                        {currentTier && userCount <= 10000 && (
-                          <span>
-                            up to {currentTier.range[1].toLocaleString()} paid
-                            users
-                          </span>
-                        )}
-                        {userCount > 10000 && <span>unlimited paid users</span>}
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="relative px-2">
-                        <Slider
-                          value={[
-                            checkpoints.findIndex(
-                              (cp) => cp.value === userCount
-                            ) >= 0
-                              ? checkpoints.findIndex(
-                                  (cp) => cp.value === userCount
-                                )
-                              : 0,
-                          ]}
-                          onValueChange={(value: number[]) =>
-                            setUserCount(checkpoints[value[0]].value)
-                          }
-                          min={0}
-                          max={checkpoints.length - 1}
-                          step={1}
-                          className="w-full"
-                        />
-                      </div>
-                      <div className="relative px-2 h-12">
-                        <div className="flex justify-between text-xs text-gray-500">
-                          {checkpoints.map((cp, idx) => (
-                            <div
-                              key={idx}
-                              className="flex flex-col items-center"
-                              style={{
-                                position: "absolute",
-                                left: `${
-                                  (idx / (checkpoints.length - 1)) * 100
-                                }%`,
-                                transform: "translateX(-50%)",
-                              }}
-                            >
-                              <div className="h-2 w-0.5 bg-gray-600 mb-1"></div>
-                              <span className="whitespace-nowrap">
-                                {cp.label}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <UserCountSlider
+                    userCount={userCount}
+                    onUserCountChange={setUserCount}
+                    showPrice={true}
+                  />
 
                   {currentTier && userCount <= 10000 && (
                     <div className="space-y-4">
-                      <div className="flex items-center justify-center gap-3 text-sm animate-in fade-in-50 duration-500">
-                        <Badge
-                          variant="secondary"
-                          className={`px-4 py-2 text-base font-semibold transition-all duration-300 bg-gradient-to-r ${
-                            TIER_COLORS[currentTier.id]
-                          } text-white border-0 shadow-lg`}
-                        >
-                          {currentTier.name} Tier
-                        </Badge>
-                        <span className="text-lg font-bold text-white">
-                          ${calculatePrice(currentTier)}/month
-                        </span>
-                      </div>
-
                       {currentTier.trialDays && (
                         <div className="text-center">
                           <Badge
@@ -793,7 +690,7 @@ function SignUpForm() {
 
                       <div className="bg-white/5 rounded-lg p-4 space-y-2">
                         <p className="text-sm font-semibold text-white mb-3">
-                          What's included:
+                          What&apos;s included:
                         </p>
                         {currentTier.features
                           .slice(0, 5)
@@ -812,12 +709,6 @@ function SignUpForm() {
 
                   {userCount > 10000 && (
                     <div className="text-center space-y-4">
-                      <Badge
-                        variant="secondary"
-                        className="px-4 py-2 text-base font-semibold bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg"
-                      >
-                        Enterprise
-                      </Badge>
                       <p className="text-white">
                         For 10,000+ users, please contact our sales team for
                         custom pricing.

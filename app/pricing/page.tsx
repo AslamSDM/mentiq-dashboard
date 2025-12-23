@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
@@ -14,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import {
   Check,
@@ -31,6 +29,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
+import { UserCountSlider, TIER_COLORS } from "@/components/user-count-slider";
 
 // Icon mapping for tiers
 const TIER_ICONS: Record<string, React.ReactNode> = {
@@ -42,16 +41,6 @@ const TIER_ICONS: Record<string, React.ReactNode> = {
   enterprise: <Crown className="h-6 w-6" />,
 };
 
-// Color mapping for tiers
-const TIER_COLORS: Record<string, string> = {
-  launch: "from-blue-500 to-cyan-500",
-  traction: "from-purple-500 to-pink-500",
-  momentum: "from-orange-500 to-red-500",
-  scale: "from-green-500 to-emerald-500",
-  expansion: "from-yellow-500 to-amber-500",
-  enterprise: "from-yellow-500 to-amber-500",
-};
-
 function PricingContent() {
   const { toast } = useToast();
   const router = useRouter();
@@ -60,28 +49,6 @@ function PricingContent() {
   const [userCount, setUserCount] = useState(250);
   const [isRequired, setIsRequired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Create checkpoints from tier ranges (midpoint of each range)
-  const checkpoints: {
-    value: number;
-    label: string;
-    tierName: string;
-    range: readonly [number, number];
-  }[] = PRICING_TIERS.filter((t) => t.id !== "enterprise").map((tier) => {
-    const midpoint = Math.floor((tier.range[0] + tier.range[1]) / 2);
-    return {
-      value: midpoint,
-      label: tier.range[1].toLocaleString(),
-      tierName: tier.name,
-      range: tier.range,
-    };
-  });
-  checkpoints.push({
-    value: 11000,
-    label: "10,000+",
-    tierName: "Enterprise",
-    range: [10001, Infinity],
-  });
 
   useEffect(() => {
     // Check if subscription is required
@@ -291,91 +258,12 @@ function PricingContent() {
                 Slide to select your current or expected user count
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-6">
-                <div className="text-center transition-all duration-300">
-                  <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-400">
-                    {userCount > 10000 ? "10,000+" : userCount.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400 mt-2">
-                    {currentTier && userCount <= 10000 && (
-                      <span>
-                        up to {currentTier.range[1].toLocaleString()} Paid Users
-                      </span>
-                    )}
-                    {userCount > 10000 && <span>Unlimited Paid Users</span>}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="relative px-2">
-                    <Slider
-                      value={[
-                        checkpoints.findIndex((cp) => cp.value === userCount) >=
-                        0
-                          ? checkpoints.findIndex(
-                              (cp) => cp.value === userCount
-                            )
-                          : 0,
-                      ]}
-                      onValueChange={(value: number[]) =>
-                        setUserCount(checkpoints[value[0]].value)
-                      }
-                      min={0}
-                      max={checkpoints.length - 1}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="relative px-2">
-                    <div className="flex justify-between text-xs text-gray-500">
-                      {checkpoints.map((cp, idx) => (
-                        <div
-                          key={idx}
-                          className="flex flex-col items-center"
-                          style={{
-                            position: "absolute",
-                            left: `${(idx / (checkpoints.length - 1)) * 100}%`,
-                            transform: "translateX(-50%)",
-                          }}
-                        >
-                          <div className="h-2 w-0.5 bg-gray-600 mb-1"></div>
-                          <span className="whitespace-nowrap">{cp.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {currentTier && (
-                <div className="flex items-center justify-center gap-3 text-sm animate-in fade-in-50 duration-500">
-                  <Badge
-                    variant="secondary"
-                    className={`px-4 py-2 text-base font-semibold transition-all duration-300 bg-gradient-to-r ${
-                      TIER_COLORS[currentTier.id]
-                    } text-white border-0 shadow-lg`}
-                  >
-                    {currentTier.name} Tier
-                  </Badge>
-                  <span className="text-lg font-bold text-white">
-                    ${calculatePrice(currentTier)}/month
-                  </span>
-                </div>
-              )}
-
-              {userCount > 10000 && (
-                <div className="flex items-center justify-center gap-3 text-sm animate-in fade-in-50 duration-500">
-                  <Badge
-                    variant="secondary"
-                    className="px-4 py-2 text-base font-semibold bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg"
-                  >
-                    Enterprise
-                  </Badge>
-                  <span className="text-lg font-bold text-white">
-                    Custom pricing
-                  </span>
-                </div>
-              )}
+            <CardContent>
+              <UserCountSlider
+                userCount={userCount}
+                onUserCountChange={setUserCount}
+                showPrice={true}
+              />
             </CardContent>
           </Card>
 

@@ -97,6 +97,42 @@ async function recordPayment(data: any) {
   }
 }
 
+// Helper function to check and trigger auto-upgrade if needed
+// User count is now calculated automatically by the backend
+async function checkAutoUpgrade(accountId: string) {
+  try {
+    console.log(`🔄 Checking auto-upgrade for account ${accountId}`);
+    
+    const response = await fetch(
+      `${BACKEND_URL}/api/v1/subscriptions/${accountId}/check-upgrade`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.BACKEND_API_KEY || ""}`,
+          "X-Account-ID": accountId,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("Failed to check auto-upgrade:", error);
+      return null;
+    }
+
+    const result = await response.json();
+    if (result.result?.upgraded) {
+      console.log(`✅ Auto-upgraded account ${accountId} from ${result.result.old_tier} to ${result.result.new_tier}`);
+      console.log(`   Calculated users: ${result.calculated_users}`);
+    }
+    return result;
+  } catch (error) {
+    console.error("Error checking auto-upgrade:", error);
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
@@ -275,6 +311,11 @@ export async function POST(req: NextRequest) {
             ? new Date(subscription.canceled_at * 1000).toISOString()
             : null,
         });
+
+        // Check if account needs auto-upgrade (user count calculated by backend)
+        if (subscription.status === "active") {
+          await checkAutoUpgrade(accountId);
+        }
 
         break;
       }
