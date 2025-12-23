@@ -33,8 +33,31 @@ import {
   Building2,
   Crown,
   Loader2,
+  MailOpen,
 } from "lucide-react";
 import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
+
+// Google icon component
+const GoogleIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path
+      fill="currentColor"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="currentColor"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="currentColor"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="currentColor"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+);
 
 const TIER_ICONS: Record<string, React.ReactNode> = {
   launch: <Zap className="h-5 w-5" />,
@@ -54,13 +77,14 @@ const TIER_COLORS: Record<string, string> = {
   enterprise: "from-yellow-500 to-amber-500",
 };
 
+
 function SignUpForm() {
   const searchParams = useSearchParams();
 
   const preselectedPlanId = searchParams.get("plan");
   const preselectedUsers = searchParams.get("users");
 
-  const [step, setStep] = useState<"details" | "plan">("details");
+  const [step, setStep] = useState<"details" | "plan" | "verification">("details");
   const [userCount, setUserCount] = useState(
     preselectedUsers ? parseInt(preselectedUsers) : 250
   );
@@ -69,6 +93,7 @@ function SignUpForm() {
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [userId, setUserId] = useState("");
@@ -152,7 +177,15 @@ function SignUpForm() {
         return;
       }
 
-      // Sign in the user after registration
+      // Check if email verification is required
+      if (data.requiresVerification) {
+        setIsRegistered(true);
+        setUserId(data.account?.id || email);
+        setStep("verification");
+        return;
+      }
+
+      // If no verification required (e.g., Google OAuth users), sign in and go to plan
       const result = await signIn("credentials", {
         email,
         password,
@@ -172,6 +205,18 @@ function SignUpForm() {
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsGoogleLoading(true);
+    setError("");
+    try {
+      await signIn("google", { callbackUrl: "/signup?step=plan" });
+    } catch (error: any) {
+      console.error("Google sign up error:", error);
+      setError("Failed to sign up with Google. Please try again.");
+      setIsGoogleLoading(false);
     }
   };
 
@@ -348,6 +393,33 @@ function SignUpForm() {
                 <p className="text-gray-400">
                   Fill in your details to get started
                 </p>
+              </div>
+
+              {/* Google Sign Up Button */}
+              <Button
+                variant="outline"
+                onClick={handleGoogleSignUp}
+                disabled={isGoogleLoading}
+                className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+              >
+                {isGoogleLoading ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <GoogleIcon className="mr-2 h-5 w-5" />
+                )}
+                Continue with Google
+              </Button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-black text-gray-400">
+                    or create account with email
+                  </span>
+                </div>
               </div>
 
               {error && (
@@ -543,6 +615,61 @@ function SignUpForm() {
                   className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
                 >
                   Sign in instead
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Email Verification Pending Step */}
+          {step === "verification" && (
+            <div className="space-y-6 text-center">
+              <div className="flex justify-center">
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MailOpen className="h-10 w-10 text-primary" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold">Check your email</h2>
+                <p className="text-gray-400">
+                  We&apos;ve sent a verification link to <strong className="text-white">{email}</strong>
+                </p>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
+                <p className="text-sm text-gray-400">
+                  Click the link in your email to verify your account. Once verified, you can sign in and complete your subscription setup.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Didn&apos;t receive the email? Check your spam folder or{" "}
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(
+                          `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/resend-verification`,
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email }),
+                          }
+                        );
+                        if (response.ok) {
+                          alert("Verification email resent!");
+                        }
+                      } catch (error) {
+                        console.error("Failed to resend:", error);
+                      }
+                    }}
+                    className="text-primary hover:underline"
+                  >
+                    resend verification email
+                  </button>
+                </p>
+              </div>
+
+              <Link href="/signin">
+                <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90">
+                  Go to Sign In
                 </Button>
               </Link>
             </div>

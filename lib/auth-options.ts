@@ -1,10 +1,15 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { apiClient, setAuthToken } from "@/lib/api";
 import type { AuthResponse } from "@/lib/api";
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -61,19 +66,58 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async signIn({ user, account }) {
+      // Handle Google OAuth sign-in
+      if (account?.provider === "google" && user?.email) {
+        try {
+          // Call our backend to authenticate with Google
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/api/auth/google`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ idToken: account.id_token }),
+            }
+          );
+
+          if (!response.ok) {
+            console.error("Google auth failed:", await response.text());
+            return false;
+          }
+
+          const data = await response.json();
+          
+          // Store the tokens in the user object for the jwt callback
+          (user as any).accessToken = data.accessToken;
+          (user as any).refreshToken = data.refreshToken;
+          (user as any).projectId = data.projectId;
+          (user as any).isAdmin = data.user?.isAdmin || false;
+          (user as any).role = data.user?.role || "owner";
+          (user as any).hasActiveSubscription = data.user?.hasActiveSubscription || false;
+          (user as any).subscriptionStatus = data.user?.subscriptionStatus || "none";
+          (user as any).id = data.user?.id;
+
+          return true;
+        } catch (error) {
+          console.error("Error during Google sign-in:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account, trigger }) {
       // Initial sign in
-      if (user && user.accessToken) {
+      if (user && (user as any).accessToken) {
         console.log("JWT callback: Setting accessToken in token");
-        token.accessToken = user.accessToken;
-        token.refreshToken = user.refreshToken;
-        token.projectId = user.projectId;
-        token.isAdmin = user.isAdmin;
-        token.role = user.role;
-        token.hasActiveSubscription = user.hasActiveSubscription;
-        token.subscriptionStatus = user.subscriptionStatus;
+        token.accessToken = (user as any).accessToken;
+        token.refreshToken = (user as any).refreshToken;
+        token.projectId = (user as any).projectId;
+        token.isAdmin = (user as any).isAdmin;
+        token.role = (user as any).role;
+        token.hasActiveSubscription = (user as any).hasActiveSubscription;
+        token.subscriptionStatus = (user as any).subscriptionStatus;
         // Store user ID in token.sub (NextAuth standard)
-        token.sub = user.id;
+        token.sub = (user as any).id || user.id;
       }
 
       // Manual session update - refetch subscription status from backend
