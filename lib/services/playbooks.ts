@@ -1,12 +1,34 @@
 import { BaseHttpService } from "./base";
 
-// Types
+// Types - NEW FORMAT
+export interface PlaybookData {
+  title: string;
+  confidence_level: "High" | "Medium" | "Low";
+  impact: string;
+  why_seeing_this: string;
+  what_data_shows: string[];
+  churn_risk_if_ignored: {
+    summary: string;
+    projections: string[];
+  };
+  recommended_actions: {
+    product: string[];
+    messaging: string[];
+    lifecycle: string[];
+  };
+  execution_checklist: Array<{
+    task: string;
+    completed: boolean;
+  }>;
+  success_metrics: string[];
+}
+
 export interface Playbook {
   id: string;
   project_id: string;
   name: string;
-  description: string;
-  type: "churn_prevention" | "growth_expansion" | "onboarding" | "engagement";
+  description: string; // Contains JSON of PlaybookData for LLM-generated playbooks
+  type: "churn_prevention" | "growth_expansion" | "onboarding" | "feature_adoption" | "engagement";
   status: "draft" | "active" | "paused" | "archived";
   source: "manual" | "llm_generated";
   llm_prompt_used?: string;
@@ -111,7 +133,7 @@ export interface LLMGeneration {
   input_context: Record<string, any>;
   prompt_used: string;
   llm_response?: string;
-  parsed_playbook?: Record<string, any>;
+  parsed_playbook?: PlaybookData;
   status: "pending" | "generating" | "completed" | "failed" | "applied";
   error_message?: string;
   playbook_id?: string;
@@ -156,9 +178,21 @@ export interface CreateTriggerRequest {
 }
 
 export interface GeneratePlaybookRequest {
-  playbook_type: "churn_prevention" | "growth_expansion";
+  playbook_type: "churn_prevention" | "growth_expansion" | "onboarding" | "feature_adoption";
   context_data?: Record<string, any>;
   goals?: string[];
+}
+
+// Helper function to parse playbook data from description
+export function parsePlaybookData(playbook: Playbook): PlaybookData | null {
+  if (playbook.source !== "llm_generated") {
+    return null;
+  }
+  try {
+    return JSON.parse(playbook.description) as PlaybookData;
+  } catch {
+    return null;
+  }
 }
 
 // API functions
@@ -389,16 +423,16 @@ class PlaybooksService extends BaseHttpService {
     );
   }
 
-  // LLM Generation
+  // LLM Generation - Simplified API (metrics are auto-gathered)
   async generatePlaybook(
     projectId: string,
-    request: GeneratePlaybookRequest
+    playbookType: "churn_prevention" | "growth_expansion" | "onboarding" | "feature_adoption"
   ): Promise<LLMGeneration> {
     return this.request<LLMGeneration>(
       `${this.getBaseUrl(projectId)}/generate`,
       {
         method: "POST",
-        body: JSON.stringify(request),
+        body: JSON.stringify({ playbook_type: playbookType }),
       }
     );
   }
@@ -422,6 +456,24 @@ class PlaybooksService extends BaseHttpService {
         method: "POST",
       }
     );
+  }
+
+  // Update execution checklist item
+  async updateChecklistItem(
+    projectId: string,
+    playbookId: string,
+    taskIndex: number,
+    completed: boolean
+  ): Promise<Playbook> {
+    const playbook = await this.getPlaybook(projectId, playbookId);
+    const data = parsePlaybookData(playbook);
+    if (data && data.execution_checklist[taskIndex]) {
+      data.execution_checklist[taskIndex].completed = completed;
+      return this.updatePlaybook(projectId, playbookId, {
+        description: JSON.stringify(data),
+      });
+    }
+    throw new Error("Could not update checklist item");
   }
 }
 

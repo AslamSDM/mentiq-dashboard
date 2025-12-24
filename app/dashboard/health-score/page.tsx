@@ -109,19 +109,21 @@ export default function HealthScorePage() {
         setSessionData(sessionRes);
       }
 
-      // Calculate health score using the new calculator after all data is loaded
-      if (churnRes || featureRes || (sessionRes as any)?.session_data) {
-        const healthScoreInputs = prepareHealthScoreInputs(
-          churnRes,
-          featureRes,
-          (sessionRes as any)?.session_data
-        );
-        const result = calculateHealthScore(healthScoreInputs);
-        setHealthScoreResult(result);
-        console.log("📊 Health Score Calculated:", result);
-      }
+      // Calculate health score using the new calculator - always run even if no data
+      const healthScoreInputs = prepareHealthScoreInputs(
+        churnRes,
+        featureRes,
+        (sessionRes as any)?.session_data
+      );
+      const result = calculateHealthScore(healthScoreInputs);
+      setHealthScoreResult(result);
+      console.log("📊 Health Score Calculated:", result);
     } catch (error) {
       console.error("Error fetching health data:", error);
+      // Even on error, set a default health score of 0
+      const emptyInputs = prepareHealthScoreInputs(null, null, null);
+      const result = calculateHealthScore(emptyInputs);
+      setHealthScoreResult(result);
       toast({
         title: "Error",
         description: "Failed to load health score data",

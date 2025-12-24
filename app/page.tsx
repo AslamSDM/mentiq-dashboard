@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowRight,
   Search,
@@ -19,10 +21,156 @@ import {
   Zap,
   LineChart,
   PieChart,
+  Loader2,
+  Check,
 } from "lucide-react";
 import { AnimatedText, FadeIn } from "@/components/ui/animated-components";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+
+// Waitlist Form Component
+function WaitlistForm({ source = "landing_page" }: { source?: string }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    company: "",
+    user_count: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.full_name || !formData.email) {
+      toast({
+        title: "Missing fields",
+        description: "Please enter your name and email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          user_count: formData.user_count ? parseInt(formData.user_count) : 0,
+          source,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        toast({
+          title: "You're on the list! 🎉",
+          description: "Check your email for confirmation.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to join waitlist",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 border border-green-500/30 mb-4">
+          <Check className="h-8 w-8 text-green-500" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-2">You're on the list!</h3>
+        <p className="text-gray-400">We'll be in touch soon with early access.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="full_name" className="text-white">Full Name *</Label>
+          <Input
+            id="full_name"
+            placeholder="John Doe"
+            value={formData.full_name}
+            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-white">Email *</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="john@company.com"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            required
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="company" className="text-white">Company Name</Label>
+          <Input
+            id="company"
+            placeholder="Acme Inc."
+            value={formData.company}
+            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="user_count" className="text-white">Expected Users</Label>
+          <Input
+            id="user_count"
+            type="number"
+            placeholder="e.g. 500"
+            value={formData.user_count}
+            onChange={(e) => setFormData({ ...formData, user_count: e.target.value })}
+            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+          />
+        </div>
+      </div>
+      <Button
+        type="submit"
+        disabled={loading}
+        className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_-5px_var(--primary)]"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Joining...
+          </>
+        ) : (
+          <>
+            Join the Waitlist <ArrowRight className="ml-2 h-5 w-5" />
+          </>
+        )}
+      </Button>
+    </form>
+  );
+}
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -65,13 +213,6 @@ export default function Home() {
             >
               Sign In
             </Link>
-            <Button
-              asChild
-              size="sm"
-              className="bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_-5px_var(--primary)]"
-            >
-              <Link href="/signup">Get Started</Link>
-            </Button>
           </div>
         </div>
       </nav>
@@ -89,7 +230,7 @@ export default function Home() {
             className="inline-flex items-center justify-center px-4 py-1.5 mb-8 text-sm font-medium rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-white/90 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]"
           >
             <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse shadow-[0_0_10px_var(--primary)]"></span>
-            The Churn Murderer
+            Coming Soon - Join the Waitlist
           </FadeIn>
 
           <div className="mb-8 relative">
@@ -111,27 +252,22 @@ export default function Home() {
             </p>
           </FadeIn>
 
-          <FadeIn
-            delay={0.6}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Button
-              asChild
-              size="lg"
-              className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_-5px_var(--primary)] hover:shadow-[0_0_40px_-5px_var(--primary)] transition-all duration-300 border border-white/10"
-            >
-              <Link href="/signup">
-                Start Killing Churn <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="h-14 px-8 text-lg border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm transition-all duration-300"
-            >
-              <Link href="/signin">View Demo</Link>
-            </Button>
+          {/* Waitlist Form in Hero */}
+          <FadeIn delay={0.6} className="max-w-xl mx-auto">
+            <div className="relative group">
+              {/* Animated gradient border */}
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-50 animate-gradient-x"></div>
+              {/* Glow effect */}
+              <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+              {/* Card content */}
+              <div className="relative p-8 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_-12px_var(--primary)]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                <h3 className="text-2xl font-bold text-white mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">Get Early Access</h3>
+                <p className="text-gray-400 text-sm mb-6">Be the first to kill churn with Mentiq</p>
+                <WaitlistForm source="hero" />
+              </div>
+            </div>
           </FadeIn>
 
           {/* Dashboard Preview */}
@@ -460,7 +596,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Founders Note */}
+      {/* Final CTA - Waitlist */}
       <section className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-primary/5 to-black"></div>
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
@@ -476,7 +612,7 @@ export default function Home() {
             <blockquote className="text-2xl md:text-3xl italic text-gray-400 mb-12 leading-relaxed font-light">
               "We built Mentiq because we struggled with one thing: <br />
               <span className="text-white font-normal not-italic">
-                We could acquire users. We could activate them. But we couldn’t
+                We could acquire users. We could activate them. But we couldn't
                 keep them.
               </span>
               "
@@ -489,18 +625,27 @@ export default function Home() {
                 It turns retention into a system.
               </p>
             </div>
-            <div>
-              <Button
-                asChild
-                size="lg"
-                className="h-16 px-12 text-xl bg-primary hover:bg-primary/90 text-white shadow-[0_0_50px_-10px_var(--primary)] hover:shadow-[0_0_70px_-10px_var(--primary)] hover:scale-105 transition-all duration-300 rounded-full"
-              >
-                <Link href="/signup">Start Retaining Users Now</Link>
-              </Button>
-              <p className="mt-6 text-sm text-gray-400">
-                No credit card required • 14-day free trial
-              </p>
+            
+            {/* Waitlist Form */}
+            <div className="max-w-xl mx-auto relative group">
+              {/* Animated gradient border */}
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
+              <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-50 animate-gradient-x"></div>
+              {/* Glow effect */}
+              <div className="absolute -inset-6 bg-primary/30 rounded-3xl blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+              {/* Card content */}
+              <div className="relative p-8 rounded-2xl bg-black/90 backdrop-blur-xl border border-white/20 shadow-[0_0_60px_-12px_var(--primary)]">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                <h3 className="text-2xl font-bold text-white mb-2">Join the Waitlist</h3>
+                <p className="text-gray-400 text-sm mb-6">Secure your spot for early access</p>
+                <WaitlistForm source="footer_cta" />
+              </div>
             </div>
+            
+            <p className="mt-6 text-sm text-gray-400">
+              Be the first to know when we launch
+            </p>
           </FadeIn>
         </div>
       </section>

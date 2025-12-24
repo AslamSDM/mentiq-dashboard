@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
@@ -33,57 +33,47 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    console.log("Session status changed:", status, session);
-    console.log("Current token in Zustand:", token);
-    console.log("Session access token:", session?.accessToken);
-    console.log("Session project ID:", session?.projectId);
+  // Use refs to track initialization state to prevent redundant operations
+  const hasInitialized = useRef(false);
+  const hasFetchedProjects = useRef(false);
+  const hasSetProject = useRef(false);
 
-    if (status === "authenticated" && session?.accessToken) {
-      console.log("Setting token from session:", session.accessToken);
+  // Sync auth token from session (only when status changes)
+  useEffect(() => {
+    if (status === "authenticated" && session?.accessToken && !hasInitialized.current) {
+      hasInitialized.current = true;
       setToken(session.accessToken, session.refreshToken);
     } else if (status === "unauthenticated") {
-      console.log("Unauthenticated, clearing token");
+      hasInitialized.current = false;
+      hasFetchedProjects.current = false;
+      hasSetProject.current = false;
       setToken(null, null);
     }
-  }, [status, session, setToken, token]);
+  }, [status, session?.accessToken, session?.refreshToken, setToken]);
 
+  // Fetch projects once when authenticated
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated && token && !hasFetchedProjects.current && !projectsLoaded) {
+      hasFetchedProjects.current = true;
       fetchProjects();
     }
-  }, [isAuthenticated, fetchProjects, token]);
+  }, [isAuthenticated, token, projectsLoaded, fetchProjects]);
 
-  // Set project ID from session after projects are loaded
+  // Set project ID from session after projects are loaded (once)
   useEffect(() => {
     if (
       projectsLoaded &&
-      session?.projectId &&
+      projects.length > 0 &&
       !selectedProjectId &&
-      projects.length > 0
+      !hasSetProject.current
     ) {
-      console.log(
-        "Projects loaded, setting project ID from session:",
-        session.projectId
-      );
-      // Check if the session project ID exists in the projects list
-      const projectExists = projects.some((p) => p.id === session.projectId);
-      if (projectExists) {
-        setSelectedProjectId(session.projectId);
-      } else {
-        console.log(
-          "Session project not found in projects list, using first project"
-        );
-        setSelectedProjectId(projects[0].id);
-      }
+      hasSetProject.current = true;
+      // Use session project if it exists, otherwise use first project
+      const targetProjectId = session?.projectId;
+      const projectExists = targetProjectId && projects.some((p) => p.id === targetProjectId);
+      setSelectedProjectId(projectExists ? targetProjectId : projects[0].id);
     }
-  }, [
-    projectsLoaded,
-    session?.projectId,
-    selectedProjectId,
-    projects,
-    setSelectedProjectId,
-  ]);
+  }, [projectsLoaded, projects, selectedProjectId, session?.projectId, setSelectedProjectId]);
 
   // Redirect to verify-email page if email is not verified
   useEffect(() => {

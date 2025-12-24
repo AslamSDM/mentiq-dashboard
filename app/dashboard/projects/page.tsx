@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +53,10 @@ export default function ProjectsPage() {
   const { toast } = useToast();
   const { data: session } = useSession();
 
+  // Refs to prevent duplicate operations
+  const hasFetched = useRef(false);
+  const hasShownPaymentToast = useRef(false);
+
   // Local state
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
     new Set()
@@ -70,15 +74,22 @@ export default function ProjectsPage() {
   // Get role from session, default to "owner" for backward compatibility
   const currentUserRole = session?.role || "owner";
 
+  // Fetch projects only once if not loaded
   useEffect(() => {
-    if (!projectsLoaded) {
+    if (!projectsLoaded && !hasFetched.current) {
+      hasFetched.current = true;
       setLoading(true);
       fetchProjects().finally(() => setLoading(false));
     }
-  }, [fetchProjects, projectsLoaded]); // Check for successful payment from Stripe
+  }, [fetchProjects, projectsLoaded]);
+
+  // Check for successful payment from Stripe (once)
   useEffect(() => {
+    if (hasShownPaymentToast.current) return;
+    
     const params = new URLSearchParams(window.location.search);
     if (params.get("success") === "true") {
+      hasShownPaymentToast.current = true;
       toast({
         title: "Payment successful! 🎉",
         description:

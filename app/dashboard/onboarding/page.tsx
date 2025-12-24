@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useStore } from "@/lib/store";
 import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import {
@@ -50,15 +50,28 @@ export default function OnboardingPage() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "" });
+  
+  // Use refs to prevent multiple operations
   const paymentPollingStarted = useRef(false);
+  const hasRedirected = useRef(false);
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Check if user already has projects, skip to ready step
+  // Check if user already has projects, skip to dashboard (once)
   useEffect(() => {
-    if (projectsLoaded && projects && projects.length > 0) {
-      setStep("ready");
-      router.push("/dashboard");
+    if (projectsLoaded && projects && projects.length > 0 && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.replace("/dashboard");
     }
-  }, [projectsLoaded, projects]);
+  }, [projectsLoaded, projects, router]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Refresh session after successful payment
   useEffect(() => {
@@ -67,65 +80,45 @@ export default function OnboardingPage() {
     // Prevent multiple polling attempts
     if (success === "true" && update && !paymentPollingStarted.current) {
       paymentPollingStarted.current = true;
-      console.log(
-        "💳 Payment successful - waiting for subscription to be created..."
-      );
       setLoading(true);
 
       let attempts = 0;
-      const maxAttempts = 5; // 5 retries max
+      const maxAttempts = 5;
 
-      // Exponential backoff: 2s, 4s, 8s, 16s, 32s (total ~62 seconds)
       const getBackoffDelay = (attempt: number) => Math.pow(2, attempt) * 1000;
 
       const checkAndUpdateSession = async () => {
         attempts++;
         const delay = getBackoffDelay(attempts);
-        console.log(
-          `🔄 Checking subscription status (${attempts}/${maxAttempts}), next delay: ${
-            delay / 1000
-          }s...`
-        );
 
         try {
-          // Trigger session refresh which will call /api/v1/me
           await update();
-
-          // Check if session was updated with subscription
           const response = await fetch("/api/auth/session");
           const sessionData = await response.json();
 
           if (sessionData?.hasActiveSubscription) {
-            console.log(
-              "✅ Subscription confirmed! Redirecting to dashboard..."
-            );
             setLoading(false);
-            router.push("/dashboard");
+            hasRedirected.current = true;
+            router.replace("/dashboard");
             return;
           }
 
           if (attempts < maxAttempts) {
-            setTimeout(checkAndUpdateSession, delay);
+            pollingTimeoutRef.current = setTimeout(checkAndUpdateSession, delay);
           } else {
-            console.log(
-              "⏱️ Max retries reached - subscription not confirmed yet"
-            );
             setLoading(false);
-            // Show error toast instead of redirect loop
             toast({
               title: "Payment processing",
               description:
-                "Your payment is still being processed. Please refresh the page in a few moments or contact support if this persists.",
+                "Your payment is still being processed. Please refresh the page in a few moments.",
               variant: "destructive",
             });
           }
         } catch (error) {
-          console.error("Error checking subscription:", error);
           if (attempts < maxAttempts) {
-            setTimeout(checkAndUpdateSession, delay);
+            pollingTimeoutRef.current = setTimeout(checkAndUpdateSession, delay);
           } else {
             setLoading(false);
-            // Show error toast instead of redirect loop
             toast({
               title: "Payment verification failed",
               description:
@@ -136,8 +129,7 @@ export default function OnboardingPage() {
         }
       };
 
-      // Start checking after 2 seconds to allow webhook to process
-      setTimeout(checkAndUpdateSession, 2000);
+      pollingTimeoutRef.current = setTimeout(checkAndUpdateSession, 2000);
     }
   }, [searchParams, update, router, toast]);
 
