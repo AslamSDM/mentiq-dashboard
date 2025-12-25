@@ -587,7 +587,7 @@ export default function Home() {
                   <span className="text-lg">{row.other}</span>
                 </div>
                 <div className="flex items-center gap-4 font-bold text-white">
-                  <CheckCircle2 className="h-6 w-6 text-primary group-hover:scale-110 transition-transform shadow-[0_0_10px_var(--primary)]" />
+                  <CheckCircle2 className="h-6 w-6 text-primary group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
                   <span className="text-lg">{row.mentiq}</span>
                 </div>
               </motion.div>
