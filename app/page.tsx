@@ -34,6 +34,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [promoOptIn, setPromoOptIn] = useState(true);
   const [formData, setFormData] = useState({
     full_name: "",
     email: "",
@@ -60,6 +61,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
         body: JSON.stringify({
           ...formData,
           user_count: formData.user_count ? parseInt(formData.user_count) : 0,
+          promo_emails_opt_in: promoOptIn,
           source,
         }),
       });
@@ -152,6 +154,21 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           />
         </div>
       </div>
+      
+      {/* Promotional email consent checkbox */}
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          id="promo_opt_in"
+          checked={promoOptIn}
+          onChange={(e) => setPromoOptIn(e.target.checked)}
+          className="mt-1 h-4 w-4 rounded border-white/20 bg-white/10 text-primary focus:ring-primary focus:ring-offset-0"
+        />
+        <label htmlFor="promo_opt_in" className="text-sm text-gray-400 cursor-pointer">
+          I agree to receive promotional emails from Mentiq about product updates, tips, and special offers. You can unsubscribe anytime.
+        </label>
+      </div>
+      
       <Button
         type="submit"
         disabled={loading}

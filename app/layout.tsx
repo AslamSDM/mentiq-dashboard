@@ -64,7 +64,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "Mentiq - Churn Prevention Platform for SaaS",
-      },
+      }, 
     ],
   },
   twitter: {

@@ -338,7 +338,7 @@ export default function SignInPage() {
             </Button>
           </form>
 
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-white/10"></div>
             </div>
@@ -356,7 +356,7 @@ export default function SignInPage() {
             >
               Create an account
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

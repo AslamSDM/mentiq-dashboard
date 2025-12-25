@@ -138,6 +138,11 @@ const navigation = [
     href: "/dashboard/team",
     icon: <Users className="h-5 w-5" />,
   },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: <Settings className="h-5 w-5" />,
+  },
   // {
   //   name: "Pricing",
   //   href: "/dashboard/pricing",
