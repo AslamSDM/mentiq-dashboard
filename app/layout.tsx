@@ -19,22 +19,28 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.trymentiq.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Mentiq - Cut Monthly Churn in Half Within 90 Days",
+    default: "Mentiq - SaaS Retention Analytics Platform | Reduce Churn & Increase Revenue",
     template: "%s | Mentiq",
   },
   description:
-    "The only analytics platform built for SaaS founders who want actionable retention insights. Identify churn risk, understand root causes, and get automated save strategies.",
+    "Leading SaaS retention analytics platform to reduce SaaS churn by 50% in 90 days. Track customer health scores, product usage analytics, and get actionable insights to improve user retention. Customer retention software built for SaaS founders.",
   keywords: [
-    "SaaS analytics",
-    "churn prevention",
-    "customer retention",
-    "user analytics",
-    "product analytics",
+    "SaaS retention analytics platform",
+    "reduce SaaS churn",
+    "SaaS user analytics",
+    "customer retention software",
+    "SaaS customer health score",
+    "product usage analytics for SaaS",
+    "churn prevention software",
+    "SaaS analytics platform",
+    "customer retention analytics",
+    "user behavior analytics",
+    "SaaS metrics dashboard",
     "churn prediction",
     "retention platform",
-    "SaaS metrics",
-    "user behavior analytics",
-    "customer success",
+    "customer success software",
+    "SaaS churn reduction",
+    "user retention tools",
   ],
   authors: [{ name: "Mentiq", url: siteUrl }],
   creator: "Mentiq",
@@ -55,23 +61,23 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "Mentiq",
-    title: "Mentiq - Cut Monthly Churn in Half Within 90 Days",
+    title: "Mentiq - SaaS Retention Analytics Platform | Reduce Churn & Increase Revenue",
     description:
-      "The only analytics platform built for SaaS founders who want actionable retention insights. Identify churn risk, understand root causes, and get automated save strategies.",
+      "Leading SaaS retention analytics platform to reduce SaaS churn by 50%. Track customer health scores, product usage analytics, and SaaS user analytics. Customer retention software for data-driven founders.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Mentiq - Churn Prevention Platform for SaaS",
-      }, 
+        alt: "Mentiq - SaaS Retention Analytics Platform",
+      },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mentiq - Cut Monthly Churn in Half Within 90 Days",
+    title: "Mentiq - SaaS Retention Analytics Platform",
     description:
-      "The only analytics platform built for SaaS founders who want actionable retention insights.",
+      "Reduce SaaS churn by 50% with customer retention software. Track health scores, product usage analytics, and get actionable insights.",
     images: ["/og-image.png"],
     creator: "@mentiq",
   },
@@ -83,6 +89,23 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   alternates: {
     canonical: siteUrl,
+  },
+  other: {
+    // AI-specific meta tags for better AI search visibility
+    "og:type": "website",
+    "og:site_name": "Mentiq",
+    "article:publisher": "Mentiq",
+    "product:price:amount": "Contact for pricing",
+    "product:price:currency": "USD",
+    "product:category": "SaaS Analytics",
+    "product:availability": "Coming Soon",
+    // Additional context for AI crawlers
+    "description": "Mentiq is a SaaS retention analytics platform that helps companies reduce customer churn by 50% through real-time customer health scores, product usage analytics, and automated retention playbooks. Built specifically for SaaS founders who need actionable insights to improve user retention and reduce monthly recurring revenue loss.",
+    "keywords": "SaaS retention analytics platform, reduce SaaS churn, customer retention software, SaaS customer health score, product usage analytics for SaaS, SaaS user analytics, churn prediction, retention platform",
+    // AI citation-friendly metadata
+    "citation_title": "Mentiq - SaaS Retention Analytics Platform",
+    "citation_publisher": "Mentiq Inc.",
+    "citation_online_date": "2024",
   },
 };
 

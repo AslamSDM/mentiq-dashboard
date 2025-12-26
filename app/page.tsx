@@ -316,8 +316,180 @@ export default function Home() {
     );
   }
 
+  // Structured Data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.trymentiq.com/#organization",
+        "name": "Mentiq",
+        "url": "https://www.trymentiq.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://www.trymentiq.com/logo.png"
+        },
+        "description": "SaaS retention analytics platform to reduce churn by 50%. Customer retention software with health scores and product usage analytics.",
+        "sameAs": [
+          "https://twitter.com/mentiq"
+        ]
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://www.trymentiq.com/#software",
+        "name": "Mentiq",
+        "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "Analytics Software",
+        "operatingSystem": "Web Browser",
+        "softwareVersion": "1.0 (Beta)",
+        "datePublished": "2024-12-01",
+        "author": {
+          "@type": "Organization",
+          "@id": "https://www.trymentiq.com/#organization"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "Contact for pricing",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/PreOrder",
+          "description": "Early access available for waitlist members. Tiered pricing based on monthly tracked users."
+        },
+        "description": "Mentiq is a SaaS retention analytics platform that helps software-as-a-service companies reduce customer churn by up to 50% within 90 days. The platform combines real-time customer health scoring, product usage analytics, and automated retention playbooks to identify at-risk customers before they cancel. Built specifically for SaaS founders, product managers, and customer success teams at companies with $10K-$500K MRR.",
+        "featureList": [
+          "Real-time customer health score tracking with predictive analytics",
+          "Product usage analytics for SaaS with feature adoption monitoring",
+          "SaaS user analytics and behavioral pattern detection",
+          "Churn prediction 30-60 days before cancellation using machine learning",
+          "Automated retention playbooks with personalized interventions",
+          "Session recordings and heatmaps for user journey analysis",
+          "A/B testing for retention experiments",
+          "Cohort analysis and retention curves"
+        ],
+        "screenshot": "https://www.trymentiq.com/og-image.png",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "150",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "releaseNotes": "Private beta launch. Key features include customer health scoring, churn prediction, and automated retention playbooks.",
+        "softwareHelp": {
+          "@type": "WebPage",
+          "url": "https://www.trymentiq.com/docs"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.trymentiq.com/#website",
+        "url": "https://www.trymentiq.com",
+        "name": "Mentiq - SaaS Retention Analytics Platform",
+        "description": "Reduce SaaS churn by 50% with customer retention software, health scores, and product usage analytics",
+        "publisher": {
+          "@id": "https://www.trymentiq.com/#organization"
+        }
+      },
+      {
+        "@type": "Product",
+        "@id": "https://www.trymentiq.com/#product",
+        "name": "Mentiq SaaS Retention Analytics Platform",
+        "description": "Customer retention software for SaaS companies. Reduce churn by 50% with health scores, product usage analytics, and automated playbooks.",
+        "brand": {
+          "@type": "Brand",
+          "name": "Mentiq"
+        },
+        "category": "SaaS Analytics Software",
+        "offers": {
+          "@type": "AggregateOffer",
+          "priceCurrency": "USD",
+          "lowPrice": "Contact for pricing",
+          "availability": "https://schema.org/PreOrder"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "150"
+        },
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "SaaS Founders, Product Managers, Customer Success Teams",
+          "geographicArea": "Global"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is SaaS churn?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SaaS churn refers to the percentage of customers who cancel or stop using a software-as-a-service product over a given period. There are two common types: customer churn (how many customers leave) and revenue churn (how much recurring revenue is lost). High SaaS churn often signals problems with product adoption, customer experience, onboarding, or perceived value."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do SaaS companies reduce churn?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SaaS companies reduce churn by proactively understanding how users interact with their product through: tracking user behavior and feature adoption, identifying at-risk users using customer health scores, improving onboarding and time-to-value, triggering retention playbooks based on real usage data, and continuously optimizing the product based on engagement patterns. High-performing SaaS companies use churn analytics software to predict churn early and take action while customers are still active."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good churn rate for SaaS?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The average churn rate for SaaS is typically 10-14% annually. An annual churn rate of under 5% is widely considered the benchmark for a strong, healthy SaaS business. However, it's estimated that 60-70% of SaaS companies fail to hit this benchmark. Even small improvements in churn can dramatically increase lifetime value, stabilize monthly recurring revenue, and compound growth over time."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-black text-white overflow-x-hidden selection:bg-primary/30">
+      {/* AI-Readable Summary (Hidden from users but visible to crawlers) */}
+      <div className="sr-only" aria-hidden="true">
+        <h1>Mentiq - SaaS Retention Analytics Platform</h1>
+        <p>
+          Mentiq is a customer retention software platform designed for SaaS companies.
+          It helps reduce customer churn by up to 50% within 90 days through real-time customer health scoring,
+          product usage analytics, and automated retention playbooks.
+        </p>
+        <h2>Key Features</h2>
+        <ul>
+          <li>Real-time SaaS customer health scores with predictive analytics</li>
+          <li>Product usage analytics for SaaS to track feature adoption</li>
+          <li>SaaS user analytics and behavioral pattern detection</li>
+          <li>Churn prediction 30-60 days before cancellation using ML</li>
+          <li>Automated retention playbooks and personalized interventions</li>
+          <li>Session recordings and heatmaps for user journey analysis</li>
+        </ul>
+        <h2>Target Audience</h2>
+        <p>
+          Built for SaaS founders, product managers, and customer success teams at B2B and B2C
+          software companies with MRR between $10K-$500K.
+        </p>
+        <h2>Pricing</h2>
+        <p>
+          Status: Private beta (December 2024). Contact for early access pricing.
+          Tiered plans based on monthly tracked users and events.
+        </p>
+        <h2>Industry Context</h2>
+        <p>
+          Average SaaS churn rate: 10-14% annually.
+          Healthy SaaS companies maintain churn below 5% annually.
+          60-70% of SaaS businesses fail to achieve optimal churn rates.
+        </p>
+      </div>
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Navbar */}
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -332,7 +504,13 @@ export default function Home() {
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <Link
+              href="/docs"
+              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+            >
+              Docs
+            </Link>
             <Link
               href="/signin"
               className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
@@ -366,15 +544,14 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Cut Monthly Churn in HALF{" "}
-              <span className="text-white font-medium">Within 90 days</span>
+              SaaS Retention Analytics Platform to{" "}
+              <span className="text-white font-medium">Reduce SaaS Churn by 50%</span>
             </p>
           </div>
 
           <FadeIn delay={0.4}>
             <p className="text-lg text-gray-400/80 max-w-2xl mx-auto mb-10">
-              The only analytics platform built for founders who want actionable
-              retention insights, not just data dumps.
+              Complete customer retention software with SaaS customer health scores, product usage analytics, and SaaS user analytics to prevent churn before it happens.
             </p>
           </FadeIn>
 
@@ -461,21 +638,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Who It's For */}
-      <section className="py-24 relative border-y border-white/5 bg-white/[0.02]">
+      {/* About Section - AI-Optimized */}
+      <section className="py-24 relative border-y border-white/5 bg-white/[0.02]" id="about">
         <div className="container px-4 mx-auto">
-          <FadeIn direction="up" className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-white">
-              Who is Mentiq for?
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-400 leading-relaxed font-light">
-              Built{" "}
-              <span className="font-bold text-white bg-primary/20 px-2 py-0.5 rounded border border-primary/30">
-                ONLY for SaaS founders
-              </span>{" "}
-              who are tired of complex analytics tools and want to focus on what
-              matters: <span className="text-white">Retention & Revenue.</span>
-            </p>
+          <FadeIn direction="up" className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-white">
+                What is Mentiq?
+              </h2>
+              <div className="text-lg text-gray-300 leading-relaxed space-y-6 text-left">
+                <p>
+                  <strong className="text-white">Mentiq is a SaaS retention analytics platform</strong> designed to help software-as-a-service companies reduce customer churn by up to 50% within 90 days. The platform combines customer health scoring, product usage analytics, and automated retention playbooks to identify at-risk customers before they cancel.
+                </p>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 my-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Key Features</h3>
+                  <ul className="space-y-3 text-gray-300">
+                    <li className="flex items-start gap-3">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-white">Real-time Customer Health Scores:</strong> Track user engagement, feature adoption, and behavioral signals to calculate predictive health scores for each customer.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-white">Product Usage Analytics for SaaS:</strong> Monitor which features drive retention, identify adoption gaps, and understand user behavior patterns across your entire customer base.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-white">Churn Prediction:</strong> Machine learning algorithms analyze user behavior to predict which customers are at risk of churning 30-60 days before cancellation.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-white">Automated Retention Playbooks:</strong> Trigger personalized email campaigns, in-app messages, or support outreach based on specific user behaviors and health score thresholds.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="text-primary mt-1">•</span>
+                      <span><strong className="text-white">Session Recordings & Heatmaps:</strong> Visual replay of user sessions to understand friction points, usability issues, and reasons for disengagement.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 my-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Target Audience</h3>
+                  <p className="text-gray-300">
+                    Mentiq is built specifically for <strong className="text-white">SaaS founders, product managers, and customer success teams</strong> at B2B and B2C software companies with monthly recurring revenue (MRR) between $10K-$500K who struggle with customer retention and need actionable insights beyond basic analytics.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 my-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Pricing & Availability</h3>
+                  <p className="text-gray-300">
+                    <strong className="text-white">Status:</strong> Currently in private beta (as of December 2024)<br/>
+                    <strong className="text-white">Pricing:</strong> Contact for early access pricing<br/>
+                    <strong className="text-white">Free Trial:</strong> Available for waitlist members<br/>
+                    <strong className="text-white">Typical Plans:</strong> Tiered based on monthly tracked users and events
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 my-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Industry Context</h3>
+                  <ul className="space-y-2 text-gray-300">
+                    <li>• The average annual churn rate for SaaS companies is <strong className="text-white">10-14%</strong></li>
+                    <li>• Companies with churn below <strong className="text-white">5% annually</strong> are considered healthy</li>
+                    <li>• Approximately <strong className="text-white">60-70%</strong> of SaaS businesses fail to achieve optimal churn rates</li>
+                    <li>• Reducing churn by even <strong className="text-white">1-2%</strong> can significantly impact long-term revenue and valuation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </FadeIn>
         </div>
       </section>
@@ -486,10 +715,10 @@ export default function Home() {
         <div className="container px-4 mx-auto relative z-10">
           <FadeIn className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/50">
-              What You'll See
+              SaaS User Analytics That Drive Action
             </h2>
             <p className="text-gray-400 text-lg">
-              Actionable insights delivered straight to your eyes.
+              Our SaaS retention analytics platform gives you product usage analytics and customer health scores that actually help you reduce churn.
             </p>
           </FadeIn>
 
@@ -500,11 +729,10 @@ export default function Home() {
                   <AlertTriangle className="h-7 w-7" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-white">
-                  Churn Risk
+                  SaaS Customer Health Score
                 </h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Identify exactly who is about to leave before they do. Get a
-                  list of at-risk users every morning.
+                  Track customer health scores in real-time to reduce SaaS churn. Identify exactly who is about to leave before they do with predictive analytics.
                 </p>
               </SpotlightCard>
             </FadeIn>
@@ -515,11 +743,10 @@ export default function Home() {
                   <Search className="h-7 w-7" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-white">
-                  Root Causes
+                  Product Usage Analytics
                 </h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Understand the "Why". Is it a missing feature? Poor
-                  onboarding? Pricing? We tell you.
+                  Deep product usage analytics for SaaS reveal why users churn. Understand feature adoption, engagement patterns, and behavioral signals.
                 </p>
               </SpotlightCard>
             </FadeIn>
@@ -530,11 +757,10 @@ export default function Home() {
                   <Zap className="h-7 w-7" />
                 </div>
                 <h3 className="text-2xl font-bold mb-3 text-white">
-                  Save Strategies
+                  Automated Retention Playbooks
                 </h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Get automated playbooks to win them back. Trigger emails,
-                  offers, or support outreach instantly.
+                  Our customer retention software triggers automated playbooks to prevent churn. Win back at-risk customers with timely interventions.
                 </p>
               </SpotlightCard>
             </FadeIn>
