@@ -23,11 +23,120 @@ import {
   PieChart,
   Loader2,
   Check,
+  ChevronDown,
 } from "lucide-react";
 import { AnimatedText, FadeIn } from "@/components/ui/animated-components";
 import { SpotlightCard } from "@/components/ui/spotlight-card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+
+// FAQ Data
+const faqData = [
+  {
+    question: "What is SaaS churn?",
+    answer: (
+      <div className="space-y-4 text-gray-400 leading-relaxed">
+        <p>
+          SaaS churn refers to the percentage of customers who cancel or stop using a software-as-a-service product over a given period of time. It is one of the most important metrics for subscription-based businesses because even small increases in churn can significantly slow growth and reduce long-term revenue.
+        </p>
+        <p>There are two common types of SaaS churn:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong className="text-white">Customer churn</strong>, which measures how many customers leave</li>
+          <li><strong className="text-white">Revenue churn</strong>, which measures how much recurring revenue is lost</li>
+        </ul>
+        <p>
+          High SaaS churn often signals problems with product adoption, customer experience, onboarding, or perceived value. This is why modern SaaS companies rely on user behavior analytics and customer health scores to identify churn risk before customers cancel.
+        </p>
+      </div>
+    ),
+  },
+  {
+    question: "How do SaaS companies reduce churn?",
+    answer: (
+      <div className="space-y-4 text-gray-400 leading-relaxed">
+        <p>
+          SaaS companies reduce churn by proactively understanding how users interact with their product and intervening before disengagement turns into cancellation. The most effective churn reduction strategies include:
+        </p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li>Tracking user behavior and feature adoption</li>
+          <li>Identifying at-risk users using customer health scores</li>
+          <li>Improving onboarding and time-to-value</li>
+          <li>Triggering retention playbooks based on real usage data</li>
+          <li>Continuously optimizing the product based on engagement patterns</li>
+        </ul>
+        <p>
+          Instead of reacting after churn happens, high-performing SaaS companies use churn analytics software to predict churn early and take action while customers are still active. This shift from reactive to proactive retention is what separates high-retention SaaS businesses from stagnant ones.
+        </p>
+      </div>
+    ),
+  },
+  {
+    question: "What is a good churn rate for SaaS?",
+    answer: (
+      <div className="space-y-4 text-gray-400 leading-relaxed">
+        <p>
+          A good churn rate for SaaS depends on the business model, but benchmarks are well established.
+        </p>
+        <p>
+          The average churn rate for SaaS is typically <strong className="text-white">10–14% annually</strong>. An annual churn rate of <strong className="text-primary">under 5%</strong> is widely considered the benchmark for a strong, healthy SaaS business. However, it&apos;s estimated that <strong className="text-white">60–70% of SaaS companies fail to hit this benchmark</strong>, meaning most subscription software businesses are losing customers faster than they should.
+        </p>
+        <p>
+          This gap highlights why churn reduction is such a major growth lever. Even small improvements in churn can dramatically increase lifetime value, stabilize monthly recurring revenue, and compound growth over time.
+        </p>
+      </div>
+    ),
+  },
+];
+
+// FAQ Accordion Component
+function FAQAccordion() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-4">
+      {faqData.map((faq, index) => (
+        <FadeIn key={index} delay={0.1 * (index + 1)}>
+          <div
+            className={`rounded-2xl border backdrop-blur-sm transition-all duration-300 ${
+              openIndex === index
+                ? "border-primary/50 bg-white/10"
+                : "border-white/10 bg-white/5 hover:border-white/20"
+            }`}
+          >
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="w-full p-6 sm:p-8 flex items-center justify-between text-left"
+            >
+              <h3 className="text-lg sm:text-xl font-bold text-white pr-4">
+                {faq.question}
+              </h3>
+              <ChevronDown
+                className={`h-5 w-5 sm:h-6 sm:w-6 text-primary transition-transform duration-300 shrink-0 ${
+                  openIndex === index ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            <AnimatePresence>
+              {openIndex === index && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+                    {faq.answer}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  );
+}
 
 // Waitlist Form Component
 function WaitlistForm({ source = "landing_page" }: { source?: string }) {
@@ -106,7 +215,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="full_name" className="text-white">Full Name *</Label>
           <Input
@@ -131,7 +240,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="company" className="text-white">Company Name</Label>
           <Input
@@ -288,11 +397,10 @@ export default function Home() {
           </FadeIn>
 
           {/* Dashboard Preview */}
-          <FadeIn delay={0.8} className="mt-20 relative mx-auto max-w-5xl">
+          {/* <FadeIn delay={0.8} className="mt-20 relative mx-auto max-w-5xl">
             <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-sm p-2 shadow-2xl shadow-primary/20">
               <div className="rounded-lg overflow-hidden bg-white/5 aspect-[16/9] relative group">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                {/* Abstract representation of dashboard */}
                 <div className="grid grid-cols-12 gap-4 p-6 h-full opacity-80 group-hover:opacity-100 transition-opacity duration-500">
                   <div className="col-span-3 space-y-4">
                     <div className="h-8 w-3/4 bg-white/10 rounded animate-pulse"></div>
@@ -349,7 +457,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </FadeIn>
+          </FadeIn> */}
         </div>
       </section>
 
@@ -571,7 +679,7 @@ export default function Home() {
             delay={0.2}
             className="max-w-5xl mx-auto overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-black/40 backdrop-blur-md"
           >
-            <div className="grid grid-cols-2 bg-white/5 p-6 font-bold text-xl border-b border-white/10">
+            <div className="grid grid-cols-2 bg-white/5 p-4 sm:p-6 font-bold text-base sm:text-xl border-b border-white/10">
               <div className="text-gray-400 pl-4">Others show</div>
               <div className="text-primary pl-4">Mentiq Reveals</div>
             </div>
@@ -597,15 +705,15 @@ export default function Home() {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.1 }}
-                className="grid grid-cols-2 p-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group"
+                className="grid grid-cols-2 p-4 sm:p-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group"
               >
-                <div className="flex items-center gap-4 text-gray-400 group-hover:text-white/70 transition-colors">
-                  <XCircle className="h-6 w-6 text-red-500/50 group-hover:text-red-500 transition-colors" />
-                  <span className="text-lg">{row.other}</span>
+                <div className="flex items-center gap-2 sm:gap-4 text-gray-400 group-hover:text-white/70 transition-colors">
+                  <XCircle className="h-4 w-4 sm:h-6 sm:w-6 text-red-500/50 group-hover:text-red-500 transition-colors shrink-0" />
+                  <span className="text-sm sm:text-lg">{row.other}</span>
                 </div>
-                <div className="flex items-center gap-4 font-bold text-white">
-                  <CheckCircle2 className="h-6 w-6 text-primary group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
-                  <span className="text-lg">{row.mentiq}</span>
+                <div className="flex items-center gap-2 sm:gap-4 font-bold text-white">
+                  <CheckCircle2 className="h-4 w-4 sm:h-6 sm:w-6 text-primary group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(var(--primary),0.8)] shrink-0" />
+                  <span className="text-sm sm:text-lg">{row.mentiq}</span>
                 </div>
               </motion.div>
             ))}
@@ -664,6 +772,22 @@ export default function Home() {
               Be the first to know when we launch
             </p>
           </FadeIn>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 relative border-t border-white/5 bg-white/[0.02]">
+        <div className="container px-4 mx-auto">
+          <FadeIn className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Everything you need to know about SaaS churn
+            </p>
+          </FadeIn>
+
+          <FAQAccordion />
         </div>
       </section>
 
