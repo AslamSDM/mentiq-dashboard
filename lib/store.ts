@@ -206,12 +206,10 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       apiClient: apiClient,
-      // Auth state
       token: null,
       refreshToken: null,
       isAuthenticated: false,
       setToken: (token, refreshToken) => {
-        console.log("Zustand: Setting token", token);
         setAuthToken(token);
         set({
           token,
@@ -223,27 +221,20 @@ export const useStore = create<AppState>()(
       refreshAccessToken: async () => {
         const currentRefreshToken = get().refreshToken;
         if (!currentRefreshToken) {
-          console.log("No refresh token available");
           return false;
         }
 
         try {
           const { authService } = await import("./api");
           const response = await authService.refreshToken(currentRefreshToken);
-
-          // Update tokens
           get().setToken(response.accessToken, response.refreshToken);
-          console.log("Access token refreshed successfully");
           return true;
-        } catch (error) {
-          console.error("Failed to refresh access token:", error);
-          // Clear tokens and redirect to login
+        } catch {
           get().logout();
           return false;
         }
       },
       logout: () => {
-        // Clear all caches on logout
         set({
           token: null,
           refreshToken: null,
@@ -288,19 +279,13 @@ export const useStore = create<AppState>()(
           loadingApiKeys: {},
         });
         setAuthToken(null);
-        // Clear centralized cache
         centralizedData.clearAllCache();
-        // SECURITY: Clear localStorage to prevent cross-account data leaks
         if (typeof window !== "undefined") {
           localStorage.removeItem("selectedProjectId");
           localStorage.removeItem("impersonatedProjectId");
         }
-        console.log(
-          "🗑️ Cleared all project data, caches, and localStorage on logout"
-        );
       },
 
-      // Admin Impersonation state
       impersonatedProjectId: null,
       impersonatedProjectName: null,
       impersonatedUserEmail: null,
@@ -309,18 +294,10 @@ export const useStore = create<AppState>()(
         projectName = null,
         userEmail = null
       ) => {
-        console.log(
-          "🔄 Setting impersonated project:",
-          projectId,
-          projectName,
-          userEmail
-        );
-        // Clear caches when switching to impersonated project
         set({
           impersonatedProjectId: projectId,
           impersonatedProjectName: projectName,
           impersonatedUserEmail: userEmail,
-          // Clear data caches so they reload with new project
           analyticsCache: {},
           eventsCache: null,
           sessionsCache: null,
@@ -336,12 +313,10 @@ export const useStore = create<AppState>()(
         centralizedData.clearAllCache();
       },
       clearImpersonation: () => {
-        console.log("🔄 Clearing impersonation");
         set({
           impersonatedProjectId: null,
           impersonatedProjectName: null,
           impersonatedUserEmail: null,
-          // Clear caches to reload with original project
           analyticsCache: {},
           eventsCache: null,
           sessionsCache: null,
@@ -360,38 +335,27 @@ export const useStore = create<AppState>()(
         return state.impersonatedProjectId || state.selectedProjectId;
       },
 
-      // Projects state
       projects: [],
       selectedProjectId: null,
       projectsLoaded: false,
-
-      // API Keys state
       apiKeys: {},
       loadingApiKeys: {},
       fetchProjects: async (retryCount?: number) => {
         const currentRetry = retryCount ?? 0;
         const { isAuthenticated, token } = get();
-        
+
         if (!isAuthenticated || !token) {
-          console.warn("Zustand: Cannot fetch projects - not authenticated or no token");
           return;
         }
-        
-        console.log("Zustand: Fetching projects...", currentRetry > 0 ? `(retry ${currentRetry})` : "");
+
         try {
           const projects = await apiClient.getProjects();
-          console.log("Zustand: Projects fetched", projects);
           set({ projects, projectsLoaded: true });
-        } catch (error) {
-          console.error("Zustand: Failed to fetch projects", error);
-          
-          // Retry up to 3 times with exponential backoff
+        } catch {
           if (currentRetry < 3) {
             const delay = Math.pow(2, currentRetry) * 1000;
-            console.log(`Zustand: Retrying in ${delay}ms...`);
             setTimeout(() => get().fetchProjects(currentRetry + 1), delay);
           } else {
-            console.error("Zustand: All project fetch retries failed");
             set({ projectsLoaded: true });
           }
         }
@@ -415,7 +379,6 @@ export const useStore = create<AppState>()(
 
           return projectWithDescription;
         } catch (error) {
-          console.error("Zustand: Failed to create project", error);
           throw error;
         }
       },
@@ -431,32 +394,17 @@ export const useStore = create<AppState>()(
                 : state.selectedProjectId,
           }));
         } catch (error) {
-          console.error("Zustand: Failed to delete project", error);
           throw error;
         }
       },
       setSelectedProjectId: (projectId) => {
-        console.log("Zustand: Setting project ID", projectId);
-
-        // SECURITY: Validate project belongs to current account
         if (projectId) {
           const projects = get().projects;
           const projectExists = projects.find((p) => p.id === projectId);
           if (!projectExists && projects.length > 0) {
-            console.error(
-              "🚨 SECURITY: Attempted to select project not in account's project list",
-              projectId
-            );
-            console.log(
-              "Available projects:",
-              projects.map((p) => p.id)
-            );
-            // Select first available project instead
             if (projects[0]) {
               projectId = projects[0].id;
-              console.log("✅ Switched to first available project:", projectId);
             } else {
-              console.error("❌ No projects available");
               return;
             }
           }
@@ -466,24 +414,21 @@ export const useStore = create<AppState>()(
         if (projectId) {
           apiClient.setProjectId(projectId);
 
-          // Prefetch all data for the selected project
           const endDate = new Date();
           const startDate = new Date();
-          startDate.setDate(startDate.getDate() - 30); // Default 30 days
+          startDate.setDate(startDate.getDate() - 30);
 
           const dateRange = {
             start: startDate.toISOString().split("T")[0],
             end: endDate.toISOString().split("T")[0],
           };
 
-          console.log("🚀 Triggering prefetch for project", projectId);
           centralizedData
             .prefetchAllData(projectId, dateRange)
-            .catch(console.error);
+            .catch(() => {});
         }
       },
 
-      // API Keys actions
       fetchApiKeys: async (projectId) => {
         if (!get().isAuthenticated) return;
         set((state) => ({
@@ -495,8 +440,7 @@ export const useStore = create<AppState>()(
             apiKeys: { ...state.apiKeys, [projectId]: keys },
             loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
           }));
-        } catch (error) {
-          console.error("Zustand: Failed to fetch API keys", error);
+        } catch {
           set((state) => ({
             apiKeys: { ...state.apiKeys, [projectId]: [] },
             loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
@@ -519,7 +463,6 @@ export const useStore = create<AppState>()(
           }));
           return newKey;
         } catch (error) {
-          console.error("Zustand: Failed to create API key", error);
           throw error;
         }
       },
@@ -536,7 +479,6 @@ export const useStore = create<AppState>()(
             },
           }));
         } catch (error) {
-          console.error("Zustand: Failed to delete API key", error);
           throw error;
         }
       },
@@ -557,12 +499,10 @@ export const useStore = create<AppState>()(
             },
           }));
         } catch (error) {
-          console.error("Zustand: Failed to update API key", error);
           throw error;
         }
       },
 
-      // Analytics state with caching
       analyticsData: null,
       analyticsCache: {},
       loadingAnalytics: false,
@@ -571,7 +511,6 @@ export const useStore = create<AppState>()(
       loadingEvents: false,
       enhancedAnalyticsCache: {},
 
-      // Cache helper functions
       getCachedEnhancedData: <T>(
         key: keyof EnhancedAnalyticsCache
       ): T | null => {
@@ -580,13 +519,8 @@ export const useStore = create<AppState>()(
 
         const now = Date.now();
         if (now - cached.timestamp > CACHE_TTL.ENHANCED_ANALYTICS) {
-          // Cache expired
           return null;
         }
-
-        console.log(`✅ Using cached ${key}`, {
-          age: (now - cached.timestamp) / 1000 + "s",
-        });
         return cached.data as T;
       },
 
@@ -604,7 +538,6 @@ export const useStore = create<AppState>()(
             },
           },
         }));
-        console.log(`📦 Cached ${key}`);
       },
 
       clearEnhancedCache: (key?: keyof EnhancedAnalyticsCache) => {
@@ -614,10 +547,8 @@ export const useStore = create<AppState>()(
             delete newCache[key];
             return { enhancedAnalyticsCache: newCache };
           });
-          console.log(`🗑️ Cleared cache: ${key}`);
         } else {
           set({ enhancedAnalyticsCache: {} });
-          console.log("🗑️ Cleared all enhanced analytics cache");
         }
       },
 
@@ -626,9 +557,6 @@ export const useStore = create<AppState>()(
           get();
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId || !isAuthenticated) {
-          console.warn(
-            "Cannot fetch analytics: no project or not authenticated"
-          );
           return;
         }
 
@@ -636,26 +564,19 @@ export const useStore = create<AppState>()(
           params.endDate
         }_${params.groupBy || "none"}`;
 
-        // Check cache unless force refresh
         if (!forceRefresh) {
           const cached = analyticsCache[cacheKey];
           if (cached && Date.now() - cached.timestamp < CACHE_TTL.ANALYTICS) {
-            console.log("✅ Using cached analytics data", {
-              age: (Date.now() - cached.timestamp) / 1000 + "s",
-            });
             set({ analyticsData: cached.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh analytics with params:", params);
         set({ loadingAnalytics: true });
         try {
           apiClient.setProjectId(effectiveProjectId);
           const data = await apiClient.getAnalyticsGlobal(params);
-          console.log("✅ Fetched analytics data:", data);
 
-          // Update cache
           set((state) => ({
             analyticsData: data,
             analyticsCache: {
@@ -668,8 +589,7 @@ export const useStore = create<AppState>()(
             },
             loadingAnalytics: false,
           }));
-        } catch (error) {
-          console.error("❌ Failed to fetch analytics", error);
+        } catch {
           set({ loadingAnalytics: false });
         }
       },
@@ -679,23 +599,17 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           eventsCache &&
           eventsCache.key === effectiveProjectId
         ) {
           if (Date.now() - eventsCache.timestamp < CACHE_TTL.EVENTS) {
-            console.log("✅ Using cached events", {
-              age: (Date.now() - eventsCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ events: eventsCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh events");
         set({ loadingEvents: true });
         try {
           const events = await apiClient.getEvents(effectiveProjectId);
@@ -708,14 +622,11 @@ export const useStore = create<AppState>()(
             },
             loadingEvents: false,
           });
-          console.log("✅ Fetched and cached events");
-        } catch (error) {
-          console.error("❌ Failed to fetch events", error);
+        } catch {
           set({ loadingEvents: false, events: [] });
         }
       },
 
-      // Heatmaps state with caching
       heatmapPages: [],
       heatmapPagesCache: null,
       loadingHeatmapPages: false,
@@ -731,23 +642,17 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           heatmapPagesCache &&
           heatmapPagesCache.key === effectiveProjectId
         ) {
           if (Date.now() - heatmapPagesCache.timestamp < CACHE_TTL.HEATMAPS) {
-            console.log("✅ Using cached heatmap pages", {
-              age: (Date.now() - heatmapPagesCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ heatmapPages: heatmapPagesCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh heatmap pages");
         set({ loadingHeatmapPages: true });
         try {
           const pages = await apiClient.getHeatmapPages(effectiveProjectId);
@@ -760,9 +665,7 @@ export const useStore = create<AppState>()(
             },
             loadingHeatmapPages: false,
           });
-          console.log("✅ Fetched and cached heatmap pages");
-        } catch (error) {
-          console.error("❌ Failed to fetch heatmap pages", error);
+        } catch {
           set({ loadingHeatmapPages: false, heatmapPages: [] });
         }
       },
@@ -774,19 +677,14 @@ export const useStore = create<AppState>()(
 
         const cacheKey = `${effectiveProjectId}_${params.url}_${params.type}`;
 
-        // Check cache unless force refresh
         if (!forceRefresh) {
           const cached = heatmapDataCache[cacheKey];
           if (cached && Date.now() - cached.timestamp < CACHE_TTL.HEATMAPS) {
-            console.log("✅ Using cached heatmap data", {
-              age: (Date.now() - cached.timestamp) / 1000 + "s",
-            });
             set({ heatmapData: cached.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh heatmap data");
         set({ loadingHeatmapData: true });
         try {
           const data = await apiClient.getHeatmaps(effectiveProjectId, params);
@@ -802,14 +700,11 @@ export const useStore = create<AppState>()(
             },
             loadingHeatmapData: false,
           }));
-          console.log("✅ Fetched and cached heatmap data");
-        } catch (error) {
-          console.error("❌ Failed to fetch heatmap data", error);
+        } catch {
           set({ loadingHeatmapData: false });
         }
       },
 
-      // A/B Testing state with caching
       experiments: [],
       experimentsCache: null,
       loadingExperiments: true,
@@ -818,7 +713,6 @@ export const useStore = create<AppState>()(
       experimentResultsCache: {},
       loadingExperimentResults: false,
 
-      // Sessions & Users initial state with caching
       sessions: [],
       sessionsCache: null,
       users: [],
@@ -839,17 +733,12 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           experimentsCache &&
           experimentsCache.key === effectiveProjectId
         ) {
           if (Date.now() - experimentsCache.timestamp < CACHE_TTL.EXPERIMENTS) {
-            console.log("✅ Using cached experiments", {
-              age: (Date.now() - experimentsCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ experiments: experimentsCache.data });
             if (
               experimentsCache.data.length > 0 &&
@@ -861,7 +750,6 @@ export const useStore = create<AppState>()(
           }
         }
 
-        console.log("📡 Fetching fresh experiments");
         set({ loadingExperiments: true });
         try {
           const experiments = await apiClient.getExperiments(
@@ -879,9 +767,7 @@ export const useStore = create<AppState>()(
           if (experiments.length > 0 && !get().selectedExperimentId) {
             set({ selectedExperimentId: experiments[0].id });
           }
-          console.log("✅ Fetched and cached experiments");
-        } catch (error) {
-          console.error("❌ Failed to fetch experiments", error);
+        } catch {
           set({ loadingExperiments: false, experiments: [] });
         }
       },
@@ -893,19 +779,14 @@ export const useStore = create<AppState>()(
 
         const cacheKey = `${effectiveProjectId}_${experimentId}`;
 
-        // Check cache unless force refresh
         if (!forceRefresh) {
           const cached = experimentResultsCache[cacheKey];
           if (cached && Date.now() - cached.timestamp < CACHE_TTL.EXPERIMENTS) {
-            console.log("✅ Using cached experiment results", {
-              age: (Date.now() - cached.timestamp) / 1000 + "s",
-            });
             set({ experimentResults: cached.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh experiment results");
         set({ loadingExperimentResults: true });
         try {
           const results = await apiClient.getExperimentResults(
@@ -924,9 +805,7 @@ export const useStore = create<AppState>()(
             },
             loadingExperimentResults: false,
           }));
-          console.log("✅ Fetched and cached experiment results");
-        } catch (error) {
-          console.error("❌ Failed to fetch experiment results", error);
+        } catch {
           set({ loadingExperimentResults: false });
         }
       },
@@ -935,17 +814,13 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        try {
-          const newExperiment = await apiClient.createExperiment(
-            effectiveProjectId,
-            experiment
-          );
-          set((state) => ({
-            experiments: [...state.experiments, newExperiment],
-          }));
-        } catch (error) {
-          console.error("Failed to create experiment", error);
-        }
+        const newExperiment = await apiClient.createExperiment(
+          effectiveProjectId,
+          experiment
+        );
+        set((state) => ({
+          experiments: [...state.experiments, newExperiment],
+        }));
       },
       setSelectedExperimentId: (experimentId) => {
         set({ selectedExperimentId: experimentId });
@@ -954,39 +829,28 @@ export const useStore = create<AppState>()(
         const { fetchExperiments, apiClient, getEffectiveProjectId } = get();
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
-        try {
-          await apiClient.updateExperiment(effectiveProjectId, experimentId, {
-            status,
-          });
-          await fetchExperiments();
-        } catch (error) {
-          console.error("Failed to update experiment status:", error);
-        }
+        await apiClient.updateExperiment(effectiveProjectId, experimentId, {
+          status,
+        });
+        await fetchExperiments();
       },
 
-      // Sessions & Users actions with caching
       fetchSessions: async (forceRefresh = false) => {
         const { apiClient, sessionsCache, getEffectiveProjectId } = get();
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           sessionsCache &&
           sessionsCache.key === effectiveProjectId
         ) {
           if (Date.now() - sessionsCache.timestamp < CACHE_TTL.SESSIONS) {
-            console.log("✅ Using cached sessions", {
-              age: (Date.now() - sessionsCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ sessions: sessionsCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh sessions");
         set({ loadingSessions: true });
         try {
           const sessions = await apiClient.getSessions(effectiveProjectId);
@@ -999,9 +863,7 @@ export const useStore = create<AppState>()(
             },
             loadingSessions: false,
           });
-          console.log("✅ Fetched and cached sessions");
-        } catch (error) {
-          console.error("❌ Failed to fetch sessions:", error);
+        } catch {
           set({ loadingSessions: false });
         }
       },
@@ -1011,27 +873,20 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           usersCache &&
           usersCache.key === effectiveProjectId
         ) {
           if (Date.now() - usersCache.timestamp < CACHE_TTL.USERS) {
-            console.log("✅ Using cached users", {
-              age: (Date.now() - usersCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ users: usersCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh users");
         set({ loadingUsers: true });
         try {
           const response = await apiClient.getUsers(effectiveProjectId);
-          // Extract users array from UserListResponse
           const users = response.users?.map((profile: UserProfile) => ({
             id: profile.userId,
             email: undefined,
@@ -1039,7 +894,7 @@ export const useStore = create<AppState>()(
             lastSeen: profile.lastSeen,
             totalSessions: profile.sessionCount,
             totalEvents: profile.totalEvents,
-            avgSessionDuration: 0, // Not provided in UserProfile
+            avgSessionDuration: 0,
             properties: profile.customProperties,
             projectId: effectiveProjectId,
             createdAt: profile.firstSeen,
@@ -1054,9 +909,7 @@ export const useStore = create<AppState>()(
             },
             loadingUsers: false,
           });
-          console.log("✅ Fetched and cached users");
-        } catch (error) {
-          console.error("❌ Failed to fetch users:", error);
+        } catch {
           set({ loadingUsers: false });
         }
       },
@@ -1067,7 +920,6 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        // Check cache unless force refresh - also verify project ID matches
         if (
           !forceRefresh &&
           sessionsOverviewCache &&
@@ -1077,16 +929,11 @@ export const useStore = create<AppState>()(
             Date.now() - sessionsOverviewCache.timestamp <
             CACHE_TTL.SESSIONS
           ) {
-            console.log("✅ Using cached sessions overview", {
-              age: (Date.now() - sessionsOverviewCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ sessionsOverview: sessionsOverviewCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh sessions overview");
         set({ loadingSessionsOverview: true });
         try {
           const overview = await apiClient.getSessionsOverview(
@@ -1101,9 +948,7 @@ export const useStore = create<AppState>()(
             },
             loadingSessionsOverview: false,
           });
-          console.log("✅ Fetched and cached sessions overview");
-        } catch (error) {
-          console.error("❌ Failed to fetch sessions overview:", error);
+        } catch {
           set({ loadingSessionsOverview: false });
         }
       },
@@ -1113,15 +958,14 @@ export const useStore = create<AppState>()(
           const { apiClient, getEffectiveProjectId } = get();
           const effectiveProjectId = getEffectiveProjectId();
           if (!effectiveProjectId) return;
-          console.log(session);
           try {
             const fullSession = await apiClient.getSession(
               effectiveProjectId,
               session.id
             );
             set({ selectedSession: fullSession });
-          } catch (error) {
-            console.error("Failed to fetch session details:", error);
+          } catch {
+            // Silent fail
           }
         }
       },
@@ -1129,7 +973,6 @@ export const useStore = create<AppState>()(
         set({ selectedUser: user });
       },
 
-      // Playbooks state
       playbooks: [],
       playbooksCache: null,
       playbooksSummary: null,
@@ -1144,23 +987,17 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh
         if (
           !forceRefresh &&
           playbooksCache &&
           playbooksCache.key === effectiveProjectId
         ) {
           if (Date.now() - playbooksCache.timestamp < CACHE_TTL.PLAYBOOKS) {
-            console.log("✅ Using cached playbooks", {
-              age: (Date.now() - playbooksCache.timestamp) / 1000 + "s",
-              projectId: effectiveProjectId,
-            });
             set({ playbooks: playbooksCache.data });
             return;
           }
         }
 
-        console.log("📡 Fetching fresh playbooks");
         set({ loadingPlaybooks: true });
         try {
           const playbooks = await playbooksService.getPlaybooks(effectiveProjectId);
@@ -1173,9 +1010,7 @@ export const useStore = create<AppState>()(
             },
             loadingPlaybooks: false,
           });
-          console.log("✅ Fetched and cached playbooks");
-        } catch (error) {
-          console.error("❌ Failed to fetch playbooks:", error);
+        } catch {
           set({ loadingPlaybooks: false, playbooks: [] });
         }
       },
@@ -1188,14 +1023,12 @@ export const useStore = create<AppState>()(
           return;
         }
 
-        // Check cache unless force refresh
         if (
           !forceRefresh &&
           playbooksSummaryCache &&
           playbooksSummaryCache.key === effectiveProjectId
         ) {
           if (Date.now() - playbooksSummaryCache.timestamp < CACHE_TTL.PLAYBOOKS) {
-            console.log("✅ Using cached playbooks summary");
             set({ playbooksSummary: playbooksSummaryCache.data });
             return;
           }
@@ -1211,8 +1044,8 @@ export const useStore = create<AppState>()(
               key: effectiveProjectId,
             },
           });
-        } catch (error) {
-          console.error("❌ Failed to fetch playbooks summary:", error);
+        } catch {
+          // Silent fail
         }
       },
 
@@ -1255,7 +1088,6 @@ export const useStore = create<AppState>()(
         await fetchPlaybooksSummary(true);
       },
 
-      // Global cache management functions
       clearAllCaches: () => {
         set({
           analyticsCache: {},
@@ -1271,13 +1103,11 @@ export const useStore = create<AppState>()(
           playbooksCache: null,
           playbooksSummaryCache: null,
         });
-        console.log("🗑️ Cleared all caches");
       },
 
       invalidateProjectCache: (projectId: string) => {
         const state = get();
 
-        // Clear analytics cache for this project
         const newAnalyticsCache: typeof state.analyticsCache = {};
         Object.keys(state.analyticsCache).forEach((key) => {
           if (!key.startsWith(projectId)) {
@@ -1285,7 +1115,6 @@ export const useStore = create<AppState>()(
           }
         });
 
-        // Clear other project-specific caches
         set({
           analyticsCache: newAnalyticsCache,
           eventsCache:
@@ -1307,8 +1136,6 @@ export const useStore = create<AppState>()(
               ? null
               : state.heatmapPagesCache,
         });
-
-        console.log(`🗑️ Invalidated cache for project: ${projectId}`);
       },
     }),
     {

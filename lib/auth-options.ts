@@ -18,29 +18,21 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.error("Missing email or password");
           throw new Error("Missing email or password");
         }
 
         try {
-          console.log("Attempting login with:", credentials.email);
           const response: AuthResponse = await apiClient.login(
             credentials.email,
             credentials.password
           );
 
-          console.log("Login response:", JSON.stringify(response, null, 2));
-
-          // Support both old (token) and new (accessToken) formats
           const token = response.accessToken || response.token;
           const refreshToken = response.refreshToken;
           const projectId = response.projectId;
 
           if (token && response.user) {
-            console.log("Login successful, setting token");
-            // Set the token immediately in the API client
             setAuthToken(token);
-
             return {
               id: response.user.id,
               email: response.user.email,
@@ -57,10 +49,8 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          console.error("Invalid response format - missing token or user");
           throw new Error("Invalid response from server");
         } catch (error: any) {
-          console.error("Authentication error:", error.message || error);
           throw new Error(error.message || "Authentication failed");
         }
       },
@@ -82,7 +72,6 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!response.ok) {
-            console.error("Google auth failed:", await response.text());
             return false;
           }
 
@@ -100,17 +89,14 @@ export const authOptions: NextAuthOptions = {
           (user as any).id = data.user?.id;
 
           return true;
-        } catch (error) {
-          console.error("Error during Google sign-in:", error);
+        } catch {
           return false;
         }
       }
       return true;
     },
     async jwt({ token, user, account, trigger }) {
-      // Initial sign in
       if (user && (user as any).accessToken) {
-        console.log("JWT callback: Setting accessToken in token");
         token.accessToken = (user as any).accessToken;
         token.refreshToken = (user as any).refreshToken;
         token.projectId = (user as any).projectId;
@@ -123,11 +109,7 @@ export const authOptions: NextAuthOptions = {
         token.sub = (user as any).id || user.id;
       }
 
-      // Manual session update - refetch subscription status from backend
       if (trigger === "update" && token.accessToken) {
-        console.log(
-          "JWT callback: Refetching subscription status from backend"
-        );
         try {
           const response = await fetch(
             `${
@@ -142,16 +124,12 @@ export const authOptions: NextAuthOptions = {
 
           if (response.ok) {
             const data = await response.json();
-            console.log("JWT callback: Updated subscription status:", {
-              hasActiveSubscription: data.hasActiveSubscription,
-              subscriptionStatus: data.subscriptionStatus,
-            });
             token.hasActiveSubscription = data.hasActiveSubscription;
             token.subscriptionStatus = data.subscriptionStatus;
             token.projectId = data.projectId || token.projectId;
           }
-        } catch (error) {
-          console.error("JWT callback: Error refetching subscription:", error);
+        } catch {
+          // Silent fail - token refresh will retry
         }
       }
 
@@ -159,7 +137,6 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token.accessToken) {
-        console.log("Session callback: Setting accessToken in session");
         session.accessToken = token.accessToken;
         session.refreshToken = token.refreshToken;
         session.projectId = token.projectId;

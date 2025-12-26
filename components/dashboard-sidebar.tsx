@@ -28,6 +28,8 @@ import {
   Heart,
   AlertTriangle,
   GitMerge,
+  LifeBuoy,
+  Ticket,
   TrendingDown,
   ChevronLeft,
   ChevronRight,
@@ -143,11 +145,11 @@ const navigation = [
     href: "/dashboard/settings",
     icon: <Settings className="h-5 w-5" />,
   },
-  // {
-  //   name: "Pricing",
-  //   href: "/dashboard/pricing",
-  //   icon: <Settings className="h-5 w-5" />,
-  // },
+  {
+    name: "Support",
+    href: "/dashboard/support",
+    icon: <LifeBuoy className="h-5 w-5" />,
+  },
 ];
 
 const adminNavigation = [
@@ -155,6 +157,11 @@ const adminNavigation = [
     name: "Admin - Users",
     href: "/dashboard/admin/users",
     icon: <Shield className="h-5 w-5" />,
+  },
+  {
+    name: "Admin - Tickets",
+    href: "/dashboard/admin/tickets",
+    icon: <Ticket className="h-5 w-5" />,
   },
 ];
 
