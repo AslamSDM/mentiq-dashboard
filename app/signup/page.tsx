@@ -183,7 +183,7 @@ function SignUpForm() {
     try {
       await signIn("google", { callbackUrl: "/signup?step=plan" });
     } catch (error: any) {
-      console.error("Google sign up error:", error);
+      // Silent fail - error handled via UI
       setError("Failed to sign up with Google. Please try again.");
       setIsGoogleLoading(false);
     }
@@ -625,7 +625,7 @@ function SignUpForm() {
                           alert("Verification email resent!");
                         }
                       } catch (error) {
-                        console.error("Failed to resend:", error);
+                        // Silent fail - user can retry manually
                       }
                     }}
                     className="text-primary hover:underline"

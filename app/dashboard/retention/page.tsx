@@ -96,16 +96,7 @@ export default function RetentionPage() {
       const response = await centralizedData.getRetentionData(
         selectedProjectId
       );
-      console.log("📊 Retention API Response:", response);
-      console.log("📊 Response structure:", {
-        hasCohorts: !!response?.cohorts,
-        hasDataCohorts: !!response?.data?.cohorts,
-        cohortsLength:
-          response?.cohorts?.length || response?.data?.cohorts?.length || 0,
-        fullResponse: JSON.stringify(response, null, 2),
-      });
       const apiCohorts = response?.cohorts || response?.data?.cohorts || [];
-      console.log("📊 API Cohorts extracted:", apiCohorts);
 
       // Transform API response to match our UI format
       const transformedCohorts: CohortData[] = apiCohorts.map((cohort: any) => {
@@ -193,7 +184,7 @@ export default function RetentionPage() {
         setSelectedCohort(transformedCohorts[0].cohort_date);
       }
     } catch (error) {
-      console.error("Error fetching retention data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load retention data",

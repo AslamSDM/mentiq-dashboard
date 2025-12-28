@@ -107,16 +107,9 @@ export default function ChurnAnalysisPage() {
         selectedProjectId,
         70
       );
-      console.log("📦 Churn page using cached data", response);
 
       if (response) {
         const { at_risk_users, total_at_risk, churn_rate } = response;
-        console.log(
-          "Fetched churn data:",
-          at_risk_users,
-          total_at_risk,
-          churn_rate
-        );
 
         // Parse churn rate (comes as "2.7%")
         const parsedChurnRate = parseFloat(churn_rate?.replace("%", "") || "0");
@@ -228,7 +221,7 @@ export default function ChurnAnalysisPage() {
         ]);
       }
     } catch (error) {
-      console.error("Error fetching churn data:", error);
+      // Silent fail - data will show empty state
     } finally {
       setIsLoading(false);
     }

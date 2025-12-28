@@ -136,7 +136,7 @@ export default function FeatureAdoptionPage() {
         setSelectedFeature(null);
       }
     } catch (error) {
-      console.error("Error fetching adoption data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to fetch feature adoption data. Please try again.",

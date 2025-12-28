@@ -144,7 +144,7 @@ export default function PlaybooksPage() {
         throw new Error(generation.error_message || "Generation failed");
       }
     } catch (error: any) {
-      console.error("Error generating playbook:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate playbook. Please try again.",

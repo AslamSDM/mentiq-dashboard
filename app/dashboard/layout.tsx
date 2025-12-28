@@ -98,9 +98,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (status === "authenticated" && session && impersonatedProjectId) {
       if (!session.isAdmin) {
-        console.warn(
-          "🚨 SECURITY: Non-admin user has impersonation set, clearing it"
-        );
+        // SECURITY: Non-admin user has impersonation set, clearing it
         clearImpersonation();
         // Also clear from localStorage
         if (typeof window !== "undefined") {

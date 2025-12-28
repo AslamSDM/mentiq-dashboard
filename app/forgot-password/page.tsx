@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
         setError(data.error || "Something went wrong. Please try again.");
       }
     } catch (error) {
-      console.error("Forgot password error:", error);
+      // Silent fail - error handled via UI
       setError("Failed to send reset link. Please try again.");
     } finally {
       setIsLoading(false);

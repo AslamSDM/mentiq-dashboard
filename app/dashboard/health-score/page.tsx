@@ -84,12 +84,6 @@ export default function HealthScorePage() {
           .catch(() => null),
       ]);
 
-      console.log("📦 Using centralized cached data", {
-        churnRes,
-        featureRes,
-        sessionRes,
-      });
-
       if (churnRes) {
         setChurnData(churnRes.at_risk_users || []);
         setChurnStats({
@@ -117,9 +111,7 @@ export default function HealthScorePage() {
       );
       const result = calculateHealthScore(healthScoreInputs);
       setHealthScoreResult(result);
-      console.log("📊 Health Score Calculated:", result);
-    } catch (error) {
-      console.error("Error fetching health data:", error);
+    } catch {
       // Even on error, set a default health score of 0
       const emptyInputs = prepareHealthScoreInputs(null, null, null);
       const result = calculateHealthScore(emptyInputs);

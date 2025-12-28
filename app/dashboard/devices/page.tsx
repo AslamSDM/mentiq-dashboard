@@ -175,7 +175,7 @@ export default function DeviceAnalyticsPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching device analytics:", error);
+      // Silent fail - data will show empty state
     } finally {
       setIsLoading(false);
     }

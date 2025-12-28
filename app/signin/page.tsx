@@ -51,17 +51,13 @@ export default function SignInPage() {
     setShowVerificationMessage(false);
 
     try {
-      console.log("Attempting sign in with:", email);
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
-      console.log("Sign in result:", result);
-
       if (result?.error) {
-        console.error("Sign in error:", result.error);
         // Check if it's a verification required error
         try {
           const errorObj = JSON.parse(result.error);
@@ -85,32 +81,25 @@ export default function SignInPage() {
           }
         }
       } else if (result?.ok) {
-        console.log("Sign in successful, checking verification and subscription status");
-
-        // Get the session to check email verification and subscription status
         const sessionResponse = await fetch("/api/auth/session");
         const sessionData = await sessionResponse.json();
 
         // Check email verification first
         if (sessionData?.emailVerified === false) {
-          console.log("Email not verified, redirecting to verify-pending");
           window.location.href = "/verify-pending";
           return;
         }
 
         // Redirect to pricing if no active subscription, otherwise to dashboard
         if (sessionData?.hasActiveSubscription) {
-          console.log("User has active subscription, redirecting to dashboard");
           window.location.href = "/dashboard";
         } else {
-          console.log("No active subscription, redirecting to pricing");
           window.location.href = "/pricing?required=true";
         }
       } else {
         setError("Authentication failed. Please check your credentials.");
       }
     } catch (error: any) {
-      console.error("Sign in exception:", error);
       setError(error.message || "An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -123,8 +112,7 @@ export default function SignInPage() {
     try {
       // Use NextAuth's signIn with Google provider
       await signIn("google", { callbackUrl: "/dashboard" });
-    } catch (error: any) {
-      console.error("Google sign in error:", error);
+    } catch {
       setError("Failed to sign in with Google. Please try again.");
       setIsGoogleLoading(false);
     }
@@ -144,8 +132,8 @@ export default function SignInPage() {
         setError("");
         alert("Verification email sent! Please check your inbox.");
       }
-    } catch (error) {
-      console.error("Failed to resend verification:", error);
+    } catch {
+      // Silent fail
     }
   };
 

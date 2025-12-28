@@ -125,7 +125,7 @@ export default function LocationAnalyticsPage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching location analytics:", error);
+      // Silent fail - data will show empty state
     } finally {
       setIsLoading(false);
     }

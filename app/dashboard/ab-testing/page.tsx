@@ -154,7 +154,7 @@ export default function ABTestingPage() {
         setAdoptionData([]);
       }
     } catch (error) {
-      console.error("Error fetching adoption data:", error);
+      // Silent fail - adoption tab will show empty state
       setAdoptionData([]);
     } finally {
       setLoadingAdoption(false);

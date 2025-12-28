@@ -72,8 +72,8 @@ export function OnboardingTaskBanner() {
           setDismissed(true);
         }
       }
-    } catch (error) {
-      console.error("Error fetching onboarding tasks:", error);
+    } catch {
+      // Silent fail
     } finally {
       setLoading(false);
     }

@@ -46,7 +46,7 @@ export default function RevenueLeakagePage() {
         });
       }
     } catch (error) {
-      console.error("Error fetching revenue leakage data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load revenue leakage data",

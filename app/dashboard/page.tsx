@@ -195,11 +195,10 @@ export default function DashboardPage() {
       if (locationRes) setLocationData(locationRes);
       if (deviceRes) setDeviceData(deviceRes);
       if (retentionRes) {
-        console.log("📦 Cached Retention Data:", retentionRes);
         setRetentionData(retentionRes);
       }
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load some dashboard data",
@@ -356,7 +355,6 @@ export default function DashboardPage() {
 
   const getEngagementData = () => {
     if (!analyticsData?.results) {
-      console.log("⚠️ No analytics results available");
       return [];
     }
     const result = analyticsData.results.find(
@@ -367,7 +365,6 @@ export default function DashboardPage() {
 
   const getEngagementValue = () => {
     if (!analyticsData) {
-      console.log("⚠️ No analytics data available for engagement value");
       return 0;
     }
     switch (engagementTab) {

@@ -48,9 +48,8 @@ export default function HeatmapsPage() {
 
   useEffect(() => {
     if (effectiveProjectId) {
-      fetchHeatmapPages(true).catch((error) => {
-        // Force refresh when project changes
-        console.error("Error fetching heatmap pages:", error);
+      fetchHeatmapPages(true).catch(() => {
+        // Silent fail - error shown via toast
         toast({
           title: "Error",
           description: "Failed to load heatmap pages",
@@ -70,14 +69,9 @@ export default function HeatmapsPage() {
 
   useEffect(() => {
     if (effectiveProjectId && selectedPage) {
-      console.log("🔍 Fetching heatmap data for:", {
-        selectedPage,
-        heatmapType,
-      });
       fetchHeatmapData({ url: selectedPage, type: heatmapType }, true).catch(
-        // Force refresh when project changes
-        (error) => {
-          console.error("Error fetching heatmap data:", error);
+        // Silent fail - error shown via toast
+        () => {
           toast({
             title: "Error",
             description: "Failed to load heatmap data",
@@ -88,20 +82,6 @@ export default function HeatmapsPage() {
     }
   }, [effectiveProjectId, selectedPage, heatmapType, fetchHeatmapData, toast]);
 
-  // Log heatmap data changes
-  useEffect(() => {
-    if (heatmapData) {
-      console.log("📊 Heatmap data received:", {
-        url: heatmapData.url,
-        clicksCount: heatmapData.clicks?.length || 0,
-        scrollsCount: heatmapData.scrolls?.length || 0,
-        mouseMovesCount: heatmapData.mouseMoves?.length || 0,
-        totalSessions: heatmapData.totalSessions,
-        clicks: heatmapData.clicks,
-        scrolls: heatmapData.scrolls,
-      });
-    }
-  }, [heatmapData]);
 
   if (!effectiveProjectId) {
     return (

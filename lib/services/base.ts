@@ -1,33 +1,24 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
-// Token management - stored in memory and localStorage
 let authToken: string | null = null;
 
 export const setAuthToken = (token: string | null) => {
-  console.log(
-    "setAuthToken called with:",
-    token ? `${token.substring(0, 20)}...` : "null"
-  );
   authToken = token;
   if (typeof window !== "undefined") {
     if (token) {
       localStorage.setItem("auth_token", token);
-      console.log("Token saved to localStorage ✅");
     } else {
       localStorage.removeItem("auth_token");
-      console.log("Token removed from localStorage ❌");
     }
   }
 };
 
 export const getAuthToken = (): string | null => {
-  // First check memory
   if (authToken) {
     return authToken;
   }
 
-  // Then check localStorage
   if (typeof window !== "undefined") {
     const stored = localStorage.getItem("auth_token");
     if (stored) {
@@ -39,16 +30,16 @@ export const getAuthToken = (): string | null => {
   return null;
 };
 
-// Utility function to check if an error is an invalid token error
-export const isInvalidTokenError = (error: any): boolean => {
-  if (!error) return false;
+export const isInvalidTokenError = (error: unknown): boolean => {
+  if (!error || typeof error !== "object") return false;
 
-  const errorMessage = error.message || error.error || "";
+  const err = error as { message?: string; error?: string; status?: number };
+  const errorMessage = err.message || err.error || "";
   return (
     errorMessage.includes("Invalid token") ||
     errorMessage.includes("Unauthorized") ||
     errorMessage.includes("Token expired") ||
-    error.status === 401
+    err.status === 401
   );
 };
 
@@ -63,7 +54,6 @@ export class BaseHttpService {
 
   setProjectId(projectId: string) {
     this.projectId = projectId;
-    console.log("BaseHttpService: Project ID set", projectId);
   }
 
   protected async request<T>(
@@ -78,34 +68,22 @@ export class BaseHttpService {
     } = options;
 
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log(`Making request to: ${url}`);
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       ...customHeaders,
     };
 
-    // Only add auth token if required (default true, but can be disabled for login/signup)
     if (requireAuth) {
       const token = getAuthToken();
-
-      console.log("API Request: Using token", token ? "✅" : "❌");
       if (token) {
         headers.Authorization = `Bearer ${token}`;
-        console.log(`API Request: ${endpoint} with auth token ✅`);
-      } else {
-        console.warn(`API Request: ${endpoint} without auth token ⚠️`);
       }
-    } else {
-      console.log(`API Request: ${endpoint} without auth requirement ✅`);
     }
 
-    // Add project ID if provided or set globally
     const targetProjectId = projectId || this.projectId;
     if (targetProjectId) {
       headers["X-Project-ID"] = targetProjectId;
     }
-
-    console.log("Request headers:", headers);
 
     const response = await fetch(url, {
       ...fetchOptions,
@@ -114,7 +92,6 @@ export class BaseHttpService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error(`API Error: ${endpoint} - ${response.status}`, errorData);
       throw new Error(
         errorData.message || `HTTP ${response.status}: ${response.statusText}`
       );

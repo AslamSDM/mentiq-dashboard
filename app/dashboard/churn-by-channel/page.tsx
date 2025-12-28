@@ -42,7 +42,6 @@ export default function ChurnByChannelPage() {
 
     setLoading(true);
     try {
-      console.log("📦 Churn by Channel page using cached data");
       const response = await centralizedData.getChurnByChannel(
         selectedProjectId
       );
@@ -50,8 +49,7 @@ export default function ChurnByChannelPage() {
       if (response?.data) {
         setChannelChurnData(response.data);
       }
-    } catch (error) {
-      console.error("Error fetching channel data:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load churn by channel data",

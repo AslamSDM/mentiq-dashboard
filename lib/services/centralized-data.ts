@@ -179,8 +179,8 @@ class CentralizedDataService {
         // Experiments
         this.getExperiments(projectId),
       ]);
-    } catch (error) {
-      console.error("❌ Error during prefetch:", error);
+    } catch {
+      // Silent fail - prefetch errors are non-critical
     } finally {
       this.prefetchInProgress = false;
     }

@@ -102,7 +102,7 @@ export default function AdminTicketsPage() {
       setTickets(ticketsData || []);
       setStats(statsData);
     } catch (err) {
-      console.error("Failed to fetch data:", err);
+      // Silent fail - data will show empty state
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +118,7 @@ export default function AdminTicketsPage() {
       setSelectedTicket(ticket);
       setIsDetailDialogOpen(true);
     } catch (err) {
-      console.error("Failed to fetch ticket:", err);
+      // Silent fail - dialog will show empty state
     }
   };
 
@@ -129,7 +129,7 @@ export default function AdminTicketsPage() {
       setSelectedTicket(updated);
       fetchData();
     } catch (err) {
-      console.error("Failed to update ticket:", err);
+      // Silent fail - UI will reflect original status
     }
   };
 
@@ -140,7 +140,7 @@ export default function AdminTicketsPage() {
       setSelectedTicket(updated);
       fetchData();
     } catch (err) {
-      console.error("Failed to update ticket:", err);
+      // Silent fail - UI will reflect original status
     }
   };
 
@@ -160,7 +160,7 @@ export default function AdminTicketsPage() {
       setNewComment("");
       setIsInternalComment(false);
     } catch (err) {
-      console.error("Failed to add comment:", err);
+      // Silent fail - comment will not be added
     } finally {
       setIsAddingComment(false);
     }

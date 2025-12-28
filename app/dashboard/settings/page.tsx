@@ -62,7 +62,7 @@ export default function SettingsPage() {
           });
         }
       } catch (error) {
-        console.error("Failed to fetch profile:", error);
+        // Silent fail - profile will show defaults
       } finally {
         setProfileLoading(false);
       }

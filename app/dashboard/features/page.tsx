@@ -127,7 +127,7 @@ export default function FeatureTrackingDashboard() {
         setFeatures(featureData.features || []);
         setTotalUsers(featureData.total_users || 0);
       } else {
-        console.error("Feature usage request failed:", featureResponse.status);
+        // Silent fail - feature tab will show empty state
       }
 
       // Fetch onboarding stats
@@ -145,13 +145,10 @@ export default function FeatureTrackingDashboard() {
           setSelectedStep(onboardingData.steps[0]);
         }
       } else {
-        console.error(
-          "Onboarding stats request failed:",
-          onboardingResponse.status
-        );
+        // Silent fail - onboarding tab will show empty state
       }
     } catch (error) {
-      console.error("Error fetching feature tracking data:", error);
+      // Silent fail - data will show empty state
     } finally {
       setLoading(false);
     }

@@ -120,8 +120,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
       },
     });
-  } catch (error) {
-    console.error("Error calculating health score:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to calculate health score" },
       { status: 500 }

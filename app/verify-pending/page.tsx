@@ -34,7 +34,7 @@ export default function VerifyPendingPage() {
           }
         }
       } catch (error) {
-        console.error("Error checking verification:", error);
+        // Silent fail - will retry on next interval
       }
     };
 
@@ -81,7 +81,7 @@ export default function VerifyPendingPage() {
       await update();
       // The useEffect will handle the redirect if verified
     } catch (error) {
-      console.error("Error checking verification:", error);
+      // Silent fail - user can retry manually
     } finally {
       setIsChecking(false);
     }

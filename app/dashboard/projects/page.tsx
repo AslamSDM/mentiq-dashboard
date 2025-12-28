@@ -111,8 +111,6 @@ export default function ProjectsPage() {
         description: "Your project has been created successfully.",
       });
     } catch (error: any) {
-      console.error("Failed to create project:", error);
-
       // Check if it's a project limit error
       if (error?.response?.status === 403) {
         toast({
@@ -145,7 +143,7 @@ export default function ProjectsPage() {
     try {
       await deleteProject(projectId);
     } catch (error) {
-      console.error("Failed to delete project:", error);
+      // Silent fail - store handles error state
     }
   };
 
@@ -171,7 +169,7 @@ export default function ProjectsPage() {
       setNewApiKey({ name: "", permissions: [] });
       setIsCreateKeyOpen(null);
     } catch (error) {
-      console.error("Failed to create API key:", error);
+      // Silent fail - store handles error state
       setNewApiKey({ name: "", permissions: [] });
       setIsCreateKeyOpen(null);
     }
@@ -181,7 +179,7 @@ export default function ProjectsPage() {
     try {
       await deleteApiKey(projectId, keyId);
     } catch (error) {
-      console.error("Failed to delete API key:", error);
+      // Silent fail - store handles error state
     }
   };
 
@@ -193,7 +191,7 @@ export default function ProjectsPage() {
     try {
       await updateApiKey(projectId, keyId, { isActive });
     } catch (error) {
-      console.error("Failed to update API key:", error);
+      // Silent fail - store handles error state
     }
   };
 

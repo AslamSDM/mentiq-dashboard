@@ -128,7 +128,7 @@ export default function PlaybookDetailPage() {
         setPlaybook(playbookData);
         setEnrollments(enrollmentsData);
       } catch (error) {
-        console.error("Failed to fetch playbook:", error);
+        // Silent fail - error shown via toast
         toast({
           title: "Error",
           description: "Failed to load playbook details.",

@@ -43,8 +43,7 @@ export function HeatmapsView() {
 
   useEffect(() => {
     if (selectedProjectId) {
-      fetchHeatmapPages().catch((error) => {
-        console.error("Error fetching heatmap pages:", error);
+      fetchHeatmapPages().catch(() => {
         toast({
           title: "Error",
           description: "Failed to load heatmap pages",
@@ -64,16 +63,13 @@ export function HeatmapsView() {
 
   useEffect(() => {
     if (selectedProjectId && selectedPage) {
-      fetchHeatmapData({ url: selectedPage, type: heatmapType }).catch(
-        (error) => {
-          console.error("Error fetching heatmap data:", error);
-          toast({
-            title: "Error",
-            description: "Failed to load heatmap data",
-            variant: "destructive",
-          });
-        }
-      );
+      fetchHeatmapData({ url: selectedPage, type: heatmapType }).catch(() => {
+        toast({
+          title: "Error",
+          description: "Failed to load heatmap data",
+          variant: "destructive",
+        });
+      });
     }
   }, [selectedProjectId, selectedPage, heatmapType, fetchHeatmapData, toast]);
 

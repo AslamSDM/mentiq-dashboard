@@ -82,7 +82,7 @@ function AcceptInvitationContent() {
         }
       }, 2000);
     } catch (err: any) {
-      console.error("Error accepting invitation:", err);
+      // Silent fail - error handled via UI
       setError(err.response?.data?.error || err.message || "Failed to accept invitation");
     } finally {
       setLoading(false);

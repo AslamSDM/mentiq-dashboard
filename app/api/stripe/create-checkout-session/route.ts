@@ -103,7 +103,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url });
   } catch (error: any) {
-    console.error("Stripe checkout error:", error);
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }

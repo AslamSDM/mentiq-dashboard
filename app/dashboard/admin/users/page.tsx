@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
 
         setUsersWithProjects(usersWithProjectsData);
       } catch (error: any) {
-        console.error("Failed to fetch data:", error);
+        // Silent fail - error shown via toast
         toast({
           title: "Error",
           description: "Failed to load users. Please try again.",
@@ -135,7 +135,7 @@ export default function AdminUsersPage() {
       const data = await adminService.getProjectData(projectId);
       setProjectData(data);
     } catch (error: any) {
-      console.error("Failed to fetch project data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load project data. Please try again.",

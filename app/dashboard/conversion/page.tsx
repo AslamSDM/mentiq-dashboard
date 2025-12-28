@@ -159,7 +159,7 @@ export default function ConversionFunnelPage() {
         setConversionTrends([]);
       }
     } catch (error) {
-      console.error("Error fetching conversion data:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load conversion funnel data",

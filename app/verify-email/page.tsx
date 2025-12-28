@@ -49,8 +49,7 @@ function VerifyEmailContent() {
           setStatus("error");
           setMessage(data.error || "Failed to verify email. The link may have expired.");
         }
-      } catch (error) {
-        console.error("Verification error:", error);
+      } catch {
         setStatus("error");
         setMessage("An error occurred while verifying your email. Please try again.");
       }
@@ -75,8 +74,8 @@ function VerifyEmailContent() {
       try {
         // Trigger a session update to check if email was verified
         await updateSession();
-      } catch (error) {
-        console.error("Error checking verification status:", error);
+      } catch {
+        // Silent fail - retry on next interval
       }
     };
 
@@ -116,8 +115,7 @@ function VerifyEmailContent() {
       } else {
         setMessage(data.error || "Failed to resend verification email.");
       }
-    } catch (error) {
-      console.error("Resend error:", error);
+    } catch {
       setMessage("An error occurred. Please try again.");
     } finally {
       setIsResending(false);

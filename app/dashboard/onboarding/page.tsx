@@ -159,7 +159,7 @@ export default function OnboardingPage() {
         throw new Error("Failed to update onboarding status");
       }
     } catch (error) {
-      console.error("Error updating onboarding status:", error);
+      // Silent fail - onboarding status update is non-critical
     }
   };
 
@@ -184,7 +184,7 @@ export default function OnboardingPage() {
       setNewProject({ name: "", description: "" });
       setStep("ready");
     } catch (error: any) {
-      console.error("Failed to create project:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Failed to create project",
         description:

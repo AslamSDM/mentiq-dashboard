@@ -90,7 +90,7 @@ export default function SupportPage() {
       const data = await ticketService.getTickets();
       setTickets(data || []);
     } catch (err) {
-      console.error("Failed to fetch tickets:", err);
+      // Silent fail - tickets will show empty state
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +131,7 @@ export default function SupportPage() {
       setSelectedTicket(ticket);
       setIsDetailDialogOpen(true);
     } catch (err) {
-      console.error("Failed to fetch ticket:", err);
+      // Silent fail - dialog will show empty state
     }
   };
 
@@ -147,7 +147,7 @@ export default function SupportPage() {
       });
       setNewComment("");
     } catch (err) {
-      console.error("Failed to add comment:", err);
+      // Silent fail - comment will not be added
     } finally {
       setIsAddingComment(false);
     }

@@ -160,12 +160,11 @@ export default function RevenuePage() {
           .catch(() => null),
       ]);
 
-      console.log("📦 Revenue page using cached data");
       setRevenueMetrics(metrics);
       setRevenueAnalytics(analytics);
       setCustomerAnalytics(customers);
-    } catch (error) {
-      console.error("Error fetching revenue data:", error);
+    } catch {
+      // Silent fail for non-critical data
     } finally {
       setIsLoading(false);
     }

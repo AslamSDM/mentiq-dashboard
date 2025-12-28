@@ -42,8 +42,7 @@ export default function ChurnRiskPage() {
         threshold
       );
       setChurnData(response.data);
-    } catch (error) {
-      console.error("Error fetching churn risk data:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load churn risk data",
@@ -81,8 +80,7 @@ export default function ChurnRiskPage() {
         title: "Export Successful",
         description: `Exported ${riskLevel === "all" ? "all" : riskLevel + " risk"} users to CSV`,
       });
-    } catch (error) {
-      console.error("Error exporting at-risk users:", error);
+    } catch {
       toast({
         title: "Export Failed",
         description: "Failed to export at-risk users",

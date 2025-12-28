@@ -246,7 +246,6 @@ class EnhancedAnalyticsService extends BaseHttpService {
       projectId,
     });
 
-    console.log("🔍 Churn Risk API Response:", response);
     return response as any;
   }
 

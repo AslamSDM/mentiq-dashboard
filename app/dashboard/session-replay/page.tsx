@@ -67,14 +67,6 @@ export default function SessionReplayPage() {
           timestamp: event.timestamp - firstTimestamp,
         }));
 
-        console.log("Player events:", {
-          original: events.length,
-          normalized: normalizedEvents.length,
-          duration: normalizedEvents[normalizedEvents.length - 1]?.timestamp,
-          firstEvent: normalizedEvents[0],
-          lastEvent: normalizedEvents[normalizedEvents.length - 1],
-        });
-
         // Initialize new player
         playerRef.current = new rrwebPlayer({
           target: playerContainerRef.current,
@@ -88,7 +80,7 @@ export default function SessionReplayPage() {
           },
         });
       } catch (error) {
-        console.error("Failed to initialize rrweb player:", error);
+        // Silent fail - player initialization may fail on some sessions
       }
     }
 

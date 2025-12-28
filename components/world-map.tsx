@@ -28,8 +28,7 @@ export function WorldMap({ geoData, svgUrl }: WorldMapProps) {
         setSvgContent(svg);
         setIsLoading(false);
       })
-      .catch((error) => {
-        console.error("Error loading SVG:", error);
+      .catch(() => {
         setIsLoading(false);
       });
   }, [svgUrl]);

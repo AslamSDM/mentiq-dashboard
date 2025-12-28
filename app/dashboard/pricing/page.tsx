@@ -213,7 +213,7 @@ export default function HealthScorePage() {
       // Redirect to Stripe checkout
       window.location.href = url;
     } catch (error) {
-      console.error("Subscription error:", error);
+      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to start checkout process. Please try again.",

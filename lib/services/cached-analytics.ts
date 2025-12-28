@@ -1,10 +1,6 @@
 import { enhancedAnalyticsService } from "./enhanced-analytics";
 import { useStore } from "../store";
 
-/**
- * Cached wrapper for enhanced analytics service
- * Automatically handles caching in Zustand store
- */
 export class CachedAnalyticsService {
   /**
    * Get churn risk data with caching
@@ -56,9 +52,6 @@ export class CachedAnalyticsService {
     return response;
   }
 
-  /**
-   * Get session analytics with caching
-   */
   async getSessionAnalytics(
     projectId: string,
     startDate?: string,
@@ -68,7 +61,6 @@ export class CachedAnalyticsService {
     const cached = useStore.getState().getCachedEnhancedData<any>(cacheKey);
 
     if (cached) {
-      console.log("✅ Using cached session analytics");
       return { session_data: cached };
     }
 
@@ -78,14 +70,10 @@ export class CachedAnalyticsService {
       endDate
     );
 
-    console.log("📡 Session analytics API response:", response);
-
-    // The API returns { session_data: {...} }
     const sessionData = (response as any).session_data;
 
     if (sessionData) {
       useStore.getState().setCachedEnhancedData(cacheKey, sessionData);
-      console.log("📦 Cached session analytics");
     }
 
     return response;
