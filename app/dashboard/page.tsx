@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+// Removed DashboardHeader as it's now in the Navbar
 import {
   Card,
   CardContent,
@@ -31,6 +31,7 @@ import {
   Pie,
   PieChart,
   Cell,
+  Tooltip,
 } from "recharts";
 import {
   ChartContainer,
@@ -69,6 +70,7 @@ import {
   Tablet,
   ArrowUpRight,
   ArrowDownRight,
+  Calendar,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -388,19 +390,15 @@ export default function DashboardPage() {
 
   if (!effectiveProjectId) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Overview"
-          description="Unified view of your project analytics"
-        />
+      <div className="flex flex-col h-full bg-[#F4F7FE]">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="w-24 h-24 mx-auto bg-muted rounded-full flex items-center justify-center">
-              <Loader2 className="h-12 w-12 text-muted-foreground animate-spin" />
+            <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg">
+              <Loader2 className="h-12 w-12 text-[#4318FF] animate-spin" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">Select a Project</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-lg font-bold text-[#2B3674]">Select a Project</h3>
+              <p className="text-[#A3AED0]">
                 Please select a project to view the dashboard
               </p>
             </div>
@@ -411,15 +409,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <DashboardHeader
-          title="Overview"
-          description="Unified view of your project analytics"
-        />
-        <div className="flex items-center space-x-2">
+    <div className="flex flex-col h-full space-y-6">
+      {/* Date Range & Controls */}
+      <div className="flex items-center justify-end">
+        <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm">
+          <Calendar className="h-4 w-4 text-[#A3AED0] ml-2" />
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[130px] m-1">
+            <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 text-[#2B3674] font-medium">
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
@@ -435,11 +431,11 @@ export default function DashboardPage() {
       {/* 1. Revenue Analytics (Top) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
             Revenue Analytics
           </h2>
           <Link href="/dashboard/revenue">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -448,81 +444,99 @@ export default function DashboardPage() {
         {loadingEnhanced ? (
           <div className="grid gap-4 md:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-muted animate-pulse rounded-xl" />
+              <div key={i} className="h-32 bg-white/50 animate-pulse rounded-2xl" />
             ))}
           </div>
         ) : revenueMetrics ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">MRR</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(revenueMetrics.mrr)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {revenueMetrics.growth_rate > 0 ? "+" : ""}
-                  {formatPercentage(revenueMetrics.growth_rate)} from last month
-                </p>
+            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+              <CardContent className="p-6">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-[#F4F7FE] rounded-full">
+                        <DollarSign className="h-6 w-6 text-[#4318FF]" />
+                    </div>
+                 </div>
+                 <div>
+                    <div className="text-sm font-medium text-[#A3AED0] mb-1">MRR</div>
+                    <div className="text-2xl font-bold text-[#2B3674]">
+                      {formatCurrency(revenueMetrics.mrr)}
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                         <span className={revenueMetrics.growth_rate >= 0 ? "text-[#05CD99] font-bold text-xs" : "text-red-500 font-bold text-xs"}>
+                             {revenueMetrics.growth_rate > 0 ? "+" : ""}
+                             {formatPercentage(revenueMetrics.growth_rate)}
+                         </span>
+                         <span className="text-xs text-[#A3AED0]">since last month</span>
+                    </div>
+                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Active Subscriptions
-                </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {revenueMetrics.active_subscriptions}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {revenueMetrics.new_subscriptions} new this month
-                </p>
+
+            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+              <CardContent className="p-6">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-[#F4F7FE] rounded-full">
+                        <Users className="h-6 w-6 text-[#4318FF]" />
+                    </div>
+                 </div>
+                 <div>
+                    <div className="text-sm font-medium text-[#A3AED0] mb-1">Active Subs</div>
+                    <div className="text-2xl font-bold text-[#2B3674]">
+                      {revenueMetrics.active_subscriptions}
+                    </div>
+                    <p className="text-xs text-[#A3AED0] mt-1">
+                      {revenueMetrics.new_subscriptions} new this month
+                    </p>
+                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Churn Rate
-                </CardTitle>
-                <TrendingDown className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatPercentage(revenueMetrics.churn_rate)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {revenueMetrics.churned_subscriptions} canceled this month
-                </p>
+            
+            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+              <CardContent className="p-6">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-[#FFF9E5] rounded-full">
+                        <TrendingDown className="h-6 w-6 text-[#FFCE20]" />
+                    </div>
+                 </div>
+                 <div>
+                    <div className="text-sm font-medium text-[#A3AED0] mb-1">Churn Rate</div>
+                    <div className="text-2xl font-bold text-[#2B3674]">
+                      {formatPercentage(revenueMetrics.churn_rate)}
+                    </div>
+                    <p className="text-xs text-[#A3AED0] mt-1">
+                      {revenueMetrics.churned_subscriptions} churned
+                    </p>
+                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">ARPU</CardTitle>
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(revenueMetrics.arpu)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Average revenue per user
-                </p>
+            
+             <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+              <CardContent className="p-6">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-[#F4F7FE] rounded-full">
+                        <CreditCard className="h-6 w-6 text-[#4318FF]" />
+                    </div>
+                 </div>
+                 <div>
+                    <div className="text-sm font-medium text-[#A3AED0] mb-1">ARPU</div>
+                    <div className="text-2xl font-bold text-[#2B3674]">
+                      {formatCurrency(revenueMetrics.arpu)}
+                    </div>
+                    <p className="text-xs text-[#A3AED0] mt-1">
+                       Avg. Revenue Per User
+                    </p>
+                 </div>
               </CardContent>
             </Card>
           </div>
         ) : (
-          <Card className="bg-muted/50 border-dashed">
+          <Card className="bg-white border-dashed border-2 border-[#E0E5F2] shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-8">
-              <p className="text-muted-foreground mb-4">
+              <p className="text-[#A3AED0] mb-4">
                 No revenue data available. Configure Stripe to see metrics.
               </p>
               <Link href="/dashboard/revenue">
-                <Button variant="outline">Configure Stripe</Button>
+                <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">Configure Stripe</Button>
               </Link>
             </CardContent>
           </Card>
@@ -533,10 +547,10 @@ export default function DashboardPage() {
           revenueAnalytics.time_series.length > 0) ||
           (revenueMetrics?.time_series &&
             revenueMetrics.time_series.length > 0)) && (
-          <Card>
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
             <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">Revenue Trend</CardTitle>
+              <CardDescription className="text-[#A3AED0]">
                 Daily revenue from Stripe charges over the last 30 days
               </CardDescription>
             </CardHeader>
@@ -545,27 +559,33 @@ export default function DashboardPage() {
                 config={{
                   revenue: {
                     label: "Revenue",
-                    color: "hsl(var(--primary))",
+                    color: "#4318FF",
                   },
                 }}
                 className="h-[300px] w-full"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <AreaChart
                     data={
                       revenueAnalytics?.time_series ||
                       revenueMetrics?.time_series ||
                       []
                     }
                   >
+                     <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#4318FF" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#4318FF" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      className="stroke-muted/20"
+                      className="stroke-[#E0E5F2]"
                       vertical={false}
                     />
                     <XAxis
                       dataKey="date"
-                      className="text-xs text-muted-foreground"
+                      className="text-xs text-[#A3AED0]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
@@ -578,38 +598,25 @@ export default function DashboardPage() {
                       }
                     />
                     <YAxis
-                      className="text-xs text-muted-foreground"
+                      className="text-xs text-[#A3AED0]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
                       tickFormatter={(value) => `$${value.toLocaleString()}`}
                     />
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          formatter={(value) => [
-                            `$${Number(value).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`,
-                            "Revenue",
-                          ]}
-                          labelFormatter={(value) =>
-                            new Date(value).toLocaleDateString("en-US", {
-                              month: "long",
-                              day: "numeric",
-                              year: "numeric",
-                            })
-                          }
-                        />
-                      }
-                    />
-                    <Bar
+                    <Tooltip 
+                        cursor={{ stroke: '#E0E5F2', strokeWidth: 1 }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0px 10px 20px rgba(0,0,0,0.1)' }}
+                     />
+                    <Area
+                      type="monotone"
                       dataKey="revenue"
-                      fill="hsl(var(--primary))"
-                      radius={[4, 4, 0, 0]}
+                      stroke="#4318FF"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorRevenue)"
                     />
-                  </BarChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </ChartContainer>
             </CardContent>
@@ -620,146 +627,137 @@ export default function DashboardPage() {
       {/* 2. General Analytics (DAU, MAU, WAU) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
             User Engagement
           </h2>
           <Link href="/dashboard/analytics">
-            <Button variant="ghost" size="sm">
+             <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Events
-              </CardTitle>
-              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {totalEvents.toLocaleString()}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                In selected period
-              </p>
-            </CardContent>
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+             <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-[#A3AED0]">Total Events</p>
+                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{totalEvents.toLocaleString()}</h3>
+                    </div>
+                    <div className="p-3 rounded-full bg-[#E6F7FF]">
+                        <ArrowUpRight className="h-6 w-6 text-[#00A3FF]" />
+                    </div>
+                </div>
+             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Page Views</CardTitle>
-              <Monitor className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {pageViews.toLocaleString()}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                In selected period
-              </p>
-            </CardContent>
+          
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+             <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-[#A3AED0]">Page Views</p>
+                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{pageViews.toLocaleString()}</h3>
+                    </div>
+                    <div className="p-3 rounded-full bg-[#F4F7FE]">
+                        <Monitor className="h-6 w-6 text-[#4318FF]" />
+                    </div>
+                </div>
+             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Unique Users
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {uniqueUsers.toLocaleString()}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                In selected period
-              </p>
-            </CardContent>
+          
+           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+             <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-[#A3AED0]">Unique Users</p>
+                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{uniqueUsers.toLocaleString()}</h3>
+                    </div>
+                    <div className="p-3 rounded-full bg-[#E9E3FF]">
+                        <Users className="h-6 w-6 text-[#A3AED0]" /> {/* Usually a distinct color if needed */}
+                    </div>
+                </div>
+             </CardContent>
           </Card>
         </div>
 
         {/* Retention & Bounce Rate Metrics */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle>User Retention</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">User Retention</CardTitle>
+              <CardDescription className="text-[#A3AED0]">
                 Percentage of users returning over time
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingEnhanced ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#4318FF]" />
                 </div>
               ) : retentionData?.cohorts && retentionData.cohorts.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="text-3xl font-bold">
+                  <div className="text-3xl font-bold text-[#2B3674]">
                     {getOverallRetentionRate().toFixed(1)}%
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-[#A3AED0]">
                     Day 1 Retention (Avg across {retentionData.cohorts.length}{" "}
                     cohorts)
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-4 mt-6">
                     {getRetentionMetrics().map((metric, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-sm"
+                        className="space-y-2"
                       >
-                        <span className="text-muted-foreground">
-                          {metric.period}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={metric.rate} className="w-24 h-2" />
-                          <span className="font-medium w-12 text-right">
-                            {metric.rate.toFixed(1)}%
-                          </span>
+                         <div className="flex justify-between text-sm">
+                            <span className="text-[#A3AED0]">{metric.period}</span>
+                            <span className="font-bold text-[#2B3674]">{metric.rate.toFixed(1)}%</span>
                         </div>
+                        <Progress value={metric.rate} className="h-2 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-[#A3AED0]">
                   No retention data available
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle>Bounce Rate</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">Bounce Rate</CardTitle>
+              <CardDescription className="text-[#A3AED0]">
                 Single-page sessions (lower is better)
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingAnalytics ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#4318FF]" />
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="flex items-baseline gap-2">
-                    <div className="text-3xl font-bold">
+                    <div className="text-3xl font-bold text-[#2B3674]">
                       {bounceRate.toFixed(1)}%
                     </div>
                     {bounceRate < 40 ? (
-                      <Badge variant="default" className="bg-green-500">
+                      <Badge className="bg-[#05CD99] text-white hover:bg-[#05CD99]/80 border-none">
                         Excellent
                       </Badge>
                     ) : bounceRate < 55 ? (
-                      <Badge variant="secondary">Good</Badge>
+                      <Badge className="bg-[#4318FF] text-white hover:bg-[#4318FF]/80 border-none">Good</Badge>
                     ) : bounceRate < 70 ? (
-                      <Badge variant="outline">Average</Badge>
+                      <Badge variant="outline" className="text-[#2B3674] border-[#E0E5F2]">Average</Badge>
                     ) : (
                       <Badge variant="destructive">Needs Attention</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-[#A3AED0]">
                     {bounceRate < 40
                       ? "Users are highly engaged"
                       : bounceRate < 55
@@ -769,8 +767,8 @@ export default function DashboardPage() {
                       : "Consider improving content"}
                   </p>
                   <div className="pt-2">
-                    <Progress value={100 - bounceRate} className="h-2" />
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <Progress value={100 - bounceRate} className="h-3 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
+                    <p className="text-xs text-[#A3AED0] mt-2">
                       {(100 - bounceRate).toFixed(1)}% engaged sessions
                     </p>
                   </div>
@@ -780,32 +778,32 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card>
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Active Users</CardTitle>
-                <CardDescription>User engagement over time</CardDescription>
+                <CardTitle className="text-[#2B3674] font-bold">Active Users</CardTitle>
+                <CardDescription className="text-[#A3AED0]">User engagement over time</CardDescription>
               </div>
               <Tabs
                 value={engagementTab}
                 onValueChange={setEngagementTab}
                 className="w-[300px]"
               >
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="dau">DAU</TabsTrigger>
-                  <TabsTrigger value="wau">WAU</TabsTrigger>
-                  <TabsTrigger value="mau">MAU</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 bg-[#F4F7FE] p-1 rounded-xl">
+                  <TabsTrigger value="dau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">DAU</TabsTrigger>
+                  <TabsTrigger value="wau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">WAU</TabsTrigger>
+                  <TabsTrigger value="mau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">MAU</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <div className="text-3xl font-bold">
+              <div className="text-3xl font-bold text-[#2B3674]">
                 {getEngagementValue().toLocaleString()}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-[#A3AED0]">
                 {engagementTab === "dau"
                   ? "Daily Active Users"
                   : engagementTab === "wau"
@@ -816,14 +814,14 @@ export default function DashboardPage() {
             <div className="h-[350px] w-full px-2">
               {loadingAnalytics ? (
                 <div className="h-full w-full flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-8 w-8 animate-spin text-[#4318FF]" />
                 </div>
               ) : getEngagementData().length > 0 ? (
                 <ChartContainer
                   config={{
                     value: {
                       label: "Users",
-                      color: "hsl(var(--primary))",
+                      color: "#4318FF",
                     },
                   }}
                   className="h-full w-full"
@@ -832,12 +830,12 @@ export default function DashboardPage() {
                     <LineChart data={getEngagementData()}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        className="stroke-muted/20"
+                        className="stroke-[#E0E5F2]"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="date"
-                        className="text-xs text-muted-foreground"
+                        className="text-xs text-[#A3AED0]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
@@ -850,37 +848,27 @@ export default function DashboardPage() {
                         }
                       />
                       <YAxis
-                        className="text-xs text-muted-foreground"
+                        className="text-xs text-[#A3AED0]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
                       />
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            labelFormatter={(value) =>
-                              new Date(value).toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              })
-                            }
-                          />
-                        }
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0px 10px 20px rgba(0,0,0,0.1)' }}
                       />
                       <Line
                         type="monotone"
                         dataKey="value"
-                        stroke="#8b5cf6"
-                        strokeWidth={2.5}
+                        stroke="#4318FF"
+                        strokeWidth={4}
                         dot={false}
-                        activeDot={{ r: 6 }}
+                        activeDot={{ r: 6, fill: "#4318FF", stroke: "#fff", strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </ChartContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-muted-foreground">
+                <div className="h-full w-full flex items-center justify-center text-[#A3AED0]">
                   No data available for this period
                 </div>
               )}
@@ -890,28 +878,32 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Events & Recent Events */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle>Top Events</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">Top Events</CardTitle>
+            <CardDescription className="text-[#A3AED0]">
               Most frequently triggered events in the selected period
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-8">
+            <div className="space-y-6">
               {topEvents.slice(0, 5)?.map((event: any, i: number) => (
                 <div key={i} className="flex items-center">
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                    <p className="text-sm font-bold text-[#2B3674] leading-none">
                       {event.name || `Event ${i + 1}`}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {event.count?.toLocaleString() || 0} events
-                    </p>
+                    <div className="w-full bg-[#F4F7FE] rounded-full h-2 mt-2">
+                        <div 
+                         className="bg-[#4318FF] h-2 rounded-full" 
+                         style={{ width: `${totalEvents > 0 ? ((event.count / totalEvents) * 100) : 0}%` }}
+                        />
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">
+                  <div className="text-right pl-4">
+                     <div className="text-sm font-bold text-[#2B3674]">{event.count?.toLocaleString() || 0}</div>
+                    <div className="text-xs font-medium text-[#A3AED0]">
                       {totalEvents > 0
                         ? ((event.count / totalEvents) * 100)?.toFixed(1)
                         : "0"}
@@ -921,7 +913,7 @@ export default function DashboardPage() {
                 </div>
               ))}
               {topEvents.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-[#A3AED0] text-center py-4">
                   No events data available
                 </p>
               )}
@@ -930,10 +922,10 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent Events */}
-        <Card>
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle>Recent Events</CardTitle>
-            <CardDescription>Latest events from your users</CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">Recent Events</CardTitle>
+            <CardDescription className="text-[#A3AED0]">Latest events from your users</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -952,25 +944,19 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={event.ID || index}
-                      className="flex items-center justify-between border-b pb-2 last:border-b-0"
+                      className="flex items-center justify-between border-b border-[#F4F7FE] pb-3 last:border-b-0"
                     >
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm">{countryFlag}</span>
-                          <p className="text-sm font-medium">
+                          <p className="text-sm font-bold text-[#2B3674]">
                             {event.Event || event.event || "Unknown Event"}
                           </p>
                         </div>
-                        <div className="flex gap-2 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap gap-2 text-xs text-[#A3AED0]">
                           {event.UserId && (
-                            <span>User: {event.UserId.substring(0, 8)}...</span>
+                            <span className="bg-[#F4F7FE] px-2 py-0.5 rounded text-[#2B3674]">User: {event.UserId.substring(0, 8)}...</span>
                           )}
-                          {event.SessionId && (
-                            <span>
-                              Session: {event.SessionId.substring(0, 8)}...
-                            </span>
-                          )}
-                          {event.Url && <span>URL: {event.Url}</span>}
                           {city !== "Unknown" && country !== "Unknown" && (
                             <span>
                               {city}, {country}
@@ -979,17 +965,17 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-[#A3AED0] whitespace-nowrap">
                           {new Date(
                             event.Timestamp || event.timestamp || Date.now()
-                          ).toLocaleString()}
+                          ).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>
                   );
                 })}
               {events.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-[#A3AED0] text-center py-4">
                   No recent events found. Start tracking events to see data
                   here.
                 </p>
@@ -1002,41 +988,41 @@ export default function DashboardPage() {
       {/* 3. Location Analytics */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
             Location Analytics
           </h2>
           <Link href="/dashboard/location">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-2">
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="md:col-span-2 border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle>Global Distribution</CardTitle>
-              <CardDescription>User activity by country</CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">Global Distribution</CardTitle>
+              <CardDescription className="text-[#A3AED0]">User activity by country</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] relative overflow-hidden">
               {loadingEnhanced ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="animate-spin" />
+                  <Loader2 className="animate-spin text-[#4318FF] h-8 w-8" />
                 </div>
               ) : getGeoData().length > 0 ? (
                 <WorldMap geoData={getGeoData()} svgUrl="/world.svg" />
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="flex items-center justify-center h-full text-[#A3AED0]">
                   No location data available
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle>Top Countries</CardTitle>
-              <CardDescription>By user count</CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">Top Countries</CardTitle>
+              <CardDescription className="text-[#A3AED0]">By user count</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1045,20 +1031,20 @@ export default function DashboardPage() {
                   .map((geo: any, i: number) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold">
+                        <div className="h-8 w-8 rounded-full bg-[#F4F7FE] flex items-center justify-center text-xs font-bold text-[#2B3674]">
                           {i + 1}
                         </div>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-[#2B3674]">
                           {geo.country}
                         </span>
                       </div>
-                      <span className="text-sm font-bold">
+                      <span className="text-sm font-bold text-[#2B3674]">
                         {geo.users.toLocaleString()}
                       </span>
                     </div>
                   ))}
                 {getGeoData().length === 0 && (
-                  <div className="text-center text-muted-foreground py-8">
+                  <div className="text-center text-[#A3AED0] py-8">
                     No data
                   </div>
                 )}
@@ -1071,61 +1057,61 @@ export default function DashboardPage() {
       {/* 4. Device Analytics (Table) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
             Device Analytics
           </h2>
           <Link href="/dashboard/devices">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
-        <Card>
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle>Device Performance</CardTitle>
-            <CardDescription>Breakdown by device type</CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">Device Performance</CardTitle>
+            <CardDescription className="text-[#A3AED0]">Breakdown by device type</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {loadingEnhanced ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="animate-spin" />
+                <Loader2 className="animate-spin text-[#4318FF]" />
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Device</TableHead>
-                    <TableHead className="text-right">Users</TableHead>
-                    <TableHead className="text-right">Sessions</TableHead>
-                    <TableHead className="text-right">Bounce Rate</TableHead>
-                    <TableHead className="text-right">Avg. Duration</TableHead>
+                  <TableRow className="border-[#F4F7FE] hover:bg-transparent">
+                    <TableHead className="text-[#A3AED0] pl-6">Device</TableHead>
+                    <TableHead className="text-right text-[#A3AED0]">Users</TableHead>
+                    <TableHead className="text-right text-[#A3AED0]">Sessions</TableHead>
+                    <TableHead className="text-right text-[#A3AED0]">Bounce Rate</TableHead>
+                    <TableHead className="text-right text-[#A3AED0] pr-6">Avg. Duration</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {getDeviceTableData().length > 0 ? (
                     getDeviceTableData().map((device: any, i: number) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium flex items-center gap-2">
+                      <TableRow key={i} className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50">
+                        <TableCell className="font-bold text-[#2B3674] flex items-center gap-2 pl-6">
                           {device.device === "Desktop" ? (
-                            <Monitor className="h-4 w-4" />
+                            <Monitor className="h-4 w-4 text-[#4318FF]" />
                           ) : device.device === "Mobile" ? (
-                            <Smartphone className="h-4 w-4" />
+                            <Smartphone className="h-4 w-4 text-[#4318FF]" />
                           ) : (
-                            <Tablet className="h-4 w-4" />
+                            <Tablet className="h-4 w-4 text-[#4318FF]" />
                           )}
                           {device.device}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-medium text-[#2B3674]">
                           {device.users.toLocaleString()}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-medium text-[#2B3674]">
                           {device.sessions.toLocaleString()}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-medium text-[#2B3674]">
                           {device.bounce_rate.toFixed(1)}%
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-medium text-[#2B3674] pr-6">
                           {device.avg_session_time}
                         </TableCell>
                       </TableRow>
@@ -1134,7 +1120,7 @@ export default function DashboardPage() {
                     <TableRow>
                       <TableCell
                         colSpan={5}
-                        className="text-center py-8 text-muted-foreground"
+                        className="text-center py-8 text-[#A3AED0]"
                       >
                         No device data available
                       </TableCell>

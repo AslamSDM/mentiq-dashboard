@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { DashboardNavbar } from "@/components/dashboard/dashboard-navbar";
 import { OnboardingTaskBanner } from "@/components/onboarding-task-banner";
 import { Button } from "@/components/ui/button";
 import { X, Eye } from "lucide-react";
@@ -125,8 +126,23 @@ export default function DashboardLayout({
     );
   }
 
+  // Helper to determine page title
+  const getPageTitle = (path: string) => {
+    const segments = path.slice(1).split('/').filter(Boolean); // Remove leading slash
+    // If path is just 'dashboard', return 'Dashboard'
+    if (segments.length === 1 && segments[0] === 'dashboard') return 'Dashboard';
+    
+    // Get the last segment
+    const lastSegment = segments[segments.length - 1];
+    
+    // Capitalize and replace dashes
+    return lastSegment 
+      ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, ' ')
+      : 'Dashboard';
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden flex-col">
+    <div className="flex h-screen overflow-hidden flex-col bg-[#F4F7FE]">
       {/* Admin Impersonation Banner - Only shown for admin users */}
       {session?.isAdmin && impersonatedProjectId && (
         <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between z-50">
@@ -154,9 +170,14 @@ export default function DashboardLayout({
       )}
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <OnboardingTaskBanner />
-          {children}
+        <main className="flex-1 overflow-y-auto bg-[#F4F7FE]">
+          {/* Top Navbar */}
+          <DashboardNavbar title={getPageTitle(pathname)} />
+          
+          <div className="mx-auto max-w-7xl p-4 md:p-6 pb-20">
+             <OnboardingTaskBanner />
+             {children}
+          </div>
         </main>
       </div>
     </div>
