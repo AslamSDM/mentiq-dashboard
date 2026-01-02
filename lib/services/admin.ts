@@ -146,6 +146,27 @@ class AdminService extends BaseHttpService {
       method: "GET",
     });
   }
+
+  /**
+   * Create a test user that bypasses email verification and paywall (admin only)
+   */
+  async createTestUser(data: {
+    name: string;
+    email: string;
+    password: string;
+    skip_email_verification?: boolean;
+    skip_paywall?: boolean;
+    create_project?: boolean;
+    project_name?: string;
+  }): Promise<any> {
+    return this.request<any>("/api/v1/admin/test-users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const adminService = new AdminService();

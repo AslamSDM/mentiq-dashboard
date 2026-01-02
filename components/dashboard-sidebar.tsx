@@ -107,6 +107,11 @@ const adminNavigation = [
     icon: <Shield className="h-5 w-5" />,
   },
   {
+    name: "Test Users",
+    href: "/dashboard/admin/test-users",
+    icon: <User className="h-5 w-5" />,
+  },
+  {
     name: "Admin Projects",
     href: "/dashboard/admin/projects",
     icon: <FolderKanban className="h-5 w-5" />,
