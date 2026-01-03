@@ -13,7 +13,7 @@ export function Providers({ children }: ProvidersProps) {
     // Set up global handler for unauthorized API responses
     setOnUnauthorizedHandler(() => {
       // Sign out the user when an unauthorized response is received
-      signOut({ callbackUrl: "/login" });
+      signOut({ callbackUrl: "/signin" });
     });
   }, []);
 
