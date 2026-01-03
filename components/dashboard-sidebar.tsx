@@ -171,11 +171,16 @@ export function DashboardSidebar() {
         )}
       >
         {/* Sidebar Header */}
-        <div className="flex h-20 items-center justify-between px-6 border-b border-gray-100">
+        <div className="flex h-20 items-center justify-between px-2 border-b border-gray-100">
           <div className={cn("flex items-center gap-3 overflow-hidden transition-all duration-300", isCollapsed && "w-0 opacity-0")}>
-            <div className="flex items-center gap-2 font-bold text-2xl text-[#2B3674]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4318FF] text-white text-lg">M</span>
-                <span>Mentiq</span>
+             <div className="relative h-30 w-30">
+              <img
+                src="/logo.png"
+                alt="Mentiq Logo"
+                className={
+                  "object-contain transition-all duration-300" + "h-30 w-30"
+                }
+              />
             </div>
           </div>
           

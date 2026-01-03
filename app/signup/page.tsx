@@ -229,20 +229,20 @@ function SignUpForm() {
   };
 
   return (
-    <div className="min-h-screen flex bg-black text-white">
+    <div className="min-h-screen flex bg-white text-[#2B3674]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-black"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
 
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full text-white">
           <Link href="/" className="flex items-center gap-3">
             <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"
                 fill
-                className="object-contain"
+                className="object-contain brightness-0 invert"
               />
             </div>
           </Link>
@@ -251,34 +251,19 @@ function SignUpForm() {
             <h1 className="text-5xl font-bold leading-tight">
               Start killing churn
               <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-white">
                 in minutes
               </span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-md">
+            <p className="text-xl text-blue-100 max-w-md">
               Join thousands of SaaS founders who've turned retention into their
               competitive advantage.
             </p>
 
-            {/* Feature List */}
-            <div className="space-y-4 pt-8">
-              {[
-                "3-day free trial on all 1-1000 user plans",
-                "No credit card required to start",
-                "Cancel anytime, no questions asked",
-                "Full access to all plan features",
-              ].map((feature, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                    <Check className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="text-gray-300">{feature}</span>
-                </div>
-              ))}
-            </div>
+      
           </div>
 
-          <div className="flex items-center gap-8 text-sm text-gray-400">
+          <div className="flex items-center gap-8 text-sm text-blue-200">
             <span>© 2025 Mentiq</span>
             <Link
               href="/docs/Privacy Policy MENTIQ.pdf"
@@ -301,7 +286,7 @@ function SignUpForm() {
       </div>
 
       {/* Right Side - Sign Up Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 overflow-y-auto bg-white">
         <div className="w-full max-w-2xl space-y-8">
           {/* Mobile Logo */}
           <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
@@ -313,38 +298,38 @@ function SignUpForm() {
                 className="object-contain"
               />
             </div>
-            <span className="text-xl font-bold">Mentiq</span>
+            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
           </Link>
 
           {/* Step Indicator */}
           <div className="flex items-center gap-4 mb-8">
             <div
               className={`flex items-center gap-2 ${
-                step === "details" ? "text-primary" : "text-gray-400"
+                step === "details" ? "text-primary" : "text-[#A3AED0]"
               }`}
             >
               <div
                 className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
                   step === "details"
                     ? "border-primary bg-primary/10"
-                    : "border-gray-600 bg-white/5"
+                    : "border-[#E0E5F2] bg-[#F4F7FE]"
                 }`}
               >
                 1
               </div>
               <span className="font-medium">Account Details</span>
             </div>
-            <div className="flex-1 h-px bg-white/10"></div>
+            <div className="flex-1 h-px bg-[#E0E5F2]"></div>
             <div
               className={`flex items-center gap-2 ${
-                step === "plan" ? "text-primary" : "text-gray-400"
+                step === "plan" ? "text-primary" : "text-[#A3AED0]"
               }`}
             >
               <div
                 className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
                   step === "plan"
                     ? "border-primary bg-primary/10"
-                    : "border-gray-600 bg-white/5"
+                    : "border-[#E0E5F2] bg-[#F4F7FE]"
                 }`}
               >
                 2
@@ -357,8 +342,8 @@ function SignUpForm() {
           {step === "details" && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Create your account</h2>
-                <p className="text-gray-400">
+                <h2 className="text-3xl font-bold text-[#2B3674]">Create your account</h2>
+                <p className="text-[#A3AED0]">
                   Fill in your details to get started
                 </p>
               </div>
@@ -368,7 +353,7 @@ function SignUpForm() {
                 variant="outline"
                 onClick={handleGoogleSignUp}
                 disabled={isGoogleLoading}
-                className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
               >
                 {isGoogleLoading ? (
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -381,17 +366,17 @@ function SignUpForm() {
               {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
+                  <div className="w-full border-t border-[#E0E5F2]"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-black text-gray-400">
+                  <span className="px-4 bg-white text-[#A3AED0]">
                     or create account with email
                   </span>
                 </div>
               </div>
 
               {error && (
-                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
                   {error}
                 </div>
               )}
@@ -400,12 +385,12 @@ function SignUpForm() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="fullName"
-                    className="text-sm font-medium text-gray-300"
+                    className="text-sm font-medium text-[#2B3674]"
                   >
                     Full name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                     <Input
                       id="fullName"
                       type="text"
@@ -413,7 +398,7 @@ function SignUpForm() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -421,12 +406,12 @@ function SignUpForm() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="companyName"
-                    className="text-sm font-medium text-gray-300"
+                    className="text-sm font-medium text-[#2B3674]"
                   >
                     Company name
                   </Label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                     <Input
                       id="companyName"
                       type="text"
@@ -434,7 +419,7 @@ function SignUpForm() {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -443,12 +428,12 @@ function SignUpForm() {
               <div className="space-y-2">
                 <Label
                   htmlFor="email"
-                  className="text-sm font-medium text-gray-300"
+                  className="text-sm font-medium text-[#2B3674]"
                 >
                   Work email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                   <Input
                     id="email"
                     type="email"
@@ -456,7 +441,7 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -464,12 +449,12 @@ function SignUpForm() {
               <div className="space-y-2">
                 <Label
                   htmlFor="password"
-                  className="text-sm font-medium text-gray-300"
+                  className="text-sm font-medium text-[#2B3674]"
                 >
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                   <Input
                     id="password"
                     type="password"
@@ -478,27 +463,27 @@ function SignUpForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#A3AED0]">
                   Use 8 or more characters with a mix of letters, numbers &
                   symbols
                 </p>
               </div>
 
-              <div className="flex items-start gap-3 p-4 bg-white/5 border border-white/10 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg">
                 <Checkbox
                   id="terms"
                   checked={acceptedTerms}
                   onCheckedChange={(checked) =>
                     setAcceptedTerms(checked as boolean)
                   }
-                  className="mt-1 border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="mt-1 border-[#A3AED0] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label
                   htmlFor="terms"
-                  className="text-xs text-gray-300 leading-relaxed cursor-pointer"
+                  className="text-xs text-[#2B3674] leading-relaxed cursor-pointer"
                 >
                   By creating an account, I agree to the{" "}
                   <Link
@@ -542,7 +527,7 @@ function SignUpForm() {
 
               <Button
                 onClick={handleRegisterUser}
-                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
                 disabled={
                   !fullName ||
                   !companyName ||
@@ -568,10 +553,10 @@ function SignUpForm() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
+                  <div className="w-full border-t border-[#E0E5F2]"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-black text-gray-400">
+                  <span className="px-4 bg-white text-[#A3AED0]">
                     Already have an account?
                   </span>
                 </div>
@@ -580,7 +565,7 @@ function SignUpForm() {
               <Link href="/signin">
                 <Button
                   variant="outline"
-                  className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                  className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
                 >
                   Sign in instead
                 </Button>
@@ -598,17 +583,17 @@ function SignUpForm() {
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Check your email</h2>
-                <p className="text-gray-400">
-                  We&apos;ve sent a verification link to <strong className="text-white">{email}</strong>
+                <h2 className="text-3xl font-bold text-[#2B3674]">Check your email</h2>
+                <p className="text-[#A3AED0]">
+                  We&apos;ve sent a verification link to <strong className="text-[#2B3674]">{email}</strong>
                 </p>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-lg p-4 space-y-3">
-                <p className="text-sm text-gray-400">
+              <div className="bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg p-4 space-y-3">
+                <p className="text-sm text-[#A3AED0]">
                   Click the link in your email to verify your account. Once verified, you can sign in and complete your subscription setup.
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#A3AED0]">
                   Didn&apos;t receive the email? Check your spam folder or{" "}
                   <button
                     onClick={async () => {
@@ -647,24 +632,24 @@ function SignUpForm() {
           {step === "plan" && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Choose your plan</h2>
-                <p className="text-gray-400">
+                <h2 className="text-3xl font-bold text-[#2B3674]">Choose your plan</h2>
+                <p className="text-[#A3AED0]">
                   Select the number of paid users you have
                 </p>
               </div>
 
               {error && (
-                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg">
+                <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
                   {error}
                 </div>
               )}
 
-              <Card className="bg-white/5 border-white/10">
+              <Card className="bg-white border-[#E0E5F2] shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-white">
+                  <CardTitle className="text-[#2B3674]">
                     How many paid users do you have?
                   </CardTitle>
-                  <CardDescription className="text-gray-400">
+                  <CardDescription className="text-[#A3AED0]">
                     Slide to select your current or expected user count
                   </CardDescription>
                 </CardHeader>
@@ -681,15 +666,15 @@ function SignUpForm() {
                         <div className="text-center">
                           <Badge
                             variant="secondary"
-                            className="bg-green-500/10 text-green-400 border-green-500/20"
+                            className="bg-green-50 text-green-700 border-green-200"
                           >
                             {currentTier.trialDays}-day free trial included
                           </Badge>
                         </div>
                       )}
 
-                      <div className="bg-white/5 rounded-lg p-4 space-y-2">
-                        <p className="text-sm font-semibold text-white mb-3">
+                      <div className="bg-[#F4F7FE] rounded-lg p-4 space-y-2">
+                        <p className="text-sm font-semibold text-[#2B3674] mb-3">
                           What&apos;s included:
                         </p>
                         {currentTier.features
@@ -700,7 +685,7 @@ function SignUpForm() {
                               className="flex items-start gap-3 text-sm"
                             >
                               <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                              <span className="text-gray-300">{feature}</span>
+                              <span className="text-[#A3AED0]">{feature}</span>
                             </div>
                           ))}
                       </div>
@@ -709,14 +694,14 @@ function SignUpForm() {
 
                   {userCount > 10000 && (
                     <div className="text-center space-y-4">
-                      <p className="text-white">
+                      <p className="text-[#2B3674]">
                         For 10,000+ users, please contact our sales team for
                         custom pricing.
                       </p>
                       <Link href="/pricing">
                         <Button
                           variant="outline"
-                          className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                          className="border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
                         >
                           View Enterprise Options
                         </Button>
@@ -728,7 +713,7 @@ function SignUpForm() {
 
               <Button
                 onClick={handleCheckout}
-                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
                 disabled={!currentTier || userCount > 10000 || isLoading}
               >
                 {isLoading ? (
@@ -744,7 +729,7 @@ function SignUpForm() {
                 )}
               </Button>
 
-              <p className="text-xs text-center text-gray-400">
+              <p className="text-xs text-center text-[#A3AED0]">
                 You'll be redirected to Stripe for secure payment processing.
                 After payment, you'll be able to create your first project.
               </p>
@@ -760,10 +745,10 @@ export default function SignUpPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-4 text-gray-400">Loading...</p>
+            <p className="mt-4 text-[#A3AED0]">Loading...</p>
           </div>
         </div>
       }

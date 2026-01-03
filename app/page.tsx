@@ -35,14 +35,14 @@ const faqData = [
   {
     question: "What is SaaS churn?",
     answer: (
-      <div className="space-y-4 text-gray-400 leading-relaxed">
+      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
         <p>
           SaaS churn refers to the percentage of customers who cancel or stop using a software-as-a-service product over a given period of time. It is one of the most important metrics for subscription-based businesses because even small increases in churn can significantly slow growth and reduce long-term revenue.
         </p>
         <p>There are two common types of SaaS churn:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
-          <li><strong className="text-white">Customer churn</strong>, which measures how many customers leave</li>
-          <li><strong className="text-white">Revenue churn</strong>, which measures how much recurring revenue is lost</li>
+          <li><strong className="text-[#2B3674]">Customer churn</strong>, which measures how many customers leave</li>
+          <li><strong className="text-[#2B3674]">Revenue churn</strong>, which measures how much recurring revenue is lost</li>
         </ul>
         <p>
           High SaaS churn often signals problems with product adoption, customer experience, onboarding, or perceived value. This is why modern SaaS companies rely on user behavior analytics and customer health scores to identify churn risk before customers cancel.
@@ -53,7 +53,7 @@ const faqData = [
   {
     question: "How do SaaS companies reduce churn?",
     answer: (
-      <div className="space-y-4 text-gray-400 leading-relaxed">
+      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
         <p>
           SaaS companies reduce churn by proactively understanding how users interact with their product and intervening before disengagement turns into cancellation. The most effective churn reduction strategies include:
         </p>
@@ -73,12 +73,12 @@ const faqData = [
   {
     question: "What is a good churn rate for SaaS?",
     answer: (
-      <div className="space-y-4 text-gray-400 leading-relaxed">
+      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
         <p>
           A good churn rate for SaaS depends on the business model, but benchmarks are well established.
         </p>
         <p>
-          The average churn rate for SaaS is typically <strong className="text-white">10–14% annually</strong>. An annual churn rate of <strong className="text-primary">under 5%</strong> is widely considered the benchmark for a strong, healthy SaaS business. However, it&apos;s estimated that <strong className="text-white">60–70% of SaaS companies fail to hit this benchmark</strong>, meaning most subscription software businesses are losing customers faster than they should.
+          The average churn rate for SaaS is typically <strong className="text-[#2B3674]">10–14% annually</strong>. An annual churn rate of <strong className="text-primary">under 5%</strong> is widely considered the benchmark for a strong, healthy SaaS business. However, it&apos;s estimated that <strong className="text-[#2B3674]">60–70% of SaaS companies fail to hit this benchmark</strong>, meaning most subscription software businesses are losing customers faster than they should.
         </p>
         <p>
           This gap highlights why churn reduction is such a major growth lever. Even small improvements in churn can dramatically increase lifetime value, stabilize monthly recurring revenue, and compound growth over time.
@@ -99,15 +99,15 @@ function FAQAccordion() {
           <div
             className={`rounded-2xl border backdrop-blur-sm transition-all duration-300 ${
               openIndex === index
-                ? "border-primary/50 bg-white/10"
-                : "border-white/10 bg-white/5 hover:border-white/20"
+                ? "border-primary/50 bg-white shadow-md"
+                : "border-[#E0E5F2] bg-white hover:border-primary/30"
             }`}
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="w-full p-6 sm:p-8 flex items-center justify-between text-left"
             >
-              <h3 className="text-lg sm:text-xl font-bold text-white pr-4">
+              <h3 className="text-lg sm:text-xl font-bold text-[#2B3674] pr-4">
                 {faq.question}
               </h3>
               <ChevronDown
@@ -204,11 +204,11 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
   if (submitted) {
     return (
       <div className="text-center py-8">
-        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/20 border border-green-500/30 mb-4">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20 mb-4">
           <Check className="h-8 w-8 text-green-500" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">You're on the list!</h3>
-        <p className="text-gray-400">We'll be in touch soon with early access.</p>
+        <h3 className="text-2xl font-bold text-[#2B3674] mb-2">You're on the list!</h3>
+        <p className="text-[#A3AED0]">We'll be in touch soon with early access.</p>
       </div>
     );
   }
@@ -217,49 +217,49 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="full_name" className="text-white">Full Name *</Label>
+          <Label htmlFor="full_name" className="text-[#2B3674]">Full Name *</Label>
           <Input
             id="full_name"
             placeholder="John Doe"
             value={formData.full_name}
             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white">Email *</Label>
+          <Label htmlFor="email" className="text-[#2B3674]">Email *</Label>
           <Input
             id="email"
             type="email"
             placeholder="john@company.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
             required
           />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="company" className="text-white">Company Name</Label>
+          <Label htmlFor="company" className="text-[#2B3674]">Company Name</Label>
           <Input
             id="company"
             placeholder="Acme Inc."
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="user_count" className="text-white">Expected Users</Label>
+          <Label htmlFor="user_count" className="text-[#2B3674]">Expected Users</Label>
           <Input
             id="user_count"
             type="number"
             placeholder="e.g. 500"
             value={formData.user_count}
             onChange={(e) => setFormData({ ...formData, user_count: e.target.value })}
-            className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
           />
         </div>
       </div>
@@ -271,9 +271,9 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           id="promo_opt_in"
           checked={promoOptIn}
           onChange={(e) => setPromoOptIn(e.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-white/20 bg-white/10 text-primary focus:ring-primary focus:ring-offset-0"
+          className="mt-1 h-4 w-4 rounded border-gray-300 bg-white text-primary focus:ring-primary focus:ring-offset-0"
         />
-        <label htmlFor="promo_opt_in" className="text-sm text-gray-400 cursor-pointer">
+        <label htmlFor="promo_opt_in" className="text-sm text-[#A3AED0] cursor-pointer">
           I agree to receive promotional emails from Mentiq about product updates, tips, and special offers. You can unsubscribe anytime.
         </label>
       </div>
@@ -281,7 +281,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_30px_-5px_var(--primary)]"
+        className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_-5px_var(--primary)]"
       >
         {loading ? (
           <>
@@ -449,7 +449,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-black text-white overflow-x-hidden selection:bg-primary/30">
+    <div className="min-h-screen flex flex-col bg-[#F4F7FE] text-[#2B3674] overflow-x-hidden selection:bg-primary/30">
       {/* AI-Readable Summary (Hidden from users but visible to crawlers) */}
       <div className="sr-only" aria-hidden="true">
         <h1>Mentiq - SaaS Retention Analytics Platform</h1>
@@ -491,7 +491,7 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       {/* Navbar */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+      <nav className="fixed top-0 w-full z-50 border-b border-[#E0E5F2] bg-white/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative h-30 w-30">
@@ -507,13 +507,13 @@ export default function Home() {
           <div className="flex items-center gap-6">
             <Link
               href="/docs"
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
             >
               Docs
             </Link>
             <Link
               href="/signin"
-              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
             >
               Sign In
             </Link>
@@ -524,33 +524,33 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-32 pb-32 overflow-hidden">
         {/* Background Effects */}
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-30 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-purple-500/10 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#e0e5f2_1px,transparent_1px),linear-gradient(to_bottom,#e0e5f2_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-60 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-purple-500/10 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
 
         <div className="container px-4 mx-auto text-center relative z-10">
           <FadeIn
             delay={0.2}
-            className="inline-flex items-center justify-center px-4 py-1.5 mb-8 text-sm font-medium rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-white/90 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]"
+            className="inline-flex items-center justify-center px-4 py-1.5 mb-8 text-sm font-medium rounded-full bg-white border border-[#E0E5F2] backdrop-blur-sm text-[#2B3674] shadow-sm"
           >
             <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse shadow-[0_0_10px_var(--primary)]"></span>
             Coming Soon - Join the Waitlist
           </FadeIn>
 
           <div className="mb-8 relative">
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-white mb-2">
-              <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-[#2B3674] mb-2">
+              <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#2B3674] via-[#2B3674] to-[#4318FF]">
                 Mentiq
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-[#A3AED0] max-w-3xl mx-auto leading-relaxed">
               SaaS Retention Analytics Platform to{" "}
-              <span className="text-white font-medium">Reduce SaaS Churn by 50%</span>
+              <span className="text-[#2B3674] font-medium">Reduce SaaS Churn by 50%</span>
             </p>
           </div>
 
           <FadeIn delay={0.4}>
-            <p className="text-lg text-gray-400/80 max-w-2xl mx-auto mb-10">
+            <p className="text-lg text-[#A3AED0] max-w-2xl mx-auto mb-10">
               Complete customer retention software with SaaS customer health scores, product usage analytics, and SaaS user analytics to prevent churn before it happens.
             </p>
           </FadeIn>
@@ -562,12 +562,12 @@ export default function Home() {
               <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
               <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-50 animate-gradient-x"></div>
               {/* Glow effect */}
-              <div className="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+              <div className="absolute -inset-4 bg-primary/10 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
               {/* Card content */}
-              <div className="relative p-8 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/20 shadow-[0_0_50px_-12px_var(--primary)]">
+              <div className="relative p-8 rounded-2xl bg-white backdrop-blur-xl border border-[#E0E5F2] shadow-xl">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                <h3 className="text-2xl font-bold text-white mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">Get Early Access</h3>
-                <p className="text-gray-400 text-sm mb-6">Be the first to kill churn with Mentiq</p>
+                <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Get Early Access</h3>
+                <p className="text-[#A3AED0] text-sm mb-6">Be the first to kill churn with Mentiq</p>
                 <WaitlistForm source="hero" />
               </div>
             </div>
@@ -640,55 +640,55 @@ export default function Home() {
 
       {/* What You'll See */}
       <section className="py-32 relative">
-        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] opacity-20 pointer-events-none"></div>
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] opacity-40 pointer-events-none"></div>
         <div className="container px-4 mx-auto relative z-10">
           <FadeIn className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/50">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#2B3674] via-[#4318FF] to-[#2B3674]">
               SaaS User Analytics That Drive Action
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-[#A3AED0] text-lg">
               Our SaaS retention analytics platform gives you product usage analytics and customer health scores that actually help you reduce churn.
             </p>
           </FadeIn>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <FadeIn delay={0.2} direction="up" className="h-full">
-              <SpotlightCard className="p-8 h-full bg-white/5 backdrop-blur-sm border-white/10 hover:border-red-500/50 transition-colors group">
+              <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-red-500/50 transition-colors group shadow-lg">
                 <div className="h-14 w-14 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 text-red-500 group-hover:scale-110 transition-transform duration-300 border border-red-500/20">
                   <AlertTriangle className="h-7 w-7" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-white">
+                <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   SaaS Customer Health Score
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-[#A3AED0] leading-relaxed">
                   Track customer health scores in real-time to reduce SaaS churn. Identify exactly who is about to leave before they do with predictive analytics.
                 </p>
               </SpotlightCard>
             </FadeIn>
 
             <FadeIn delay={0.4} direction="up" className="h-full">
-              <SpotlightCard className="p-8 h-full bg-white/5 backdrop-blur-sm border-white/10 hover:border-amber-500/50 transition-colors group">
+              <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-amber-500/50 transition-colors group shadow-lg">
                 <div className="h-14 w-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition-transform duration-300 border border-amber-500/20">
                   <Search className="h-7 w-7" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-white">
+                <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   Product Usage Analytics
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-[#A3AED0] leading-relaxed">
                   Deep product usage analytics for SaaS reveal why users churn. Understand feature adoption, engagement patterns, and behavioral signals.
                 </p>
               </SpotlightCard>
             </FadeIn>
 
             <FadeIn delay={0.6} direction="up" className="h-full">
-              <SpotlightCard className="p-8 h-full bg-white/5 backdrop-blur-sm border-white/10 hover:border-green-500/50 transition-colors group">
+              <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-green-500/50 transition-colors group shadow-lg">
                 <div className="h-14 w-14 rounded-2xl bg-green-500/10 flex items-center justify-center mb-6 text-green-500 group-hover:scale-110 transition-transform duration-300 border border-green-500/20">
                   <Zap className="h-7 w-7" />
                 </div>
-                <h3 className="text-2xl font-bold mb-3 text-white">
+                <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   Automated Retention Playbooks
                 </h3>
-                <p className="text-gray-400 leading-relaxed">
+                <p className="text-[#A3AED0] leading-relaxed">
                   Our customer retention software triggers automated playbooks to prevent churn. Win back at-risk customers with timely interventions.
                 </p>
               </SpotlightCard>
@@ -698,15 +698,15 @@ export default function Home() {
       </section>
 
       {/* How Does Mentiq Work */}
-      <section className="py-32 bg-white/[0.02] border-y border-white/5 relative overflow-hidden">
+      <section className="py-32 bg-white/50 border-y border-[#E0E5F2] relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.05),transparent_50%)]"></div>
 
         <div className="container px-4 mx-auto relative z-10">
           <FadeIn className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               How does Mentiq Work?
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-[#A3AED0] text-lg">
               It's not magic, it's just smarter analytics.
             </p>
           </FadeIn>
@@ -719,10 +719,10 @@ export default function Home() {
                     1
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-2 text-white">
+                    <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
                       We map your product
                     </h3>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-[#A3AED0] text-lg">
                       We automatically identify every feature, button, and page
                       in your app.
                     </p>
@@ -736,10 +736,10 @@ export default function Home() {
                     2
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-2 text-white">
+                    <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
                       We track user journeys
                     </h3>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-[#A3AED0] text-lg">
                       We monitor how every single user interacts with your
                       features in real-time.
                     </p>
@@ -753,10 +753,10 @@ export default function Home() {
                     3
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold mb-4 text-white">
+                    <h3 className="text-2xl font-bold mb-4 text-[#2B3674]">
                       Then we reveal:
                     </h3>
-                    <ul className="space-y-4 text-gray-400">
+                    <ul className="space-y-4 text-[#A3AED0]">
                       {[
                         "Real adoption depth per user",
                         "Users who are slipping away",
@@ -768,10 +768,10 @@ export default function Home() {
                           initial={{ opacity: 0, x: -10 }}
                           whileInView={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.8 + i * 0.1 }}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5 hover:border-primary/30 transition-colors"
+                          className="flex items-center gap-3 p-3 rounded-lg bg-white border border-[#E0E5F2] hover:border-primary/30 transition-colors shadow-sm"
                         >
                           <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                          <span className="font-medium text-white/90">
+                          <span className="font-medium text-[#2B3674]">
                             {item}
                           </span>
                         </motion.li>
@@ -784,31 +784,31 @@ export default function Home() {
 
             <div className="grid grid-cols-2 gap-6">
               <FadeIn delay={0.3} className="col-span-2">
-                <SpotlightCard className="bg-black/40 border border-white/10 rounded-2xl p-8 shadow-2xl aspect-[2/1] flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <SpotlightCard className="bg-white border border-[#E0E5F2] rounded-2xl p-8 shadow-xl aspect-[2/1] flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <Activity className="h-12 w-12 text-primary mb-4 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-lg font-bold text-white mb-1">
+                  <span className="text-lg font-bold text-[#2B3674] mb-1">
                     User Health Dash
                   </span>
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-[#A3AED0]">
                     Live health scores
                   </span>
                 </SpotlightCard>
               </FadeIn>
               <FadeIn delay={0.5}>
-                <SpotlightCard className="bg-black/40 border border-white/10 rounded-2xl p-6 shadow-2xl aspect-square flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <BarChart3 className="h-10 w-10 text-purple-400 mb-4 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-base font-bold text-white">
+                <SpotlightCard className="bg-white border border-[#E0E5F2] rounded-2xl p-6 shadow-xl aspect-square flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <BarChart3 className="h-10 w-10 text-purple-500 mb-4 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="text-base font-bold text-[#2B3674]">
                     Churn by Channel
                   </span>
                 </SpotlightCard>
               </FadeIn>
               <FadeIn delay={0.7}>
-                <SpotlightCard className="bg-black/40 border border-white/10 rounded-2xl p-6 shadow-2xl aspect-square flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <MousePointerClick className="h-10 w-10 text-blue-400 mb-4 group-hover:scale-110 transition-transform duration-300" />
-                  <span className="text-base font-bold text-white">
+                <SpotlightCard className="bg-white border border-[#E0E5F2] rounded-2xl p-6 shadow-xl aspect-square flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <MousePointerClick className="h-10 w-10 text-blue-500 mb-4 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="text-base font-bold text-[#2B3674]">
                     Heatmaps
                   </span>
                 </SpotlightCard>
@@ -822,20 +822,20 @@ export default function Home() {
       <section className="py-32 relative">
         <div className="container px-4 mx-auto">
           <FadeIn className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               Why Mentiq is BETTER
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-[#A3AED0] text-lg">
               Stop settling for vanity metrics.
             </p>
           </FadeIn>
 
           <FadeIn
             delay={0.2}
-            className="max-w-5xl mx-auto overflow-hidden rounded-2xl border border-white/10 shadow-2xl bg-black/40 backdrop-blur-md"
+            className="max-w-5xl mx-auto overflow-hidden rounded-2xl border border-[#E0E5F2] shadow-xl bg-white backdrop-blur-md"
           >
-            <div className="grid grid-cols-2 bg-white/5 p-4 sm:p-6 font-bold text-base sm:text-xl border-b border-white/10">
-              <div className="text-gray-400 pl-4">Others show</div>
+            <div className="grid grid-cols-2 bg-[#F4F7FE] p-4 sm:p-6 font-bold text-base sm:text-xl border-b border-[#E0E5F2]">
+              <div className="text-[#A3AED0] pl-4">Others show</div>
               <div className="text-primary pl-4">Mentiq Reveals</div>
             </div>
 
@@ -860,13 +860,13 @@ export default function Home() {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.1 }}
-                className="grid grid-cols-2 p-4 sm:p-6 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group"
+                className="grid grid-cols-2 p-4 sm:p-6 border-b border-[#E0E5F2] last:border-0 hover:bg-[#F4F7FE]/50 transition-colors group"
               >
-                <div className="flex items-center gap-2 sm:gap-4 text-gray-400 group-hover:text-white/70 transition-colors">
+                <div className="flex items-center gap-2 sm:gap-4 text-[#A3AED0] group-hover:text-[#2B3674] transition-colors">
                   <XCircle className="h-4 w-4 sm:h-6 sm:w-6 text-red-500/50 group-hover:text-red-500 transition-colors shrink-0" />
                   <span className="text-sm sm:text-lg">{row.other}</span>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-4 font-bold text-white">
+                <div className="flex items-center gap-2 sm:gap-4 font-bold text-[#2B3674]">
                   <CheckCircle2 className="h-4 w-4 sm:h-6 sm:w-6 text-primary group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(var(--primary),0.8)] shrink-0" />
                   <span className="text-sm sm:text-lg">{row.mentiq}</span>
                 </div>
@@ -878,20 +878,20 @@ export default function Home() {
 
       {/* Final CTA - Waitlist */}
       <section className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-primary/5 to-black"></div>
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F4F7FE] via-primary/5 to-[#F4F7FE]"></div>
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
 
         <div className="container px-4 mx-auto text-center relative z-10">
           <FadeIn className="max-w-4xl mx-auto">
-            <div className="mb-12 inline-block p-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+            <div className="mb-12 inline-block p-3 rounded-full bg-white border border-[#E0E5F2] backdrop-blur-sm shadow-sm">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold mb-8 text-white">
+            <h2 className="text-3xl font-bold mb-8 text-[#2B3674]">
               A Note from the Founders
             </h2>
-            <blockquote className="text-2xl md:text-3xl italic text-gray-400 mb-12 leading-relaxed font-light">
+            <blockquote className="text-2xl md:text-3xl italic text-[#A3AED0] mb-12 leading-relaxed font-light">
               "We built Mentiq because we struggled with one thing: <br />
-              <span className="text-white font-normal not-italic">
+              <span className="text-[#2B3674] font-normal not-italic">
                 We could acquire users. We could activate them. But we couldn't
                 keep them.
               </span>
@@ -901,7 +901,7 @@ export default function Home() {
               <h3 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-primary animate-gradient-x">
                 Mentiq Simplifies that.
               </h3>
-              <p className="text-2xl font-medium text-white/80">
+              <p className="text-2xl font-medium text-[#2B3674]/80">
                 It turns retention into a system.
               </p>
             </div>
@@ -912,18 +912,18 @@ export default function Home() {
               <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
               <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-50 animate-gradient-x"></div>
               {/* Glow effect */}
-              <div className="absolute -inset-6 bg-primary/30 rounded-3xl blur-3xl opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+              <div className="absolute -inset-6 bg-primary/30 rounded-3xl blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
               {/* Card content */}
-              <div className="relative p-8 rounded-2xl bg-black/90 backdrop-blur-xl border border-white/20 shadow-[0_0_60px_-12px_var(--primary)]">
+              <div className="relative p-8 rounded-2xl bg-white backdrop-blur-xl border border-[#E0E5F2] shadow-xl">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                <h3 className="text-2xl font-bold text-white mb-2">Join the Waitlist</h3>
-                <p className="text-gray-400 text-sm mb-6">Secure your spot for early access</p>
+                <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Join the Waitlist</h3>
+                <p className="text-[#A3AED0] text-sm mb-6">Secure your spot for early access</p>
                 <WaitlistForm source="footer_cta" />
               </div>
             </div>
             
-            <p className="mt-6 text-sm text-gray-400">
+            <p className="mt-6 text-sm text-[#A3AED0]">
               Be the first to know when we launch
             </p>
           </FadeIn>
@@ -931,13 +931,13 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 relative border-t border-white/5 bg-white/[0.02]">
+      <section className="py-24 relative border-t border-[#E0E5F2] bg-white">
         <div className="container px-4 mx-auto">
           <FadeIn className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               Frequently Asked Questions
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-[#A3AED0] text-lg">
               Everything you need to know about SaaS churn
             </p>
           </FadeIn>
@@ -947,10 +947,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/10 bg-black">
+      <footer className="py-12 border-t border-[#E0E5F2] bg-white">
         <div className="container px-4 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="relative  h-30 w-30 opacity-70">
+            <div className="relative  h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"
@@ -959,25 +959,25 @@ export default function Home() {
               />
             </div>
           </div>
-          <p className="text-gray-400 text-sm">
+          <p className="text-[#A3AED0] text-sm">
             &copy; {new Date().getFullYear()} Mentiq. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link
               href="#"
-              className="text-gray-400 hover:text-primary transition-colors text-sm"
+              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
             >
               Privacy
             </Link>
             <Link
               href="#"
-              className="text-gray-400 hover:text-primary transition-colors text-sm"
+              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
             >
               Terms
             </Link>
             <Link
               href="#"
-              className="text-gray-400 hover:text-primary transition-colors text-sm"
+              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
             >
               Contact
             </Link>
@@ -986,4 +986,5 @@ export default function Home() {
       </footer>
     </div>
   );
+
 }

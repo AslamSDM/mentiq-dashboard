@@ -35,6 +35,8 @@ export function ProjectSelector() {
     return null;
   }
   return (
+         <div className="mr-2 border-r border-gray-100 pr-2">
+
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground">Project:</span>
       <Select
@@ -59,6 +61,7 @@ export function ProjectSelector() {
           ))}
         </SelectContent>
       </Select>
+    </div>
     </div>
   );
 }

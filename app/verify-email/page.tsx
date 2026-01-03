@@ -127,20 +127,20 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen flex bg-black text-white">
+    <div className="min-h-screen flex bg-white text-[#2B3674]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-black"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
 
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full text-white">
           <Link href="/" className="flex items-center gap-3">
             <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"
                 fill
-                className="object-contain"
+                className="object-contain brightness-0 invert"
               />
             </div>
             <span className="text-2xl font-bold">Mentiq</span>
@@ -150,16 +150,16 @@ function VerifyEmailContent() {
             <h1 className="text-5xl font-bold leading-tight">
               Email
               <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-white">
                 Verification
               </span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-md">
+            <p className="text-xl text-blue-100 max-w-md">
               Verify your email to unlock the full power of Mentiq.
             </p>
           </div>
 
-          <div className="flex items-center gap-8 text-sm text-gray-400">
+          <div className="flex items-center gap-8 text-sm text-blue-200">
             <span>© 2025 Mentiq</span>
             <Link href="#" className="hover:text-white transition-colors">
               Privacy
@@ -172,7 +172,7 @@ function VerifyEmailContent() {
       </div>
 
       {/* Right Side - Verification Status */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
@@ -184,7 +184,7 @@ function VerifyEmailContent() {
                 className="object-contain"
               />
             </div>
-            <span className="text-xl font-bold">Mentiq</span>
+            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
           </Link>
 
           <div className="text-center space-y-6">
@@ -195,8 +195,8 @@ function VerifyEmailContent() {
                     <Loader2 className="h-10 w-10 text-primary animate-spin" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold">Verifying your email...</h2>
-                <p className="text-gray-400">
+                <h2 className="text-2xl font-bold text-[#2B3674]">Verifying your email...</h2>
+                <p className="text-[#A3AED0]">
                   Please wait while we verify your email address.
                 </p>
               </>
@@ -205,28 +205,28 @@ function VerifyEmailContent() {
             {status === "pending" && (
               <>
                 <div className="flex justify-center">
-                  <div className="h-20 w-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                    <Mail className="h-10 w-10 text-yellow-500" />
+                  <div className="h-20 w-20 rounded-full bg-yellow-50 flex items-center justify-center">
+                    <Mail className="h-10 w-10 text-yellow-600" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-yellow-400">
+                <h2 className="text-2xl font-bold text-yellow-600">
                   Verify Your Email
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-[#A3AED0]">
                   We sent a verification email to{" "}
-                  <span className="text-white font-medium">
+                  <span className="text-[#2B3674] font-medium">
                     {session?.user?.email || "your email"}
                   </span>
                   . Please check your inbox and click the verification link.
                 </p>
                 {message && (
-                  <p className="text-sm text-green-400">{message}</p>
+                  <p className="text-sm text-green-600">{message}</p>
                 )}
                 <div className="space-y-3 pt-4">
                   <Button
                     onClick={handleResendVerification}
                     disabled={isResending || resendCooldown > 0}
-                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
                   >
                     {isResending ? (
                       <>
@@ -248,12 +248,12 @@ function VerifyEmailContent() {
                   <Button
                     onClick={handleSignOut}
                     variant="outline"
-                    className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                    className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
                   >
                     Sign out
                   </Button>
                 </div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[#A3AED0]">
                   Once verified, you will be automatically redirected to the dashboard.
                 </p>
               </>
@@ -262,22 +262,22 @@ function VerifyEmailContent() {
             {status === "success" && (
               <>
                 <div className="flex justify-center">
-                  <div className="h-20 w-20 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center">
                     <CheckCircle className="h-10 w-10 text-green-500" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-green-400">
+                <h2 className="text-2xl font-bold text-green-600">
                   Email Verified!
                 </h2>
-                <p className="text-gray-400">{message}</p>
+                <p className="text-[#A3AED0]">{message}</p>
                 {session ? (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-[#A3AED0]">
                     Redirecting to dashboard...
                   </p>
                 ) : (
                   <Button
                     onClick={() => router.push("/signin")}
-                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
                   >
                     Sign in to your account
                   </Button>
@@ -288,25 +288,25 @@ function VerifyEmailContent() {
             {status === "error" && (
               <>
                 <div className="flex justify-center">
-                  <div className="h-20 w-20 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <div className="h-20 w-20 rounded-full bg-red-100 flex items-center justify-center">
                     <XCircle className="h-10 w-10 text-red-500" />
                   </div>
                 </div>
-                <h2 className="text-2xl font-bold text-red-400">
+                <h2 className="text-2xl font-bold text-red-500">
                   Verification Failed
                 </h2>
-                <p className="text-gray-400">{message}</p>
+                <p className="text-[#A3AED0]">{message}</p>
                 <div className="space-y-3">
                   <Link href="/signin" className="block">
                     <Button
                       variant="outline"
-                      className="w-full h-12 text-base border-white/10 bg-white/5 hover:bg-white/10 text-white"
+                      className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
                     >
                       <Mail className="mr-2 h-5 w-5" />
                       Go to Sign In
                     </Button>
                   </Link>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-[#A3AED0]">
                     You can request a new verification email from the sign-in page.
                   </p>
                 </div>
@@ -323,10 +323,10 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-4 text-gray-400">Loading...</p>
+            <p className="mt-4 text-[#A3AED0]">Loading...</p>
           </div>
         </div>
       }

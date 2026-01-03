@@ -92,49 +92,49 @@ export default function VerifyPendingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#F4F7FE] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Card */}
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-white border border-transparent rounded-2xl p-8 shadow-xl">
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-500/30">
-              <Mail className="w-10 h-10 text-blue-400" />
+            <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center border border-blue-100">
+              <Mail className="w-10 h-10 text-blue-500" />
             </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-bold text-white text-center mb-2">
+          <h1 className="text-2xl font-bold text-[#2B3674] text-center mb-2">
             Verify Your Email
           </h1>
-          <p className="text-slate-400 text-center mb-6">
+          <p className="text-[#A3AED0] text-center mb-6">
             We've sent a verification link to
           </p>
 
           {/* Email Display */}
-          <div className="bg-slate-900/50 rounded-xl p-4 mb-6 border border-slate-700/50">
-            <p className="text-blue-400 font-medium text-center break-all">
+          <div className="bg-[#F4F7FE] rounded-xl p-4 mb-6 border border-[#E0E5F2]">
+            <p className="text-[#2B3674] font-medium text-center break-all">
               {email}
             </p>
           </div>
 
           {/* Instructions */}
           <div className="space-y-3 mb-6">
-            <div className="flex items-start gap-3 text-slate-300 text-sm">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-400 text-xs font-bold">1</span>
+            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-500 text-xs font-bold">1</span>
               </div>
               <p>Check your inbox (and spam folder)</p>
             </div>
-            <div className="flex items-start gap-3 text-slate-300 text-sm">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-400 text-xs font-bold">2</span>
+            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-500 text-xs font-bold">2</span>
               </div>
               <p>Click the verification link in the email</p>
             </div>
-            <div className="flex items-start gap-3 text-slate-300 text-sm">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-blue-400 text-xs font-bold">3</span>
+            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+              <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-blue-500 text-xs font-bold">3</span>
               </div>
               <p>You'll be automatically redirected to your dashboard</p>
             </div>
@@ -142,14 +142,14 @@ export default function VerifyPendingPage() {
 
           {/* Success/Error Messages */}
           {resendSuccess && (
-            <div className="mb-4 p-3 rounded-lg bg-green-500/10 border border-green-500/30 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-              <p className="text-green-400 text-sm">Verification email sent!</p>
+            <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <p className="text-green-600 text-sm">Verification email sent!</p>
             </div>
           )}
           {resendError && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-              <p className="text-red-400 text-sm">{resendError}</p>
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200">
+              <p className="text-red-500 text-sm">{resendError}</p>
             </div>
           )}
 
@@ -158,7 +158,7 @@ export default function VerifyPendingPage() {
             <button
               onClick={handleCheckNow}
               disabled={isChecking}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-500 hover:to-purple-500 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
             >
               {isChecking ? (
                 <>
@@ -176,7 +176,7 @@ export default function VerifyPendingPage() {
             <button
               onClick={handleResendVerification}
               disabled={isResending}
-              className="w-full py-3 px-4 rounded-xl bg-slate-700/50 text-slate-300 font-medium hover:bg-slate-700 hover:text-white transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-white border border-[#E0E5F2] text-[#A3AED0] font-medium hover:bg-[#F4F7FE] hover:text-[#2B3674] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isResending ? (
                 <>
@@ -193,12 +193,12 @@ export default function VerifyPendingPage() {
           </div>
 
           {/* Divider */}
-          <div className="my-6 border-t border-slate-700/50" />
+          <div className="my-6 border-t border-[#E0E5F2]" />
 
           {/* Sign Out */}
           <button
             onClick={handleSignOut}
-            className="w-full py-2 px-4 text-slate-500 hover:text-slate-300 text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 px-4 text-[#A3AED0] hover:text-[#2B3674] text-sm font-medium transition-colors flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" />
             Sign out and use a different email
@@ -206,7 +206,7 @@ export default function VerifyPendingPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-slate-500 text-xs mt-6">
+        <p className="text-center text-[#A3AED0] text-xs mt-6">
           Didn't receive the email? Check your spam folder or try resending.
         </p>
       </div>

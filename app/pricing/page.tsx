@@ -155,9 +155,9 @@ function PricingContent() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-[#F4F7FE] text-[#2B3674]">
       {/* Header - Matching Landing Page */}
-      <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
+      <nav className="fixed top-0 w-full z-50 border-b border-[#E0E5F2] bg-white/50 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="relative h-30 w-30">
@@ -174,14 +174,14 @@ function PricingContent() {
                 <Link href="/dashboard">
                   <Button
                     variant="ghost"
-                    className="text-gray-400 hover:text-white"
+                    className="text-[#A3AED0] hover:text-[#2B3674]"
                   >
                     Dashboard
                   </Button>
                 </Link>
                 <Button
                   variant="ghost"
-                  className="text-gray-400 hover:text-white"
+                  className="text-[#A3AED0] hover:text-[#2B3674]"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -192,7 +192,7 @@ function PricingContent() {
               <>
                 <Link
                   href="/signin"
-                  className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                  className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
                 >
                   Sign In
                 </Link>
@@ -212,19 +212,19 @@ function PricingContent() {
       {/* Main Content */}
       <div className="container mx-auto px-4 pt-24 pb-12">
         {/* Background Effects - Matching Landing Page */}
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-30 pointer-events-none"></div>
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#e0e5f2_1px,transparent_1px),linear-gradient(to_bottom,#e0e5f2_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-60 pointer-events-none"></div>
 
         <div className="mx-auto max-w-7xl space-y-8 relative z-10">
           {/* Subscription Required Alert */}
           {isRequired && (
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-yellow-500">
+                <h3 className="font-semibold text-yellow-700">
                   Active Subscription Required
                 </h3>
-                <p className="text-sm text-yellow-500/80 mt-1">
+                <p className="text-sm text-yellow-600 mt-1">
                   To access the dashboard and create projects, you need an
                   active subscription. Choose a plan below to get started.
                 </p>
@@ -234,27 +234,27 @@ function PricingContent() {
 
           {/* Hero - Matching Landing Page Style */}
           <div className="text-center space-y-6 pt-8">
-            <div className="inline-flex items-center justify-center px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-white/90 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]">
+            <div className="inline-flex items-center justify-center px-4 py-1.5 mb-4 text-sm font-medium rounded-full bg-white border border-[#E0E5F2] backdrop-blur-sm text-[#2B3674] shadow-sm">
               <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse shadow-[0_0_10px_var(--primary)]"></span>
               Flexible Pricing for Every Stage
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-[#2B3674]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#2B3674] via-[#2B3674] to-[#4318FF]">
                 Simple, transparent pricing
               </span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            <p className="text-xl text-[#A3AED0] max-w-2xl mx-auto">
               Scale as you grow. Pay only for what you need.
             </p>
           </div>
 
           {/* User Count Selector */}
-          <Card className="bg-white/5 border-white/10 backdrop-blur-sm shadow-2xl shadow-primary/10">
+          <Card className="bg-white border-[#E0E5F2] backdrop-blur-sm shadow-xl">
             <CardHeader>
-              <CardTitle className="text-white">
+              <CardTitle className="text-[#2B3674]">
                 How many paid users do you have?
               </CardTitle>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-[#A3AED0]">
                 Slide to select your current or expected user count
               </CardDescription>
             </CardHeader>
@@ -287,12 +287,12 @@ function PricingContent() {
                         ref={(el) => {
                           cardRefs.current[tier.id] = el;
                         }}
-                        className={`relative overflow-hidden transition-all duration-500 ease-out transform flex-shrink-0 w-[350px] snap-center bg-white/5 border-white/10 backdrop-blur-sm ${
+                        className={`relative overflow-hidden transition-all duration-500 ease-out transform flex-shrink-0 w-[350px] snap-center bg-white border-[#E0E5F2] backdrop-blur-sm ${
                           isCurrentTier
                             ? "ring-4 ring-primary shadow-2xl shadow-primary/20 scale-105 border-primary"
                             : isInRange
-                            ? "ring-2 ring-white/20 shadow-lg scale-100 opacity-90"
-                            : "opacity-60 scale-95 hover:opacity-80"
+                            ? "ring-2 ring-primary/20 shadow-xl scale-100 opacity-100"
+                            : "opacity-80 scale-95 hover:opacity-100"
                         } ${
                           (tier as any).popular ? "border-purple-500" : ""
                         } hover:shadow-xl`}
@@ -319,30 +319,32 @@ function PricingContent() {
                                 : ""
                             }`}
                           >
-                            {TIER_ICONS[tier.id]}
+                            <div className="text-white">
+                              {TIER_ICONS[tier.id]}
+                            </div>
                           </div>
                           <CardTitle
-                            className={`text-2xl text-white transition-colors duration-300 ${
+                            className={`text-2xl text-[#2B3674] transition-colors duration-300 ${
                               isCurrentTier ? "text-primary" : ""
                             }`}
                           >
                             {tier.name}
                           </CardTitle>
-                          <CardDescription className="text-gray-400">
+                          <CardDescription className="text-[#A3AED0]">
                             {tier.description}
                           </CardDescription>
                           <div className="mt-4">
                             <div className="flex items-baseline gap-2">
                               <span
-                                className={`text-4xl font-bold text-white transition-all duration-300 ${
+                                className={`text-4xl font-bold text-[#2B3674] transition-all duration-300 ${
                                   isCurrentTier ? "text-primary scale-110" : ""
                                 }`}
                               >
                                 ${price}
                               </span>
-                              <span className="text-gray-400">/month</span>
+                              <span className="text-[#A3AED0]">/month</span>
                             </div>
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-sm text-[#A3AED0] mt-1">
                               {tier.range[0].toLocaleString()} -{" "}
                               {tier.range[1].toLocaleString()} users
                             </p>
@@ -351,7 +353,7 @@ function PricingContent() {
 
                         <CardContent className="space-y-4">
                           <Button
-                            className="w-full"
+                            className="w-full shadow-md"
                             variant={isCurrentTier ? "default" : "outline"}
                             onClick={() => handleGetStarted(tier.id)}
                             disabled={isLoading}
@@ -372,7 +374,7 @@ function PricingContent() {
                           </Button>
 
                           <div className="space-y-3 pt-4">
-                            <p className="text-sm font-semibold text-white">
+                            <p className="text-sm font-semibold text-[#2B3674]">
                               What's included:
                             </p>
                             {tier.features.map((feature, index) => (
@@ -381,7 +383,7 @@ function PricingContent() {
                                 className="flex items-start gap-3 text-sm"
                               >
                                 <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                                <span className="text-gray-300">{feature}</span>
+                                <span className="text-[#A3AED0]">{feature}</span>
                               </div>
                             ))}
                           </div>
@@ -393,30 +395,30 @@ function PricingContent() {
               </div>
 
               {/* Carousel Hint */}
-              <div className="text-center text-sm text-gray-400 mt-4">
+              <div className="text-center text-sm text-[#A3AED0] mt-4">
                 ← Scroll to see all plans →
               </div>
             </div>
           ) : (
             // Enterprise/Demo Card for 10,000+ users
-            <Card className="mx-auto max-w-2xl border-2 border-yellow-500/50 bg-gradient-to-br from-yellow-900/20 to-amber-900/20 backdrop-blur-sm">
+            <Card className="mx-auto max-w-2xl border-2 border-yellow-500/50 bg-gradient-to-br from-white to-amber-50 shadow-xl">
               <CardHeader className="text-center">
-                <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 mb-4">
+                <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 mb-4 shadow-lg">
                   <Crown className="h-8 w-8 text-white" />
                 </div>
-                <CardTitle className="text-3xl text-white">
+                <CardTitle className="text-3xl text-[#2B3674]">
                   Enterprise
                 </CardTitle>
-                <CardDescription className="text-lg text-gray-300">
+                <CardDescription className="text-lg text-[#A3AED0]">
                   Custom solutions for large-scale operations
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center py-4">
-                  <p className="text-5xl font-bold mb-2 text-white">
+                  <p className="text-5xl font-bold mb-2 text-[#2B3674]">
                     Let's Talk
                   </p>
-                  <p className="text-gray-400">
+                  <p className="text-[#A3AED0]">
                     Custom pricing based on your needs
                   </p>
                 </div>
@@ -424,50 +426,50 @@ function PricingContent() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">Unlimited Paid Users</span>
+                    <span className="text-[#A3AED0]">Unlimited Paid Users</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">
+                    <span className="text-[#A3AED0]">
                       Custom deployment options
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">
+                    <span className="text-[#A3AED0]">
                       Dedicated infrastructure
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">24/7 premium support</span>
+                    <span className="text-[#A3AED0]">24/7 premium support</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">
+                    <span className="text-[#A3AED0]">
                       Custom SLA & guarantees
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">
+                    <span className="text-[#A3AED0]">
                       Dedicated success team
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">White-label solutions</span>
+                    <span className="text-[#A3AED0]">White-label solutions</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-gray-300">
+                    <span className="text-[#A3AED0]">
                       Custom feature development
                     </span>
                   </div>
                 </div>
 
                 <Button
-                  className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600"
+                  className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 shadow-lg text-white"
                   size="lg"
                   onClick={handleBookDemo}
                 >
@@ -479,59 +481,59 @@ function PricingContent() {
 
           {/* FAQ Section */}
           <div className="mt-12 text-center pb-12">
-            <h2 className="text-2xl font-bold mb-4 text-white">
+            <h2 className="text-2xl font-bold mb-4 text-[#2B3674]">
               Frequently Asked Questions
             </h2>
             <div className="grid gap-4 md:grid-cols-2 text-left max-w-4xl mx-auto">
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-white border-[#E0E5F2] backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">
+                  <CardTitle className="text-lg text-[#2B3674]">
                     What counts as a paid user?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-[#A3AED0]">
                     A paid user is any user who has an active subscription or
                     has made a payment in your application. Free trial users are
                     not counted.
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-white border-[#E0E5F2] backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">
+                  <CardTitle className="text-lg text-[#2B3674]">
                     Can I change plans anytime?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-[#A3AED0]">
                     Yes! Upgrade or downgrade at any time. Prorated charges
                     apply when upgrading, and credits are issued for downgrades.
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-white border-[#E0E5F2] backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">
+                  <CardTitle className="text-lg text-[#2B3674]">
                     What payment methods do you accept?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-[#A3AED0]">
                     We accept all major credit cards, debit cards, and ACH
                     transfers through Stripe. Enterprise plans can use invoice
                     billing.
                   </p>
                 </CardContent>
               </Card>
-              <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+              <Card className="bg-white border-[#E0E5F2] backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
                 <CardHeader>
-                  <CardTitle className="text-lg text-white">
+                  <CardTitle className="text-lg text-[#2B3674]">
                     Is there a free trial?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-[#A3AED0]">
                     Yes! All plans include a 14-day free trial. No credit card
                     required to start. Cancel anytime during the trial period.
                   </p>

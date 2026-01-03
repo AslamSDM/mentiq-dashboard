@@ -91,16 +91,16 @@ function AcceptInvitationContent() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex bg-black text-white">
+      <div className="min-h-screen flex bg-white text-[#2B3674]">
         <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
           <div className="w-full max-w-md text-center space-y-6">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
             <h2 className="text-3xl font-bold">Invalid Invitation</h2>
-            <p className="text-gray-400">
+            <p className="text-[#A3AED0]">
               No invitation token was provided in the URL or the token is invalid.
             </p>
             <Link href="/signin">
-              <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90">
+              <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-white">
                 Go to Sign In
               </Button>
             </Link>
@@ -112,12 +112,12 @@ function AcceptInvitationContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex bg-black text-white">
+      <div className="min-h-screen flex bg-white text-[#2B3674]">
         <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
           <div className="w-full max-w-md text-center space-y-6">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
             <h2 className="text-3xl font-bold">Welcome to the Team!</h2>
-            <p className="text-gray-400">
+            <p className="text-[#A3AED0]">
               Your account has been created successfully.
             </p>
             <div className="flex items-center justify-center gap-2 text-primary">
@@ -131,20 +131,20 @@ function AcceptInvitationContent() {
   }
 
   return (
-    <div className="min-h-screen flex bg-black text-white">
+    <div className="min-h-screen flex bg-white text-[#2B3674]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-black"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
 
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full text-white">
           <Link href="/" className="flex items-center gap-3">
             <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
                 alt="Mentiq Logo"
                 fill
-                className="object-contain"
+                className="object-contain brightness-0 invert"
               />
             </div>
             <span className="text-2xl font-bold">Mentiq</span>
@@ -154,16 +154,16 @@ function AcceptInvitationContent() {
             <h1 className="text-5xl font-bold leading-tight">
               Join the
               <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-primary">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-white">
                 Winning Team
               </span>
             </h1>
-            <p className="text-xl text-gray-400 max-w-md">
+            <p className="text-xl text-blue-100 max-w-md">
               Accept your invitation to collaborate, analyze, and drive growth with Mentiq.
             </p>
           </div>
 
-          <div className="flex items-center gap-8 text-sm text-gray-400">
+          <div className="flex items-center gap-8 text-sm text-blue-200">
             <span>© 2025 Mentiq</span>
             <Link href="#" className="hover:text-white transition-colors">
               Privacy
@@ -176,7 +176,7 @@ function AcceptInvitationContent() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="relative h-30 w-30">
@@ -187,30 +187,30 @@ function AcceptInvitationContent() {
                 className="object-contain"
               />
             </div>
-            <span className="text-xl font-bold">Mentiq</span>
+            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold">Accept Invitation</h2>
-            <p className="text-gray-400">
+            <h2 className="text-3xl font-bold text-[#2B3674]">Accept Invitation</h2>
+            <p className="text-[#A3AED0]">
               Set up your account to join the team
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg flex items-start gap-2">
+              <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg flex items-start gap-2">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-sm font-medium text-gray-300">
+              <Label htmlFor="fullName" className="text-sm font-medium text-[#2B3674]">
                 Full Name
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                 <Input
                   id="fullName"
                   type="text"
@@ -219,17 +219,17 @@ function AcceptInvitationContent() {
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}
                   required
-                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+              <Label htmlFor="password" className="text-sm font-medium text-[#2B3674]">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                 <Input
                   id="password"
                   type="password"
@@ -239,17 +239,17 @@ function AcceptInvitationContent() {
                   disabled={loading}
                   required
                   minLength={8}
-                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
+              <Label htmlFor="confirmPassword" className="text-sm font-medium text-[#2B3674]">
                 Confirm Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -259,14 +259,14 @@ function AcceptInvitationContent() {
                   disabled={loading}
                   required
                   minLength={8}
-                  className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_30px_-5px_var(--primary)] transition-all duration-300"
+              className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
               disabled={loading}
             >
               {loading ? (
@@ -282,7 +282,7 @@ function AcceptInvitationContent() {
               )}
             </Button>
             
-            <p className="text-xs text-center text-gray-500 mt-4">
+            <p className="text-xs text-center text-[#A3AED0] mt-4">
               By accepting, you agree to our Terms of Service and Privacy Policy
             </p>
           </form>
@@ -295,7 +295,7 @@ function AcceptInvitationContent() {
 export default function AcceptInvitationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
