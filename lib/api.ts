@@ -13,6 +13,7 @@ export {
   setAuthToken,
   getAuthToken,
   isInvalidTokenError,
+  setOnUnauthorizedHandler,
 } from "./services/base";
 
 // Export all types

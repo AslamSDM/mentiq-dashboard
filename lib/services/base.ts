@@ -2,6 +2,7 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 let authToken: string | null = null;
+let onUnauthorizedCallback: (() => void) | null = null;
 
 export const setAuthToken = (token: string | null) => {
   authToken = token;
@@ -28,6 +29,11 @@ export const getAuthToken = (): string | null => {
   }
 
   return null;
+};
+
+// Set a callback to be called when an unauthorized (401) response is received
+export const setOnUnauthorizedHandler = (callback: () => void) => {
+  onUnauthorizedCallback = callback;
 };
 
 export const isInvalidTokenError = (error: unknown): boolean => {
@@ -92,8 +98,26 @@ export class BaseHttpService {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      
+      // Handle unauthorized responses globally
+      if (response.status === 401 || 
+          errorData.error === "Invalid token" ||
+          errorData.message?.includes("Invalid token") ||
+          errorData.message?.includes("Unauthorized") ||
+          errorData.message?.includes("Token expired")) {
+        // Clear the auth token
+        setAuthToken(null);
+        
+        // Call the unauthorized handler if set
+        if (onUnauthorizedCallback) {
+          onUnauthorizedCallback();
+        }
+        
+        throw new Error("Session expired. Please sign in again.");
+      }
+      
       throw new Error(
-        errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`
       );
     }
 
@@ -108,3 +132,4 @@ export class BaseHttpService {
     return this.request("/api/v1/system/status");
   }
 }
+

@@ -33,6 +33,64 @@ import { apiClient, type Project, type ApiKey } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Copy, Check } from "lucide-react";
+
+// Code block component with syntax highlighting
+function CodeBlock({
+  code,
+  language = "typescript",
+  onCopy,
+  isCopied,
+}: {
+  code: string;
+  language?: string;
+  onCopy: () => void;
+  isCopied: boolean;
+}) {
+  return (
+    <div className="relative rounded-xl overflow-hidden border border-[#E0E5F2]">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#2B3674] border-b border-[#3a4690]">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-500/80" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+          <div className="w-3 h-3 rounded-full bg-green-500/80" />
+        </div>
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white transition-colors px-2 py-1 rounded hover:bg-white/10"
+        >
+          {isCopied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-green-400" />
+              <span className="text-green-400">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        language={language}
+        style={oneDark}
+        customStyle={{
+          margin: 0,
+          padding: "1rem",
+          background: "#1e1e2e",
+          fontSize: "0.875rem",
+          borderRadius: 0,
+        }}
+        wrapLongLines
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
 
 export default function ProjectsPage() {
   // Zustand store
@@ -791,78 +849,225 @@ export default function ProjectsPage() {
           ))}
         </div>
 
-        <Card>
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle>SDK Integration</CardTitle>
-            <CardDescription>
-              Use your API key to integrate the MentiQ Analytics SDK
+            <CardTitle className="text-[#2B3674] font-bold">SDK Integration</CardTitle>
+            <CardDescription className="text-[#A3AED0]">
+              Use your API key to integrate the Mentiq Analytics SDK into your application
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Installation</Label>
-              <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                npm install mentiq-sdk
+          <CardContent className="space-y-6">
+            {/* Step 1: Installation */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#4318FF]">1</span>
+                </div>
+                <Label className="text-[#2B3674] font-semibold">Installation</Label>
               </div>
+              <CodeBlock
+                code="npm install mentiq-sdk"
+                language="bash"
+                onCopy={() => handleCopyItem("npm install mentiq-sdk")}
+                isCopied={copiedItem === "npm install mentiq-sdk"}
+              />
             </div>
-            <div className="space-y-2">
-              <Label>React/Next.js Setup</Label>
-              <div className="bg-muted p-4 rounded-lg font-mono text-sm whitespace-pre-wrap">
-                {`import { AnalyticsProvider } from 'mentiq-sdk';
 
-function App() {
+            {/* Step 2: Provider Setup */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#4318FF]">2</span>
+                </div>
+                <Label className="text-[#2B3674] font-semibold">Provider Setup (app/layout.tsx)</Label>
+              </div>
+              <CodeBlock
+                code={`import { AnalyticsProvider } from "mentiq-sdk";
+
+export default function RootLayout({ children }) {
   return (
-    <AnalyticsProvider
-      config={{
-        apiKey: 'YOUR_API_KEY',
-        projectId: 'YOUR_PROJECT_ID',
-        endpoint: 'https://app.trymentiq.com/api/v1/events',
-        enableHeatmapTracking: true,
-        enableSessionRecording: true,
-      }}
-    >
-      <YourApp />
-    </AnalyticsProvider>
+    <html>
+      <body>
+        <AnalyticsProvider
+          config={{
+            projectId: "${projects?.[0]?.id || 'your-project-id'}",
+            apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
+            endpoint: "https://api.trymentiq.com",
+            enableHeatmapTracking: true,
+            enableSessionRecording: true,
+          }}
+        >
+          {children}
+        </AnalyticsProvider>
+      </body>
+    </html>
   );
 }`}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Track Events</Label>
-              <div className="bg-muted p-4 rounded-lg font-mono text-sm whitespace-pre-wrap">
-                {`import { useAnalytics } from 'mentiq-sdk';
+                language="tsx"
+                onCopy={() => handleCopyItem(`import { AnalyticsProvider } from "mentiq-sdk";
 
-function MyComponent() {
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <AnalyticsProvider
+          config={{
+            projectId: "${projects?.[0]?.id || 'your-project-id'}",
+            apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
+            endpoint: "https://api.trymentiq.com",
+            enableHeatmapTracking: true,
+            enableSessionRecording: true,
+          }}
+        >
+          {children}
+        </AnalyticsProvider>
+      </body>
+    </html>
+  );
+}`)}
+                isCopied={copiedItem?.includes("AnalyticsProvider") || false}
+              />
+            </div>
+
+            {/* Step 3: Track Events */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#4318FF]">3</span>
+                </div>
+                <Label className="text-[#2B3674] font-semibold">Track Custom Events</Label>
+              </div>
+              <CodeBlock
+                code={`import { useAnalytics } from "mentiq-sdk";
+
+function SignupButton() {
   const { track } = useAnalytics();
 
   const handleClick = () => {
-    track('button_clicked', {
-      button_id: 'hero-cta',
-      user_plan: 'premium'
+    track("button_clicked", {
+      button_name: "signup_cta",
+      page: "homepage",
+      position: "hero",
     });
   };
 
-  return <button onClick={handleClick}>Track Me!</button>;
+  return <button onClick={handleClick}>Sign Up</button>;
 }`}
-              </div>
+                language="tsx"
+                onCopy={() => handleCopyItem(`import { useAnalytics } from "mentiq-sdk";
+
+function SignupButton() {
+  const { track } = useAnalytics();
+
+  const handleClick = () => {
+    track("button_clicked", {
+      button_name: "signup_cta",
+      page: "homepage",
+      position: "hero",
+    });
+  };
+
+  return <button onClick={handleClick}>Sign Up</button>;
+}`)}
+                isCopied={(copiedItem?.includes("useAnalytics") && !copiedItem?.includes("identify")) || false}
+              />
             </div>
-            <div className="text-sm text-muted-foreground mt-4">
-              <p className="font-medium mb-2">Features:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Event tracking with custom properties</li>
-                <li>Heatmap tracking (clicks, hovers, scrolls)</li>
-                <li>Session recording with rrweb</li>
-                <li>Onboarding funnel tracking</li>
-                <li>A/B testing support</li>
-                <li>Error tracking and performance monitoring</li>
-              </ul>
-              <p className="mt-3">
+
+            {/* Step 4: Identify Users */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#4318FF]">4</span>
+                </div>
+                <Label className="text-[#2B3674] font-semibold">Identify Users</Label>
+              </div>
+              <CodeBlock
+                code={`import { useAnalytics } from "mentiq-sdk";
+
+function LoginHandler() {
+  const { identify } = useAnalytics();
+
+  const handleLogin = async (user) => {
+    identify(user.id, {
+      email: user.email,
+      name: user.name,
+      plan: user.subscription.plan,
+    });
+  };
+}`}
+                language="tsx"
+                onCopy={() => handleCopyItem(`import { useAnalytics } from "mentiq-sdk";
+
+function LoginHandler() {
+  const { identify } = useAnalytics();
+
+  const handleLogin = async (user) => {
+    identify(user.id, {
+      email: user.email,
+      name: user.name,
+      plan: user.subscription.plan,
+    });
+  };
+}`)}
+                isCopied={copiedItem?.includes("identify") || false}
+              />
+            </div>
+
+            {/* Features & Docs Link */}
+            <div className="bg-[#F4F7FE] rounded-xl p-4 mt-6">
+              <p className="font-semibold text-[#2B3674] mb-3">Available Features:</p>
+              <div className="grid grid-cols-2 gap-2 text-sm text-[#2B3674] mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>Event Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>Heatmap Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>Session Recording</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>User Identification</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>Page View Tracking</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <span>Error Tracking</span>
+                </div>
+              </div>
+              <p className="text-sm text-[#A3AED0]">
                 📚 Full documentation:{" "}
+                <a
+                  href="/docs"
+                  className="text-[#4318FF] hover:underline font-medium"
+                >
+                  View SDK Docs
+                </a>
+                {" "}or{" "}
                 <a
                   href="https://github.com/AslamSDM/mentiq-sdk#readme"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline"
+                  className="text-[#4318FF] hover:underline font-medium"
                 >
                   GitHub README
                 </a>
