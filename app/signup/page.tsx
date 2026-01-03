@@ -415,7 +415,7 @@ function SignUpForm() {
                     <Input
                       id="companyName"
                       type="text"
-                      placeholder="Acme Inc."
+                      placeholder="Your Company"
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       required

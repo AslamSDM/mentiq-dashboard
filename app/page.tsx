@@ -245,7 +245,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           <Label htmlFor="company" className="text-[#2B3674]">Company Name</Label>
           <Input
             id="company"
-            placeholder="Acme Inc."
+            placeholder="Your Company"
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
             className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
@@ -701,7 +701,7 @@ export default function Home() {
       <section className="py-32 bg-white/50 border-y border-[#E0E5F2] relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.05),transparent_50%)]"></div>
 
-        <div className="container px-4 mx-auto relative z-10">
+        <div className="container px-4 mx-auto relative z-10 ">
           <FadeIn className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               How does Mentiq Work?
@@ -711,7 +711,7 @@ export default function Home() {
             </p>
           </FadeIn>
 
-          <div className="grid md:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+          <div className="items-center max-w-6xl mx-auto items-center justify-center">
             <div className="space-y-10">
               <FadeIn delay={0.2} direction="right">
                 <div className="flex gap-6 group">
@@ -781,7 +781,7 @@ export default function Home() {
                 </div>
               </FadeIn>
             </div>
-
+{/* 
             <div className="grid grid-cols-2 gap-6">
               <FadeIn delay={0.3} className="col-span-2">
                 <SpotlightCard className="bg-white border border-[#E0E5F2] rounded-2xl p-8 shadow-xl aspect-[2/1] flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors relative overflow-hidden">
@@ -813,7 +813,7 @@ export default function Home() {
                   </span>
                 </SpotlightCard>
               </FadeIn>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
