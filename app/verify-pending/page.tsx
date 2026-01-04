@@ -107,7 +107,7 @@ export default function VerifyPendingPage() {
           <h1 className="text-2xl font-bold text-[#2B3674] text-center mb-2">
             Verify Your Email
           </h1>
-          <p className="text-[#A3AED0] text-center mb-6">
+          <p className="text-[#4363C7] text-center mb-6">
             We've sent a verification link to
           </p>
 
@@ -120,19 +120,19 @@ export default function VerifyPendingPage() {
 
           {/* Instructions */}
           <div className="space-y-3 mb-6">
-            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+            <div className="flex items-start gap-3 text-[#4363C7] text-sm">
               <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-blue-500 text-xs font-bold">1</span>
               </div>
               <p>Check your inbox (and spam folder)</p>
             </div>
-            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+            <div className="flex items-start gap-3 text-[#4363C7] text-sm">
               <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-blue-500 text-xs font-bold">2</span>
               </div>
               <p>Click the verification link in the email</p>
             </div>
-            <div className="flex items-start gap-3 text-[#A3AED0] text-sm">
+            <div className="flex items-start gap-3 text-[#4363C7] text-sm">
               <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-blue-500 text-xs font-bold">3</span>
               </div>
@@ -176,7 +176,7 @@ export default function VerifyPendingPage() {
             <button
               onClick={handleResendVerification}
               disabled={isResending}
-              className="w-full py-3 px-4 rounded-xl bg-white border border-[#E0E5F2] text-[#A3AED0] font-medium hover:bg-[#F4F7FE] hover:text-[#2B3674] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 rounded-xl bg-white border border-[#E0E5F2] text-[#4363C7] font-medium hover:bg-[#F4F7FE] hover:text-[#2B3674] transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isResending ? (
                 <>
@@ -198,7 +198,7 @@ export default function VerifyPendingPage() {
           {/* Sign Out */}
           <button
             onClick={handleSignOut}
-            className="w-full py-2 px-4 text-[#A3AED0] hover:text-[#2B3674] text-sm font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 px-4 text-[#4363C7] hover:text-[#2B3674] text-sm font-medium transition-colors flex items-center justify-center gap-2"
           >
             <LogOut className="w-4 h-4" />
             Sign out and use a different email
@@ -206,7 +206,7 @@ export default function VerifyPendingPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-[#A3AED0] text-xs mt-6">
+        <p className="text-center text-[#4363C7] text-xs mt-6">
           Didn't receive the email? Check your spam folder or try resending.
         </p>
       </div>

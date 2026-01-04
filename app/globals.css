@@ -20,7 +20,7 @@
   /* Light blue accent */
   --secondary-foreground: #2B3674;
   --muted: #F4F7FE;
-  --muted-foreground: #A3AED0;
+  --muted-foreground: #4363C7;
   /* Muted text color */
   --accent: #4318FF;
   /* Vibrant Purple/Blue for active states */
@@ -43,7 +43,7 @@
   /* Green/Success */
 
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #A3AED0;
+  --sidebar-foreground: #4363C7;
   --sidebar-primary: #4318FF;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F4F7FE;
@@ -209,6 +209,11 @@
     background-position: 100% 50%;
   }
 }
+
+
+
+
+
 
 .animate-gradient-x {
   background-size: 200% 200%;

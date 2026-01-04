@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-md">
           <Link
             href="/signin"
-            className="inline-flex items-center gap-2 text-sm text-[#A3AED0] hover:text-[#2B3674] transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-[#4363C7] hover:text-[#2B3674] transition-colors mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to sign in
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
           {!isSubmitted ? (
             <>
               <h2 className="text-2xl font-bold mb-2 text-[#2B3674]">Forgot password?</h2>
-              <p className="text-[#A3AED0] mb-8">
+              <p className="text-[#4363C7] mb-8">
                 Enter your email and we&apos;ll send you a reset link.
               </p>
 
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
                     Email address
                   </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                     <Input
                       id="email"
                       type="email"
@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -157,11 +157,11 @@ export default function ForgotPasswordPage() {
                 <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
               <h2 className="text-2xl font-bold text-[#2B3674]">Check your email</h2>
-              <p className="text-[#A3AED0]">
+              <p className="text-[#4363C7]">
                 If an account exists with <strong>{email}</strong>, we&apos;ve
                 sent a password reset link. Check your inbox and spam folder.
               </p>
-              <p className="text-sm text-[#A3AED0]">
+              <p className="text-sm text-[#4363C7]">
                 The link will expire in 1 hour.
               </p>
               <div className="pt-4">

@@ -96,7 +96,7 @@ function AcceptInvitationContent() {
           <div className="w-full max-w-md text-center space-y-6">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
             <h2 className="text-3xl font-bold">Invalid Invitation</h2>
-            <p className="text-[#A3AED0]">
+            <p className="text-[#4363C7]">
               No invitation token was provided in the URL or the token is invalid.
             </p>
             <Link href="/signin">
@@ -117,7 +117,7 @@ function AcceptInvitationContent() {
           <div className="w-full max-w-md text-center space-y-6">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
             <h2 className="text-3xl font-bold">Welcome to the Team!</h2>
-            <p className="text-[#A3AED0]">
+            <p className="text-[#4363C7]">
               Your account has been created successfully.
             </p>
             <div className="flex items-center justify-center gap-2 text-primary">
@@ -192,7 +192,7 @@ function AcceptInvitationContent() {
 
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-[#2B3674]">Accept Invitation</h2>
-            <p className="text-[#A3AED0]">
+            <p className="text-[#4363C7]">
               Set up your account to join the team
             </p>
           </div>
@@ -210,7 +210,7 @@ function AcceptInvitationContent() {
                 Full Name
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                 <Input
                   id="fullName"
                   type="text"
@@ -219,7 +219,7 @@ function AcceptInvitationContent() {
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={loading}
                   required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -229,7 +229,7 @@ function AcceptInvitationContent() {
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                 <Input
                   id="password"
                   type="password"
@@ -239,7 +239,7 @@ function AcceptInvitationContent() {
                   disabled={loading}
                   required
                   minLength={8}
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -249,7 +249,7 @@ function AcceptInvitationContent() {
                 Confirm Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -259,7 +259,7 @@ function AcceptInvitationContent() {
                   disabled={loading}
                   required
                   minLength={8}
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -282,7 +282,7 @@ function AcceptInvitationContent() {
               )}
             </Button>
             
-            <p className="text-xs text-center text-[#A3AED0] mt-4">
+            <p className="text-xs text-center text-[#4363C7] mt-4">
               By accepting, you agree to our Terms of Service and Privacy Policy
             </p>
           </form>

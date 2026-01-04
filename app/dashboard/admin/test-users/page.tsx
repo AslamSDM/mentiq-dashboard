@@ -115,7 +115,7 @@ export default function AdminTestUsersPage() {
             <UserPlus className="h-6 w-6 text-[#4318FF]" />
             Create Test User
           </CardTitle>
-          <CardDescription className="text-[#A3AED0]">
+          <CardDescription className="text-[#4363C7]">
             Create a test user account that bypasses normal registration requirements
           </CardDescription>
         </CardHeader>

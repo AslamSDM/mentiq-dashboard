@@ -71,16 +71,16 @@ export function TransactionsTable() {
                  <input 
                     type="text" 
                     placeholder="Search" 
-                    className="pl-8 pr-4 py-2 rounded-full bg-[#F4F7FE] text-sm text-[#2B3674] placeholder-[#A3AED0] focus:outline-none focus:ring-2 focus:ring-[#4318FF]"
+                    className="pl-8 pr-4 py-2 rounded-full bg-[#F4F7FE] text-sm text-[#2B3674] placeholder-[#4363C7] focus:outline-none focus:ring-2 focus:ring-[#4318FF]"
                  />
-                 <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A3AED0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4363C7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                  </svg>
             </div>
-            <Button variant="outline" size="sm" className="rounded-full text-[#A3AED0] border-none bg-[#F4F7FE]">
+            <Button variant="outline" size="sm" className="rounded-full text-[#4363C7] border-none bg-[#F4F7FE]">
                 <Filter className="h-4 w-4 mr-2" /> Filter
             </Button>
-            <Button variant="outline" size="sm" className="rounded-full text-[#A3AED0] border-none bg-[#F4F7FE]">
+            <Button variant="outline" size="sm" className="rounded-full text-[#4363C7] border-none bg-[#F4F7FE]">
                 <Download className="h-4 w-4 mr-2" /> Export
             </Button>
         </div>
@@ -89,14 +89,14 @@ export function TransactionsTable() {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-[#E0E5F2] hover:bg-transparent">
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">ID</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Customer</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Product</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Amount</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Status</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Payment</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Date</TableHead>
-              <TableHead className="text-[#A3AED0] font-medium text-xs uppercase tracking-wider">Action</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">ID</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Customer</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Product</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Amount</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Payment</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Date</TableHead>
+              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -120,7 +120,7 @@ export function TransactionsTable() {
                 <TableCell className="font-bold text-[#2B3674]">{tx.payment}</TableCell>
                 <TableCell className="font-bold text-[#2B3674]">{tx.date}</TableCell>
                 <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#A3AED0]">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#4363C7]">
                         <MoreHorizontal className="h-4 w-4" />
                     </Button>
                 </TableCell>

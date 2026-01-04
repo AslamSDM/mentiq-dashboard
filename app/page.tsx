@@ -35,7 +35,7 @@ const faqData = [
   {
     question: "What is SaaS churn?",
     answer: (
-      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
+      <div className="space-y-4 text-[#4363C7] leading-relaxed">
         <p>
           SaaS churn refers to the percentage of customers who cancel or stop using a software-as-a-service product over a given period of time. It is one of the most important metrics for subscription-based businesses because even small increases in churn can significantly slow growth and reduce long-term revenue.
         </p>
@@ -53,7 +53,7 @@ const faqData = [
   {
     question: "How do SaaS companies reduce churn?",
     answer: (
-      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
+      <div className="space-y-4 text-[#4363C7] leading-relaxed">
         <p>
           SaaS companies reduce churn by proactively understanding how users interact with their product and intervening before disengagement turns into cancellation. The most effective churn reduction strategies include:
         </p>
@@ -73,7 +73,7 @@ const faqData = [
   {
     question: "What is a good churn rate for SaaS?",
     answer: (
-      <div className="space-y-4 text-[#A3AED0] leading-relaxed">
+      <div className="space-y-4 text-[#4363C7] leading-relaxed">
         <p>
           A good churn rate for SaaS depends on the business model, but benchmarks are well established.
         </p>
@@ -208,7 +208,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           <Check className="h-8 w-8 text-green-500" />
         </div>
         <h3 className="text-2xl font-bold text-[#2B3674] mb-2">You're on the list!</h3>
-        <p className="text-[#A3AED0]">We'll be in touch soon with early access.</p>
+        <p className="text-[#4363C7]">We'll be in touch soon with early access.</p>
       </div>
     );
   }
@@ -273,7 +273,7 @@ function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           onChange={(e) => setPromoOptIn(e.target.checked)}
           className="mt-1 h-4 w-4 rounded border-gray-300 bg-white text-primary focus:ring-primary focus:ring-offset-0"
         />
-        <label htmlFor="promo_opt_in" className="text-sm text-[#A3AED0] cursor-pointer">
+        <label htmlFor="promo_opt_in" className="text-sm text-[#4363C7] cursor-pointer">
           I agree to receive promotional emails from Mentiq about product updates, tips, and special offers. You can unsubscribe anytime.
         </label>
       </div>
@@ -507,13 +507,13 @@ export default function Home() {
           <div className="flex items-center gap-6">
             <Link
               href="/docs"
-              className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
+              className="text-sm font-medium text-[#4363C7] hover:text-[#2B3674] transition-colors"
             >
               Docs
             </Link>
             <Link
               href="/signin"
-              className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
+              className="text-sm font-medium text-[#4363C7] hover:text-[#2B3674] transition-colors"
             >
               Sign In
             </Link>
@@ -543,14 +543,14 @@ export default function Home() {
                 Mentiq
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-[#A3AED0] max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-[#4363C7] max-w-3xl mx-auto leading-relaxed">
               SaaS Retention Analytics Platform to{" "}
               <span className="text-[#2B3674] font-medium">Reduce SaaS Churn by 50%</span>
             </p>
           </div>
 
           <FadeIn delay={0.4}>
-            <p className="text-lg text-[#A3AED0] max-w-2xl mx-auto mb-10">
+            <p className="text-lg text-[#4363C7] max-w-2xl mx-auto mb-10">
               Complete customer retention software with SaaS customer health scores, product usage analytics, and SaaS user analytics to prevent churn before it happens.
             </p>
           </FadeIn>
@@ -567,7 +567,7 @@ export default function Home() {
               <div className="relative p-8 rounded-2xl bg-white backdrop-blur-xl border border-[#E0E5F2] shadow-xl">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
                 <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Get Early Access</h3>
-                <p className="text-[#A3AED0] text-sm mb-6">Be the first to kill churn with Mentiq</p>
+                <p className="text-[#4363C7] text-sm mb-6">Be the first to kill churn with Mentiq</p>
                 <WaitlistForm source="hero" />
               </div>
             </div>
@@ -646,7 +646,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#2B3674] via-[#4318FF] to-[#2B3674]">
               SaaS User Analytics That Drive Action
             </h2>
-            <p className="text-[#A3AED0] text-lg">
+            <p className="text-[#4363C7] text-lg">
               Our SaaS retention analytics platform gives you product usage analytics and customer health scores that actually help you reduce churn.
             </p>
           </FadeIn>
@@ -660,7 +660,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   SaaS Customer Health Score
                 </h3>
-                <p className="text-[#A3AED0] leading-relaxed">
+                <p className="text-[#4363C7] leading-relaxed">
                   Track customer health scores in real-time to reduce SaaS churn. Identify exactly who is about to leave before they do with predictive analytics.
                 </p>
               </SpotlightCard>
@@ -674,7 +674,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   Product Usage Analytics
                 </h3>
-                <p className="text-[#A3AED0] leading-relaxed">
+                <p className="text-[#4363C7] leading-relaxed">
                   Deep product usage analytics for SaaS reveal why users churn. Understand feature adoption, engagement patterns, and behavioral signals.
                 </p>
               </SpotlightCard>
@@ -688,7 +688,7 @@ export default function Home() {
                 <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
                   Automated Retention Playbooks
                 </h3>
-                <p className="text-[#A3AED0] leading-relaxed">
+                <p className="text-[#4363C7] leading-relaxed">
                   Our customer retention software triggers automated playbooks to prevent churn. Win back at-risk customers with timely interventions.
                 </p>
               </SpotlightCard>
@@ -706,7 +706,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               How does Mentiq Work?
             </h2>
-            <p className="text-[#A3AED0] text-lg">
+            <p className="text-[#4363C7] text-lg">
               It's not magic, it's just smarter analytics.
             </p>
           </FadeIn>
@@ -722,7 +722,7 @@ export default function Home() {
                     <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
                       We map your product
                     </h3>
-                    <p className="text-[#A3AED0] text-lg">
+                    <p className="text-[#4363C7] text-lg">
                       We automatically identify every feature, button, and page
                       in your app.
                     </p>
@@ -739,7 +739,7 @@ export default function Home() {
                     <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
                       We track user journeys
                     </h3>
-                    <p className="text-[#A3AED0] text-lg">
+                    <p className="text-[#4363C7] text-lg">
                       We monitor how every single user interacts with your
                       features in real-time.
                     </p>
@@ -756,7 +756,7 @@ export default function Home() {
                     <h3 className="text-2xl font-bold mb-4 text-[#2B3674]">
                       Then we reveal:
                     </h3>
-                    <ul className="space-y-4 text-[#A3AED0]">
+                    <ul className="space-y-4 text-[#4363C7]">
                       {[
                         "Real adoption depth per user",
                         "Users who are slipping away",
@@ -790,7 +790,7 @@ export default function Home() {
                   <span className="text-lg font-bold text-[#2B3674] mb-1">
                     User Health Dash
                   </span>
-                  <span className="text-sm text-[#A3AED0]">
+                  <span className="text-sm text-[#4363C7]">
                     Live health scores
                   </span>
                 </SpotlightCard>
@@ -825,7 +825,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               Why Mentiq is BETTER
             </h2>
-            <p className="text-[#A3AED0] text-lg">
+            <p className="text-[#4363C7] text-lg">
               Stop settling for vanity metrics.
             </p>
           </FadeIn>
@@ -835,7 +835,7 @@ export default function Home() {
             className="max-w-5xl mx-auto overflow-hidden rounded-2xl border border-[#E0E5F2] shadow-xl bg-white backdrop-blur-md"
           >
             <div className="grid grid-cols-2 bg-[#F4F7FE] p-4 sm:p-6 font-bold text-base sm:text-xl border-b border-[#E0E5F2]">
-              <div className="text-[#A3AED0] pl-4">Others show</div>
+              <div className="text-[#4363C7] pl-4">Others show</div>
               <div className="text-primary pl-4">Mentiq Reveals</div>
             </div>
 
@@ -862,7 +862,7 @@ export default function Home() {
                 transition={{ delay: 0.3 + i * 0.1 }}
                 className="grid grid-cols-2 p-4 sm:p-6 border-b border-[#E0E5F2] last:border-0 hover:bg-[#F4F7FE]/50 transition-colors group"
               >
-                <div className="flex items-center gap-2 sm:gap-4 text-[#A3AED0] group-hover:text-[#2B3674] transition-colors">
+                <div className="flex items-center gap-2 sm:gap-4 text-[#4363C7] group-hover:text-[#2B3674] transition-colors">
                   <XCircle className="h-4 w-4 sm:h-6 sm:w-6 text-red-500/50 group-hover:text-red-500 transition-colors shrink-0" />
                   <span className="text-sm sm:text-lg">{row.other}</span>
                 </div>
@@ -889,7 +889,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-8 text-[#2B3674]">
               A Note from the Founders
             </h2>
-            <blockquote className="text-2xl md:text-3xl italic text-[#A3AED0] mb-12 leading-relaxed font-light">
+            <blockquote className="text-2xl md:text-3xl italic text-[#4363C7] mb-12 leading-relaxed font-light">
               "We built Mentiq because we struggled with one thing: <br />
               <span className="text-[#2B3674] font-normal not-italic">
                 We could acquire users. We could activate them. But we couldn't
@@ -918,12 +918,12 @@ export default function Home() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
                 <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Join the Waitlist</h3>
-                <p className="text-[#A3AED0] text-sm mb-6">Secure your spot for early access</p>
+                <p className="text-[#4363C7] text-sm mb-6">Secure your spot for early access</p>
                 <WaitlistForm source="footer_cta" />
               </div>
             </div>
             
-            <p className="mt-6 text-sm text-[#A3AED0]">
+            <p className="mt-6 text-sm text-[#4363C7]">
               Be the first to know when we launch
             </p>
           </FadeIn>
@@ -937,7 +937,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
               Frequently Asked Questions
             </h2>
-            <p className="text-[#A3AED0] text-lg">
+            <p className="text-[#4363C7] text-lg">
               Everything you need to know about SaaS churn
             </p>
           </FadeIn>
@@ -959,25 +959,25 @@ export default function Home() {
               />
             </div>
           </div>
-          <p className="text-[#A3AED0] text-sm">
+          <p className="text-[#4363C7] text-sm">
             &copy; {new Date().getFullYear()} Mentiq. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link
               href="#"
-              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
+              className="text-[#4363C7] hover:text-primary transition-colors text-sm"
             >
               Privacy
             </Link>
             <Link
               href="#"
-              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
+              className="text-[#4363C7] hover:text-primary transition-colors text-sm"
             >
               Terms
             </Link>
             <Link
               href="#"
-              className="text-[#A3AED0] hover:text-primary transition-colors text-sm"
+              className="text-[#4363C7] hover:text-primary transition-colors text-sm"
             >
               Contact
             </Link>

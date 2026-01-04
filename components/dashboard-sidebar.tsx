@@ -188,7 +188,7 @@ export function DashboardSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className={cn("hidden md:flex h-8 w-8 text-[#A3AED0] hover:text-[#2B3674] shrink-0", isCollapsed && "mx-auto")}
+            className={cn("hidden md:flex h-8 w-8 text-[#4363C7] hover:text-[#2B3674] shrink-0", isCollapsed && "mx-auto")}
             onClick={() => setIsCollapsed(!isCollapsed)}
           >
             {isCollapsed ? (
@@ -202,7 +202,7 @@ export function DashboardSidebar() {
            <Button
             variant="ghost"
             size="icon"
-            className="md:hidden h-8 w-8 text-[#A3AED0] hover:text-[#2B3674]"
+            className="md:hidden h-8 w-8 text-[#4363C7] hover:text-[#2B3674]"
              onClick={() => setIsMobileOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -222,7 +222,7 @@ export function DashboardSidebar() {
                   "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group my-1",
                   isActive
                     ? "text-[#2B3674] font-bold bg-[#F4F7FE]" // Active state: Dark text on light blue bg
-                    : "text-[#A3AED0] hover:text-[#2B3674]", // Inactive state: Muted text
+                    : "text-[#4363C7] hover:text-[#2B3674]", // Inactive state: Muted text
                   isCollapsed && "justify-center px-2"
                 )}
                 title={isCollapsed ? item.name : undefined}
@@ -232,7 +232,7 @@ export function DashboardSidebar() {
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-l-lg bg-[#4318FF]" />
                  )}
 
-                <div className={cn("transition-colors", isActive ? "text-[#4318FF]" : "text-[#A3AED0] group-hover:text-[#2B3674]")}>
+                <div className={cn("transition-colors", isActive ? "text-[#4318FF]" : "text-[#4363C7] group-hover:text-[#2B3674]")}>
                     {item.icon}
                 </div>
                 {!isCollapsed && <span>{item.name}</span>}
@@ -244,7 +244,7 @@ export function DashboardSidebar() {
           {session?.isAdmin && (
             <>
               {!isCollapsed && (
-                <div className="px-4 py-2 text-xs font-bold text-[#A3AED0] uppercase tracking-wider mt-4">
+                <div className="px-4 py-2 text-xs font-bold text-[#4363C7] uppercase tracking-wider mt-4">
                   Admin
                 </div>
               )}
@@ -261,7 +261,7 @@ export function DashboardSidebar() {
                         "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group my-1",
                         isActive
                             ? "text-[#2B3674] font-bold bg-[#F4F7FE]"
-                            : "text-[#A3AED0] hover:text-[#2B3674]",
+                            : "text-[#4363C7] hover:text-[#2B3674]",
                          isCollapsed && "justify-center px-2"
                     )}
                      title={isCollapsed ? item.name : undefined}
@@ -269,7 +269,7 @@ export function DashboardSidebar() {
                      {isActive && (
                         <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-l-lg bg-[#4318FF]" />
                      )}
-                    <div className={cn("transition-colors", isActive ? "text-[#4318FF]" : "text-[#A3AED0] group-hover:text-[#2B3674]")}>
+                    <div className={cn("transition-colors", isActive ? "text-[#4318FF]" : "text-[#4363C7] group-hover:text-[#2B3674]")}>
                       {item.icon}
                     </div>
                     {!isCollapsed && <span>{item.name}</span>}
@@ -314,7 +314,7 @@ export function DashboardSidebar() {
                  <Button
                     variant="ghost"
                     size="icon"
-                    className="w-full h-12 text-[#A3AED0] hover:text-[#E31A1A] hover:bg-red-50"
+                    className="w-full h-12 text-[#4363C7] hover:text-[#E31A1A] hover:bg-red-50"
                     onClick={handleSignOut}
                     title="Sign Out"
                 >

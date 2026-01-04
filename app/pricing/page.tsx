@@ -174,14 +174,14 @@ function PricingContent() {
                 <Link href="/dashboard">
                   <Button
                     variant="ghost"
-                    className="text-[#A3AED0] hover:text-[#2B3674]"
+                    className="text-[#4363C7] hover:text-[#2B3674]"
                   >
                     Dashboard
                   </Button>
                 </Link>
                 <Button
                   variant="ghost"
-                  className="text-[#A3AED0] hover:text-[#2B3674]"
+                  className="text-[#4363C7] hover:text-[#2B3674]"
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -192,7 +192,7 @@ function PricingContent() {
               <>
                 <Link
                   href="/signin"
-                  className="text-sm font-medium text-[#A3AED0] hover:text-[#2B3674] transition-colors"
+                  className="text-sm font-medium text-[#4363C7] hover:text-[#2B3674] transition-colors"
                 >
                   Sign In
                 </Link>
@@ -243,7 +243,7 @@ function PricingContent() {
                 Simple, transparent pricing
               </span>
             </h1>
-            <p className="text-xl text-[#A3AED0] max-w-2xl mx-auto">
+            <p className="text-xl text-[#4363C7] max-w-2xl mx-auto">
               Scale as you grow. Pay only for what you need.
             </p>
           </div>
@@ -254,7 +254,7 @@ function PricingContent() {
               <CardTitle className="text-[#2B3674]">
                 How many paid users do you have?
               </CardTitle>
-              <CardDescription className="text-[#A3AED0]">
+              <CardDescription className="text-[#4363C7]">
                 Slide to select your current or expected user count
               </CardDescription>
             </CardHeader>
@@ -330,7 +330,7 @@ function PricingContent() {
                           >
                             {tier.name}
                           </CardTitle>
-                          <CardDescription className="text-[#A3AED0]">
+                          <CardDescription className="text-[#4363C7]">
                             {tier.description}
                           </CardDescription>
                           <div className="mt-4">
@@ -342,9 +342,9 @@ function PricingContent() {
                               >
                                 ${price}
                               </span>
-                              <span className="text-[#A3AED0]">/month</span>
+                              <span className="text-[#4363C7]">/month</span>
                             </div>
-                            <p className="text-sm text-[#A3AED0] mt-1">
+                            <p className="text-sm text-[#4363C7] mt-1">
                               {tier.range[0].toLocaleString()} -{" "}
                               {tier.range[1].toLocaleString()} users
                             </p>
@@ -383,7 +383,7 @@ function PricingContent() {
                                 className="flex items-start gap-3 text-sm"
                               >
                                 <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                                <span className="text-[#A3AED0]">{feature}</span>
+                                <span className="text-[#4363C7]">{feature}</span>
                               </div>
                             ))}
                           </div>
@@ -395,7 +395,7 @@ function PricingContent() {
               </div>
 
               {/* Carousel Hint */}
-              <div className="text-center text-sm text-[#A3AED0] mt-4">
+              <div className="text-center text-sm text-[#4363C7] mt-4">
                 ← Scroll to see all plans →
               </div>
             </div>
@@ -409,7 +409,7 @@ function PricingContent() {
                 <CardTitle className="text-3xl text-[#2B3674]">
                   Enterprise
                 </CardTitle>
-                <CardDescription className="text-lg text-[#A3AED0]">
+                <CardDescription className="text-lg text-[#4363C7]">
                   Custom solutions for large-scale operations
                 </CardDescription>
               </CardHeader>
@@ -418,7 +418,7 @@ function PricingContent() {
                   <p className="text-5xl font-bold mb-2 text-[#2B3674]">
                     Let's Talk
                   </p>
-                  <p className="text-[#A3AED0]">
+                  <p className="text-[#4363C7]">
                     Custom pricing based on your needs
                   </p>
                 </div>
@@ -426,43 +426,43 @@ function PricingContent() {
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">Unlimited Paid Users</span>
+                    <span className="text-[#4363C7]">Unlimited Paid Users</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">
+                    <span className="text-[#4363C7]">
                       Custom deployment options
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">
+                    <span className="text-[#4363C7]">
                       Dedicated infrastructure
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">24/7 premium support</span>
+                    <span className="text-[#4363C7]">24/7 premium support</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">
+                    <span className="text-[#4363C7]">
                       Custom SLA & guarantees
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">
+                    <span className="text-[#4363C7]">
                       Dedicated success team
                     </span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">White-label solutions</span>
+                    <span className="text-[#4363C7]">White-label solutions</span>
                   </div>
                   <div className="flex items-start gap-3 text-sm">
                     <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                    <span className="text-[#A3AED0]">
+                    <span className="text-[#4363C7]">
                       Custom feature development
                     </span>
                   </div>
@@ -492,7 +492,7 @@ function PricingContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     A paid user is any user who has an active subscription or
                     has made a payment in your application. Free trial users are
                     not counted.
@@ -506,7 +506,7 @@ function PricingContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Yes! Upgrade or downgrade at any time. Prorated charges
                     apply when upgrading, and credits are issued for downgrades.
                   </p>
@@ -519,7 +519,7 @@ function PricingContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     We accept all major credit cards, debit cards, and ACH
                     transfers through Stripe. Enterprise plans can use invoice
                     billing.
@@ -533,7 +533,7 @@ function PricingContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Yes! All plans include a 14-day free trial. No credit card
                     required to start. Cancel anytime during the trial period.
                   </p>

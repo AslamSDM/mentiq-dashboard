@@ -200,7 +200,7 @@ export default function SignInPage() {
 
           <div className="space-y-2">
             <h2 className="text-3xl font-bold text-[#2B3674]">Sign in</h2>
-            <p className="text-[#A3AED0]">
+            <p className="text-[#4363C7]">
               Enter your credentials to access your dashboard
             </p>
           </div>
@@ -226,7 +226,7 @@ export default function SignInPage() {
               <div className="w-full border-t border-[#E0E5F2]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#A3AED0]">
+              <span className="px-4 bg-white text-[#4363C7]">
                 or continue with email
               </span>
             </div>
@@ -265,7 +265,7 @@ export default function SignInPage() {
                 Email address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                 <Input
                   id="email"
                   type="email"
@@ -273,7 +273,7 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -294,7 +294,7 @@ export default function SignInPage() {
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                 <Input
                   id="password"
                   type="password"
@@ -302,7 +302,7 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function SignInPage() {
               <div className="w-full border-t border-[#E0E5F2]"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#A3AED0]">
+              <span className="px-4 bg-white text-[#4363C7]">
                 Don&apos;t have an account?
               </span>
             </div>

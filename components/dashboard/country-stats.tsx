@@ -18,7 +18,7 @@ export function CountryStats({ totalUsers, data }: CountryStatsProps) {
     <Card className="border-none shadow-sm h-full">
         <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg font-bold text-[#2B3674]">Country</CardTitle>
-            <div className="bg-[#F4F7FE] p-2 rounded-lg text-sm text-[#A3AED0] cursor-pointer hover:bg-gray-100 font-medium">
+            <div className="bg-[#F4F7FE] p-2 rounded-lg text-sm text-[#4363C7] cursor-pointer hover:bg-gray-100 font-medium">
                View All
             </div>
         </CardHeader>
@@ -28,14 +28,14 @@ export function CountryStats({ totalUsers, data }: CountryStatsProps) {
              <span className="bg-[#05CD99] text-white text-xs px-2 py-0.5 rounded-full flex items-center">
                  +39.2%
              </span>
-             <span className="text-sm text-[#A3AED0]">Since last month</span>
+             <span className="text-sm text-[#4363C7]">Since last month</span>
         </div>
 
         <div className="space-y-6">
           {data.map((country, index) => (
             <div key={index} className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 font-medium text-[#A3AED0]">
+                <div className="flex items-center gap-2 font-medium text-[#4363C7]">
                   <span className="text-lg">{country.flag}</span>
                   {country.name}
                 </div>

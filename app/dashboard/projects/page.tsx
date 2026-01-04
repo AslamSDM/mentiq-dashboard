@@ -852,7 +852,7 @@ export default function ProjectsPage() {
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
             <CardTitle className="text-[#2B3674] font-bold">SDK Integration</CardTitle>
-            <CardDescription className="text-[#A3AED0]">
+            <CardDescription className="text-[#4363C7]">
               Use your API key to integrate the Mentiq Analytics SDK into your application
             </CardDescription>
           </CardHeader>
@@ -1054,7 +1054,7 @@ function LoginHandler() {
                   <span>Error Tracking</span>
                 </div>
               </div>
-              <p className="text-sm text-[#A3AED0]">
+              <p className="text-sm text-[#4363C7]">
                 📚 Full documentation:{" "}
                 <a
                   href="/docs"

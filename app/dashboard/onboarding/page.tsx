@@ -282,7 +282,7 @@ export default function OnboardingPage() {
             <h2 className="text-2xl font-bold text-[#2B3674]">
               Processing your payment...
             </h2>
-            <p className="text-[#A3AED0]">
+            <p className="text-[#4363C7]">
               Please wait while we activate your subscription
             </p>
           </div>
@@ -306,7 +306,7 @@ export default function OnboardingPage() {
               <CardTitle className="text-3xl text-[#2B3674]">
                 Create Your First Project
               </CardTitle>
-              <CardDescription className="text-[#A3AED0]">
+              <CardDescription className="text-[#4363C7]">
                 Let's start by creating a project to track your analytics
               </CardDescription>
             </CardHeader>
@@ -323,7 +323,7 @@ export default function OnboardingPage() {
                     onChange={(e) =>
                       setNewProject({ ...newProject, name: e.target.value })
                     }
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#A3AED0]"
+                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -340,13 +340,13 @@ export default function OnboardingPage() {
                         description: e.target.value,
                       })
                     }
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#A3AED0]"
+                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
                   />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-[#E0E5F2]">
-                <p className="text-sm text-[#A3AED0] mb-4">
+                <p className="text-sm text-[#4363C7] mb-4">
                   What you'll get with your project:
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -485,7 +485,7 @@ export default function OnboardingPage() {
               </svg>
             </div>
             <h1 className="text-4xl font-bold text-[#2B3674]">All set!</h1>
-            <p className="text-lg text-[#A3AED0]">
+            <p className="text-lg text-[#4363C7]">
               Redirecting to your dashboard...
             </p>
           </div>

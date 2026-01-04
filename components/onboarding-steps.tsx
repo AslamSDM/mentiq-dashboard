@@ -39,7 +39,7 @@ export function ReadyToConnect({ onYes, onNotYet }: ReadyToConnectProps) {
           <h1 className="text-4xl md:text-5xl font-bold text-[#2B3674]">
             Ready to connect?
           </h1>
-          <p className="text-lg text-[#A3AED0] max-w-2xl mx-auto">
+          <p className="text-lg text-[#4363C7] max-w-2xl mx-auto">
             Let's get your analytics up and running. Choose how you'd like to
             proceed.
           </p>
@@ -61,7 +61,7 @@ export function ReadyToConnect({ onYes, onNotYet }: ReadyToConnectProps) {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Yes!</h3>
-                    <p className="text-[#A3AED0]">I'm ready to send data</p>
+                    <p className="text-[#4363C7]">I'm ready to send data</p>
                   </div>
                   <div className="h-10 w-10 rounded-full bg-[#4318FF]/20 flex items-center justify-center border border-[#4318FF]/30 group-hover:bg-[#4318FF] group-hover:border-[#4318FF] transition-all">
                     <ChevronRight className="h-5 w-5 text-[#4318FF] group-hover:text-white" />
@@ -103,7 +103,7 @@ export function ReadyToConnect({ onYes, onNotYet }: ReadyToConnectProps) {
                     <h3 className="text-2xl font-bold text-[#2B3674] mb-2">
                       Not yet...
                     </h3>
-                    <p className="text-[#A3AED0]">Show me what else I can do</p>
+                    <p className="text-[#4363C7]">Show me what else I can do</p>
                   </div>
                   <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30 group-hover:bg-purple-500 group-hover:border-purple-500 transition-all">
                     <ChevronRight className="h-5 w-5 text-purple-500 group-hover:text-white" />
@@ -133,7 +133,7 @@ export function ReadyToConnect({ onYes, onNotYet }: ReadyToConnectProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-center text-sm text-[#A3AED0]"
+          className="text-center text-sm text-[#4363C7]"
         >
           You can change this anytime from your dashboard settings
         </motion.p>
@@ -165,7 +165,7 @@ export function AlternativeOptions({
           <h1 className="text-4xl md:text-5xl font-bold text-[#2B3674]">
             No problem! Here are a few things to try...
           </h1>
-          <p className="text-lg text-[#A3AED0]">
+          <p className="text-lg text-[#4363C7]">
             Get familiar with the platform at your own pace
           </p>
         </div>
@@ -190,7 +190,7 @@ export function AlternativeOptions({
                   <h3 className="text-xl font-bold text-[#2B3674] mb-2">
                     Upload sample data
                   </h3>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Send sample data through CSV, Chrome Extension, or
                     Bookmarklet
                   </p>
@@ -218,7 +218,7 @@ export function AlternativeOptions({
                   <h3 className="text-xl font-bold text-[#2B3674] mb-2">
                     Invite a developer
                   </h3>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Draft a setup email to a colleague to handle the integration
                   </p>
                 </div>
@@ -243,7 +243,7 @@ export function AlternativeOptions({
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-[#2B3674] mb-2">Skip</h3>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Browse Mentiq without data and explore the features
                   </p>
                 </div>
@@ -335,7 +335,7 @@ export function PlatformSelection({
           <h1 className="text-4xl md:text-5xl font-bold text-[#2B3674]">
             Select your platform
           </h1>
-          <p className="text-lg text-[#A3AED0]">
+          <p className="text-lg text-[#4363C7]">
             Choose where you'll integrate Mentiq SDK
           </p>
         </div>
@@ -386,7 +386,7 @@ export function PlatformSelection({
                       <h3 className="text-xl font-bold text-[#2B3674] mb-2">
                         {platform.name}
                       </h3>
-                      <p className="text-sm text-[#A3AED0]">
+                      <p className="text-sm text-[#4363C7]">
                         {platform.description}
                       </p>
                     </div>
@@ -400,7 +400,7 @@ export function PlatformSelection({
         <div className="text-center">
           <Button
             variant="link"
-            className="text-[#A3AED0] hover:text-[#2B3674]"
+            className="text-[#4363C7] hover:text-[#2B3674]"
             onClick={() => onPlatformSelect("skip")}
           >
             Skip for now
@@ -470,7 +470,7 @@ Mentiq.identify('user-123', {
           <h1 className="text-4xl md:text-5xl font-bold text-[#2B3674]">
             Install Mentiq SDK
           </h1>
-          <p className="text-lg text-[#A3AED0]">
+          <p className="text-lg text-[#4363C7]">
             Follow these steps to start tracking events
           </p>
         </div>
@@ -565,7 +565,7 @@ Mentiq.identify('user-123', {
                   <h3 className="text-lg font-bold text-[#2B3674]">
                     Need more help?
                   </h3>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Check out our full documentation and examples
                   </p>
                 </div>

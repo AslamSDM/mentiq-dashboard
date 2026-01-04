@@ -196,7 +196,7 @@ function VerifyEmailContent() {
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-[#2B3674]">Verifying your email...</h2>
-                <p className="text-[#A3AED0]">
+                <p className="text-[#4363C7]">
                   Please wait while we verify your email address.
                 </p>
               </>
@@ -212,7 +212,7 @@ function VerifyEmailContent() {
                 <h2 className="text-2xl font-bold text-yellow-600">
                   Verify Your Email
                 </h2>
-                <p className="text-[#A3AED0]">
+                <p className="text-[#4363C7]">
                   We sent a verification email to{" "}
                   <span className="text-[#2B3674] font-medium">
                     {session?.user?.email || "your email"}
@@ -253,7 +253,7 @@ function VerifyEmailContent() {
                     Sign out
                   </Button>
                 </div>
-                <p className="text-sm text-[#A3AED0]">
+                <p className="text-sm text-[#4363C7]">
                   Once verified, you will be automatically redirected to the dashboard.
                 </p>
               </>
@@ -269,9 +269,9 @@ function VerifyEmailContent() {
                 <h2 className="text-2xl font-bold text-green-600">
                   Email Verified!
                 </h2>
-                <p className="text-[#A3AED0]">{message}</p>
+                <p className="text-[#4363C7]">{message}</p>
                 {session ? (
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Redirecting to dashboard...
                   </p>
                 ) : (
@@ -295,7 +295,7 @@ function VerifyEmailContent() {
                 <h2 className="text-2xl font-bold text-red-500">
                   Verification Failed
                 </h2>
-                <p className="text-[#A3AED0]">{message}</p>
+                <p className="text-[#4363C7]">{message}</p>
                 <div className="space-y-3">
                   <Link href="/signin" className="block">
                     <Button
@@ -306,7 +306,7 @@ function VerifyEmailContent() {
                       Go to Sign In
                     </Button>
                   </Link>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     You can request a new verification email from the sign-in page.
                   </p>
                 </div>
@@ -326,7 +326,7 @@ export default function VerifyEmailPage() {
         <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-4 text-[#A3AED0]">Loading...</p>
+            <p className="mt-4 text-[#4363C7]">Loading...</p>
           </div>
         </div>
       }

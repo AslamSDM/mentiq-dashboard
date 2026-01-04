@@ -398,7 +398,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-[#2B3674]">Select a Project</h3>
-              <p className="text-[#A3AED0]">
+              <p className="text-[#4363C7]">
                 Please select a project to view the dashboard
               </p>
             </div>
@@ -413,7 +413,7 @@ export default function DashboardPage() {
       {/* Date Range & Controls */}
       <div className="flex items-center justify-end">
         <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm">
-          <Calendar className="h-4 w-4 text-[#A3AED0] ml-2" />
+          <Calendar className="h-4 w-4 text-[#4363C7] ml-2" />
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 text-[#2B3674] font-medium">
               <SelectValue placeholder="Select date range" />
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                     </div>
                  </div>
                  <div>
-                    <div className="text-sm font-medium text-[#A3AED0] mb-1">MRR</div>
+                    <div className="text-sm font-medium text-[#4363C7] mb-1">MRR</div>
                     <div className="text-2xl font-bold text-[#2B3674]">
                       {formatCurrency(revenueMetrics.mrr)}
                     </div>
@@ -466,7 +466,7 @@ export default function DashboardPage() {
                              {revenueMetrics.growth_rate > 0 ? "+" : ""}
                              {formatPercentage(revenueMetrics.growth_rate)}
                          </span>
-                         <span className="text-xs text-[#A3AED0]">since last month</span>
+                         <span className="text-xs text-[#4363C7]">since last month</span>
                     </div>
                  </div>
               </CardContent>
@@ -480,11 +480,11 @@ export default function DashboardPage() {
                     </div>
                  </div>
                  <div>
-                    <div className="text-sm font-medium text-[#A3AED0] mb-1">Active Subs</div>
+                    <div className="text-sm font-medium text-[#4363C7] mb-1">Active Subs</div>
                     <div className="text-2xl font-bold text-[#2B3674]">
                       {revenueMetrics.active_subscriptions}
                     </div>
-                    <p className="text-xs text-[#A3AED0] mt-1">
+                    <p className="text-xs text-[#4363C7] mt-1">
                       {revenueMetrics.new_subscriptions} new this month
                     </p>
                  </div>
@@ -499,11 +499,11 @@ export default function DashboardPage() {
                     </div>
                  </div>
                  <div>
-                    <div className="text-sm font-medium text-[#A3AED0] mb-1">Churn Rate</div>
+                    <div className="text-sm font-medium text-[#4363C7] mb-1">Churn Rate</div>
                     <div className="text-2xl font-bold text-[#2B3674]">
                       {formatPercentage(revenueMetrics.churn_rate)}
                     </div>
-                    <p className="text-xs text-[#A3AED0] mt-1">
+                    <p className="text-xs text-[#4363C7] mt-1">
                       {revenueMetrics.churned_subscriptions} churned
                     </p>
                  </div>
@@ -518,11 +518,11 @@ export default function DashboardPage() {
                     </div>
                  </div>
                  <div>
-                    <div className="text-sm font-medium text-[#A3AED0] mb-1">ARPU</div>
+                    <div className="text-sm font-medium text-[#4363C7] mb-1">ARPU</div>
                     <div className="text-2xl font-bold text-[#2B3674]">
                       {formatCurrency(revenueMetrics.arpu)}
                     </div>
-                    <p className="text-xs text-[#A3AED0] mt-1">
+                    <p className="text-xs text-[#4363C7] mt-1">
                        Avg. Revenue Per User
                     </p>
                  </div>
@@ -532,7 +532,7 @@ export default function DashboardPage() {
         ) : (
           <Card className="bg-white border-dashed border-2 border-[#E0E5F2] shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-8">
-              <p className="text-[#A3AED0] mb-4">
+              <p className="text-[#4363C7] mb-4">
                 No revenue data available. Configure Stripe to see metrics.
               </p>
               <Link href="/dashboard/revenue">
@@ -550,7 +550,7 @@ export default function DashboardPage() {
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
             <CardHeader>
               <CardTitle className="text-[#2B3674] font-bold">Revenue Trend</CardTitle>
-              <CardDescription className="text-[#A3AED0]">
+              <CardDescription className="text-[#4363C7]">
                 Daily revenue from Stripe charges over the last 30 days
               </CardDescription>
             </CardHeader>
@@ -585,7 +585,7 @@ export default function DashboardPage() {
                     />
                     <XAxis
                       dataKey="date"
-                      className="text-xs text-[#A3AED0]"
+                      className="text-xs text-[#4363C7]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
@@ -598,7 +598,7 @@ export default function DashboardPage() {
                       }
                     />
                     <YAxis
-                      className="text-xs text-[#A3AED0]"
+                      className="text-xs text-[#4363C7]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
@@ -642,7 +642,7 @@ export default function DashboardPage() {
              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-[#A3AED0]">Total Events</p>
+                        <p className="text-sm font-medium text-[#4363C7]">Total Events</p>
                         <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{totalEvents.toLocaleString()}</h3>
                     </div>
                     <div className="p-3 rounded-full bg-[#E6F7FF]">
@@ -656,7 +656,7 @@ export default function DashboardPage() {
              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-[#A3AED0]">Page Views</p>
+                        <p className="text-sm font-medium text-[#4363C7]">Page Views</p>
                         <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{pageViews.toLocaleString()}</h3>
                     </div>
                     <div className="p-3 rounded-full bg-[#F4F7FE]">
@@ -670,11 +670,11 @@ export default function DashboardPage() {
              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-[#A3AED0]">Unique Users</p>
+                        <p className="text-sm font-medium text-[#4363C7]">Unique Users</p>
                         <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{uniqueUsers.toLocaleString()}</h3>
                     </div>
                     <div className="p-3 rounded-full bg-[#E9E3FF]">
-                        <Users className="h-6 w-6 text-[#A3AED0]" /> {/* Usually a distinct color if needed */}
+                        <Users className="h-6 w-6 text-[#4363C7]" /> {/* Usually a distinct color if needed */}
                     </div>
                 </div>
              </CardContent>
@@ -686,7 +686,7 @@ export default function DashboardPage() {
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
               <CardTitle className="text-[#2B3674] font-bold">User Retention</CardTitle>
-              <CardDescription className="text-[#A3AED0]">
+              <CardDescription className="text-[#4363C7]">
                 Percentage of users returning over time
               </CardDescription>
             </CardHeader>
@@ -700,7 +700,7 @@ export default function DashboardPage() {
                   <div className="text-3xl font-bold text-[#2B3674]">
                     {getOverallRetentionRate().toFixed(1)}%
                   </div>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     Day 1 Retention (Avg across {retentionData.cohorts.length}{" "}
                     cohorts)
                   </p>
@@ -711,7 +711,7 @@ export default function DashboardPage() {
                         className="space-y-2"
                       >
                          <div className="flex justify-between text-sm">
-                            <span className="text-[#A3AED0]">{metric.period}</span>
+                            <span className="text-[#4363C7]">{metric.period}</span>
                             <span className="font-bold text-[#2B3674]">{metric.rate.toFixed(1)}%</span>
                         </div>
                         <Progress value={metric.rate} className="h-2 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
@@ -720,7 +720,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-[#A3AED0]">
+                <div className="text-center py-8 text-[#4363C7]">
                   No retention data available
                 </div>
               )}
@@ -730,7 +730,7 @@ export default function DashboardPage() {
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
               <CardTitle className="text-[#2B3674] font-bold">Bounce Rate</CardTitle>
-              <CardDescription className="text-[#A3AED0]">
+              <CardDescription className="text-[#4363C7]">
                 Single-page sessions (lower is better)
               </CardDescription>
             </CardHeader>
@@ -757,7 +757,7 @@ export default function DashboardPage() {
                       <Badge variant="destructive">Needs Attention</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-[#A3AED0]">
+                  <p className="text-sm text-[#4363C7]">
                     {bounceRate < 40
                       ? "Users are highly engaged"
                       : bounceRate < 55
@@ -768,7 +768,7 @@ export default function DashboardPage() {
                   </p>
                   <div className="pt-2">
                     <Progress value={100 - bounceRate} className="h-3 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
-                    <p className="text-xs text-[#A3AED0] mt-2">
+                    <p className="text-xs text-[#4363C7] mt-2">
                       {(100 - bounceRate).toFixed(1)}% engaged sessions
                     </p>
                   </div>
@@ -783,7 +783,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-[#2B3674] font-bold">Active Users</CardTitle>
-                <CardDescription className="text-[#A3AED0]">User engagement over time</CardDescription>
+                <CardDescription className="text-[#4363C7]">User engagement over time</CardDescription>
               </div>
               <Tabs
                 value={engagementTab}
@@ -791,9 +791,9 @@ export default function DashboardPage() {
                 className="w-[300px]"
               >
                 <TabsList className="grid w-full grid-cols-3 bg-[#F4F7FE] p-1 rounded-xl">
-                  <TabsTrigger value="dau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">DAU</TabsTrigger>
-                  <TabsTrigger value="wau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">WAU</TabsTrigger>
-                  <TabsTrigger value="mau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#A3AED0]">MAU</TabsTrigger>
+                  <TabsTrigger value="dau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">DAU</TabsTrigger>
+                  <TabsTrigger value="wau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">WAU</TabsTrigger>
+                  <TabsTrigger value="mau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">MAU</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -803,7 +803,7 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold text-[#2B3674]">
                 {getEngagementValue().toLocaleString()}
               </div>
-              <p className="text-sm text-[#A3AED0]">
+              <p className="text-sm text-[#4363C7]">
                 {engagementTab === "dau"
                   ? "Daily Active Users"
                   : engagementTab === "wau"
@@ -835,7 +835,7 @@ export default function DashboardPage() {
                       />
                       <XAxis
                         dataKey="date"
-                        className="text-xs text-[#A3AED0]"
+                        className="text-xs text-[#4363C7]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
@@ -848,7 +848,7 @@ export default function DashboardPage() {
                         }
                       />
                       <YAxis
-                        className="text-xs text-[#A3AED0]"
+                        className="text-xs text-[#4363C7]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
@@ -868,7 +868,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-[#A3AED0]">
+                <div className="h-full w-full flex items-center justify-center text-[#4363C7]">
                   No data available for this period
                 </div>
               )}
@@ -882,7 +882,7 @@ export default function DashboardPage() {
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
             <CardTitle className="text-[#2B3674] font-bold">Top Events</CardTitle>
-            <CardDescription className="text-[#A3AED0]">
+            <CardDescription className="text-[#4363C7]">
               Most frequently triggered events in the selected period
             </CardDescription>
           </CardHeader>
@@ -903,7 +903,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right pl-4">
                      <div className="text-sm font-bold text-[#2B3674]">{event.count?.toLocaleString() || 0}</div>
-                    <div className="text-xs font-medium text-[#A3AED0]">
+                    <div className="text-xs font-medium text-[#4363C7]">
                       {totalEvents > 0
                         ? ((event.count / totalEvents) * 100)?.toFixed(1)
                         : "0"}
@@ -913,7 +913,7 @@ export default function DashboardPage() {
                 </div>
               ))}
               {topEvents.length === 0 && (
-                <p className="text-sm text-[#A3AED0] text-center py-4">
+                <p className="text-sm text-[#4363C7] text-center py-4">
                   No events data available
                 </p>
               )}
@@ -925,7 +925,7 @@ export default function DashboardPage() {
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
             <CardTitle className="text-[#2B3674] font-bold">Recent Events</CardTitle>
-            <CardDescription className="text-[#A3AED0]">Latest events from your users</CardDescription>
+            <CardDescription className="text-[#4363C7]">Latest events from your users</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -953,7 +953,7 @@ export default function DashboardPage() {
                             {event.Event || event.event || "Unknown Event"}
                           </p>
                         </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-[#A3AED0]">
+                        <div className="flex flex-wrap gap-2 text-xs text-[#4363C7]">
                           {event.UserId && (
                             <span className="bg-[#F4F7FE] px-2 py-0.5 rounded text-[#2B3674]">User: {event.UserId.substring(0, 8)}...</span>
                           )}
@@ -965,7 +965,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-[#A3AED0] whitespace-nowrap">
+                        <p className="text-xs text-[#4363C7] whitespace-nowrap">
                           {new Date(
                             event.Timestamp || event.timestamp || Date.now()
                           ).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -975,7 +975,7 @@ export default function DashboardPage() {
                   );
                 })}
               {events.length === 0 && (
-                <p className="text-sm text-[#A3AED0] text-center py-4">
+                <p className="text-sm text-[#4363C7] text-center py-4">
                   No recent events found. Start tracking events to see data
                   here.
                 </p>
@@ -1002,7 +1002,7 @@ export default function DashboardPage() {
           <Card className="md:col-span-2 border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
               <CardTitle className="text-[#2B3674] font-bold">Global Distribution</CardTitle>
-              <CardDescription className="text-[#A3AED0]">User activity by country</CardDescription>
+              <CardDescription className="text-[#4363C7]">User activity by country</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] relative overflow-hidden">
               {loadingEnhanced ? (
@@ -1012,7 +1012,7 @@ export default function DashboardPage() {
               ) : getGeoData().length > 0 ? (
                 <WorldMap geoData={getGeoData()} svgUrl="/world.svg" />
               ) : (
-                <div className="flex items-center justify-center h-full text-[#A3AED0]">
+                <div className="flex items-center justify-center h-full text-[#4363C7]">
                   No location data available
                 </div>
               )}
@@ -1022,7 +1022,7 @@ export default function DashboardPage() {
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
               <CardTitle className="text-[#2B3674] font-bold">Top Countries</CardTitle>
-              <CardDescription className="text-[#A3AED0]">By user count</CardDescription>
+              <CardDescription className="text-[#4363C7]">By user count</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1044,7 +1044,7 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 {getGeoData().length === 0 && (
-                  <div className="text-center text-[#A3AED0] py-8">
+                  <div className="text-center text-[#4363C7] py-8">
                     No data
                   </div>
                 )}
@@ -1070,7 +1070,7 @@ export default function DashboardPage() {
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
           <CardHeader>
             <CardTitle className="text-[#2B3674] font-bold">Device Performance</CardTitle>
-            <CardDescription className="text-[#A3AED0]">Breakdown by device type</CardDescription>
+            <CardDescription className="text-[#4363C7]">Breakdown by device type</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loadingEnhanced ? (
@@ -1081,11 +1081,11 @@ export default function DashboardPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#F4F7FE] hover:bg-transparent">
-                    <TableHead className="text-[#A3AED0] pl-6">Device</TableHead>
-                    <TableHead className="text-right text-[#A3AED0]">Users</TableHead>
-                    <TableHead className="text-right text-[#A3AED0]">Sessions</TableHead>
-                    <TableHead className="text-right text-[#A3AED0]">Bounce Rate</TableHead>
-                    <TableHead className="text-right text-[#A3AED0] pr-6">Avg. Duration</TableHead>
+                    <TableHead className="text-[#4363C7] pl-6">Device</TableHead>
+                    <TableHead className="text-right text-[#4363C7]">Users</TableHead>
+                    <TableHead className="text-right text-[#4363C7]">Sessions</TableHead>
+                    <TableHead className="text-right text-[#4363C7]">Bounce Rate</TableHead>
+                    <TableHead className="text-right text-[#4363C7] pr-6">Avg. Duration</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1120,7 +1120,7 @@ export default function DashboardPage() {
                     <TableRow>
                       <TableCell
                         colSpan={5}
-                        className="text-center py-8 text-[#A3AED0]"
+                        className="text-center py-8 text-[#4363C7]"
                       >
                         No device data available
                       </TableCell>

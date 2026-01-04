@@ -177,7 +177,7 @@ export default function SupportPage() {
               <LifeBuoy className="h-8 w-8 text-[#4318FF]" />
               Support
             </h1>
-            <p className="text-[#A3AED0] mt-1">
+            <p className="text-[#4363C7] mt-1">
               Get help from our team. View your tickets and create new ones.
             </p>
           </div>
@@ -195,18 +195,18 @@ export default function SupportPage() {
               </DialogHeader>
               <form onSubmit={handleCreateTicket} className="space-y-4 mt-4">
                 <div>
-                  <label className="text-sm text-[#A3AED0] mb-1.5 block">Subject</label>
+                  <label className="text-sm text-[#4363C7] mb-1.5 block">Subject</label>
                   <Input
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Brief description of your issue"
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#A3AED0]"
+                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-[#A3AED0] mb-1.5 block">Priority</label>
+                    <label className="text-sm text-[#4363C7] mb-1.5 block">Priority</label>
                     <Select value={priority} onValueChange={setPriority}>
                       <SelectTrigger className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
                         <SelectValue />
@@ -220,7 +220,7 @@ export default function SupportPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm text-[#A3AED0] mb-1.5 block">Category</label>
+                    <label className="text-sm text-[#4363C7] mb-1.5 block">Category</label>
                     <Select value={category} onValueChange={setCategory}>
                       <SelectTrigger className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
                         <SelectValue />
@@ -236,12 +236,12 @@ export default function SupportPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-[#A3AED0] mb-1.5 block">Description</label>
+                  <label className="text-sm text-[#4363C7] mb-1.5 block">Description</label>
                   <Textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe your issue in detail..."
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#A3AED0] min-h-[120px]"
+                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[120px]"
                     required
                   />
                 </div>
@@ -253,7 +253,7 @@ export default function SupportPage() {
                     type="button"
                     variant="ghost"
                     onClick={() => setIsCreateDialogOpen(false)}
-                    className="text-[#A3AED0] hover:text-[#2B3674]"
+                    className="text-[#4363C7] hover:text-[#2B3674]"
                   >
                     Cancel
                   </Button>
@@ -282,13 +282,13 @@ export default function SupportPage() {
           {isLoading ? (
             <div className="p-12 text-center">
               <Loader2 className="h-8 w-8 animate-spin text-[#4318FF] mx-auto" />
-              <p className="text-[#A3AED0] mt-2">Loading tickets...</p>
+              <p className="text-[#4363C7] mt-2">Loading tickets...</p>
             </div>
           ) : tickets.length === 0 ? (
             <div className="p-12 text-center">
-              <LifeBuoy className="h-12 w-12 text-[#A3AED0] mx-auto mb-4" />
+              <LifeBuoy className="h-12 w-12 text-[#4363C7] mx-auto mb-4" />
               <h3 className="text-lg font-medium text-[#2B3674] mb-2">No tickets yet</h3>
-              <p className="text-[#A3AED0] mb-4">
+              <p className="text-[#4363C7] mb-4">
                 Create a support ticket to get help from our team.
               </p>
               <Button
@@ -317,10 +317,10 @@ export default function SupportPage() {
                             {ticket.subject}
                           </h3>
                         </div>
-                        <p className="text-[#A3AED0] text-sm line-clamp-1">
+                        <p className="text-[#4363C7] text-sm line-clamp-1">
                           {ticket.description}
                         </p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-[#A3AED0]">
+                        <div className="flex items-center gap-3 mt-2 text-xs text-[#4363C7]">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDate(ticket.created_at)}
@@ -385,7 +385,7 @@ export default function SupportPage() {
                     <p className="text-[#2B3674] whitespace-pre-wrap">
                       {selectedTicket.description}
                     </p>
-                    <div className="flex items-center gap-4 mt-4 text-sm text-[#A3AED0]">
+                    <div className="flex items-center gap-4 mt-4 text-sm text-[#4363C7]">
                       <span>Created: {formatDate(selectedTicket.created_at)}</span>
                       <span>•</span>
                       <span>{categoryLabels[selectedTicket.category] || selectedTicket.category}</span>
@@ -411,7 +411,7 @@ export default function SupportPage() {
                             <span className="text-sm font-medium text-[#2B3674]">
                               {comment.user?.name || comment.user?.email || "Support"}
                             </span>
-                            <span className="text-xs text-[#A3AED0]">
+                            <span className="text-xs text-[#4363C7]">
                               {formatDate(comment.created_at)}
                             </span>
                           </div>
@@ -421,7 +421,7 @@ export default function SupportPage() {
                         </div>
                       ))}
                       {(!selectedTicket.comments || selectedTicket.comments.length === 0) && (
-                        <p className="text-[#A3AED0] text-sm text-center py-4">
+                        <p className="text-[#4363C7] text-sm text-center py-4">
                           No comments yet
                         </p>
                       )}
@@ -434,7 +434,7 @@ export default function SupportPage() {
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
                           placeholder="Type your message..."
-                          className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#A3AED0] min-h-[60px] flex-1"
+                          className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[60px] flex-1"
                         />
                         <Button
                           onClick={handleAddComment}

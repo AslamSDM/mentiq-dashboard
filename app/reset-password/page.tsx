@@ -71,7 +71,7 @@ function ResetPasswordForm() {
           <AlertCircle className="h-8 w-8 text-red-500" />
         </div>
         <h2 className="text-2xl font-bold text-[#2B3674]">Invalid reset link</h2>
-        <p className="text-[#A3AED0]">
+        <p className="text-[#4363C7]">
           This password reset link is invalid or has expired. Please request a
           new one.
         </p>
@@ -93,7 +93,7 @@ function ResetPasswordForm() {
           <CheckCircle className="h-8 w-8 text-green-500" />
         </div>
         <h2 className="text-2xl font-bold text-[#2B3674]">Password reset successful!</h2>
-        <p className="text-[#A3AED0]">
+        <p className="text-[#4363C7]">
           Your password has been reset. You can now sign in with your new
           password.
         </p>
@@ -111,7 +111,7 @@ function ResetPasswordForm() {
   return (
     <>
       <h2 className="text-2xl font-bold mb-2 text-[#2B3674]">Reset your password</h2>
-      <p className="text-[#A3AED0] mb-8">
+      <p className="text-[#4363C7] mb-8">
         Enter your new password below.
       </p>
 
@@ -130,7 +130,7 @@ function ResetPasswordForm() {
             New password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
             <Input
               id="password"
               type="password"
@@ -139,10 +139,10 @@ function ResetPasswordForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
-              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
-          <p className="text-xs text-[#A3AED0]">
+          <p className="text-xs text-[#4363C7]">
             Must be at least 8 characters long
           </p>
         </div>
@@ -155,7 +155,7 @@ function ResetPasswordForm() {
             Confirm new password
           </Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
             <Input
               id="confirmPassword"
               type="password"
@@ -163,7 +163,7 @@ function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-md">
           <Link
             href="/signin"
-            className="inline-flex items-center gap-2 text-sm text-[#A3AED0] hover:text-[#2B3674] transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-[#4363C7] hover:text-[#2B3674] transition-colors mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to sign in

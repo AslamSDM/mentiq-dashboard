@@ -45,13 +45,13 @@ export function DashboardNavbar({ title = "Dashboard" }: DashboardNavbarProps) {
 
         {/* Icons */}
         {/* <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="text-[#A3AED0] hover:text-[#2B3674] hover:bg-transparent rounded-full">
+            <Button variant="ghost" size="icon" className="text-[#4363C7] hover:text-[#2B3674] hover:bg-transparent rounded-full">
                 <Bell className="h-5 w-5" />
             </Button>
-             <Button variant="ghost" size="icon" className="text-[#A3AED0] hover:text-[#2B3674] hover:bg-transparent rounded-full">
+             <Button variant="ghost" size="icon" className="text-[#4363C7] hover:text-[#2B3674] hover:bg-transparent rounded-full">
                 <Info className="h-5 w-5" />
             </Button>
-             <Button variant="ghost" size="icon" className="text-[#A3AED0] hover:text-[#2B3674] hover:bg-transparent rounded-full">
+             <Button variant="ghost" size="icon" className="text-[#4363C7] hover:text-[#2B3674] hover:bg-transparent rounded-full">
                 <Moon className="h-5 w-5" />
             </Button>
         </div> */}

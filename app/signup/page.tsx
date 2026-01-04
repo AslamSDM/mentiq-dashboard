@@ -305,7 +305,7 @@ function SignUpForm() {
           <div className="flex items-center gap-4 mb-8">
             <div
               className={`flex items-center gap-2 ${
-                step === "details" ? "text-primary" : "text-[#A3AED0]"
+                step === "details" ? "text-primary" : "text-[#4363C7]"
               }`}
             >
               <div
@@ -322,7 +322,7 @@ function SignUpForm() {
             <div className="flex-1 h-px bg-[#E0E5F2]"></div>
             <div
               className={`flex items-center gap-2 ${
-                step === "plan" ? "text-primary" : "text-[#A3AED0]"
+                step === "plan" ? "text-primary" : "text-[#4363C7]"
               }`}
             >
               <div
@@ -343,7 +343,7 @@ function SignUpForm() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold text-[#2B3674]">Create your account</h2>
-                <p className="text-[#A3AED0]">
+                <p className="text-[#4363C7]">
                   Fill in your details to get started
                 </p>
               </div>
@@ -369,7 +369,7 @@ function SignUpForm() {
                   <div className="w-full border-t border-[#E0E5F2]"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-[#A3AED0]">
+                  <span className="px-4 bg-white text-[#4363C7]">
                     or create account with email
                   </span>
                 </div>
@@ -390,7 +390,7 @@ function SignUpForm() {
                     Full name
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                     <Input
                       id="fullName"
                       type="text"
@@ -398,7 +398,7 @@ function SignUpForm() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -411,7 +411,7 @@ function SignUpForm() {
                     Company name
                   </Label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                     <Input
                       id="companyName"
                       type="text"
@@ -419,7 +419,7 @@ function SignUpForm() {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       required
-                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -433,7 +433,7 @@ function SignUpForm() {
                   Work email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                   <Input
                     id="email"
                     type="email"
@@ -441,7 +441,7 @@ function SignUpForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
@@ -454,7 +454,7 @@ function SignUpForm() {
                   Password
                 </Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#A3AED0]" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                   <Input
                     id="password"
                     type="password"
@@ -463,10 +463,10 @@ function SignUpForm() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#A3AED0] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
-                <p className="text-xs text-[#A3AED0]">
+                <p className="text-xs text-[#4363C7]">
                   Use 8 or more characters with a mix of letters, numbers &
                   symbols
                 </p>
@@ -479,7 +479,7 @@ function SignUpForm() {
                   onCheckedChange={(checked) =>
                     setAcceptedTerms(checked as boolean)
                   }
-                  className="mt-1 border-[#A3AED0] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
                 <label
                   htmlFor="terms"
@@ -556,7 +556,7 @@ function SignUpForm() {
                   <div className="w-full border-t border-[#E0E5F2]"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-[#A3AED0]">
+                  <span className="px-4 bg-white text-[#4363C7]">
                     Already have an account?
                   </span>
                 </div>
@@ -584,16 +584,16 @@ function SignUpForm() {
 
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold text-[#2B3674]">Check your email</h2>
-                <p className="text-[#A3AED0]">
+                <p className="text-[#4363C7]">
                   We&apos;ve sent a verification link to <strong className="text-[#2B3674]">{email}</strong>
                 </p>
               </div>
 
               <div className="bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg p-4 space-y-3">
-                <p className="text-sm text-[#A3AED0]">
+                <p className="text-sm text-[#4363C7]">
                   Click the link in your email to verify your account. Once verified, you can sign in and complete your subscription setup.
                 </p>
-                <p className="text-xs text-[#A3AED0]">
+                <p className="text-xs text-[#4363C7]">
                   Didn&apos;t receive the email? Check your spam folder or{" "}
                   <button
                     onClick={async () => {
@@ -633,7 +633,7 @@ function SignUpForm() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold text-[#2B3674]">Choose your plan</h2>
-                <p className="text-[#A3AED0]">
+                <p className="text-[#4363C7]">
                   Select the number of paid users you have
                 </p>
               </div>
@@ -649,7 +649,7 @@ function SignUpForm() {
                   <CardTitle className="text-[#2B3674]">
                     How many paid users do you have?
                   </CardTitle>
-                  <CardDescription className="text-[#A3AED0]">
+                  <CardDescription className="text-[#4363C7]">
                     Slide to select your current or expected user count
                   </CardDescription>
                 </CardHeader>
@@ -685,7 +685,7 @@ function SignUpForm() {
                               className="flex items-start gap-3 text-sm"
                             >
                               <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                              <span className="text-[#A3AED0]">{feature}</span>
+                              <span className="text-[#4363C7]">{feature}</span>
                             </div>
                           ))}
                       </div>
@@ -729,7 +729,7 @@ function SignUpForm() {
                 )}
               </Button>
 
-              <p className="text-xs text-center text-[#A3AED0]">
+              <p className="text-xs text-center text-[#4363C7]">
                 You'll be redirected to Stripe for secure payment processing.
                 After payment, you'll be able to create your first project.
               </p>
@@ -748,7 +748,7 @@ export default function SignUpPage() {
         <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-4 text-[#A3AED0]">Loading...</p>
+            <p className="mt-4 text-[#4363C7]">Loading...</p>
           </div>
         </div>
       }

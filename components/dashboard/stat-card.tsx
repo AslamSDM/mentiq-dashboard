@@ -19,7 +19,7 @@ export function StatCard({ title, value, trend, trendLabel, icon, iconBg }: Stat
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-[#A3AED0]">{title}</p>
+            <p className="text-sm font-medium text-[#4363C7]">{title}</p>
             <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{value}</h3>
           </div>
           {icon && (
@@ -40,7 +40,7 @@ export function StatCard({ title, value, trend, trendLabel, icon, iconBg }: Stat
               {isPositive ? <ArrowUpIcon className="h-4 w-4 mr-1" /> : <ArrowDownIcon className="h-4 w-4 mr-1" />}
               {Math.abs(trend)}%
             </span>
-            <span className="text-[#A3AED0] text-xs">{trendLabel || "since last month"}</span>
+            <span className="text-[#4363C7] text-xs">{trendLabel || "since last month"}</span>
           </div>
         )}
       </CardContent>
