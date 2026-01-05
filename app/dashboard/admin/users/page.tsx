@@ -48,7 +48,9 @@ import {
   Globe,
   Laptop,
   ExternalLink,
+  Search,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface UserWithProjects extends AdminUser {
   projects: any[];
@@ -71,6 +73,7 @@ export default function AdminUsersPage() {
   const [projectData, setProjectData] = useState<any>(null);
   const [loadingProjectData, setLoadingProjectData] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if user is admin
   useEffect(() => {
@@ -195,6 +198,17 @@ export default function AdminUsersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Search Bar */}
+            <div className="relative mb-4 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by email, user ID, or project name..."
+                className="pl-10"
+              />
+            </div>
+            
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
@@ -215,7 +229,19 @@ export default function AdminUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {usersWithProjects.map((user) => (
+                  {usersWithProjects
+                    .filter((user) => {
+                      if (!searchQuery) return true;
+                      const query = searchQuery.toLowerCase();
+                      return (
+                        user.email.toLowerCase().includes(query) ||
+                        user.id.toLowerCase().includes(query) ||
+                        user.projects.some((p) =>
+                          p.name.toLowerCase().includes(query)
+                        )
+                      );
+                    })
+                    .map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         {user.email}

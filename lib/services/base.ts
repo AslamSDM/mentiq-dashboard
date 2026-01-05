@@ -100,6 +100,10 @@ export class BaseHttpService {
       const errorData = await response.json().catch(() => ({}));
       
       // Handle unauthorized responses globally
+      // Only trigger signout if we had a token (meaning user was previously authenticated)
+      // This prevents signout during initial page load race conditions
+      const hadToken = !!getAuthToken();
+      
       if (response.status === 401 || 
           errorData.error === "Invalid token" ||
           errorData.message?.includes("Invalid token") ||
@@ -108,8 +112,8 @@ export class BaseHttpService {
         // Clear the auth token
         setAuthToken(null);
         
-        // Call the unauthorized handler if set
-        if (onUnauthorizedCallback) {
+        // Only call the unauthorized handler if user was previously authenticated
+        if (hadToken && onUnauthorizedCallback) {
           onUnauthorizedCallback();
         }
         

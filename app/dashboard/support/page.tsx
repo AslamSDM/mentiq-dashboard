@@ -100,9 +100,29 @@ export default function SupportPage() {
     fetchTickets();
   }, []);
 
+  // Validation constants
+  const SUBJECT_MIN = 3;
+  const SUBJECT_MAX = 200;
+  const DESCRIPTION_MIN = 10;
+  const DESCRIPTION_MAX = 5000;
+
+  const isSubjectValid = subject.length >= SUBJECT_MIN && subject.length <= SUBJECT_MAX;
+  const isDescriptionValid = description.length >= DESCRIPTION_MIN && description.length <= DESCRIPTION_MAX;
+  const isFormValid = isSubjectValid && isDescriptionValid;
+
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!isFormValid) {
+      if (!isSubjectValid) {
+        setError(`Subject must be between ${SUBJECT_MIN} and ${SUBJECT_MAX} characters`);
+      } else if (!isDescriptionValid) {
+        setError(`Description must be between ${DESCRIPTION_MIN} and ${DESCRIPTION_MAX} characters`);
+      }
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -195,14 +215,24 @@ export default function SupportPage() {
               </DialogHeader>
               <form onSubmit={handleCreateTicket} className="space-y-4 mt-4">
                 <div>
-                  <label className="text-sm text-[#4363C7] mb-1.5 block">Subject</label>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-sm text-[#4363C7]">Subject</label>
+                    <span className={`text-xs ${subject.length < SUBJECT_MIN || subject.length > SUBJECT_MAX ? 'text-red-500' : 'text-[#4363C7]'}`}>
+                      {subject.length}/{SUBJECT_MAX}
+                    </span>
+                  </div>
                   <Input
                     value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Brief description of your issue"
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
+                    onChange={(e) => setSubject(e.target.value.slice(0, SUBJECT_MAX))}
+                    placeholder="Brief description of your issue (min 3 chars)"
+                    className={`bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] ${subject.length > 0 && subject.length < SUBJECT_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
                     required
+                    minLength={SUBJECT_MIN}
+                    maxLength={SUBJECT_MAX}
                   />
+                  {subject.length > 0 && subject.length < SUBJECT_MIN && (
+                    <p className="text-xs text-red-500 mt-1">Subject must be at least {SUBJECT_MIN} characters</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -236,14 +266,24 @@ export default function SupportPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-[#4363C7] mb-1.5 block">Description</label>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-sm text-[#4363C7]">Description</label>
+                    <span className={`text-xs ${description.length < DESCRIPTION_MIN || description.length > DESCRIPTION_MAX ? 'text-red-500' : 'text-[#4363C7]'}`}>
+                      {description.length}/{DESCRIPTION_MAX}
+                    </span>
+                  </div>
                   <Textarea
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe your issue in detail..."
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[120px]"
+                    onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX))}
+                    placeholder="Describe your issue in detail... (min 10 chars)"
+                    className={`bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[120px] ${description.length > 0 && description.length < DESCRIPTION_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
                     required
+                    minLength={DESCRIPTION_MIN}
+                    maxLength={DESCRIPTION_MAX}
                   />
+                  {description.length > 0 && description.length < DESCRIPTION_MIN && (
+                    <p className="text-xs text-red-500 mt-1">Description must be at least {DESCRIPTION_MIN} characters</p>
+                  )}
                 </div>
                 {error && (
                   <p className="text-sm text-red-500">{error}</p>
@@ -259,8 +299,8 @@ export default function SupportPage() {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl"
-                    disabled={isSubmitting}
+                    className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl disabled:opacity-50"
+                    disabled={isSubmitting || !isFormValid}
                   >
                     {isSubmitting ? (
                       <>
