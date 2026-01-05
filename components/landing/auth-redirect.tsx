@@ -1,44 +1,40 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-// Client component to handle auth redirect
-export function AuthRedirect() {
-  const { status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
-
-  // This component renders nothing - it just handles the redirect
-  return null;
-}
-
 // Loading spinner for when checking auth
+// Note: Authenticated users are now redirected server-side via middleware,
+// so this component just needs to handle the loading state
 export function AuthLoadingCheck({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
 
+  // Show loading only briefly - middleware handles authenticated redirects
   if (status === "loading") {
     return (
       <div className="flex h-screen items-center justify-center bg-[#F4F7FE]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // Don't render children if authenticated (will be redirecting)
+  // For authenticated users, show a brief redirect message
+  // (middleware should redirect before this is seen, but just in case)
   if (status === "authenticated") {
     return (
       <div className="flex h-screen items-center justify-center bg-[#F4F7FE]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-[#4363C7]">Redirecting to dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return <>{children}</>;
+}
+
+// AuthRedirect is no longer needed since middleware handles redirects
+// Keeping this export for backwards compatibility
+export function AuthRedirect() {
+  return null;
 }

@@ -20,10 +20,22 @@ export async function middleware(req: NextRequest) {
   const isVerifyPendingPage = pathname.startsWith("/verify-pending");
   const isVerifyEmailPage = pathname.startsWith("/verify-email");
   const isOnboardingPage = pathname.startsWith("/dashboard/onboarding");
+  const isLandingPage = pathname === "/";
   const hasSuccessParam = req.nextUrl.searchParams.get("success") === "true";
 
   if (isVerifyEmailPage) {
     return null;
+  }
+
+  // Redirect authenticated users away from landing page to dashboard
+  if (isLandingPage && isAuth) {
+    if (!emailVerified) {
+      return NextResponse.redirect(new URL("/verify-pending", req.url));
+    }
+    if (!hasActiveSubscription && !isAdmin) {
+      return NextResponse.redirect(new URL("/pricing?required=true", req.url));
+    }
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   if (isAdminPage) {
@@ -87,5 +99,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/signin", "/signup", "/pricing", "/verify-pending", "/verify-email"],
+  matcher: ["/", "/dashboard/:path*", "/signin", "/signup", "/pricing", "/verify-pending", "/verify-email"],
 };
