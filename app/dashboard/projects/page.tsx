@@ -882,50 +882,50 @@ export default function ProjectsPage() {
                 <Label className="text-[#2B3674] font-semibold">Provider Setup (app/layout.tsx)</Label>
               </div>
               <CodeBlock
-                code={`import { AnalyticsProvider } from "mentiq-sdk";
+                code={`import { MentiqAnalyticsProvider } from "mentiq-sdk";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <AnalyticsProvider
+        <MentiqAnalyticsProvider
           config={{
             projectId: "${projects?.[0]?.id || 'your-project-id'}",
             apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
-            endpoint: "https://api.trymentiq.com",
+            endpoint: "https://app.trymentiq.com",
             enableHeatmapTracking: true,
             enableSessionRecording: true,
           }}
         >
           {children}
-        </AnalyticsProvider>
+        </MentiqAnalyticsProvider>
       </body>
     </html>
   );
 }`}
                 language="tsx"
-                onCopy={() => handleCopyItem(`import { AnalyticsProvider } from "mentiq-sdk";
+                onCopy={() => handleCopyItem(`import { MentiqAnalyticsProvider } from "mentiq-sdk";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <AnalyticsProvider
+        <MentiqAnalyticsProvider
           config={{
             projectId: "${projects?.[0]?.id || 'your-project-id'}",
             apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
-            endpoint: "https://api.trymentiq.com",
+            endpoint: "https://app.trymentiq.com",
             enableHeatmapTracking: true,
             enableSessionRecording: true,
           }}
         >
           {children}
-        </AnalyticsProvider>
+        </MentiqAnalyticsProvider>
       </body>
     </html>
   );
 }`)}
-                isCopied={copiedItem?.includes("AnalyticsProvider") || false}
+                isCopied={copiedItem?.includes("MentiqAnalyticsProvider") || false}
               />
             </div>
 

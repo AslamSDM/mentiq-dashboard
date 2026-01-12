@@ -243,7 +243,7 @@ export default function RootLayout({ children }) {
           config={{
             projectId: "your-project-id",
             apiKey: "mentiq_live_your_api_key",
-            endpoint: "https://api.trymentiq.com",
+            endpoint: "https://app.trymentiq.com",
           }}
         >
           {children}
@@ -279,7 +279,7 @@ export default function RootLayout({ children }) {
   config={{
     projectId: "my-project",
     apiKey: "mentiq_live_abc123",
-    endpoint: "https://api.trymentiq.com",
+    endpoint: "https://app.trymentiq.com",
   }}
 >
   <App />
@@ -290,7 +290,7 @@ export default function RootLayout({ children }) {
   config={{
     projectId: "my-project",
     apiKey: "mentiq_live_abc123",
-    endpoint: "https://api.trymentiq.com",
+    endpoint: "https://app.trymentiq.com",
     debug: true,                       // Enable console logs
     batchSize: 10,                     // Events per batch
     flushInterval: 10000,              // Auto-flush every 10s
@@ -465,7 +465,7 @@ function CustomPage() {
   config={{
     projectId: "my-project",
     apiKey: "mentiq_live_abc123",
-    endpoint: "https://api.trymentiq.com",
+    endpoint: "https://app.trymentiq.com",
     enableHeatmapTracking: true,  // Enable heatmap tracking
   }}
 >
@@ -498,7 +498,7 @@ function CustomPage() {
   config={{
     projectId: "my-project",
     apiKey: "mentiq_live_abc123",
-    endpoint: "https://api.trymentiq.com",
+    endpoint: "https://app.trymentiq.com",
     enableSessionRecording: true,  // Enable session recording
   }}
 >
