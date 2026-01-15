@@ -1096,7 +1096,7 @@ export default function DashboardPage() {
                   <Loader2 className="animate-spin text-[#4318FF] h-8 w-8" />
                 </div>
               ) : getGeoData().length > 0 ? (
-                <WorldMap geoData={getGeoData()} svgUrl="/world.svg" />
+                <WorldMap geoData={getGeoData()} />
               ) : (
                 <div className="flex items-center justify-center h-full text-[#4363C7]">
                   No location data available

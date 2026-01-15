@@ -34,6 +34,7 @@ interface CountryData {
   country_code: string;
   sessions: number;
   users: number;
+  events: number;
   conversion_rate: number;
 }
 
@@ -42,6 +43,7 @@ interface CityData {
   country: string;
   sessions: number;
   users: number;
+  events: number;
   revenue: number;
 }
 
@@ -74,14 +76,16 @@ export default function LocationAnalyticsPage() {
           (acc: any[], loc: any) => {
             const existing = acc.find((c) => c.country === loc.country);
             if (existing) {
-              existing.sessions += loc.event_count;
+              existing.sessions += loc.session_count || 1;
               existing.users += loc.unique_users;
+              existing.events += loc.event_count;
             } else {
               acc.push({
                 country: loc.country,
                 country_code: getCountryCodeFromName(loc.country),
-                sessions: loc.event_count,
+                sessions: loc.session_count || 1,
                 users: loc.unique_users,
+                events: loc.event_count,
                 conversion_rate: 0, // Would need actual conversion data
               });
             }
@@ -95,8 +99,9 @@ export default function LocationAnalyticsPage() {
           ?.map((loc: any) => ({
             city: loc.city || "Unknown",
             country: loc.country,
-            sessions: loc.event_count,
+            sessions: loc.session_count || 1,
             users: loc.unique_users,
+            events: loc.event_count,
             revenue: 0, // Would need revenue data from another source
           }));
 
@@ -262,14 +267,14 @@ export default function LocationAnalyticsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Sessions
+                  Total Events
                 </CardTitle>
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
                   {locationData.by_country
-                    .reduce((sum, country) => sum + country.sessions, 0)
+                    .reduce((sum, country) => sum + country.events, 0)
                     .toLocaleString()}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -319,7 +324,15 @@ export default function LocationAnalyticsPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-8 text-right">
+                        <div className="grid grid-cols-4 gap-6 text-right">
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Events
+                            </p>
+                            <p className="font-medium">
+                              {country.events.toLocaleString()}
+                            </p>
+                          </div>
                           <div>
                             <p className="text-sm text-muted-foreground">
                               Sessions
@@ -396,7 +409,15 @@ export default function LocationAnalyticsPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-8 text-right">
+                        <div className="grid grid-cols-4 gap-6 text-right">
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Events
+                            </p>
+                            <p className="font-medium">
+                              {city.events.toLocaleString()}
+                            </p>
+                          </div>
                           <div>
                             <p className="text-sm text-muted-foreground">
                               Sessions
@@ -439,23 +460,32 @@ export default function LocationAnalyticsPage() {
               <CardHeader>
                 <CardTitle>Geographic Distribution</CardTitle>
                 <CardDescription>
-                  Visual representation of user distribution across the globe
+                  Visual heatmap of events, sessions, and users across the globe
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[500px] w-full">
-                  {locationData && (
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  ) : locationData && locationData.by_country.length > 0 ? (
                     <WorldMap
                       geoData={locationData.by_country?.map((country) => ({
                         country: country.country,
                         users: country.users,
                         sessions: country.sessions,
+                        events: country.events,
                         code: country.country_code,
-                        lat: 0, // Would need actual coordinates
-                        lng: 0, // Would need actual coordinates
+                        lat: 0,
+                        lng: 0,
                       }))}
-                      svgUrl="/world-map.svg"
+                      metric="events"
                     />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      No location data available. Events will appear here once users start interacting with your application.
+                    </div>
                   )}
                 </div>
               </CardContent>

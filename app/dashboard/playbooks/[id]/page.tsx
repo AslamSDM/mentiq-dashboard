@@ -360,7 +360,7 @@ export default function PlaybookDetailPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      {/* Header */}
+      {/* Simple Header with Back Button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
@@ -369,32 +369,27 @@ export default function PlaybookDetailPage() {
             onClick={() => router.push("/dashboard/playbooks")}
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+            Playbooks
           </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">{playbook.name}</h1>
-              <Badge
-                className={
-                  playbook.status === "active"
-                    ? "bg-green-100 text-green-800"
-                    : playbook.status === "paused"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-gray-100 text-gray-800"
-                }
-              >
-                {playbook.status}
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">{playbook.name}</h1>
+            <Badge
+              className={
+                playbook.status === "active"
+                  ? "bg-green-100 text-green-800"
+                  : playbook.status === "paused"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-gray-100 text-gray-800"
+              }
+            >
+              {playbook.status}
+            </Badge>
+            {playbook.source === "llm_generated" && (
+              <Badge variant="secondary" className="gap-1">
+                <Sparkles className="h-3 w-3" />
+                AI Generated
               </Badge>
-              {playbook.source === "llm_generated" && (
-                <Badge variant="secondary" className="gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  AI Generated
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground">
-              {playbook.description || "No description"}
-            </p>
+            )}
           </div>
         </div>
         <div className="flex gap-2">

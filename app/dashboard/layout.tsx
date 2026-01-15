@@ -135,6 +135,17 @@ export default function DashboardLayout({
     // Get the last segment
     const lastSegment = segments[segments.length - 1];
     
+    // Check if last segment looks like a UUID (dynamic route parameter)
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(lastSegment);
+    
+    // If it's a UUID, use the parent segment as the title
+    if (isUUID && segments.length >= 3) {
+      const parentSegment = segments[segments.length - 2];
+      return parentSegment 
+        ? parentSegment.charAt(0).toUpperCase() + parentSegment.slice(1).replace(/-/g, ' ')
+        : 'Dashboard';
+    }
+    
     // Capitalize and replace dashes
     return lastSegment 
       ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, ' ')

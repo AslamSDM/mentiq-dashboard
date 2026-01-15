@@ -1,118 +1,188 @@
 "use client";
 
 import { useState, useEffect } from "react";
+// @ts-ignore
+import World from "@react-map/world";
 
 interface GeoData {
   country: string;
   users: number;
   sessions: number;
+  events?: number;
   code: string;
   lat: number;
   lng: number;
 }
 
+type MetricType = "users" | "sessions" | "events";
+
 interface WorldMapProps {
   geoData: GeoData[];
-  svgUrl: string; // URL to your world map SVG file
+  metric?: MetricType;
+  onMetricChange?: (metric: MetricType) => void;
 }
 
-export function WorldMap({ geoData, svgUrl }: WorldMapProps) {
-  const [svgContent, setSvgContent] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+interface TooltipState {
+  country: string;
+  x: number;
+  y: number;
+}
 
+export function WorldMap({ geoData, metric = "sessions", onMetricChange }: WorldMapProps) {
+  const [selectedMetric, setSelectedMetric] = useState<MetricType>(metric);
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+
+  // Create a lookup map for quick data access
+  const dataByCountry = Object.fromEntries(
+    geoData.map((geo) => [geo.country, geo])
+  );
+
+  // Track mouse position and hovered country
   useEffect(() => {
-    // Fetch the SVG file
-    fetch(svgUrl)
-      .then((response) => response.text())
-      .then((svg) => {
-        setSvgContent(svg);
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
-  }, [svgUrl]);
+    const handleMouseMove = (e: MouseEvent) => {
+      const target = e.target as SVGPathElement;
+      if (target.tagName === "path" && target.id) {
+        // Extract country name from the element id (format: "CountryName-instanceId")
+        const countryName = target.id.replace(/-[^-]+$/, "");
+        if (dataByCountry[countryName]) {
+          setTooltip({
+            country: countryName,
+            x: e.clientX,
+            y: e.clientY,
+          });
+        }
+      }
+    };
 
-  // Create a map of country codes to user data for quick lookup
-  const countryDataMap = new Map(geoData?.map((geo) => [geo.code, geo]));
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = e.target as SVGPathElement;
+      if (target.tagName === "path") {
+        setTooltip(null);
+      }
+    };
 
-  // Get max users for scaling
-  const maxUsers = Math.max(...geoData?.map((g) => g.users), 1);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseout", handleMouseOut);
 
-  // Calculate color intensity based on user count
-  const getCountryColor = (users: number) => {
-    const intensity = Math.min(0.3 + (users / maxUsers) * 0.7, 1);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseout", handleMouseOut);
+    };
+  }, [dataByCountry]);
+
+  const handleMetricChange = (newMetric: MetricType) => {
+    setSelectedMetric(newMetric);
+    onMetricChange?.(newMetric);
+  };
+
+  // Get value based on selected metric
+  const getValue = (geo: GeoData): number => {
+    switch (selectedMetric) {
+      case "users":
+        return geo.users;
+      case "sessions":
+        return geo.sessions;
+      case "events":
+        return geo.events ?? geo.sessions;
+      default:
+        return geo.sessions;
+    }
+  };
+
+  // Get max value for scaling
+  const maxValue = Math.max(...geoData?.map((g) => getValue(g)), 1);
+
+  // Calculate color intensity based on value
+  const getCountryColor = (value: number) => {
+    const intensity = Math.min(0.3 + (value / maxValue) * 0.7, 1);
     return `rgba(59, 130, 246, ${intensity})`;
   };
 
-  // Position mapping for markers (you can adjust these based on your SVG viewBox)
-  const markerPositions: Record<string, { x: number; y: number }> = {
-    US: { x: 220, y: 350 },
-    CA: { x: 220, y: 280 },
-    GB: { x: 490, y: 240 },
-    DE: { x: 530, y: 250 },
-    FR: { x: 495, y: 280 },
-    AU: { x: 835, y: 520 },
-    IN: { x: 680, y: 360 },
-    JP: { x: 870, y: 320 },
-    BR: { x: 340, y: 470 },
-    MX: { x: 180, y: 360 },
-    IT: { x: 520, y: 300 },
-    ES: { x: 470, y: 300 },
-    NL: { x: 510, y: 240 },
-    SE: { x: 530, y: 200 },
-    PL: { x: 545, y: 240 },
-    CN: { x: 760, y: 320 },
-    KR: { x: 840, y: 320 },
-    SG: { x: 750, y: 410 },
-    AE: { x: 630, y: 360 },
-  };
+  // Library uses full country names as keys, not ISO codes
+  const cityColors = Object.fromEntries(
+    geoData.map((geo) => [geo.country, getCountryColor(getValue(geo))])
+  );
 
-  if (isLoading) {
-    return (
-      <div className="relative w-full h-full bg-slate-50 rounded-lg overflow-hidden flex items-center justify-center">
-        <div className="text-slate-600">Loading map...</div>
-      </div>
-    );
-  }
+  // Sort data by current metric for the summary
+  const sortedData = [...geoData].sort((a, b) => getValue(b) - getValue(a));
+
+  const metricLabels: Record<MetricType, string> = {
+    users: "Users",
+    sessions: "Sessions",
+    events: "Events",
+  };
 
   return (
     <div className="relative w-full h-full bg-slate-50 rounded-lg overflow-hidden">
-      <div
-        className="w-full h-full flex items-center justify-center"
-        dangerouslySetInnerHTML={{
-          __html: svgContent
-            // Remove fixed width and height to allow scaling
-            .replace(/width="[^"]*"/g, '')
-            .replace(/height="[^"]*"/g, '')
-            // Add proper viewBox and sizing attributes
-            .replace(
-              /<svg([^>]*?)>/,
-              '<svg$1 viewBox="0 0 504.84 332.98" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; max-width: 100%; max-height: 100%;">'
-            )
-            .replace(
-              /<path([^>]*?)id="([A-Z]{2})"([^>]*?)\/>/g,
-              (match, before, countryCode, after) => {
-                const countryData = countryDataMap.get(countryCode);
-                const fillColor = countryData
-                  ? getCountryColor(countryData.users)
-                  : "#cbd5e1";
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-full h-full max-h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto">
+          <World
+            type="select-single"
+            mapColor="#cbd5e1"
+            strokeColor="#475569"
+            strokeWidth={0.5}
+            hoverColor="rgba(59, 130, 246, 0.8)"
+            cityColors={cityColors}
+            hints={false}
+          />
+        </div>
+      </div>
 
-                const title = countryData
-                  ? `${
-                      countryData.country
-                    }: ${countryData.users.toLocaleString()} users`
-                  : "";
+      {/* Custom Tooltip */}
+      {tooltip && dataByCountry[tooltip.country] && (
+        <div
+          className="fixed z-50 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border pointer-events-none"
+          style={{
+            top: tooltip.y + 15,
+            left: tooltip.x + 15,
+          }}
+        >
+          <p className="font-semibold text-sm mb-2">{tooltip.country}</p>
+          <div className="space-y-1 text-xs">
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-500">Events:</span>
+              <span className="font-medium">
+                {(dataByCountry[tooltip.country].events ?? 0).toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-500">Sessions:</span>
+              <span className="font-medium">
+                {dataByCountry[tooltip.country].sessions.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-500">Users:</span>
+              <span className="font-medium">
+                {dataByCountry[tooltip.country].users.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
-                return `<path${before}id="${countryCode}"${after} fill="${fillColor}" stroke="#475569" stroke-width="0.5" class="hover:opacity-80 transition-opacity cursor-pointer"><title>${title}</title></path>`;
-              }
-            ),
-        }}
-      />
+      {/* Metric Toggle */}
+      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border pointer-events-auto">
+        <div className="flex gap-1">
+          {(["sessions", "users", "events"] as MetricType[]).map((m) => (
+            <button
+              key={m}
+              onClick={() => handleMetricChange(m)}
+              className={`px-3 py-1 text-xs rounded transition-colors ${
+                selectedMetric === m
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              }`}
+            >
+              {metricLabels[m]}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border pointer-events-auto">
-        <p className="text-xs font-semibold mb-2">User Density</p>
+        <p className="text-xs font-semibold mb-2">{metricLabels[selectedMetric]} Density</p>
         <div className="flex items-center gap-2 text-xs">
           <div className="flex items-center gap-1">
             <div
@@ -136,19 +206,13 @@ export function WorldMap({ geoData, svgUrl }: WorldMapProps) {
             <span>High</span>
           </div>
         </div>
-        <div className="mt-2 pt-2 border-t">
-          <div className="flex items-center gap-1 text-xs">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span>Active regions (pulse = top 5)</span>
-          </div>
-        </div>
       </div>
 
       {/* Top Countries Summary */}
       <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border pointer-events-auto max-w-xs">
-        <p className="text-xs font-semibold mb-2">Top Countries</p>
+        <p className="text-xs font-semibold mb-2">Top Countries by {metricLabels[selectedMetric]}</p>
         <div className="space-y-1">
-          {geoData.slice(0, 5)?.map((geo, i) => (
+          {sortedData.slice(0, 5)?.map((geo, i) => (
             <div
               key={i}
               className="flex items-center justify-between text-xs gap-3"
@@ -158,7 +222,7 @@ export function WorldMap({ geoData, svgUrl }: WorldMapProps) {
                 <span className="font-medium">{geo.code}</span>
               </div>
               <span className="text-slate-600">
-                {geo.users.toLocaleString()}
+                {getValue(geo).toLocaleString()}
               </span>
             </div>
           ))}
@@ -175,6 +239,7 @@ export default function WorldMapDemo() {
       country: "United States",
       users: 1250,
       sessions: 3420,
+      events: 8540,
       code: "US",
       lat: 37.09,
       lng: -95.71,
@@ -183,6 +248,7 @@ export default function WorldMapDemo() {
       country: "United Kingdom",
       users: 890,
       sessions: 2340,
+      events: 5820,
       code: "GB",
       lat: 55.37,
       lng: -3.43,
@@ -191,6 +257,7 @@ export default function WorldMapDemo() {
       country: "Canada",
       users: 650,
       sessions: 1780,
+      events: 4210,
       code: "CA",
       lat: 56.13,
       lng: -106.34,
@@ -199,6 +266,7 @@ export default function WorldMapDemo() {
       country: "Germany",
       users: 580,
       sessions: 1560,
+      events: 3890,
       code: "DE",
       lat: 51.16,
       lng: 10.45,
@@ -207,6 +275,7 @@ export default function WorldMapDemo() {
       country: "Australia",
       users: 520,
       sessions: 1420,
+      events: 3540,
       code: "AU",
       lat: -25.27,
       lng: 133.77,
@@ -215,6 +284,7 @@ export default function WorldMapDemo() {
       country: "India",
       users: 480,
       sessions: 1320,
+      events: 3280,
       code: "IN",
       lat: 20.59,
       lng: 78.96,
@@ -223,6 +293,7 @@ export default function WorldMapDemo() {
       country: "France",
       users: 420,
       sessions: 1140,
+      events: 2850,
       code: "FR",
       lat: 46.22,
       lng: 2.21,
@@ -231,6 +302,7 @@ export default function WorldMapDemo() {
       country: "Japan",
       users: 380,
       sessions: 1020,
+      events: 2540,
       code: "JP",
       lat: 36.2,
       lng: 138.25,
@@ -239,6 +311,7 @@ export default function WorldMapDemo() {
       country: "Brazil",
       users: 340,
       sessions: 920,
+      events: 2280,
       code: "BR",
       lat: -14.23,
       lng: -51.92,
@@ -247,6 +320,7 @@ export default function WorldMapDemo() {
       country: "Spain",
       users: 310,
       sessions: 850,
+      events: 2120,
       code: "ES",
       lat: 40.46,
       lng: -3.74,
@@ -260,46 +334,25 @@ export default function WorldMapDemo() {
           Geographic Analytics Dashboard
         </h1>
         <p className="text-slate-600 mb-6">
-          Interactive world map showing user distribution
+          Interactive world map showing event distribution by country
         </p>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <WorldMap geoData={sampleData} svgUrl="/world.svg" />
+        <div className="bg-white rounded-xl shadow-lg p-6 h-[500px]">
+          <WorldMap geoData={sampleData} metric="events" />
         </div>
 
         <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4">Usage Instructions</h2>
           <div className="space-y-3 text-sm text-slate-700">
             <p>
-              <strong>Your SVG file should be at:</strong>{" "}
-              <code className="bg-slate-100 px-1.5 py-0.5 rounded">
-                /public/world.svg
-              </code>
-            </p>
-
-            <p className="mt-4">
-              <strong>To integrate into your app:</strong>
-            </p>
-            <div className="bg-slate-50 p-3 rounded border font-mono text-xs overflow-x-auto"></div>
-
-            <p className="mt-4">
               <strong>Features:</strong>
             </p>
             <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Automatically colors countries based on user density</li>
-              <li>Hover tooltips show country name and user count</li>
-              <li>Red markers indicate active regions with data</li>
-              <li>Pulse animation highlights top 5 countries</li>
+              <li>Toggle between Events, Sessions, and Users metrics</li>
+              <li>Countries colored based on selected metric density</li>
+              <li>Hover tooltips show country name</li>
               <li>Responsive legend and top countries panel</li>
-              <li>Works with any MapSVG-format world map</li>
             </ul>
-
-            <p className="mt-4 text-amber-700">
-              <strong>Note:</strong> If markers don't align perfectly, adjust
-              the coordinates in the{" "}
-              <code className="bg-slate-100 px-1 rounded">markerPositions</code>{" "}
-              object to match your SVG's viewBox dimensions.
-            </p>
           </div>
         </div>
       </div>

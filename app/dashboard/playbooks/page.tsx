@@ -235,10 +235,7 @@ export default function PlaybooksPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <DashboardHeader
-        title="AI Growth Playbooks"
-        description="Data-driven recommendations powered by your SaaS metrics"
-      />
+
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
