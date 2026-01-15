@@ -30,7 +30,6 @@ export default function ChurnByChannelPage() {
 
   const [channelChurnData, setChannelChurnData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (selectedProjectId) {
       fetchChannelData();
@@ -45,9 +44,10 @@ export default function ChurnByChannelPage() {
       const response = await centralizedData.getChurnByChannel(
         selectedProjectId
       );
-
-      if (response?.data) {
-        setChannelChurnData(response.data);
+      console.log("response", response);
+      // centralized-data already unwraps response.data, so response has { channels: [...] }
+      if (response?.channels) {
+        setChannelChurnData(response); // Store full response object, not just channels array
       }
     } catch {
       toast({
@@ -102,10 +102,7 @@ export default function ChurnByChannelPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <DashboardHeader
-        title="Churn by Channel"
-        description="Analyze customer retention across acquisition channels"
-      />
+ 
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

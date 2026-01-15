@@ -79,12 +79,16 @@ export function WorldMap({ geoData, svgUrl }: WorldMapProps) {
   return (
     <div className="relative w-full h-full bg-slate-50 rounded-lg overflow-hidden">
       <div
-        className="w-full h-full [&>svg]:w-full [&>svg]:h-full [&>svg]:object-cover"
+        className="w-full h-full flex items-center justify-center"
         dangerouslySetInnerHTML={{
           __html: svgContent
+            // Remove fixed width and height to allow scaling
+            .replace(/width="[^"]*"/g, '')
+            .replace(/height="[^"]*"/g, '')
+            // Add proper viewBox and sizing attributes
             .replace(
               /<svg([^>]*?)>/,
-              '<svg$1 preserveAspectRatio="xMidYMid slice" style="width: 100%; height: 100%;">'
+              '<svg$1 viewBox="0 0 504.84 332.98" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; max-width: 100%; max-height: 100%;">'
             )
             .replace(
               /<path([^>]*?)id="([A-Z]{2})"([^>]*?)\/>/g,

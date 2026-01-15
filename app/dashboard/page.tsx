@@ -224,32 +224,118 @@ export default function DashboardPage() {
 
   const formatPercentage = (value: number) => `${value?.toFixed(1)}%`;
 
-  // Process Device Data for Table
+  // Process Device Data for Table - show OS classification, fallback to events
   const getDeviceTableData = () => {
-    if (!deviceData?.by_device) return [];
-    return deviceData.by_device.map((d: any) => ({
-      device: d.device || "Unknown",
-      sessions: d.sessions || 0,
-      users: d.users || 0,
-      bounce_rate:
-        typeof d.bounce_rate === "string"
-          ? parseFloat(d.bounce_rate.replace("%", ""))
-          : 0,
-      avg_session_time: d.avg_session_time || "0s",
-    }));
+    // First try the by_os data from API (preferred for OS classification)
+    if (deviceData?.by_os && deviceData.by_os.length > 0) {
+      return deviceData.by_os.map((d: any) => ({
+        device: d.os || "Unknown",
+        sessions: d.sessions || 0,
+        users: d.users || 0,
+        bounce_rate:
+          typeof d.conversion_rate === "string"
+            ? parseFloat(d.conversion_rate.replace("%", ""))
+            : 0,
+        avg_session_time: "N/A",
+      }));
+    }
+    
+    // Fallback to by_device if by_os not available
+    if (deviceData?.by_device && deviceData.by_device.length > 0) {
+      return deviceData.by_device.map((d: any) => ({
+        device: d.device || d.os || "Unknown",
+        sessions: d.sessions || 0,
+        users: d.users || 0,
+        bounce_rate:
+          typeof d.bounce_rate === "string"
+            ? parseFloat(d.bounce_rate.replace("%", ""))
+            : 0,
+        avg_session_time: d.avg_session_time || "0s",
+      }));
+    }
+    
+    // Fallback: aggregate OS data from events if available
+    if (Array.isArray(events) && events.length > 0) {
+      const osMap = new Map<string, { os: string; sessions: number; users: Set<string> }>();
+      
+      events.forEach((event: any) => {
+        // Handle both camelCase and PascalCase field names from backend
+        const os = event.Os || event.os || event.Properties?.os || "Unknown";
+        if (!os || os === "Unknown") return;
+        
+        const existing = osMap.get(os) || { os, sessions: 0, users: new Set<string>() };
+        existing.sessions++;
+        const userId = event.UserId || event.user_id || event.SessionId || event.session_id || '';
+        if (userId) existing.users.add(userId);
+        osMap.set(os, existing);
+      });
+      
+      return Array.from(osMap.values())
+        .map(item => ({
+          device: item.os,
+          sessions: item.sessions,
+          users: item.users.size || item.sessions,
+          bounce_rate: 0,
+          avg_session_time: "N/A",
+        }))
+        .sort((a, b) => b.sessions - a.sessions);
+    }
+    
+    return [];
   };
 
-  // Process Location Data for Map
+  // Process Location Data for Map - fallback to events if API data unavailable
   const getGeoData = () => {
-    if (!locationData?.locations) return [];
-    return locationData.locations
-      .map((location: any) => ({
-        country: location.country,
-        users: location.unique_users,
-        sessions: location.event_count,
-        code: getCountryCode(location.country),
-      }))
-      .sort((a: any, b: any) => b.users - a.users);
+    // First try by_country from location API
+    if (locationData?.by_country && locationData.by_country.length > 0) {
+      return locationData.by_country
+        .map((location: any) => ({
+          country: location.country,
+          users: location.users || location.unique_users || 0,
+          sessions: location.sessions || location.event_count || 0,
+          code: getCountryCode(location.country),
+        }))
+        .sort((a: any, b: any) => b.users - a.users);
+    }
+    
+    // Fallback: try legacy locations field
+    if (locationData?.locations && locationData.locations.length > 0) {
+      return locationData.locations
+        .map((location: any) => ({
+          country: location.country,
+          users: location.unique_users || location.users || 0,
+          sessions: location.event_count || location.sessions || 0,
+          code: getCountryCode(location.country),
+        }))
+        .sort((a: any, b: any) => b.users - a.users);
+    }
+    
+    // Fallback: aggregate from events if available
+    if (Array.isArray(events) && events.length > 0) {
+      const countryMap = new Map<string, { country: string; users: number; sessions: number }>();
+      
+      events.forEach((event: any) => {
+        // Handle both camelCase and snake_case field names from backend
+        const country = event.Country || event.country || event.Properties?.country || null;
+        if (!country || country === 'Unknown' || country === 'Local') return;
+        
+        const existing = countryMap.get(country) || { country, users: 0, sessions: 0 };
+        existing.users++;
+        existing.sessions++;
+        countryMap.set(country, existing);
+      });
+      
+      return Array.from(countryMap.values())
+        .map(item => ({
+          country: item.country,
+          users: item.users,
+          sessions: item.sessions,
+          code: getCountryCode(item.country),
+        }))
+        .sort((a, b) => b.users - a.users);
+    }
+    
+    return [];
   };
 
   // Process Retention Data
@@ -1058,7 +1144,7 @@ export default function DashboardPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
-            Device Analytics
+            Platform Analytics
           </h2>
           <Link href="/dashboard/devices">
             <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
@@ -1069,8 +1155,8 @@ export default function DashboardPage() {
 
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">Device Performance</CardTitle>
-            <CardDescription className="text-[#4363C7]">Breakdown by device type</CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">Operating System Distribution</CardTitle>
+            <CardDescription className="text-[#4363C7]">Breakdown by operating system</CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loadingEnhanced ? (
@@ -1081,48 +1167,52 @@ export default function DashboardPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-[#F4F7FE] hover:bg-transparent">
-                    <TableHead className="text-[#4363C7] pl-6">Device</TableHead>
+                    <TableHead className="text-[#4363C7] pl-6">Operating System</TableHead>
                     <TableHead className="text-right text-[#4363C7]">Users</TableHead>
                     <TableHead className="text-right text-[#4363C7]">Sessions</TableHead>
-                    <TableHead className="text-right text-[#4363C7]">Bounce Rate</TableHead>
-                    <TableHead className="text-right text-[#4363C7] pr-6">Avg. Duration</TableHead>
+                    <TableHead className="text-right text-[#4363C7] pr-6">Share</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {getDeviceTableData().length > 0 ? (
-                    getDeviceTableData().map((device: any, i: number) => (
-                      <TableRow key={i} className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50">
-                        <TableCell className="font-bold text-[#2B3674] flex items-center gap-2 pl-6">
-                          {device.device === "Desktop" ? (
-                            <Monitor className="h-4 w-4 text-[#4318FF]" />
-                          ) : device.device === "Mobile" ? (
-                            <Smartphone className="h-4 w-4 text-[#4318FF]" />
-                          ) : (
-                            <Tablet className="h-4 w-4 text-[#4318FF]" />
-                          )}
-                          {device.device}
-                        </TableCell>
-                        <TableCell className="text-right font-medium text-[#2B3674]">
-                          {device.users.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right font-medium text-[#2B3674]">
-                          {device.sessions.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right font-medium text-[#2B3674]">
-                          {device.bounce_rate.toFixed(1)}%
-                        </TableCell>
-                        <TableCell className="text-right font-medium text-[#2B3674] pr-6">
-                          {device.avg_session_time}
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    (() => {
+                      const data = getDeviceTableData();
+                      const totalSessions = data.reduce((sum: number, d: any) => sum + d.sessions, 0);
+                      return data.map((device: any, i: number) => (
+                        <TableRow key={i} className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50">
+                          <TableCell className="font-bold text-[#2B3674] flex items-center gap-2 pl-6">
+                            {device.device?.toLowerCase().includes("mac") || device.device?.toLowerCase().includes("ios") ? (
+                              <Monitor className="h-4 w-4 text-[#4318FF]" />
+                            ) : device.device?.toLowerCase().includes("windows") ? (
+                              <Monitor className="h-4 w-4 text-[#00A3FF]" />
+                            ) : device.device?.toLowerCase().includes("android") ? (
+                              <Smartphone className="h-4 w-4 text-[#3DDC84]" />
+                            ) : device.device?.toLowerCase().includes("linux") ? (
+                              <Monitor className="h-4 w-4 text-[#FCC624]" />
+                            ) : (
+                              <Monitor className="h-4 w-4 text-[#4318FF]" />
+                            )}
+                            {device.device}
+                          </TableCell>
+                          <TableCell className="text-right font-medium text-[#2B3674]">
+                            {device.users.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right font-medium text-[#2B3674]">
+                            {device.sessions.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right font-medium text-[#2B3674] pr-6">
+                            {totalSessions > 0 ? ((device.sessions / totalSessions) * 100).toFixed(1) : 0}%
+                          </TableCell>
+                        </TableRow>
+                      ));
+                    })()
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={4}
                         className="text-center py-8 text-[#4363C7]"
                       >
-                        No device data available
+                        No platform data available
                       </TableCell>
                     </TableRow>
                   )}

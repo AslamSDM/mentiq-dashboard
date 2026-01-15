@@ -86,6 +86,14 @@ interface ChurnTrend {
   total_users: number;
 }
 
+interface ChannelChurnData {
+  channel: string;
+  total_users: number;
+  active_users: number;
+  churned_users: number;
+  churn_rate: number;
+}
+
 export default function ChurnAnalysisPage() {
   const { getEffectiveProjectId } = useStore();
   const selectedProjectId = getEffectiveProjectId();
@@ -94,6 +102,7 @@ export default function ChurnAnalysisPage() {
   const [riskUsers, setRiskUsers] = useState<ChurnRiskUser[]>([]);
   const [churnFactors, setChurnFactors] = useState<ChurnFactors[]>([]);
   const [churnTrends, setChurnTrends] = useState<ChurnTrend[]>([]);
+  const [channelData, setChannelData] = useState<ChannelChurnData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRiskLevel, setSelectedRiskLevel] = useState("all");
 
@@ -219,6 +228,14 @@ export default function ChurnAnalysisPage() {
             total_users: total_at_risk + 1000,
           },
         ]);
+      }
+
+      // Fetch churn by channel data
+      const channelResponse = await centralizedData.getChurnByChannel(
+        selectedProjectId
+      );
+      if (channelResponse?.data?.channels) {
+        setChannelData(channelResponse.data.channels);
       }
     } catch (error) {
       // Silent fail - data will show empty state
@@ -382,6 +399,7 @@ export default function ChurnAnalysisPage() {
             <TabsTrigger value="factors">Churn Factors</TabsTrigger>
             <TabsTrigger value="trends">Churn Trends</TabsTrigger>
             <TabsTrigger value="distribution">Risk Distribution</TabsTrigger>
+            <TabsTrigger value="by-channel">By Channel</TabsTrigger>
           </TabsList>
 
           <TabsContent value="risk-users" className="space-y-4">
@@ -797,6 +815,113 @@ export default function ChurnAnalysisPage() {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="by-channel" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Churn by Acquisition Channel</CardTitle>
+                <CardDescription>
+                  Compare churn rates across different acquisition channels
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : channelData.length > 0 ? (
+                  <div className="space-y-6">
+                    <ChartContainer
+                      config={{
+                        churn_rate: {
+                          label: "Churn Rate",
+                          color: "hsl(var(--chart-1))",
+                        },
+                        total_users: {
+                          label: "Total Users",
+                          color: "hsl(var(--chart-2))",
+                        },
+                      }}
+                      className="h-[300px]"
+                    >
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={channelData}
+                          layout="horizontal"
+                          margin={{ left: 80 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="channel" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar
+                            dataKey="churn_rate"
+                            fill="var(--color-churn_rate)"
+                            name="Churn Rate %"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+
+                    <div className="space-y-3">
+                      {channelData.map((channel, index) => (
+                        <div
+                          key={index}
+                          className="border rounded-lg p-4 space-y-2"
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium capitalize">
+                              {channel.channel || 'Direct'}
+                            </h4>
+                            <Badge
+                              variant={
+                                channel.churn_rate > 50
+                                  ? "destructive"
+                                  : channel.churn_rate > 25
+                                  ? "secondary"
+                                  : "default"
+                              }
+                            >
+                              {channel.churn_rate?.toFixed(1)}% churn
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Total Users</p>
+                              <p className="font-medium">{channel.total_users}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Active Users</p>
+                              <p className="font-medium text-green-600">
+                                {channel.active_users}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Churned Users</p>
+                              <p className="font-medium text-red-600">
+                                {channel.churned_users}
+                              </p>
+                            </div>
+                          </div>
+                          <Progress
+                            value={100 - channel.churn_rate}
+                            className="h-2"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            {(100 - channel.churn_rate)?.toFixed(1)}% retention
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+                    No channel data available. Make sure events have channel properties.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
