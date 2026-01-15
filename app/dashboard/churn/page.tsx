@@ -396,10 +396,7 @@ export default function ChurnAnalysisPage() {
         <Tabs defaultValue="risk-users" className="space-y-4">
           <TabsList>
             <TabsTrigger value="risk-users">At-Risk Users</TabsTrigger>
-            <TabsTrigger value="factors">Churn Factors</TabsTrigger>
-            <TabsTrigger value="trends">Churn Trends</TabsTrigger>
             <TabsTrigger value="distribution">Risk Distribution</TabsTrigger>
-            <TabsTrigger value="by-channel">By Channel</TabsTrigger>
           </TabsList>
 
           <TabsContent value="risk-users" className="space-y-4">
