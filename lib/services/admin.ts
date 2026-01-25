@@ -41,6 +41,22 @@ export interface UserEventData {
   }>;
 }
 
+export interface WaitlistEntry {
+  id: string;
+  email: string;
+  full_name: string;
+  company?: string;
+  user_count?: number;
+  source?: string;
+  email_sent: boolean;
+  promo_emails_opt_in: boolean;
+  access_granted: boolean;
+  access_granted_at?: string;
+  access_granted_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 class AdminService extends BaseHttpService {
   /**
    * Get all accounts (admin only)
@@ -59,7 +75,7 @@ class AdminService extends BaseHttpService {
       `/api/v1/admin/accounts/${accountId}/users`,
       {
         method: "GET",
-      }
+      },
     );
   }
 
@@ -123,7 +139,7 @@ class AdminService extends BaseHttpService {
   async getProjectData(
     projectId: string,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
   ): Promise<any> {
     const params = new URLSearchParams();
     if (startDate) params.append("start_date", startDate);
@@ -134,7 +150,7 @@ class AdminService extends BaseHttpService {
       `/api/v1/admin/projects/${projectId}/data${query}`,
       {
         method: "GET",
-      }
+      },
     );
   }
 
@@ -166,6 +182,32 @@ class AdminService extends BaseHttpService {
       },
       body: JSON.stringify(data),
     });
+  }
+
+  /**
+   * Get all waitlist entries (admin only)
+   */
+  async getWaitlist(): Promise<{ entries: WaitlistEntry[]; total: number }> {
+    return this.request<{ entries: WaitlistEntry[]; total: number }>(
+      "/api/v1/admin/waitlist",
+      {
+        method: "GET",
+      },
+    );
+  }
+
+  /**
+   * Grant access to a waitlist user (admin only)
+   */
+  async grantWaitlistAccess(
+    id: string,
+  ): Promise<{ message: string; entry: WaitlistEntry }> {
+    return this.request<{ message: string; entry: WaitlistEntry }>(
+      `/api/v1/admin/waitlist/${id}/grant-access`,
+      {
+        method: "POST",
+      },
+    );
   }
 }
 

@@ -124,7 +124,7 @@ export default function TeamPage() {
       if (currentEmail) {
         setCurrentUserEmail(currentEmail);
         const currentMember = membersData.members.find(
-          (m: TeamMember) => m.email === currentEmail
+          (m: TeamMember) => m.email === currentEmail,
         );
         if (currentMember) {
           setCurrentUserRole(currentMember.role);
@@ -321,15 +321,18 @@ export default function TeamPage() {
               </div>
               <div className="text-right">
                 <div className={`text-3xl font-bold ${getUsageColor()}`}>
-                  {members.length +1} / {teamInfo.limit === 0 ? "∞" : teamInfo.limit}
+                  {members.length + 1} /{" "}
+                  {teamInfo.limit === 0 ? "∞" : teamInfo.limit}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {members.length +1} Members, {invitations.length} Pending
+                  {members.length + 1} Members, {invitations.length} Pending
                 </p>
                 {teamInfo.limit > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    You can invite {teamInfo.limit - (members.length +1)} more{" "}
-                    {teamInfo.limit - (members.length +1) === 1 ? "member" : "members"}
+                    You can invite {teamInfo.limit - (members.length + 1)} more{" "}
+                    {teamInfo.limit - (members.length + 1) === 1
+                      ? "member"
+                      : "members"}
                   </p>
                 )}
               </div>
@@ -619,12 +622,12 @@ export default function TeamPage() {
             >
               Cancel
             </Button>
-            <Link href="/pricing">
+            {/* <Link href="/pricing">
               <Button>
                 <ArrowUpCircle className="h-4 w-4 mr-2" />
                 Upgrade Plan
               </Button>
-            </Link>
+            </Link> */}
           </DialogFooter>
         </DialogContent>
       </Dialog>
