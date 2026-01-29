@@ -107,7 +107,7 @@ export default function HealthScorePage() {
       const healthScoreInputs = prepareHealthScoreInputs(
         churnRes,
         featureRes,
-        (sessionRes as any)?.session_data
+        (sessionRes as any)?.session_data,
       );
       const result = calculateHealthScore(healthScoreInputs);
       setHealthScoreResult(result);
@@ -130,7 +130,7 @@ export default function HealthScorePage() {
   const prepareHealthScoreInputs = (
     churnData: any,
     featureData: any,
-    sessionData: any
+    sessionData: any,
   ): HealthScoreInputs => {
     const inputs: HealthScoreInputs = {
       engagement: {
@@ -155,14 +155,14 @@ export default function HealthScorePage() {
           featureData?.features?.length > 0
             ? featureData.features.reduce(
                 (sum: number, f: any) => sum + (f.adoption_rate || 0),
-                0
+                0,
               ) / featureData.features.length
             : undefined,
         featureDepth:
           featureData?.features?.length > 0
             ? featureData.features.reduce(
                 (sum: number, f: any) => sum + (f.total_usage || 0),
-                0
+                0,
               ) / featureData.features.length
             : undefined,
       },
@@ -203,8 +203,8 @@ export default function HealthScorePage() {
             healthScoreResult.components.engagement.score >= 80
               ? "good"
               : healthScoreResult.components.engagement.score >= 60
-              ? "warning"
-              : "critical",
+                ? "warning"
+                : "critical",
         },
         {
           name: "Adoption Score",
@@ -217,8 +217,8 @@ export default function HealthScorePage() {
             healthScoreResult.components.adoption.score >= 80
               ? "good"
               : healthScoreResult.components.adoption.score >= 60
-              ? "warning"
-              : "critical",
+                ? "warning"
+                : "critical",
         },
         {
           name: "Churn Risk Score",
@@ -231,8 +231,8 @@ export default function HealthScorePage() {
             healthScoreResult.components.churnRisk.score >= 80
               ? "good"
               : healthScoreResult.components.churnRisk.score >= 60
-              ? "warning"
-              : "critical",
+                ? "warning"
+                : "critical",
         },
         {
           name: "Account Context",
@@ -245,8 +245,8 @@ export default function HealthScorePage() {
             healthScoreResult.components.accountContext.score >= 80
               ? "good"
               : healthScoreResult.components.accountContext.score >= 60
-              ? "warning"
-              : "critical",
+                ? "warning"
+                : "critical",
         },
       ]
     : [];
@@ -273,7 +273,7 @@ export default function HealthScorePage() {
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="col-span-full md:col-span-1">
+        <Card className="col-span-full md:col-span-1 min-w-0">
           <CardHeader>
             <CardTitle>Overall Health Score</CardTitle>
             <CardDescription>Average across all users</CardDescription>
@@ -311,7 +311,7 @@ export default function HealthScorePage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span
                       className={`text-4xl font-bold ${getScoreColor(
-                        overallHealthScore
+                        overallHealthScore,
                       )}`}
                     >
                       {overallHealthScore}
@@ -366,8 +366,8 @@ export default function HealthScorePage() {
                             metric.score >= 80
                               ? "bg-green-600"
                               : metric.score >= 60
-                              ? "bg-yellow-600"
-                              : "bg-red-600"
+                                ? "bg-yellow-600"
+                                : "bg-red-600"
                           }`}
                           style={{ width: `${metric.score}%` }}
                         />
@@ -376,7 +376,7 @@ export default function HealthScorePage() {
                     <div className="ml-4 text-right">
                       <p
                         className={`text-lg font-bold ${getScoreColor(
-                          metric.score
+                          metric.score,
                         )}`}
                       >
                         {metric.score}
@@ -402,10 +402,10 @@ export default function HealthScorePage() {
                 healthScoreResult.scoreRange === "healthy"
                   ? "default"
                   : healthScoreResult.scoreRange === "at-risk"
-                  ? "secondary"
-                  : healthScoreResult.scoreRange === "warning"
-                  ? "outline"
-                  : "destructive"
+                    ? "secondary"
+                    : healthScoreResult.scoreRange === "warning"
+                      ? "outline"
+                      : "destructive"
               }
             >
               {healthScoreResult.scoreRange.toUpperCase()}
@@ -432,8 +432,8 @@ export default function HealthScorePage() {
                               rec.includes("URGENT") || rec.includes("Critical")
                                 ? "bg-red-600"
                                 : rec.includes("High")
-                                ? "bg-yellow-600"
-                                : "bg-blue-600"
+                                  ? "bg-yellow-600"
+                                  : "bg-blue-600"
                             }`}
                           />
                         </div>
@@ -528,7 +528,7 @@ export default function HealthScorePage() {
                           <p key={i} className="text-sm text-red-600">
                             • {risk}
                           </p>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -543,7 +543,7 @@ export default function HealthScorePage() {
                           <p key={i} className="text-sm text-green-600">
                             • {opp}
                           </p>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -557,7 +557,7 @@ export default function HealthScorePage() {
                     {JSON.stringify(
                       healthScoreResult.llmContext.metrics,
                       null,
-                      2
+                      2,
                     )}
                   </pre>
                 </details>
@@ -835,7 +835,7 @@ export default function HealthScorePage() {
         </div>
 
         {/* Session Trend Chart */}
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Session & User Trends</CardTitle>
             <CardDescription>
@@ -886,6 +886,7 @@ export default function HealthScorePage() {
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
+                      width={45}
                     />
                     <Tooltip
                       content={({ active, payload }) => {
@@ -1012,7 +1013,7 @@ export default function HealthScorePage() {
                       sessionData?.meta?.total_events
                         ? Math.round(
                             sessionData.meta.total_events /
-                              sessionData.overview.total_sessions
+                              sessionData.overview.total_sessions,
                           )
                         : 0}
                     </p>

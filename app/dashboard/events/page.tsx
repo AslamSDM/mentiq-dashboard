@@ -43,6 +43,7 @@ import {
 import { useStore } from "@/lib/store";
 import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { EventData } from "@/lib/api";
+import { sanitizeSearchQuery, sanitizeText, sanitizeObject } from "@/lib/sanitization";
 
 const eventVolumeData = [
   { hour: "00:00", count: 45 },
@@ -66,15 +67,26 @@ export default function EventsPage() {
     }
   }, [effectiveProjectId, fetchEvents]);
 
+  // Sanitize search query before using it
+  const sanitizedSearchQuery = sanitizeSearchQuery(searchQuery);
+
   const filteredEvents = events.filter((event) => {
+    // Sanitize event data before comparison
+    const sanitizedEventName = sanitizeText(event.name || "").toLowerCase();
+    const sanitizedUserId = sanitizeText(event.userId || "").toLowerCase();
+    const sanitizedSessionId = sanitizeText(event.sessionId || "").toLowerCase();
+    const sanitizedFilter = sanitizeText(eventFilter);
+
     const matchesSearch =
-      event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.userId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.sessionId.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = eventFilter === "all" || event.name === eventFilter;
+      sanitizedEventName.includes(sanitizedSearchQuery.toLowerCase()) ||
+      sanitizedUserId.includes(sanitizedSearchQuery.toLowerCase()) ||
+      sanitizedSessionId.includes(sanitizedSearchQuery.toLowerCase());
+    const matchesFilter = sanitizedFilter === "all" || sanitizedEventName === sanitizeText(event.name || "").toLowerCase();
     return matchesSearch && matchesFilter;
   });
-  const eventTypes = Array.from(new Set(events?.map((e) => e.name)));
+
+  // Sanitize event types for display
+  const eventTypes = Array.from(new Set(events?.map((e) => sanitizeText(e.name || ""))));
 
   if (!effectiveProjectId) {
     return (
@@ -181,7 +193,7 @@ export default function EventsPage() {
           </Card>
         </div>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Event Volume</CardTitle>
             <CardDescription>
@@ -205,7 +217,7 @@ export default function EventsPage() {
                     className="stroke-muted"
                   />
                   <XAxis dataKey="hour" className="text-xs" />
-                  <YAxis className="text-xs" />
+                  <YAxis className="text-xs" width={45} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar
                     dataKey="count"
@@ -226,15 +238,15 @@ export default function EventsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <div className="flex-1">
                 <Input
                   placeholder="Search events..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(sanitizeSearchQuery(e.target.value))}
                 />
               </div>
-              <Select value={eventFilter} onValueChange={setEventFilter}>
+              <Select value={eventFilter} onValueChange={(value) => setEventFilter(sanitizeText(value))}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Filter by type" />
                 </SelectTrigger>
@@ -242,14 +254,14 @@ export default function EventsPage() {
                   <SelectItem value="all">All Events</SelectItem>
                   {eventTypes?.map((type) => (
                     <SelectItem key={type} value={type}>
-                      {type}
+                      {sanitizeText(type)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -269,18 +281,18 @@ export default function EventsPage() {
                     </TableRow>
                   ) : filteredEvents.length > 0 ? (
                     filteredEvents?.map((event) => (
-                      <TableRow key={event.id}>
+                      <TableRow key={sanitizeText(event.id || "")}>
                         <TableCell>
-                          <Badge variant="secondary">{event.name}</Badge>
+                          <Badge variant="secondary">{sanitizeText(event.name || "")}</Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(event.timestamp).toLocaleString()}
                         </TableCell>
                         <TableCell className="text-sm font-mono">
-                          {event.userId || "-"}
+                          {sanitizeText(event.userId || "-")}
                         </TableCell>
                         <TableCell className="text-sm font-mono">
-                          {event.sessionId}
+                          {sanitizeText(event.sessionId || "")}
                         </TableCell>
                         <TableCell>
                           <Button
@@ -342,13 +354,13 @@ export default function EventsPage() {
                     <p className="text-sm font-medium text-muted-foreground">
                       Event Name
                     </p>
-                    <p className="text-sm font-mono">{selectedEvent.name}</p>
+                    <p className="text-sm font-mono">{sanitizeText(selectedEvent.name || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
                       Event ID
                     </p>
-                    <p className="text-sm font-mono">{selectedEvent.id}</p>
+                    <p className="text-sm font-mono">{sanitizeText(selectedEvent.id || "")}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">
@@ -363,7 +375,7 @@ export default function EventsPage() {
                       Session ID
                     </p>
                     <p className="text-sm font-mono">
-                      {selectedEvent.sessionId}
+                      {sanitizeText(selectedEvent.sessionId || "")}
                     </p>
                   </div>
                   {selectedEvent.userId && (
@@ -372,7 +384,7 @@ export default function EventsPage() {
                         User ID
                       </p>
                       <p className="text-sm font-mono">
-                        {selectedEvent.userId}
+                        {sanitizeText(selectedEvent.userId)}
                       </p>
                     </div>
                   )}
@@ -384,7 +396,7 @@ export default function EventsPage() {
                     </p>
                     <div className="bg-muted p-4 rounded-lg">
                       <pre className="text-xs font-mono">
-                        {JSON.stringify(selectedEvent.properties, null, 2)}
+                        {JSON.stringify(sanitizeObject(selectedEvent.properties), null, 2)}
                       </pre>
                     </div>
                   </div>

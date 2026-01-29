@@ -97,7 +97,7 @@ export default function DeviceAnalyticsPage() {
       const response = await centralizedData.getDeviceData(
         selectedProjectId,
         startDate.toISOString().split("T")[0],
-        endDate.toISOString().split("T")[0]
+        endDate.toISOString().split("T")[0],
       );
 
       // Transform backend response to match component's expected structure
@@ -184,7 +184,7 @@ export default function DeviceAnalyticsPage() {
   // Helper function to calculate growth trends (placeholder logic)
   const calculateGrowth = (
     devices: DeviceData[],
-    deviceType: string
+    deviceType: string,
   ): number => {
     const device = devices.find((d) => d.device === deviceType);
     if (!device) return 0;
@@ -320,7 +320,7 @@ export default function DeviceAnalyticsPage() {
             <TabsContent value="devices" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Device Distribution Chart */}
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <CardTitle>Device Distribution</CardTitle>
                     <CardDescription>Sessions by device type</CardDescription>
@@ -368,7 +368,7 @@ export default function DeviceAnalyticsPage() {
                 </Card>
 
                 {/* Session Performance */}
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <CardTitle>Session Performance</CardTitle>
                     <CardDescription>
@@ -394,7 +394,7 @@ export default function DeviceAnalyticsPage() {
                           <BarChart data={deviceData.by_device}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="device" />
-                            <YAxis />
+                            <YAxis width={45} />
                             <ChartTooltip
                               content={<ChartTooltipContent />}
                               formatter={(value) => [
@@ -501,7 +501,7 @@ export default function DeviceAnalyticsPage() {
                       {deviceData.by_os?.map((os) => {
                         const totalSessions = deviceData.by_os.reduce(
                           (sum, item) => sum + item.sessions,
-                          0
+                          0,
                         );
                         const percentage = (os.sessions / totalSessions) * 100;
 
@@ -552,7 +552,7 @@ export default function DeviceAnalyticsPage() {
                       {deviceData.by_browser?.map((browser) => {
                         const totalSessions = deviceData.by_browser.reduce(
                           (sum, item) => sum + item.sessions,
-                          0
+                          0,
                         );
                         const percentage =
                           (browser.sessions / totalSessions) * 100;

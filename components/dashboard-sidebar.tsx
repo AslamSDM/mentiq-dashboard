@@ -11,7 +11,7 @@ import {
   LayoutDashboard,
   Settings,
   LogOut,
-  Zap,
+  Mail,
   User,
   Bell,
   Activity,
@@ -67,9 +67,9 @@ const navigation = [
     icon: <Brain className="h-5 w-5" />,
   },
   {
-    name: "Growth Playbooks",
+    name: "Email Automations",
     href: "/dashboard/playbooks",
-    icon: <Zap className="h-5 w-5" />,
+    icon: <Mail className="h-5 w-5" />,
   },
   {
     name: "Projects",

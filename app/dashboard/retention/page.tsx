@@ -22,6 +22,8 @@ import {
 import {
   Bar,
   BarChart,
+  Area,
+  AreaChart,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -93,9 +95,8 @@ export default function RetentionPage() {
     setIsLoading(true);
     try {
       // Fetch real cohort data from API
-      const response = await centralizedData.getRetentionData(
-        selectedProjectId
-      );
+      const response =
+        await centralizedData.getRetentionData(selectedProjectId);
       const apiCohorts = response?.cohorts || response?.data?.cohorts || [];
 
       // Transform API response to match our UI format
@@ -217,7 +218,7 @@ export default function RetentionPage() {
   };
 
   const selectedCohortData = cohortData.find(
-    (c) => c.cohort_date === selectedCohort
+    (c) => c.cohort_date === selectedCohort,
   );
 
   // Prepare trend data for selected period
@@ -451,7 +452,7 @@ export default function RetentionPage() {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
-                              }
+                              },
                             )}
                             <Badge variant="secondary" className="ml-auto">
                               {cohort.cohort_size.toLocaleString()}
@@ -470,7 +471,7 @@ export default function RetentionPage() {
                         <CardDescription>
                           Retention rates over time for{" "}
                           {new Date(
-                            selectedCohortData.cohort_date
+                            selectedCohortData.cohort_date,
                           ).toLocaleDateString()}
                         </CardDescription>
                       </CardHeader>
@@ -513,7 +514,7 @@ export default function RetentionPage() {
                                   users: Math.round(
                                     (selectedCohortData.cohort_size *
                                       selectedCohortData.day_1) /
-                                      100
+                                      100,
                                   ),
                                 },
                                 {
@@ -522,7 +523,7 @@ export default function RetentionPage() {
                                   users: Math.round(
                                     (selectedCohortData.cohort_size *
                                       selectedCohortData.day_7) /
-                                      100
+                                      100,
                                   ),
                                 },
                                 {
@@ -531,7 +532,7 @@ export default function RetentionPage() {
                                   users: Math.round(
                                     (selectedCohortData.cohort_size *
                                       selectedCohortData.day_30) /
-                                      100
+                                      100,
                                   ),
                                 },
                                 {
@@ -540,7 +541,7 @@ export default function RetentionPage() {
                                   users: Math.round(
                                     (selectedCohortData.cohort_size *
                                       selectedCohortData.day_90) /
-                                      100
+                                      100,
                                   ),
                                 },
                               ]
@@ -560,7 +561,7 @@ export default function RetentionPage() {
                                         style={{
                                           width: `${item.value}%`,
                                           backgroundColor: getRetentionColor(
-                                            item.value
+                                            item.value,
                                           ),
                                         }}
                                       />
@@ -577,8 +578,8 @@ export default function RetentionPage() {
               </TabsContent>
 
               <TabsContent value="trends" className="space-y-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
+                <Card className="min-w-0">
+                  <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                       <CardTitle>Retention Trends</CardTitle>
                       <CardDescription>
@@ -589,7 +590,7 @@ export default function RetentionPage() {
                       value={selectedPeriod}
                       onValueChange={setSelectedPeriod}
                     >
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-full sm:w-[180px]">
                         <SelectValue placeholder="Select period" />
                       </SelectTrigger>
                       <SelectContent>
@@ -618,11 +619,37 @@ export default function RetentionPage() {
                             color: "hsl(var(--chart-2))",
                           },
                         }}
-                        className="h-[300px]"
+                        className="h-[300px] w-full min-w-0"
                       >
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" />
+                          <AreaChart
+                            data={trendData}
+                            margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+                          >
+                            <defs>
+                              <linearGradient
+                                id="colorRetention"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop
+                                  offset="5%"
+                                  stopColor="var(--color-retention)"
+                                  stopOpacity={0.8}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="var(--color-retention)"
+                                  stopOpacity={0}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              vertical={false}
+                            />
                             <XAxis
                               dataKey="date"
                               tickFormatter={(value) =>
@@ -632,7 +659,10 @@ export default function RetentionPage() {
                                 })
                               }
                             />
-                            <YAxis />
+                            <YAxis
+                              width={45}
+                              tickFormatter={(value) => `${value}%`}
+                            />
                             <ChartTooltip
                               content={<ChartTooltipContent />}
                               formatter={(value, name) => [
@@ -644,17 +674,18 @@ export default function RetentionPage() {
                                   : "Cohort Size",
                               ]}
                             />
-                            <Line
+                            <Area
                               type="monotone"
                               dataKey="retention"
                               stroke="var(--color-retention)"
-                              strokeWidth={3}
-                              dot={{ r: 6 }}
+                              fillOpacity={1}
+                              fill="url(#colorRetention)"
+                              strokeWidth={2}
                               animationDuration={1500}
                               animationBegin={0}
                               animationEasing="ease-in-out"
                             />
-                          </LineChart>
+                          </AreaChart>
                         </ResponsiveContainer>
                       </ChartContainer>
                     )}
@@ -677,91 +708,99 @@ export default function RetentionPage() {
                         <Loader2 className="h-8 w-8 animate-spin" />
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-7 gap-1 text-xs">
-                          {/* Header row */}
-                          <div className="font-medium">Cohort</div>
-                          <div className="text-center font-medium">Day 0</div>
-                          <div className="text-center font-medium">Day 1</div>
-                          <div className="text-center font-medium">Day 7</div>
-                          <div className="text-center font-medium">Day 30</div>
-                          <div className="text-center font-medium">Day 90</div>
-                          <div className="text-center font-medium">Day 180</div>
+                      <div className="overflow-x-auto pb-4">
+                        <div className="space-y-4 min-w-[600px]">
+                          <div className="grid grid-cols-7 gap-1 text-xs">
+                            {/* Header row */}
+                            <div className="font-medium">Cohort</div>
+                            <div className="text-center font-medium">Day 0</div>
+                            <div className="text-center font-medium">Day 1</div>
+                            <div className="text-center font-medium">Day 7</div>
+                            <div className="text-center font-medium">
+                              Day 30
+                            </div>
+                            <div className="text-center font-medium">
+                              Day 90
+                            </div>
+                            <div className="text-center font-medium">
+                              Day 180
+                            </div>
 
-                          {/* Data rows */}
-                          {cohortData?.map((cohort) => (
-                            <React.Fragment key={cohort.cohort_date}>
-                              <div className="py-2 font-medium truncate">
-                                {new Date(
-                                  cohort.cohort_date
-                                ).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  year: "2-digit",
-                                })}
-                              </div>
-                              {[
-                                cohort.day_0,
-                                cohort.day_1,
-                                cohort.day_7,
-                                cohort.day_30,
-                                cohort.day_90,
-                                cohort.day_180,
-                              ]?.map((rate, index) => (
-                                <div
-                                  key={index}
-                                  className="h-8 rounded flex items-center justify-center text-white text-xs font-medium"
-                                  style={{
-                                    backgroundColor:
-                                      rate > 0
-                                        ? getRetentionColor(rate)
-                                        : "#f3f4f6",
-                                    color: rate > 0 ? "white" : "#6b7280",
-                                  }}
-                                >
-                                  {rate > 0 ? `${rate?.toFixed(0)}%` : "-"}
+                            {/* Data rows */}
+                            {cohortData?.map((cohort) => (
+                              <React.Fragment key={cohort.cohort_date}>
+                                <div className="py-2 font-medium truncate">
+                                  {new Date(
+                                    cohort.cohort_date,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    year: "2-digit",
+                                  })}
                                 </div>
-                              ))}
-                            </React.Fragment>
-                          ))}
-                        </div>
+                                {[
+                                  cohort.day_0,
+                                  cohort.day_1,
+                                  cohort.day_7,
+                                  cohort.day_30,
+                                  cohort.day_90,
+                                  cohort.day_180,
+                                ]?.map((rate, index) => (
+                                  <div
+                                    key={index}
+                                    className="h-8 rounded flex items-center justify-center text-white text-xs font-medium"
+                                    style={{
+                                      backgroundColor:
+                                        rate > 0
+                                          ? getRetentionColor(rate)
+                                          : "#f3f4f6",
+                                      color: rate > 0 ? "white" : "#6b7280",
+                                    }}
+                                  >
+                                    {rate > 0 ? `${rate?.toFixed(0)}%` : "-"}
+                                  </div>
+                                ))}
+                              </React.Fragment>
+                            ))}
+                          </div>
 
-                        {/* Legend */}
-                        <div className="flex items-center gap-4 text-xs">
-                          <span>Retention Rate:</span>
-                          <div className="flex items-center gap-1">
-                            <div
-                              className="w-4 h-4 rounded"
-                              style={{ backgroundColor: "#ef4444" }}
-                            ></div>
-                            <span>&lt;15%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div
-                              className="w-4 h-4 rounded"
-                              style={{ backgroundColor: "#f97316" }}
-                            ></div>
-                            <span>15-25%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div
-                              className="w-4 h-4 rounded"
-                              style={{ backgroundColor: "#eab308" }}
-                            ></div>
-                            <span>25-40%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div
-                              className="w-4 h-4 rounded"
-                              style={{ backgroundColor: "#84cc16" }}
-                            ></div>
-                            <span>40-60%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div
-                              className="w-4 h-4 rounded"
-                              style={{ backgroundColor: "#22c55e" }}
-                            ></div>
-                            <span>&gt;60%</span>
+                          {/* Legend */}
+                          <div className="flex items-center gap-4 text-xs">
+                            <span>Retention Rate:</span>
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: "#ef4444" }}
+                              ></div>
+                              <span>&lt;15%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: "#f97316" }}
+                              ></div>
+                              <span>15-25%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: "#eab308" }}
+                              ></div>
+                              <span>25-40%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: "#84cc16" }}
+                              ></div>
+                              <span>40-60%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div
+                                className="w-4 h-4 rounded"
+                                style={{ backgroundColor: "#22c55e" }}
+                              ></div>
+                              <span>&gt;60%</span>
+                            </div>
                           </div>
                         </div>
                       </div>

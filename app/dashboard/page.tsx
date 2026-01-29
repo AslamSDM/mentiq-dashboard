@@ -80,6 +80,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { sanitizeText, sanitizeObject } from "@/lib/sanitization";
 
 export default function DashboardPage() {
   const {
@@ -133,7 +134,7 @@ export default function DashboardPage() {
           endDate: endDateStr,
           groupBy: "day",
         },
-        true
+        true,
       ); // Force refresh when project changes
 
       fetchEvents(true); // Force refresh when project changes
@@ -147,7 +148,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (analyticsData?.results) {
       const bounceRateMetric = analyticsData.results.find(
-        (r: any) => r.metric === "bounce_rate"
+        (r: any) => r.metric === "bounce_rate",
       );
       if (bounceRateMetric?.value) {
         const valueStr = String(bounceRateMetric.value);
@@ -186,8 +187,8 @@ export default function DashboardPage() {
             res?.data?.cohorts
               ? { cohorts: res.data.cohorts }
               : res?.cohorts
-              ? { cohorts: res.cohorts }
-              : res?.data || res
+                ? { cohorts: res.cohorts }
+                : res?.data || res,
           )
           .catch(() => null),
       ]);
@@ -239,7 +240,7 @@ export default function DashboardPage() {
         avg_session_time: "N/A",
       }));
     }
-    
+
     // Fallback to by_device if by_os not available
     if (deviceData?.by_device && deviceData.by_device.length > 0) {
       return deviceData.by_device.map((d: any) => ({
@@ -253,25 +254,37 @@ export default function DashboardPage() {
         avg_session_time: d.avg_session_time || "0s",
       }));
     }
-    
+
     // Fallback: aggregate OS data from events if available
     if (Array.isArray(events) && events.length > 0) {
-      const osMap = new Map<string, { os: string; sessions: number; users: Set<string> }>();
-      
+      const osMap = new Map<
+        string,
+        { os: string; sessions: number; users: Set<string> }
+      >();
+
       events.forEach((event: any) => {
         // Handle both camelCase and PascalCase field names from backend
         const os = event.Os || event.os || event.Properties?.os || "Unknown";
         if (!os || os === "Unknown") return;
-        
-        const existing = osMap.get(os) || { os, sessions: 0, users: new Set<string>() };
+
+        const existing = osMap.get(os) || {
+          os,
+          sessions: 0,
+          users: new Set<string>(),
+        };
         existing.sessions++;
-        const userId = event.UserId || event.user_id || event.SessionId || event.session_id || '';
+        const userId =
+          event.UserId ||
+          event.user_id ||
+          event.SessionId ||
+          event.session_id ||
+          "";
         if (userId) existing.users.add(userId);
         osMap.set(os, existing);
       });
-      
+
       return Array.from(osMap.values())
-        .map(item => ({
+        .map((item) => ({
           device: item.os,
           sessions: item.sessions,
           users: item.users.size || item.sessions,
@@ -280,7 +293,7 @@ export default function DashboardPage() {
         }))
         .sort((a, b) => b.sessions - a.sessions);
     }
-    
+
     return [];
   };
 
@@ -297,7 +310,7 @@ export default function DashboardPage() {
         }))
         .sort((a: any, b: any) => b.users - a.users);
     }
-    
+
     // Fallback: try legacy locations field
     if (locationData?.locations && locationData.locations.length > 0) {
       return locationData.locations
@@ -309,24 +322,32 @@ export default function DashboardPage() {
         }))
         .sort((a: any, b: any) => b.users - a.users);
     }
-    
+
     // Fallback: aggregate from events if available
     if (Array.isArray(events) && events.length > 0) {
-      const countryMap = new Map<string, { country: string; users: number; sessions: number }>();
-      
+      const countryMap = new Map<
+        string,
+        { country: string; users: number; sessions: number }
+      >();
+
       events.forEach((event: any) => {
         // Handle both camelCase and snake_case field names from backend
-        const country = event.Country || event.country || event.Properties?.country || null;
-        if (!country || country === 'Unknown' || country === 'Local') return;
-        
-        const existing = countryMap.get(country) || { country, users: 0, sessions: 0 };
+        const country =
+          event.Country || event.country || event.Properties?.country || null;
+        if (!country || country === "Unknown" || country === "Local") return;
+
+        const existing = countryMap.get(country) || {
+          country,
+          users: 0,
+          sessions: 0,
+        };
         existing.users++;
         existing.sessions++;
         countryMap.set(country, existing);
       });
-      
+
       return Array.from(countryMap.values())
-        .map(item => ({
+        .map((item) => ({
           country: item.country,
           users: item.users,
           sessions: item.sessions,
@@ -334,7 +355,7 @@ export default function DashboardPage() {
         }))
         .sort((a, b) => b.users - a.users);
     }
-    
+
     return [];
   };
 
@@ -446,7 +467,7 @@ export default function DashboardPage() {
       return [];
     }
     const result = analyticsData.results.find(
-      (r) => r.metric === engagementTab
+      (r) => r.metric === engagementTab,
     );
     return result?.time_series || [];
   };
@@ -483,7 +504,9 @@ export default function DashboardPage() {
               <Loader2 className="h-12 w-12 text-[#4318FF] animate-spin" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[#2B3674]">Select a Project</h3>
+              <h3 className="text-lg font-bold text-[#2B3674]">
+                Select a Project
+              </h3>
               <p className="text-[#4363C7]">
                 Please select a project to view the dashboard
               </p>
@@ -501,7 +524,7 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm">
           <Calendar className="h-4 w-4 text-[#4363C7] ml-2" />
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[140px] border-none shadow-none focus:ring-0 text-[#2B3674] font-medium">
+            <SelectTrigger className="w-full sm:w-[140px] border-none shadow-none focus:ring-0 text-[#2B3674] font-medium">
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
@@ -521,7 +544,11 @@ export default function DashboardPage() {
             Revenue Analytics
           </h2>
           <Link href="/dashboard/revenue">
-            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+            >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -530,88 +557,107 @@ export default function DashboardPage() {
         {loadingEnhanced ? (
           <div className="grid gap-4 md:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-white/50 animate-pulse rounded-2xl" />
+              <div
+                key={i}
+                className="h-32 bg-white/50 animate-pulse rounded-2xl"
+              />
             ))}
           </div>
         ) : revenueMetrics ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
               <CardContent className="p-6">
-                 <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-[#F4F7FE] rounded-full">
-                        <DollarSign className="h-6 w-6 text-[#4318FF]" />
-                    </div>
-                 </div>
-                 <div>
-                    <div className="text-sm font-medium text-[#4363C7] mb-1">MRR</div>
-                    <div className="text-2xl font-bold text-[#2B3674]">
-                      {formatCurrency(revenueMetrics.mrr)}
-                    </div>
-                    <div className="flex items-center gap-1 mt-1">
-                         <span className={revenueMetrics.growth_rate >= 0 ? "text-[#05CD99] font-bold text-xs" : "text-red-500 font-bold text-xs"}>
-                             {revenueMetrics.growth_rate > 0 ? "+" : ""}
-                             {formatPercentage(revenueMetrics.growth_rate)}
-                         </span>
-                         <span className="text-xs text-[#4363C7]">since last month</span>
-                    </div>
-                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-[#F4F7FE] rounded-full">
+                    <DollarSign className="h-6 w-6 text-[#4318FF]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                    MRR
+                  </div>
+                  <div className="text-2xl font-bold text-[#2B3674]">
+                    {formatCurrency(revenueMetrics.mrr)}
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span
+                      className={
+                        revenueMetrics.growth_rate >= 0
+                          ? "text-[#05CD99] font-bold text-xs"
+                          : "text-red-500 font-bold text-xs"
+                      }
+                    >
+                      {revenueMetrics.growth_rate > 0 ? "+" : ""}
+                      {formatPercentage(revenueMetrics.growth_rate)}
+                    </span>
+                    <span className="text-xs text-[#4363C7]">
+                      since last month
+                    </span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
             <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
               <CardContent className="p-6">
-                 <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-[#F4F7FE] rounded-full">
-                        <Users className="h-6 w-6 text-[#4318FF]" />
-                    </div>
-                 </div>
-                 <div>
-                    <div className="text-sm font-medium text-[#4363C7] mb-1">Active Subs</div>
-                    <div className="text-2xl font-bold text-[#2B3674]">
-                      {revenueMetrics.active_subscriptions}
-                    </div>
-                    <p className="text-xs text-[#4363C7] mt-1">
-                      {revenueMetrics.new_subscriptions} new this month
-                    </p>
-                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-[#F4F7FE] rounded-full">
+                    <Users className="h-6 w-6 text-[#4318FF]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                    Active Subs
+                  </div>
+                  <div className="text-2xl font-bold text-[#2B3674]">
+                    {revenueMetrics.active_subscriptions}
+                  </div>
+                  <p className="text-xs text-[#4363C7] mt-1">
+                    {revenueMetrics.new_subscriptions} new this month
+                  </p>
+                </div>
               </CardContent>
             </Card>
-            
+
             <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
               <CardContent className="p-6">
-                 <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-[#FFF9E5] rounded-full">
-                        <TrendingDown className="h-6 w-6 text-[#FFCE20]" />
-                    </div>
-                 </div>
-                 <div>
-                    <div className="text-sm font-medium text-[#4363C7] mb-1">Churn Rate</div>
-                    <div className="text-2xl font-bold text-[#2B3674]">
-                      {formatPercentage(revenueMetrics.churn_rate)}
-                    </div>
-                    <p className="text-xs text-[#4363C7] mt-1">
-                      {revenueMetrics.churned_subscriptions} churned
-                    </p>
-                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-[#FFF9E5] rounded-full">
+                    <TrendingDown className="h-6 w-6 text-[#FFCE20]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                    Churn Rate
+                  </div>
+                  <div className="text-2xl font-bold text-[#2B3674]">
+                    {formatPercentage(revenueMetrics.churn_rate)}
+                  </div>
+                  <p className="text-xs text-[#4363C7] mt-1">
+                    {revenueMetrics.churned_subscriptions} churned
+                  </p>
+                </div>
               </CardContent>
             </Card>
-            
-             <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+
+            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
               <CardContent className="p-6">
-                 <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-[#F4F7FE] rounded-full">
-                        <CreditCard className="h-6 w-6 text-[#4318FF]" />
-                    </div>
-                 </div>
-                 <div>
-                    <div className="text-sm font-medium text-[#4363C7] mb-1">ARPU</div>
-                    <div className="text-2xl font-bold text-[#2B3674]">
-                      {formatCurrency(revenueMetrics.arpu)}
-                    </div>
-                    <p className="text-xs text-[#4363C7] mt-1">
-                       Avg. Revenue Per User
-                    </p>
-                 </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-[#F4F7FE] rounded-full">
+                    <CreditCard className="h-6 w-6 text-[#4318FF]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                    ARPU
+                  </div>
+                  <div className="text-2xl font-bold text-[#2B3674]">
+                    {formatCurrency(revenueMetrics.arpu)}
+                  </div>
+                  <p className="text-xs text-[#4363C7] mt-1">
+                    Avg. Revenue Per User
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -622,7 +668,9 @@ export default function DashboardPage() {
                 No revenue data available. Configure Stripe to see metrics.
               </p>
               <Link href="/dashboard/revenue">
-                <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">Configure Stripe</Button>
+                <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">
+                  Configure Stripe
+                </Button>
               </Link>
             </CardContent>
           </Card>
@@ -633,9 +681,11 @@ export default function DashboardPage() {
           revenueAnalytics.time_series.length > 0) ||
           (revenueMetrics?.time_series &&
             revenueMetrics.time_series.length > 0)) && (
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden min-w-0">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">Revenue Trend</CardTitle>
+              <CardTitle className="text-[#2B3674] font-bold">
+                Revenue Trend
+              </CardTitle>
               <CardDescription className="text-[#4363C7]">
                 Daily revenue from Stripe charges over the last 30 days
               </CardDescription>
@@ -658,12 +708,26 @@ export default function DashboardPage() {
                       []
                     }
                   >
-                     <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#4318FF" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#4318FF" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
+                    <defs>
+                      <linearGradient
+                        id="colorRevenue"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#4318FF"
+                          stopOpacity={0.2}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#4318FF"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
                       className="stroke-[#E0E5F2]"
@@ -689,11 +753,16 @@ export default function DashboardPage() {
                       axisLine={false}
                       tickMargin={10}
                       tickFormatter={(value) => `$${value.toLocaleString()}`}
+                      width={45}
                     />
-                    <Tooltip 
-                        cursor={{ stroke: '#E0E5F2', strokeWidth: 1 }}
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0px 10px 20px rgba(0,0,0,0.1)' }}
-                     />
+                    <Tooltip
+                      cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                      contentStyle={{
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                      }}
+                    />
                     <Area
                       type="monotone"
                       dataKey="revenue"
@@ -717,7 +786,11 @@ export default function DashboardPage() {
             User Engagement
           </h2>
           <Link href="/dashboard/analytics">
-             <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+            >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -725,45 +798,58 @@ export default function DashboardPage() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
-             <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-[#4363C7]">Total Events</p>
-                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{totalEvents.toLocaleString()}</h3>
-                    </div>
-                    <div className="p-3 rounded-full bg-[#E6F7FF]">
-                        <ArrowUpRight className="h-6 w-6 text-[#00A3FF]" />
-                    </div>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-[#4363C7]">
+                    Total Events
+                  </p>
+                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                    {totalEvents.toLocaleString()}
+                  </h3>
                 </div>
-             </CardContent>
+                <div className="p-3 rounded-full bg-[#E6F7FF]">
+                  <ArrowUpRight className="h-6 w-6 text-[#00A3FF]" />
+                </div>
+              </div>
+            </CardContent>
           </Card>
-          
+
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
-             <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-[#4363C7]">Page Views</p>
-                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{pageViews.toLocaleString()}</h3>
-                    </div>
-                    <div className="p-3 rounded-full bg-[#F4F7FE]">
-                        <Monitor className="h-6 w-6 text-[#4318FF]" />
-                    </div>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-[#4363C7]">
+                    Page Views
+                  </p>
+                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                    {pageViews.toLocaleString()}
+                  </h3>
                 </div>
-             </CardContent>
+                <div className="p-3 rounded-full bg-[#F4F7FE]">
+                  <Monitor className="h-6 w-6 text-[#4318FF]" />
+                </div>
+              </div>
+            </CardContent>
           </Card>
-          
-           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
-             <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-[#4363C7]">Unique Users</p>
-                        <h3 className="text-2xl font-bold text-[#2B3674] mt-1">{uniqueUsers.toLocaleString()}</h3>
-                    </div>
-                    <div className="p-3 rounded-full bg-[#E9E3FF]">
-                        <Users className="h-6 w-6 text-[#4363C7]" /> {/* Usually a distinct color if needed */}
-                    </div>
+
+          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-[#4363C7]">
+                    Unique Users
+                  </p>
+                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                    {uniqueUsers.toLocaleString()}
+                  </h3>
                 </div>
-             </CardContent>
+                <div className="p-3 rounded-full bg-[#E9E3FF]">
+                  <Users className="h-6 w-6 text-[#4363C7]" />{" "}
+                  {/* Usually a distinct color if needed */}
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
@@ -771,7 +857,9 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">User Retention</CardTitle>
+              <CardTitle className="text-[#2B3674] font-bold">
+                User Retention
+              </CardTitle>
               <CardDescription className="text-[#4363C7]">
                 Percentage of users returning over time
               </CardDescription>
@@ -792,15 +880,20 @@ export default function DashboardPage() {
                   </p>
                   <div className="space-y-4 mt-6">
                     {getRetentionMetrics().map((metric, idx) => (
-                      <div
-                        key={idx}
-                        className="space-y-2"
-                      >
-                         <div className="flex justify-between text-sm">
-                            <span className="text-[#4363C7]">{metric.period}</span>
-                            <span className="font-bold text-[#2B3674]">{metric.rate.toFixed(1)}%</span>
+                      <div key={idx} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-[#4363C7]">
+                            {metric.period}
+                          </span>
+                          <span className="font-bold text-[#2B3674]">
+                            {metric.rate.toFixed(1)}%
+                          </span>
                         </div>
-                        <Progress value={metric.rate} className="h-2 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
+                        <Progress
+                          value={metric.rate}
+                          className="h-2 bg-[#F4F7FE]"
+                          indicatorClassName="bg-[#4318FF]"
+                        />
                       </div>
                     ))}
                   </div>
@@ -815,7 +908,9 @@ export default function DashboardPage() {
 
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">Bounce Rate</CardTitle>
+              <CardTitle className="text-[#2B3674] font-bold">
+                Bounce Rate
+              </CardTitle>
               <CardDescription className="text-[#4363C7]">
                 Single-page sessions (lower is better)
               </CardDescription>
@@ -836,9 +931,16 @@ export default function DashboardPage() {
                         Excellent
                       </Badge>
                     ) : bounceRate < 55 ? (
-                      <Badge className="bg-[#4318FF] text-white hover:bg-[#4318FF]/80 border-none">Good</Badge>
+                      <Badge className="bg-[#4318FF] text-white hover:bg-[#4318FF]/80 border-none">
+                        Good
+                      </Badge>
                     ) : bounceRate < 70 ? (
-                      <Badge variant="outline" className="text-[#2B3674] border-[#E0E5F2]">Average</Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-[#2B3674] border-[#E0E5F2]"
+                      >
+                        Average
+                      </Badge>
                     ) : (
                       <Badge variant="destructive">Needs Attention</Badge>
                     )}
@@ -847,13 +949,17 @@ export default function DashboardPage() {
                     {bounceRate < 40
                       ? "Users are highly engaged"
                       : bounceRate < 55
-                      ? "Healthy engagement levels"
-                      : bounceRate < 70
-                      ? "Room for improvement"
-                      : "Consider improving content"}
+                        ? "Healthy engagement levels"
+                        : bounceRate < 70
+                          ? "Room for improvement"
+                          : "Consider improving content"}
                   </p>
                   <div className="pt-2">
-                    <Progress value={100 - bounceRate} className="h-3 bg-[#F4F7FE]" indicatorClassName="bg-[#4318FF]" />
+                    <Progress
+                      value={100 - bounceRate}
+                      className="h-3 bg-[#F4F7FE]"
+                      indicatorClassName="bg-[#4318FF]"
+                    />
                     <p className="text-xs text-[#4363C7] mt-2">
                       {(100 - bounceRate).toFixed(1)}% engaged sessions
                     </p>
@@ -864,22 +970,41 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl min-w-0">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div>
-                <CardTitle className="text-[#2B3674] font-bold">Active Users</CardTitle>
-                <CardDescription className="text-[#4363C7]">User engagement over time</CardDescription>
+                <CardTitle className="text-[#2B3674] font-bold">
+                  Active Users
+                </CardTitle>
+                <CardDescription className="text-[#4363C7]">
+                  User engagement over time
+                </CardDescription>
               </div>
               <Tabs
                 value={engagementTab}
                 onValueChange={setEngagementTab}
-                className="w-[300px]"
+                className="w-full sm:w-[300px]"
               >
                 <TabsList className="grid w-full grid-cols-3 bg-[#F4F7FE] p-1 rounded-xl">
-                  <TabsTrigger value="dau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">DAU</TabsTrigger>
-                  <TabsTrigger value="wau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">WAU</TabsTrigger>
-                  <TabsTrigger value="mau" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]">MAU</TabsTrigger>
+                  <TabsTrigger
+                    value="dau"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                  >
+                    DAU
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="wau"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                  >
+                    WAU
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="mau"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                  >
+                    MAU
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -893,8 +1018,8 @@ export default function DashboardPage() {
                 {engagementTab === "dau"
                   ? "Daily Active Users"
                   : engagementTab === "wau"
-                  ? "Weekly Active Users"
-                  : "Monthly Active Users"}
+                    ? "Weekly Active Users"
+                    : "Monthly Active Users"}
               </p>
             </div>
             <div className="h-[350px] w-full px-2">
@@ -938,9 +1063,14 @@ export default function DashboardPage() {
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
+                        width={35}
                       />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0px 10px 20px rgba(0,0,0,0.1)' }}
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "none",
+                          boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                        }}
                       />
                       <Line
                         type="monotone"
@@ -948,7 +1078,12 @@ export default function DashboardPage() {
                         stroke="#4318FF"
                         strokeWidth={4}
                         dot={false}
-                        activeDot={{ r: 6, fill: "#4318FF", stroke: "#fff", strokeWidth: 2 }}
+                        activeDot={{
+                          r: 6,
+                          fill: "#4318FF",
+                          stroke: "#fff",
+                          strokeWidth: 2,
+                        }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -967,7 +1102,9 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">Top Events</CardTitle>
+            <CardTitle className="text-[#2B3674] font-bold">
+              Top Events
+            </CardTitle>
             <CardDescription className="text-[#4363C7]">
               Most frequently triggered events in the selected period
             </CardDescription>
@@ -978,17 +1115,21 @@ export default function DashboardPage() {
                 <div key={i} className="flex items-center">
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-bold text-[#2B3674] leading-none">
-                      {event.name || `Event ${i + 1}`}
+                      {sanitizeText(event.name || `Event ${i + 1}`)}
                     </p>
                     <div className="w-full bg-[#F4F7FE] rounded-full h-2 mt-2">
-                        <div 
-                         className="bg-[#4318FF] h-2 rounded-full" 
-                         style={{ width: `${totalEvents > 0 ? ((event.count / totalEvents) * 100) : 0}%` }}
-                        />
+                      <div
+                        className="bg-[#4318FF] h-2 rounded-full"
+                        style={{
+                          width: `${totalEvents > 0 ? (event.count / totalEvents) * 100 : 0}%`,
+                        }}
+                      />
                     </div>
                   </div>
                   <div className="text-right pl-4">
-                     <div className="text-sm font-bold text-[#2B3674]">{event.count?.toLocaleString() || 0}</div>
+                    <div className="text-sm font-bold text-[#2B3674]">
+                      {event.count?.toLocaleString() || 0}
+                    </div>
                     <div className="text-xs font-medium text-[#4363C7]">
                       {totalEvents > 0
                         ? ((event.count / totalEvents) * 100)?.toFixed(1)
@@ -1010,42 +1151,50 @@ export default function DashboardPage() {
         {/* Recent Events */}
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">Recent Events</CardTitle>
-            <CardDescription className="text-[#4363C7]">Latest events from your users</CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">
+              Recent Events
+            </CardTitle>
+            <CardDescription className="text-[#4363C7]">
+              Latest events from your users
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {Array.isArray(events) &&
                 events.slice(0, 10)?.map((event: any, index: number) => {
+                  // Sanitize event data before display
+                  const sanitizedEvent = sanitizeObject(event);
                   // Extract country from user_agent_details or use fallback
                   const country =
-                    event.UserAgentDetails?.country ||
-                    event.Country ||
+                    sanitizedEvent.UserAgentDetails?.country ||
+                    sanitizedEvent.Country ||
                     "Unknown";
                   const city =
-                    event.UserAgentDetails?.city || event.City || "Unknown";
+                    sanitizedEvent.UserAgentDetails?.city || sanitizedEvent.City || "Unknown";
                   const countryFlag =
                     country !== "Unknown" ? getCountryFlag(country) : "🌍";
 
                   return (
                     <div
-                      key={event.ID || index}
+                      key={sanitizedEvent.ID || index}
                       className="flex items-center justify-between border-b border-[#F4F7FE] pb-3 last:border-b-0"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm">{countryFlag}</span>
                           <p className="text-sm font-bold text-[#2B3674]">
-                            {event.Event || event.event || "Unknown Event"}
+                            {sanitizeText(sanitizedEvent.Event || sanitizedEvent.event || "Unknown Event")}
                           </p>
                         </div>
                         <div className="flex flex-wrap gap-2 text-xs text-[#4363C7]">
-                          {event.UserId && (
-                            <span className="bg-[#F4F7FE] px-2 py-0.5 rounded text-[#2B3674]">User: {event.UserId.substring(0, 8)}...</span>
+                          {sanitizedEvent.UserId && (
+                            <span className="bg-[#F4F7FE] px-2 py-0.5 rounded text-[#2B3674]">
+                              User: {sanitizeText(sanitizedEvent.UserId).substring(0, 8)}...
+                            </span>
                           )}
                           {city !== "Unknown" && country !== "Unknown" && (
                             <span>
-                              {city}, {country}
+                              {sanitizeText(city)}, {sanitizeText(country)}
                             </span>
                           )}
                         </div>
@@ -1053,8 +1202,11 @@ export default function DashboardPage() {
                       <div className="text-right">
                         <p className="text-xs text-[#4363C7] whitespace-nowrap">
                           {new Date(
-                            event.Timestamp || event.timestamp || Date.now()
-                          ).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            sanitizedEvent.Timestamp || sanitizedEvent.timestamp || Date.now(),
+                          ).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </p>
                       </div>
                     </div>
@@ -1078,7 +1230,11 @@ export default function DashboardPage() {
             Location Analytics
           </h2>
           <Link href="/dashboard/location">
-            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+            >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -1087,10 +1243,14 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="md:col-span-2 border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">Global Distribution</CardTitle>
-              <CardDescription className="text-[#4363C7]">User activity by country</CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">
+                Global Distribution
+              </CardTitle>
+              <CardDescription className="text-[#4363C7]">
+                User activity by country
+              </CardDescription>
             </CardHeader>
-            <CardContent className="h-[400px] relative overflow-hidden">
+            <CardContent className="h-[300px] md:h-[400px] relative overflow-hidden">
               {loadingEnhanced ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="animate-spin text-[#4318FF] h-8 w-8" />
@@ -1107,8 +1267,12 @@ export default function DashboardPage() {
 
           <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">Top Countries</CardTitle>
-              <CardDescription className="text-[#4363C7]">By user count</CardDescription>
+              <CardTitle className="text-[#2B3674] font-bold">
+                Top Countries
+              </CardTitle>
+              <CardDescription className="text-[#4363C7]">
+                By user count
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -1130,9 +1294,7 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 {getGeoData().length === 0 && (
-                  <div className="text-center text-[#4363C7] py-8">
-                    No data
-                  </div>
+                  <div className="text-center text-[#4363C7] py-8">No data</div>
                 )}
               </div>
             </CardContent>
@@ -1147,7 +1309,11 @@ export default function DashboardPage() {
             Platform Analytics
           </h2>
           <Link href="/dashboard/devices">
-            <Button variant="ghost" size="sm" className="text-[#4318FF] hover:bg-[#F4F7FE]">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+            >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -1155,8 +1321,12 @@ export default function DashboardPage() {
 
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">Operating System Distribution</CardTitle>
-            <CardDescription className="text-[#4363C7]">Breakdown by operating system</CardDescription>
+            <CardTitle className="text-[#2B3674] font-bold">
+              Operating System Distribution
+            </CardTitle>
+            <CardDescription className="text-[#4363C7]">
+              Breakdown by operating system
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loadingEnhanced ? (
@@ -1164,30 +1334,52 @@ export default function DashboardPage() {
                 <Loader2 className="animate-spin text-[#4318FF]" />
               </div>
             ) : (
-              <Table>
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow className="border-[#F4F7FE] hover:bg-transparent">
-                    <TableHead className="text-[#4363C7] pl-6">Operating System</TableHead>
-                    <TableHead className="text-right text-[#4363C7]">Users</TableHead>
-                    <TableHead className="text-right text-[#4363C7]">Sessions</TableHead>
-                    <TableHead className="text-right text-[#4363C7] pr-6">Share</TableHead>
+                    <TableHead className="text-[#4363C7] pl-6">
+                      Operating System
+                    </TableHead>
+                    <TableHead className="text-right text-[#4363C7]">
+                      Users
+                    </TableHead>
+                    <TableHead className="text-right text-[#4363C7]">
+                      Sessions
+                    </TableHead>
+                    <TableHead className="text-right text-[#4363C7] pr-6">
+                      Share
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {getDeviceTableData().length > 0 ? (
                     (() => {
                       const data = getDeviceTableData();
-                      const totalSessions = data.reduce((sum: number, d: any) => sum + d.sessions, 0);
+                      const totalSessions = data.reduce(
+                        (sum: number, d: any) => sum + d.sessions,
+                        0,
+                      );
                       return data.map((device: any, i: number) => (
-                        <TableRow key={i} className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50">
+                        <TableRow
+                          key={i}
+                          className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50"
+                        >
                           <TableCell className="font-bold text-[#2B3674] flex items-center gap-2 pl-6">
-                            {device.device?.toLowerCase().includes("mac") || device.device?.toLowerCase().includes("ios") ? (
+                            {device.device?.toLowerCase().includes("mac") ||
+                            device.device?.toLowerCase().includes("ios") ? (
                               <Monitor className="h-4 w-4 text-[#4318FF]" />
-                            ) : device.device?.toLowerCase().includes("windows") ? (
+                            ) : device.device
+                                ?.toLowerCase()
+                                .includes("windows") ? (
                               <Monitor className="h-4 w-4 text-[#00A3FF]" />
-                            ) : device.device?.toLowerCase().includes("android") ? (
+                            ) : device.device
+                                ?.toLowerCase()
+                                .includes("android") ? (
                               <Smartphone className="h-4 w-4 text-[#3DDC84]" />
-                            ) : device.device?.toLowerCase().includes("linux") ? (
+                            ) : device.device
+                                ?.toLowerCase()
+                                .includes("linux") ? (
                               <Monitor className="h-4 w-4 text-[#FCC624]" />
                             ) : (
                               <Monitor className="h-4 w-4 text-[#4318FF]" />
@@ -1201,7 +1393,13 @@ export default function DashboardPage() {
                             {device.sessions.toLocaleString()}
                           </TableCell>
                           <TableCell className="text-right font-medium text-[#2B3674] pr-6">
-                            {totalSessions > 0 ? ((device.sessions / totalSessions) * 100).toFixed(1) : 0}%
+                            {totalSessions > 0
+                              ? (
+                                  (device.sessions / totalSessions) *
+                                  100
+                                ).toFixed(1)
+                              : 0}
+                            %
                           </TableCell>
                         </TableRow>
                       ));
@@ -1218,6 +1416,7 @@ export default function DashboardPage() {
                   )}
                 </TableBody>
               </Table>
+              </div>
             )}
           </CardContent>
         </Card>

@@ -133,12 +133,12 @@ export default function ABTestingPage() {
       const data = await centralizedData.getFeatureAdoption(
         effectiveProjectId,
         startDate.toISOString().split("T")[0],
-        endDate.toISOString().split("T")[0]
+        endDate.toISOString().split("T")[0],
       );
 
       if (data?.data?.features) {
-        const transformedData: FeatureAdoptionData[] =
-          data.data.features.map((feature: any) => ({
+        const transformedData: FeatureAdoptionData[] = data.data.features.map(
+          (feature: any) => ({
             feature_name: feature.feature_name,
             total_users: feature.unique_users || 0,
             adopted_users: feature.unique_users || 0,
@@ -147,7 +147,8 @@ export default function ABTestingPage() {
             weekly_active: Math.floor((feature.unique_users || 0) * 0.6),
             monthly_active: feature.unique_users || 0,
             stickiness: (feature.adoption_rate || 0) * 0.4,
-          }));
+          }),
+        );
 
         setAdoptionData(transformedData);
       } else {
@@ -204,7 +205,7 @@ export default function ABTestingPage() {
   }
 
   const selectedExp = experiments.find(
-    (exp) => exp.id === selectedExperimentId
+    (exp) => exp.id === selectedExperimentId,
   );
 
   return (
@@ -350,7 +351,7 @@ export default function ABTestingPage() {
               </Card>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div>
                   <Label>Select Experiment</Label>
@@ -371,8 +372,8 @@ export default function ABTestingPage() {
                                 exp.status === "RUNNING"
                                   ? "default"
                                   : exp.status === "COMPLETED"
-                                  ? "secondary"
-                                  : "outline"
+                                    ? "secondary"
+                                    : "outline"
                               }
                               className="ml-2"
                             >
@@ -497,8 +498,8 @@ export default function ABTestingPage() {
                           selectedExp.status === "RUNNING"
                             ? "default"
                             : selectedExp.status === "COMPLETED"
-                            ? "secondary"
-                            : "outline"
+                              ? "secondary"
+                              : "outline"
                         }
                       >
                         {selectedExp.status.toLowerCase()}
@@ -553,11 +554,13 @@ export default function ABTestingPage() {
                       <p className="text-sm text-muted-foreground mt-1">
                         {selectedExp.start_date
                           ? new Date(
-                              selectedExp.start_date
+                              selectedExp.start_date,
                             ).toLocaleDateString()
                           : selectedExp.startDate
-                          ? new Date(selectedExp.startDate).toLocaleDateString()
-                          : "Not set"}
+                            ? new Date(
+                                selectedExp.startDate,
+                              ).toLocaleDateString()
+                            : "Not set"}
                       </p>
                     </div>
                     <div>
@@ -566,8 +569,8 @@ export default function ABTestingPage() {
                         {selectedExp.end_date
                           ? new Date(selectedExp.end_date).toLocaleDateString()
                           : selectedExp.endDate
-                          ? new Date(selectedExp.endDate).toLocaleDateString()
-                          : "Not set"}
+                            ? new Date(selectedExp.endDate).toLocaleDateString()
+                            : "Not set"}
                       </p>
                     </div>
                   </div>
@@ -719,7 +722,7 @@ export default function ABTestingPage() {
                   </TabsContent>
 
                   <TabsContent value="timeline" className="space-y-4">
-                    <Card>
+                    <Card className="min-w-0">
                       <CardHeader>
                         <CardTitle>Performance Over Time</CardTitle>
                         <CardDescription>
@@ -740,7 +743,7 @@ export default function ABTestingPage() {
                             <LineChart data={experimentResults.timeline}>
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="date" />
-                              <YAxis />
+                              <YAxis width={45} />
                               <Tooltip />
                               <Line
                                 type="monotone"
@@ -829,7 +832,7 @@ export default function ABTestingPage() {
                         {(
                           adoptionData.reduce(
                             (sum, f) => sum + f.adoption_rate,
-                            0
+                            0,
                           ) / adoptionData.length
                         )?.toFixed(1)}
                         %
@@ -916,8 +919,8 @@ export default function ABTestingPage() {
                                     feature.adoption_rate >= 60
                                       ? "default"
                                       : feature.adoption_rate >= 40
-                                      ? "secondary"
-                                      : "destructive"
+                                        ? "secondary"
+                                        : "destructive"
                                   }
                                 >
                                   {feature.adoption_rate?.toFixed(1)}% adoption

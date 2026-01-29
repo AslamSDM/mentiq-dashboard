@@ -25,6 +25,7 @@ import {
   PlaybooksSummary,
   CreatePlaybookRequest,
 } from "./services/playbooks";
+import { sanitizeText, sanitizeObject, sanitizeId } from "./sanitization";
 
 // Cache configuration
 const CACHE_TTL = {
@@ -294,10 +295,15 @@ export const useStore = create<AppState>()(
         projectName = null,
         userEmail = null
       ) => {
+        // Sanitize impersonation data
+        const sanitizedProjectId = projectId ? sanitizeId(projectId) : null;
+        const sanitizedProjectName = projectName ? sanitizeText(projectName) : null;
+        const sanitizedUserEmail = userEmail ? sanitizeText(userEmail) : null;
+
         set({
-          impersonatedProjectId: projectId,
-          impersonatedProjectName: projectName,
-          impersonatedUserEmail: userEmail,
+          impersonatedProjectId: sanitizedProjectId,
+          impersonatedProjectName: sanitizedProjectName,
+          impersonatedUserEmail: sanitizedUserEmail,
           analyticsCache: {},
           eventsCache: null,
           sessionsCache: null,
@@ -363,10 +369,14 @@ export const useStore = create<AppState>()(
       createProject: async (name, description) => {
         if (!get().isAuthenticated) throw new Error("Not authenticated");
         try {
-          const project = await apiClient.createProject(name);
+          // Sanitize inputs before sending to API
+          const sanitizedName = sanitizeText(name);
+          const sanitizedDescription = sanitizeText(description || "");
+
+          const project = await apiClient.createProject(sanitizedName);
           const projectWithDescription = {
             ...project,
-            description: description || "",
+            description: sanitizedDescription,
           };
           set((state) => ({
             projects: Array.isArray(state.projects)
@@ -385,11 +395,13 @@ export const useStore = create<AppState>()(
       deleteProject: async (projectId) => {
         if (!get().isAuthenticated) throw new Error("Not authenticated");
         try {
-          await apiClient.deleteProject(projectId);
+          // Sanitize projectId
+          const sanitizedProjectId = sanitizeId(projectId);
+          await apiClient.deleteProject(sanitizedProjectId);
           set((state) => ({
-            projects: state.projects.filter((p) => p.id !== projectId),
+            projects: state.projects.filter((p) => p.id !== sanitizedProjectId),
             selectedProjectId:
-              state.selectedProjectId === projectId
+              state.selectedProjectId === sanitizedProjectId
                 ? null
                 : state.selectedProjectId,
           }));
@@ -398,9 +410,12 @@ export const useStore = create<AppState>()(
         }
       },
       setSelectedProjectId: (projectId) => {
-        if (projectId) {
+        // Sanitize projectId
+        const sanitizedProjectId = projectId ? sanitizeId(projectId) : null;
+
+        if (sanitizedProjectId) {
           const projects = get().projects;
-          const projectExists = projects.find((p) => p.id === projectId);
+          const projectExists = projects.find((p) => p.id === sanitizedProjectId);
           if (!projectExists && projects.length > 0) {
             if (projects[0]) {
               projectId = projects[0].id;
@@ -410,9 +425,9 @@ export const useStore = create<AppState>()(
           }
         }
 
-        set({ selectedProjectId: projectId });
-        if (projectId) {
-          apiClient.setProjectId(projectId);
+        set({ selectedProjectId: sanitizedProjectId });
+        if (sanitizedProjectId) {
+          apiClient.setProjectId(sanitizedProjectId);
 
           const endDate = new Date();
           const startDate = new Date();
@@ -424,44 +439,55 @@ export const useStore = create<AppState>()(
           };
 
           centralizedData
-            .prefetchAllData(projectId, dateRange)
+            .prefetchAllData(sanitizedProjectId!, dateRange)
             .catch(() => {});
         }
       },
 
       fetchApiKeys: async (projectId) => {
         if (!get().isAuthenticated) return;
+        // Sanitize projectId
+        const sanitizedProjectId = sanitizeId(projectId);
         set((state) => ({
-          loadingApiKeys: { ...state.loadingApiKeys, [projectId]: true },
+          loadingApiKeys: { ...state.loadingApiKeys, [sanitizedProjectId]: true },
         }));
         try {
-          const keys = await apiClient.getApiKeys(projectId);
+          const keys = await apiClient.getApiKeys(sanitizedProjectId);
+          // Sanitize API keys data before storing
+          const sanitizedKeys = keys.map((key) => sanitizeObject(key));
           set((state) => ({
-            apiKeys: { ...state.apiKeys, [projectId]: keys },
-            loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
+            apiKeys: { ...state.apiKeys, [sanitizedProjectId]: sanitizedKeys },
+            loadingApiKeys: { ...state.loadingApiKeys, [sanitizedProjectId]: false },
           }));
         } catch {
           set((state) => ({
-            apiKeys: { ...state.apiKeys, [projectId]: [] },
-            loadingApiKeys: { ...state.loadingApiKeys, [projectId]: false },
+            apiKeys: { ...state.apiKeys, [sanitizedProjectId]: [] },
+            loadingApiKeys: { ...state.loadingApiKeys, [sanitizedProjectId]: false },
           }));
         }
       },
       createApiKey: async (projectId, name, permissions) => {
         if (!get().isAuthenticated) throw new Error("Not authenticated");
         try {
+          // Sanitize inputs
+          const sanitizedProjectId = sanitizeId(projectId);
+          const sanitizedName = sanitizeText(name);
+          const sanitizedPermissions = permissions.map((p) => sanitizeText(p));
+
           const newKey = await apiClient.createApiKeys(
-            projectId,
-            name,
-            permissions
+            sanitizedProjectId,
+            sanitizedName,
+            sanitizedPermissions
           );
+          // Sanitize the response before storing
+          const sanitizedKey = sanitizeObject(newKey);
           set((state) => ({
             apiKeys: {
               ...state.apiKeys,
-              [projectId]: [...(state.apiKeys[projectId] || []), newKey],
+              [sanitizedProjectId]: [...(state.apiKeys[sanitizedProjectId] || []), sanitizedKey],
             },
           }));
-          return newKey;
+          return sanitizedKey;
         } catch (error) {
           throw error;
         }
@@ -469,12 +495,16 @@ export const useStore = create<AppState>()(
       deleteApiKey: async (projectId, keyId) => {
         if (!get().isAuthenticated) throw new Error("Not authenticated");
         try {
-          await apiClient.deleteApiKey(projectId, keyId);
+          // Sanitize IDs
+          const sanitizedProjectId = sanitizeId(projectId);
+          const sanitizedKeyId = sanitizeId(keyId);
+
+          await apiClient.deleteApiKey(sanitizedProjectId, sanitizedKeyId);
           set((state) => ({
             apiKeys: {
               ...state.apiKeys,
-              [projectId]: (state.apiKeys[projectId] || []).filter(
-                (k) => k.id !== keyId
+              [sanitizedProjectId]: (state.apiKeys[sanitizedProjectId] || []).filter(
+                (k) => k.id !== sanitizedKeyId
               ),
             },
           }));
@@ -485,16 +515,23 @@ export const useStore = create<AppState>()(
       updateApiKey: async (projectId, keyId, updates) => {
         if (!get().isAuthenticated) throw new Error("Not authenticated");
         try {
+          // Sanitize IDs and updates
+          const sanitizedProjectId = sanitizeId(projectId);
+          const sanitizedKeyId = sanitizeId(keyId);
+          const sanitizedUpdates = sanitizeObject(updates);
+
           const updatedKey = await apiClient.updateApiKey(
-            projectId,
-            keyId,
-            updates
+            sanitizedProjectId,
+            sanitizedKeyId,
+            sanitizedUpdates
           );
+          // Sanitize response
+          const sanitizedKey = sanitizeObject(updatedKey);
           set((state) => ({
             apiKeys: {
               ...state.apiKeys,
-              [projectId]: (state.apiKeys[projectId] || []).map((k) =>
-                k.id === keyId ? updatedKey : k
+              [sanitizedProjectId]: (state.apiKeys[sanitizedProjectId] || []).map((k) =>
+                k.id === sanitizedKeyId ? sanitizedKey : k
               ),
             },
           }));
@@ -576,13 +613,15 @@ export const useStore = create<AppState>()(
         try {
           apiClient.setProjectId(effectiveProjectId);
           const data = await apiClient.getAnalyticsGlobal(params);
+          // Sanitize analytics data before storing
+          const sanitizedData = sanitizeObject(data);
 
           set((state) => ({
-            analyticsData: data,
+            analyticsData: sanitizedData,
             analyticsCache: {
               ...state.analyticsCache,
               [cacheKey]: {
-                data,
+                data: sanitizedData,
                 timestamp: Date.now(),
                 key: cacheKey,
               },
@@ -613,10 +652,12 @@ export const useStore = create<AppState>()(
         set({ loadingEvents: true });
         try {
           const events = await apiClient.getEvents(effectiveProjectId);
+          // Sanitize events data before storing
+          const sanitizedEvents = events.map((event) => sanitizeObject(event));
           set({
-            events,
+            events: sanitizedEvents,
             eventsCache: {
-              data: events,
+              data: sanitizedEvents,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -755,17 +796,19 @@ export const useStore = create<AppState>()(
           const experiments = await apiClient.getExperiments(
             effectiveProjectId
           );
+          // Sanitize experiments data before storing
+          const sanitizedExperiments = experiments.map((exp) => sanitizeObject(exp));
           set({
-            experiments,
+            experiments: sanitizedExperiments,
             experimentsCache: {
-              data: experiments,
+              data: sanitizedExperiments,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
             loadingExperiments: false,
           });
-          if (experiments.length > 0 && !get().selectedExperimentId) {
-            set({ selectedExperimentId: experiments[0].id });
+          if (sanitizedExperiments.length > 0 && !get().selectedExperimentId) {
+            set({ selectedExperimentId: sanitizedExperiments[0].id });
           }
         } catch {
           set({ loadingExperiments: false, experiments: [] });
@@ -777,7 +820,9 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
-        const cacheKey = `${effectiveProjectId}_${experimentId}`;
+        // Sanitize experimentId
+        const sanitizedExperimentId = sanitizeId(experimentId);
+        const cacheKey = `${effectiveProjectId}_${sanitizedExperimentId}`;
 
         if (!forceRefresh) {
           const cached = experimentResultsCache[cacheKey];
@@ -791,14 +836,16 @@ export const useStore = create<AppState>()(
         try {
           const results = await apiClient.getExperimentResults(
             effectiveProjectId,
-            experimentId
+            sanitizedExperimentId
           );
+          // Sanitize results before storing
+          const sanitizedResults = sanitizeObject(results);
           set((state) => ({
-            experimentResults: results,
+            experimentResults: sanitizedResults,
             experimentResultsCache: {
               ...state.experimentResultsCache,
               [cacheKey]: {
-                data: results,
+                data: sanitizedResults,
                 timestamp: Date.now(),
                 key: cacheKey,
               },
@@ -814,22 +861,30 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
 
+        // Sanitize experiment data before sending to API
+        const sanitizedExperiment = sanitizeObject(experiment);
         const newExperiment = await apiClient.createExperiment(
           effectiveProjectId,
-          experiment
+          sanitizedExperiment
         );
+        // Sanitize response before storing
+        const sanitizedNewExperiment = sanitizeObject(newExperiment);
         set((state) => ({
-          experiments: [...state.experiments, newExperiment],
+          experiments: [...state.experiments, sanitizedNewExperiment],
         }));
       },
       setSelectedExperimentId: (experimentId) => {
-        set({ selectedExperimentId: experimentId });
+        // Sanitize experimentId
+        const sanitizedExperimentId = experimentId ? sanitizeId(experimentId) : null;
+        set({ selectedExperimentId: sanitizedExperimentId });
       },
       updateExperimentStatus: async (experimentId, status) => {
         const { fetchExperiments, apiClient, getEffectiveProjectId } = get();
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) return;
-        await apiClient.updateExperiment(effectiveProjectId, experimentId, {
+        // Sanitize experimentId (status is a controlled enum value from dropdown)
+        const sanitizedExperimentId = sanitizeId(experimentId);
+        await apiClient.updateExperiment(effectiveProjectId, sanitizedExperimentId, {
           status,
         });
         await fetchExperiments();
@@ -854,10 +909,12 @@ export const useStore = create<AppState>()(
         set({ loadingSessions: true });
         try {
           const sessions = await apiClient.getSessions(effectiveProjectId);
+          // Sanitize sessions data before storing
+          const sanitizedSessions = sessions.map((session) => sanitizeObject(session));
           set({
-            sessions,
+            sessions: sanitizedSessions,
             sessionsCache: {
-              data: sessions,
+              data: sanitizedSessions,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -887,23 +944,24 @@ export const useStore = create<AppState>()(
         set({ loadingUsers: true });
         try {
           const response = await apiClient.getUsers(effectiveProjectId);
-          const users = response.users?.map((profile: UserProfile) => ({
-            id: profile.userId,
+          // Sanitize user profiles before mapping
+          const sanitizedUsers = response.users?.map((profile: UserProfile) => ({
+            id: sanitizeText(profile.userId),
             email: undefined,
             firstSeen: profile.firstSeen,
             lastSeen: profile.lastSeen,
             totalSessions: profile.sessionCount,
             totalEvents: profile.totalEvents,
             avgSessionDuration: 0,
-            properties: profile.customProperties,
+            properties: sanitizeObject(profile.customProperties),
             projectId: effectiveProjectId,
             createdAt: profile.firstSeen,
             updatedAt: profile.lastSeen,
           }));
           set({
-            users,
+            users: sanitizedUsers,
             usersCache: {
-              data: users,
+              data: sanitizedUsers,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -939,10 +997,12 @@ export const useStore = create<AppState>()(
           const overview = await apiClient.getSessionsOverview(
             effectiveProjectId
           );
+          // Sanitize overview data before storing
+          const sanitizedOverview = sanitizeObject(overview);
           set({
-            sessionsOverview: overview,
+            sessionsOverview: sanitizedOverview,
             sessionsOverviewCache: {
-              data: overview,
+              data: sanitizedOverview,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -953,24 +1013,30 @@ export const useStore = create<AppState>()(
         }
       },
       selectSession: async (session) => {
-        set({ selectedSession: session });
-        if (session) {
+        // Sanitize session before storing
+        const sanitizedSession = session ? sanitizeObject(session) : null;
+        set({ selectedSession: sanitizedSession });
+        if (sanitizedSession) {
           const { apiClient, getEffectiveProjectId } = get();
           const effectiveProjectId = getEffectiveProjectId();
           if (!effectiveProjectId) return;
           try {
             const fullSession = await apiClient.getSession(
               effectiveProjectId,
-              session.id
+              sanitizedSession.id
             );
-            set({ selectedSession: fullSession });
+            // Sanitize full session data
+            const sanitizedFullSession = sanitizeObject(fullSession);
+            set({ selectedSession: sanitizedFullSession });
           } catch {
             // Silent fail
           }
         }
       },
       selectUser: (user) => {
-        set({ selectedUser: user });
+        // Sanitize user before storing
+        const sanitizedUser = user ? sanitizeObject(user) : null;
+        set({ selectedUser: sanitizedUser });
       },
 
       playbooks: [],
@@ -1001,10 +1067,12 @@ export const useStore = create<AppState>()(
         set({ loadingPlaybooks: true });
         try {
           const playbooks = await playbooksService.getPlaybooks(effectiveProjectId);
+          // Sanitize playbooks data before storing
+          const sanitizedPlaybooks = playbooks.map((playbook) => sanitizeObject(playbook));
           set({
-            playbooks,
+            playbooks: sanitizedPlaybooks,
             playbooksCache: {
-              data: playbooks,
+              data: sanitizedPlaybooks,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -1036,10 +1104,12 @@ export const useStore = create<AppState>()(
 
         try {
           const summary = await playbooksService.getPlaybooksSummary(effectiveProjectId);
+          // Sanitize summary data before storing
+          const sanitizedSummary = sanitizeObject(summary);
           set({
-            playbooksSummary: summary,
+            playbooksSummary: sanitizedSummary,
             playbooksSummaryCache: {
-              data: summary,
+              data: sanitizedSummary,
               timestamp: Date.now(),
               key: effectiveProjectId,
             },
@@ -1054,11 +1124,15 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) throw new Error("No project selected");
 
-        const playbook = await playbooksService.createPlaybook(effectiveProjectId, data);
+        // Sanitize playbook data before sending
+        const sanitizedData = sanitizeObject(data);
+        const playbook = await playbooksService.createPlaybook(effectiveProjectId, sanitizedData);
+        // Sanitize response
+        const sanitizedPlaybook = sanitizeObject(playbook);
         // Refresh playbooks list
         await fetchPlaybooks(true);
         await fetchPlaybooksSummary(true);
-        return playbook;
+        return sanitizedPlaybook;
       },
 
       updatePlaybookStatus: async (playbookId, status) => {
@@ -1066,15 +1140,20 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) throw new Error("No project selected");
 
+        // Sanitize playbookId (status is a controlled enum value from dropdown)
+        const sanitizedPlaybookId = sanitizeId(playbookId);
+
         const playbook = await playbooksService.updatePlaybookStatus(
           effectiveProjectId,
-          playbookId,
+          sanitizedPlaybookId,
           status
         );
+        // Sanitize response
+        const sanitizedPlaybook = sanitizeObject(playbook);
         // Refresh playbooks list
         await fetchPlaybooks(true);
         await fetchPlaybooksSummary(true);
-        return playbook;
+        return sanitizedPlaybook;
       },
 
       deletePlaybook: async (playbookId) => {
@@ -1082,7 +1161,10 @@ export const useStore = create<AppState>()(
         const effectiveProjectId = getEffectiveProjectId();
         if (!effectiveProjectId) throw new Error("No project selected");
 
-        await playbooksService.deletePlaybook(effectiveProjectId, playbookId);
+        // Sanitize playbookId
+        const sanitizedPlaybookId = sanitizeId(playbookId);
+
+        await playbooksService.deletePlaybook(effectiveProjectId, sanitizedPlaybookId);
         // Refresh playbooks list
         await fetchPlaybooks(true);
         await fetchPlaybooksSummary(true);

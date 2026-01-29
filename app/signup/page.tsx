@@ -2,11 +2,14 @@
 
 import * as React from "react";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +39,42 @@ import {
   MailOpen,
 } from "lucide-react";
 import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
+import {
+  sanitizeText,
+  sanitizeEmail,
+  sanitizePassword,
+  sanitizeSearchQuery,
+} from "@/lib/sanitization";
+
+// Generic error message for security
+const GENERIC_ERROR = "An error occurred. Please try again.";
+
+// Zod validation schema for account details
+const signUpSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  companyName: z.string().min(2, "Company name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[A-Z])/,
+      "Password must contain at least one capital letter"
+    )
+    .regex(
+      /^(?=.*[0-9])/,
+      "Password must contain at least one number"
+    )
+    .regex(
+      /^(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
+      "Password must contain at least one special character"
+    ),
+  acceptedTerms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the Terms and Conditions",
+  }),
+});
+
+type SignUpFormData = z.infer<typeof signUpSchema>;
 
 // Google icon component
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -79,18 +118,32 @@ function SignUpForm() {
   const [userCount, setUserCount] = useState(
     preselectedUsers ? parseInt(preselectedUsers) : 250
   );
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const [userId, setUserId] = useState("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const currentTier = getTierByUserCount(userCount);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<SignUpFormData>({
+    resolver: zodResolver(signUpSchema),
+    mode: "onBlur",
+    defaultValues: {
+      fullName: "",
+      companyName: "",
+      email: "",
+      password: "",
+      acceptedTerms: false,
+    },
+  });
+
+  const acceptedTerms = watch("acceptedTerms");
 
   // Check if user canceled payment
   React.useEffect(() => {
@@ -105,25 +158,22 @@ function SignUpForm() {
     return tier.basePrice;
   };
 
-  const handleRegisterUser = async () => {
-    if (
-      !fullName ||
-      !companyName ||
-      !email ||
-      !password ||
-      password.length < 8
-    ) {
-      setError("Please fill in all fields correctly");
-      return;
-    }
-
-    if (!acceptedTerms) {
-      setError("Please accept the Terms and Conditions to continue");
-      return;
-    }
-
+  const handleRegisterUser = async (data: SignUpFormData) => {
     setIsLoading(true);
     setError("");
+
+    // Sanitize all inputs
+    const sanitizedFullName = sanitizeText(data.fullName);
+    const sanitizedCompanyName = sanitizeText(data.companyName);
+    const sanitizedEmail = sanitizeEmail(data.email);
+    const sanitizedPassword = sanitizePassword(data.password);
+
+    // Validate sanitized data
+    if (!sanitizedFullName || !sanitizedCompanyName || !sanitizedEmail || !sanitizedPassword) {
+      setError("Please fill in all fields correctly.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/auth/signup", {
@@ -132,38 +182,38 @@ function SignUpForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: fullName,
-          email,
-          password,
-          companyName,
+          name: sanitizedFullName,
+          email: sanitizedEmail,
+          password: sanitizedPassword,
+          companyName: sanitizedCompanyName,
         }),
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Something went wrong");
+        setError(responseData.error || "Something went wrong");
         return;
       }
 
       // Check if email verification is required
-      if (data.requiresVerification) {
+      if (responseData.requiresVerification) {
         setIsRegistered(true);
-        setUserId(data.account?.id || email);
+        setUserId(sanitizeText(responseData.account?.id) || sanitizedEmail);
         setStep("verification");
         return;
       }
 
       // If no verification required (e.g., Google OAuth users), sign in and go to plan
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
         redirect: false,
       });
 
       if (result?.ok) {
         setIsRegistered(true);
-        setUserId(data.id || email);
+        setUserId(responseData.id || data.email);
         setStep("plan");
       } else {
         setError(
@@ -256,7 +306,7 @@ function SignUpForm() {
               </span>
             </h1>
             <p className="text-xl text-blue-100 max-w-md">
-              Join thousands of SaaS founders who've turned retention into their
+              Join thousands of SaaS founders who&apos;ve turned retention into their
               competitive advantage.
             </p>
 
@@ -381,175 +431,180 @@ function SignUpForm() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="fullName"
-                    className="text-sm font-medium text-[#2B3674]"
-                  >
-                    Full name
-                  </Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                    />
+              <form onSubmit={handleSubmit(handleRegisterUser)} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="fullName"
+                      className="text-sm font-medium text-[#2B3674]"
+                    >
+                      Full name
+                    </Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="John Doe"
+                        {...register("fullName")}
+                        className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                          errors.fullName ? "border-red-500 ring-1 ring-red-500" : ""
+                        }`}
+                      />
+                    </div>
+                    {errors.fullName && (
+                      <p className="text-sm text-red-500">{errors.fullName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="companyName"
+                      className="text-sm font-medium text-[#2B3674]"
+                    >
+                      Company name
+                    </Label>
+                    <div className="relative">
+                      <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
+                      <Input
+                        id="companyName"
+                        type="text"
+                        placeholder="Your Company"
+                        {...register("companyName")}
+                        className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                          errors.companyName ? "border-red-500 ring-1 ring-red-500" : ""
+                        }`}
+                      />
+                    </div>
+                    {errors.companyName && (
+                      <p className="text-sm text-red-500">{errors.companyName.message}</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label
-                    htmlFor="companyName"
+                    htmlFor="email"
                     className="text-sm font-medium text-[#2B3674]"
                   >
-                    Company name
+                    Work email
                   </Label>
                   <div className="relative">
-                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
                     <Input
-                      id="companyName"
-                      type="text"
-                      placeholder="Your Company"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      required
-                      className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                      id="email"
+                      type="email"
+                      placeholder="name@company.com"
+                      {...register("email")}
+                      className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                        errors.email ? "border-red-500 ring-1 ring-red-500" : ""
+                      }`}
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-sm text-red-500">{errors.email.message}</p>
+                  )}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="email"
-                  className="text-sm font-medium text-[#2B3674]"
-                >
-                  Work email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="name@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-medium text-[#2B3674]"
+                  >
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="At least 8 characters"
+                      {...register("password")}
+                      className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                        errors.password ? "border-red-500 ring-1 ring-red-500" : ""
+                      }`}
+                    />
+                  </div>
+                  {errors.password ? (
+                    <p className="text-sm text-red-500">{errors.password.message}</p>
+                  ) : (
+                    <p className="text-xs text-[#4363C7]">
+                      Must be at least 8 characters with 1 capital letter, 1 number, and 1 special character
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-start gap-3 p-4 bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg">
+                  <Checkbox
+                    id="terms"
+                    {...register("acceptedTerms")}
+                    className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                   />
+                  <label
+                    htmlFor="terms"
+                    className="text-xs text-[#2B3674] leading-relaxed cursor-pointer"
+                  >
+                    By creating an account, I agree to the{" "}
+                    <Link
+                      href="/docs/Terms of Service MENTIQ.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and acknowledge the{" "}
+                    <Link
+                      href="/docs/Privacy Policy MENTIQ.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                    ,{" "}
+                    <Link
+                      href="/docs/COOKIES MENTIQ.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Cookie Policy
+                    </Link>
+                    , and{" "}
+                    <Link
+                      href="/docs/DPA MENTIQ.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Data Processing Addendum
+                    </Link>
+                    .
+                  </label>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="password"
-                  className="text-sm font-medium text-[#2B3674]"
-                >
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="At least 8 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                <p className="text-xs text-[#4363C7]">
-                  Use 8 or more characters with a mix of letters, numbers &
-                  symbols
-                </p>
-              </div>
-
-              <div className="flex items-start gap-3 p-4 bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg">
-                <Checkbox
-                  id="terms"
-                  checked={acceptedTerms}
-                  onCheckedChange={(checked) =>
-                    setAcceptedTerms(checked as boolean)
-                  }
-                  className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <label
-                  htmlFor="terms"
-                  className="text-xs text-[#2B3674] leading-relaxed cursor-pointer"
-                >
-                  By creating an account, I agree to the{" "}
-                  <Link
-                    href="/docs/Terms of Service MENTIQ.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Terms of Service
-                  </Link>{" "}
-                  and acknowledge the{" "}
-                  <Link
-                    href="/docs/Privacy Policy MENTIQ.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Privacy Policy
-                  </Link>
-                  ,{" "}
-                  <Link
-                    href="/docs/COOKIES MENTIQ.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Cookie Policy
-                  </Link>
-                  , and{" "}
-                  <Link
-                    href="/docs/DPA MENTIQ.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Data Processing Addendum
-                  </Link>
-                  .
-                </label>
-              </div>
-
-              <Button
-                onClick={handleRegisterUser}
-                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
-                disabled={
-                  !fullName ||
-                  !companyName ||
-                  !email ||
-                  !password ||
-                  password.length < 8 ||
-                  !acceptedTerms ||
-                  isLoading
-                }
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  <>
-                    Continue to plan selection
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </>
+                {errors.acceptedTerms && (
+                  <p className="text-sm text-red-500 -mt-2">{errors.acceptedTerms.message}</p>
                 )}
-              </Button>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
+                  disabled={!isValid || isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      Continue to plan selection
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </>
+                  )}
+                </Button>
+              </form>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -585,7 +640,7 @@ function SignUpForm() {
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold text-[#2B3674]">Check your email</h2>
                 <p className="text-[#4363C7]">
-                  We&apos;ve sent a verification link to <strong className="text-[#2B3674]">{email}</strong>
+                  We&apos;ve sent a verification link to <strong className="text-[#2B3674]">{watch("email")}</strong>
                 </p>
               </div>
 
@@ -603,7 +658,7 @@ function SignUpForm() {
                           {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email }),
+                            body: JSON.stringify({ email: watch("email") }),
                           }
                         );
                         if (response.ok) {
@@ -730,8 +785,8 @@ function SignUpForm() {
               </Button>
 
               <p className="text-xs text-center text-[#4363C7]">
-                You'll be redirected to Stripe for secure payment processing.
-                After payment, you'll be able to create your first project.
+                You&apos;ll be redirected to Stripe for secure payment processing.
+                After payment, you&apos;ll be able to create your first project.
               </p>
             </div>
           )}

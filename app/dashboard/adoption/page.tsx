@@ -83,7 +83,7 @@ export default function FeatureAdoptionPage() {
       const response = await centralizedData.getFeatureAdoption(
         selectedProjectId,
         startDate.toISOString().split("T")[0],
-        endDate.toISOString().split("T")[0]
+        endDate.toISOString().split("T")[0],
       );
 
       if (response?.data?.features) {
@@ -114,7 +114,7 @@ export default function FeatureAdoptionPage() {
             transformedData.length;
           const totalUsers = transformedData.reduce(
             (sum, f) => sum + f.adopted_users,
-            0
+            0,
           );
 
           trendData.push({
@@ -170,7 +170,7 @@ export default function FeatureAdoptionPage() {
   };
 
   const selectedFeatureData = adoptionData.find(
-    (f) => f.feature_name === selectedFeature
+    (f) => f.feature_name === selectedFeature,
   );
 
   if (!selectedProjectId) {
@@ -314,7 +314,7 @@ export default function FeatureAdoptionPage() {
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Vertical Bar Chart */}
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <CardTitle>Feature Adoption Funnel</CardTitle>
                     <CardDescription>
@@ -375,12 +375,12 @@ export default function FeatureAdoptionPage() {
                                     entry.feature_name === selectedFeature
                                       ? "hsl(var(--primary))"
                                       : entry.adoption_rate >= 80
-                                      ? "#22c55e"
-                                      : entry.adoption_rate >= 60
-                                      ? "#84cc16"
-                                      : entry.adoption_rate >= 40
-                                      ? "#eab308"
-                                      : "#ef4444"
+                                        ? "#22c55e"
+                                        : entry.adoption_rate >= 60
+                                          ? "#84cc16"
+                                          : entry.adoption_rate >= 40
+                                            ? "#eab308"
+                                            : "#ef4444"
                                   }
                                   opacity={
                                     entry.feature_name === selectedFeature
@@ -420,14 +420,14 @@ export default function FeatureAdoptionPage() {
                             <Badge
                               variant={
                                 getAdoptionStatus(
-                                  selectedFeatureData.adoption_rate
+                                  selectedFeatureData.adoption_rate,
                                 ).color as any
                               }
                               className="mt-2"
                             >
                               {
                                 getAdoptionStatus(
-                                  selectedFeatureData.adoption_rate
+                                  selectedFeatureData.adoption_rate,
                                 ).status
                               }
                             </Badge>
@@ -442,14 +442,14 @@ export default function FeatureAdoptionPage() {
                             <Badge
                               variant={
                                 getStickinessStatus(
-                                  selectedFeatureData.stickiness
+                                  selectedFeatureData.stickiness,
                                 ).color as any
                               }
                               className="mt-2"
                             >
                               {
                                 getStickinessStatus(
-                                  selectedFeatureData.stickiness
+                                  selectedFeatureData.stickiness,
                                 ).status
                               }
                             </Badge>
@@ -528,7 +528,7 @@ export default function FeatureAdoptionPage() {
                             </div>
                             <span className="text-sm font-medium">
                               {selectedFeatureData.dropoff_after_first?.toFixed(
-                                1
+                                1,
                               )}
                               %
                             </span>
@@ -567,7 +567,7 @@ export default function FeatureAdoptionPage() {
             </TabsContent>
 
             <TabsContent value="trends" className="space-y-4">
-              <Card>
+              <Card className="min-w-0">
                 <CardHeader>
                   <CardTitle>Adoption Trends</CardTitle>
                   <CardDescription>
@@ -594,7 +594,7 @@ export default function FeatureAdoptionPage() {
                         <LineChart data={trendData}>
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="date" />
-                          <YAxis />
+                          <YAxis width={45} />
                           <ChartTooltip
                             content={<ChartTooltipContent />}
                             formatter={(value, name) => [
@@ -725,7 +725,7 @@ export default function FeatureAdoptionPage() {
                             <span className="text-sm">
                               Dropoff after first use:{" "}
                               {selectedFeatureData.dropoff_after_first?.toFixed(
-                                1
+                                1,
                               )}
                               %
                             </span>

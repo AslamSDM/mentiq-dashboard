@@ -2,15 +2,30 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Mail, Lock, Loader2 } from "lucide-react";
+import {
+  sanitizeEmail,
+  sanitizePassword,
+} from "@/lib/sanitization";
+
+// Zod validation schema
+const signInSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+type SignInFormData = z.infer<typeof signInSchema>;
 
 // Google icon component
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -34,26 +49,65 @@ const GoogleIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+// Generic error message to prevent user enumeration
+const GENERIC_ERROR = "Invalid credentials. Please try again.";
+
 export default function SignInPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState("");
+  const [lastAttempt, setLastAttempt] = useState<number>(0);
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignInFormData>({
+    resolver: zodResolver(signInSchema),
+    mode: "onBlur",
+  });
+
+  // Rate limiting: minimum 1 second between attempts
+  const checkRateLimit = useCallback(() => {
+    const now = Date.now();
+    if (now - lastAttempt < 1000) {
+      setError("Please wait a moment before trying again.");
+      return false;
+    }
+    return true;
+  }, [lastAttempt]);
+
+  const handleSignIn = async (data: SignInFormData) => {
+    if (!checkRateLimit()) {
+      return;
+    }
+
+    // Sanitize inputs
+    const sanitizedEmail = sanitizeEmail(data.email);
+    const sanitizedPassword = sanitizePassword(data.password);
+
+    if (!sanitizedEmail) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!sanitizedPassword) {
+      setError("Please enter your password.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
     setShowVerificationMessage(false);
+    setLastAttempt(Date.now());
 
     try {
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
         redirect: false,
       });
 
@@ -63,77 +117,94 @@ export default function SignInPage() {
           const errorObj = JSON.parse(result.error);
           if (errorObj.requiresVerification) {
             setShowVerificationMessage(true);
-            setVerificationEmail(errorObj.email || email);
+            setVerificationEmail(sanitizeEmail(errorObj.email) || sanitizedEmail);
             setError("");
           } else {
-            setError(
-              errorObj.message || "Invalid credentials. Please try again."
-            );
+            // Use generic error message to prevent user enumeration
+            setError(GENERIC_ERROR);
           }
         } catch {
           // Check for verification message in plain text
           if (result.error.includes("verify your email")) {
             setShowVerificationMessage(true);
-            setVerificationEmail(email);
+            setVerificationEmail(sanitizedEmail);
             setError("");
           } else {
-            setError(result.error || "Invalid credentials. Please try again.");
+            // Use generic error message to prevent user enumeration
+            setError(GENERIC_ERROR);
           }
         }
       } else if (result?.ok) {
-        const sessionResponse = await fetch("/api/auth/session");
-        const sessionData = await sessionResponse.json();
-
-        // Check email verification first
-        if (sessionData?.emailVerified === false) {
-          window.location.href = "/verify-pending";
-          return;
-        }
-
-        // Redirect to pricing if no active subscription, otherwise to dashboard
-        if (sessionData?.hasActiveSubscription) {
-          window.location.href = "/dashboard";
-        } else {
-          window.location.href = "/pricing?required=true";
-        }
+        // Redirect to dashboard — the middleware handles further routing
+        router.push("/dashboard");
+        return;
       } else {
-        setError("Authentication failed. Please check your credentials.");
+        setError(GENERIC_ERROR);
       }
-    } catch (error: any) {
-      setError(error.message || "An error occurred. Please try again.");
+    } catch {
+      // Generic error message - don't expose internal errors
+      setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    if (!checkRateLimit()) {
+      return;
+    }
+
     setIsGoogleLoading(true);
     setError("");
+    setLastAttempt(Date.now());
+    
     try {
-      // Use NextAuth's signIn with Google provider
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch {
-      setError("Failed to sign in with Google. Please try again.");
+      setError("Failed to sign in. Please try again.");
       setIsGoogleLoading(false);
     }
   };
 
   const handleResendVerification = async () => {
+    if (!checkRateLimit()) {
+      return;
+    }
+
+    // Sanitize verification email
+    const sanitizedVerificationEmail = sanitizeEmail(verificationEmail);
+    if (!sanitizedVerificationEmail) {
+      setError("Invalid email address.");
+      return;
+    }
+
+    setLastAttempt(Date.now());
+    
     try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      if (!apiBaseUrl) {
+        setError("Service temporarily unavailable. Please try again later.");
+        return;
+      }
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/resend-verification`,
+        `${apiBaseUrl}/resend-verification`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: verificationEmail }),
+          body: JSON.stringify({ email: sanitizedVerificationEmail }),
         }
       );
+      
       if (response.ok) {
         setError("");
-        alert("Verification email sent! Please check your inbox.");
+        // Use a more user-friendly notification instead of alert
+        setShowVerificationMessage(true);
+      } else {
+        setError("Failed to resend verification email. Please try again later.");
       }
     } catch {
-      // Silent fail
+      setError("Failed to resend verification email. Please try again later.");
     }
   };
 
@@ -170,7 +241,7 @@ export default function SignInPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-8 text-sm text-blue-200">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-sm text-blue-200">
             <span>© 2025 Mentiq</span>
             <Link href="#" className="hover:text-white transition-colors">
               Privacy
@@ -183,10 +254,10 @@ export default function SignInPage() {
       </div>
 
       {/* Right Side - Sign In Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:p-12 bg-white">
+        <div className="w-full max-w-md space-y-6 sm:space-y-8">
           {/* Mobile Logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
+          <Link href="/" className="lg:hidden flex items-center gap-3 mb-4 sm:mb-8">
             <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
@@ -199,8 +270,8 @@ export default function SignInPage() {
           </Link>
 
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-[#2B3674]">Sign in</h2>
-            <p className="text-[#4363C7]">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#2B3674]">Sign in</h2>
+            <p className="text-sm sm:text-base text-[#4363C7]">
               Enter your credentials to access your dashboard
             </p>
           </div>
@@ -210,7 +281,7 @@ export default function SignInPage() {
             variant="outline"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
-            className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
+            className="w-full h-12 text-sm sm:text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
           >
             {isGoogleLoading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -225,14 +296,14 @@ export default function SignInPage() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#E0E5F2]"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#4363C7]">
+            <div className="relative flex justify-center text-xs sm:text-sm">
+              <span className="px-2 sm:px-4 bg-white text-[#4363C7]">
                 or continue with email
               </span>
             </div>
           </div>
 
-          <form onSubmit={handleSignIn} className="space-y-6">
+          <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4 sm:space-y-6">
             {error && (
               <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
                 {error}
@@ -270,16 +341,20 @@ export default function SignInPage() {
                   id="email"
                   type="email"
                   placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  autoComplete="email"
+                  {...register("email")}
+                  className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                    errors.email ? "border-red-500 ring-1 ring-red-500" : ""
+                  }`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
                 <Label
                   htmlFor="password"
                   className="text-sm font-medium text-[#2B3674]"
@@ -299,17 +374,21 @@ export default function SignInPage() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  autoComplete="current-password"
+                  {...register("password")}
+                  className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
+                    errors.password ? "border-red-500 ring-1 ring-red-500" : ""
+                  }`}
                 />
               </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
+              className="w-full h-12 text-sm sm:text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -325,26 +404,6 @@ export default function SignInPage() {
               )}
             </Button>
           </form>
-
-          {/* <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#E0E5F2]"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#4363C7]">
-                Don&apos;t have an account?
-              </span>
-            </div>
-          </div>
-
-          <Link href="/signup">
-            <Button
-              variant="outline"
-              className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
-            >
-              Create an account
-            </Button>
-          </Link> */}
         </div>
       </div>
     </div>

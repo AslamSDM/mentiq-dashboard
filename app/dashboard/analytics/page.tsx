@@ -30,6 +30,7 @@ import {
   getTopEventsValue,
   getTotalSessionsValue,
 } from "@/lib/api";
+import { sanitizeText, sanitizeObject } from "@/lib/sanitization";
 
 // Helper function to get country flag emoji
 const getCountryFlag = (countryName: string): string => {
@@ -150,7 +151,7 @@ export default function AnalyticsPage() {
 
       <div className="flex items-center space-x-2">
         <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Select date range" />
           </SelectTrigger>
           <SelectContent>
@@ -297,7 +298,7 @@ export default function AnalyticsPage() {
                 <div key={i} className="flex items-center">
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {event.name || `Event ${i + 1}`}
+                      {sanitizeText(event.name || `Event ${i + 1}`)}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {event.count?.toLocaleString() || 0} events
@@ -331,39 +332,41 @@ export default function AnalyticsPage() {
           <CardContent>
             <div className="space-y-4">
               {events.slice(0, 10)?.map((event: any, index: number) => {
+                // Sanitize event data before display
+                const sanitizedEvent = sanitizeObject(event);
                 // Extract country from user_agent_details or use fallback
                 const country =
-                  event.UserAgentDetails?.country || event.Country || "Unknown";
+                  sanitizedEvent.UserAgentDetails?.country || sanitizedEvent.Country || "Unknown";
                 const city =
-                  event.UserAgentDetails?.city || event.City || "Unknown";
+                  sanitizedEvent.UserAgentDetails?.city || sanitizedEvent.City || "Unknown";
                 const countryFlag =
                   country !== "Unknown" ? getCountryFlag(country) : "🌍";
 
                 return (
                   <div
-                    key={event.ID || index}
+                    key={sanitizedEvent.ID || index}
                     className="flex items-center justify-between border-b pb-2 last:border-b-0"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm">{countryFlag}</span>
                         <p className="text-sm font-medium">
-                          {event.Event || event.event || "Unknown Event"}
+                          {sanitizeText(sanitizedEvent.Event || sanitizedEvent.event || "Unknown Event")}
                         </p>
                       </div>
-                      <div className="flex gap-2 text-xs text-muted-foreground">
-                        {event.UserId && (
-                          <span>User: {event.UserId.substring(0, 8)}...</span>
+                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        {sanitizedEvent.UserId && (
+                          <span>User: {sanitizeText(sanitizedEvent.UserId).substring(0, 8)}...</span>
                         )}
-                        {event.SessionId && (
+                        {sanitizedEvent.SessionId && (
                           <span>
-                            Session: {event.SessionId.substring(0, 8)}...
+                            Session: {sanitizeText(sanitizedEvent.SessionId).substring(0, 8)}...
                           </span>
                         )}
-                        {event.Url && <span>URL: {event.Url}</span>}
+                        {sanitizedEvent.Url && <span>URL: {sanitizeText(sanitizedEvent.Url)}</span>}
                         {city !== "Unknown" && country !== "Unknown" && (
                           <span>
-                            {city}, {country}
+                            {sanitizeText(city)}, {sanitizeText(country)}
                           </span>
                         )}
                       </div>
@@ -371,7 +374,7 @@ export default function AnalyticsPage() {
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">
                         {new Date(
-                          event.Timestamp || event.timestamp || Date.now()
+                          sanitizedEvent.Timestamp || sanitizedEvent.timestamp || Date.now()
                         ).toLocaleString()}
                       </p>
                     </div>

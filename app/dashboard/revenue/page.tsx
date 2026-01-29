@@ -59,7 +59,7 @@ export default function RevenuePage() {
   const [isUpdatingKey, setIsUpdatingKey] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [revenueMetrics, setRevenueMetrics] = useState<RevenueMetrics | null>(
-    null
+    null,
   );
   const [revenueAnalytics, setRevenueAnalytics] =
     useState<RevenueAnalytics | null>(null);
@@ -152,7 +152,7 @@ export default function RevenuePage() {
           .getRevenueAnalytics(
             selectedProjectId,
             dateRange.start,
-            dateRange.end
+            dateRange.end,
           )
           .catch(() => null),
         centralizedData
@@ -253,7 +253,7 @@ export default function RevenuePage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-4 items-end">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
               <div className="flex-1">
                 <Label htmlFor="stripe-key">Stripe Restricted API Key</Label>
                 <Input
@@ -271,7 +271,7 @@ export default function RevenuePage() {
                 Update Key
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 onClick={handleSyncStripeData}
                 disabled={isSyncing}
@@ -423,7 +423,7 @@ export default function RevenuePage() {
               {revenueAnalytics && (
                 <>
                   {/* MRR Trend Chart */}
-                  <Card>
+                  <Card className="min-w-0">
                     <CardHeader>
                       <CardTitle>MRR Trend</CardTitle>
                       <CardDescription>
@@ -469,6 +469,7 @@ export default function RevenuePage() {
                               tickFormatter={(value) =>
                                 `$${value.toLocaleString()}`
                               }
+                              width={45}
                             />
                             <ChartTooltip
                               content={<ChartTooltipContent />}
@@ -490,7 +491,7 @@ export default function RevenuePage() {
 
                   {/* Subscriptions and Churn Chart */}
                   <div className="grid gap-4 md:grid-cols-2">
-                    <Card>
+                    <Card className="min-w-0">
                       <CardHeader>
                         <CardTitle>Active Subscriptions</CardTitle>
                         <CardDescription>
@@ -533,6 +534,7 @@ export default function RevenuePage() {
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
+                                width={45}
                               />
                               <ChartTooltip content={<ChartTooltipContent />} />
                               <Line
@@ -552,7 +554,7 @@ export default function RevenuePage() {
                       </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="min-w-0">
                       <CardHeader>
                         <CardTitle>Churn Rate</CardTitle>
                         <CardDescription>
@@ -595,6 +597,7 @@ export default function RevenuePage() {
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
+                                width={45}
                               />
                               <ChartTooltip
                                 content={<ChartTooltipContent />}
@@ -652,7 +655,7 @@ export default function RevenuePage() {
                       <CardContent>
                         <div className="text-3xl font-bold">
                           {formatPercentage(
-                            customerAnalytics.summary?.conversion_rate
+                            customerAnalytics.summary?.conversion_rate,
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -696,15 +699,18 @@ export default function RevenuePage() {
                                 key={customer.id}
                                 className="flex items-center justify-between p-3 border rounded"
                               >
-                                <div>
-                                  <p className="font-medium">
+                                <div className="min-w-0 mr-2">
+                                  <p
+                                    className="font-medium truncate"
+                                    title={customer.email || ""}
+                                  >
                                     {customer.email || "N/A"}
                                   </p>
-                                  <p className="text-sm text-muted-foreground">
+                                  <p className="text-sm text-muted-foreground truncate">
                                     {customer.name || "Unknown"}
                                   </p>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-right flex-shrink-0">
                                   <p className="font-medium">
                                     {formatCurrency(customer.mrr || 0)}
                                   </p>
@@ -808,7 +814,7 @@ export default function RevenuePage() {
                         <span>Trial Conversion Rate:</span>
                         <span className="font-medium">
                           {formatPercentage(
-                            revenueMetrics.trial_to_pay_conversion_rate
+                            revenueMetrics.trial_to_pay_conversion_rate,
                           )}
                         </span>
                       </div>

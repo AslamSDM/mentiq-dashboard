@@ -114,7 +114,7 @@ export default function ChurnAnalysisPage() {
       // Use centralized cached data
       const response = await centralizedData.getChurnRisk(
         selectedProjectId,
-        70
+        70,
       );
 
       if (response) {
@@ -125,16 +125,16 @@ export default function ChurnAnalysisPage() {
 
         // Categorize users by risk category (Critical/High/Medium/Low)
         const highRiskUsers = at_risk_users.filter(
-          (u: ChurnData) => u.category === "Critical" || u.category === "High"
+          (u: ChurnData) => u.category === "Critical" || u.category === "High",
         );
         const mediumRiskUsers = at_risk_users.filter(
-          (u: ChurnData) => u.category === "Medium"
+          (u: ChurnData) => u.category === "Medium",
         );
         const lowRiskUsers = at_risk_users.filter(
-          (u: ChurnData) => u.category === "Low"
+          (u: ChurnData) => u.category === "Low",
         );
         const churnedUsers = at_risk_users.filter(
-          (u: ChurnData) => u.is_churned
+          (u: ChurnData) => u.is_churned,
         );
 
         // Map backend ChurnData to frontend ChurnRiskUser
@@ -150,15 +150,15 @@ export default function ChurnAnalysisPage() {
             last_activity: user.last_active,
             days_since_activity: user.days_inactive || 0,
             churn_probability: parseFloat(
-              user.risk_score?.replace("%", "") || "0"
+              user.risk_score?.replace("%", "") || "0",
             ),
             predicted_churn_date: new Date(
               Date.now() +
-                (30 - (user.days_inactive || 0)) * 24 * 60 * 60 * 1000
+                (30 - (user.days_inactive || 0)) * 24 * 60 * 60 * 1000,
             )
               .toISOString()
               .split("T")[0],
-          })
+          }),
         );
 
         setChurnMetrics({
@@ -179,10 +179,10 @@ export default function ChurnAnalysisPage() {
             factor: "Low Engagement",
             impact_score: Math.round(
               (at_risk_users.filter(
-                (u: ChurnData) => parseFloat(u.avg_sessions_week) < 2
+                (u: ChurnData) => parseFloat(u.avg_sessions_week) < 2,
               ).length /
                 at_risk_users.length) *
-                100
+                100,
             ),
             description: `Users with <2 sessions per week`,
           },
@@ -191,7 +191,7 @@ export default function ChurnAnalysisPage() {
             impact_score: Math.round(
               (at_risk_users.filter((u: ChurnData) => u.trend < -10).length /
                 at_risk_users.length) *
-                100
+                100,
             ),
             description: `Users showing negative engagement trend`,
           },
@@ -201,7 +201,7 @@ export default function ChurnAnalysisPage() {
               (at_risk_users.filter((u: ChurnData) => u.days_inactive > 14)
                 .length /
                 at_risk_users.length) *
-                100
+                100,
             ),
             description: `Users inactive for >14 days`,
           },
@@ -211,7 +211,7 @@ export default function ChurnAnalysisPage() {
               (at_risk_users.filter((u: ChurnData) => u.category === "Critical")
                 .length /
                 at_risk_users.length) *
-                100
+                100,
             ),
             description: `Users in critical risk category`,
           },
@@ -231,9 +231,8 @@ export default function ChurnAnalysisPage() {
       }
 
       // Fetch churn by channel data
-      const channelResponse = await centralizedData.getChurnByChannel(
-        selectedProjectId
-      );
+      const channelResponse =
+        await centralizedData.getChurnByChannel(selectedProjectId);
       if (channelResponse?.data?.channels) {
         setChannelData(channelResponse.data.channels);
       }
@@ -327,7 +326,7 @@ export default function ChurnAnalysisPage() {
         {/* Overview Cards */}
         {churnMetrics && (
           <div className="grid gap-4 md:grid-cols-4">
-            <Card>
+            <Card className="min-w-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Churn Rate
@@ -344,7 +343,7 @@ export default function ChurnAnalysisPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   High Risk Users
@@ -361,7 +360,7 @@ export default function ChurnAnalysisPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Predicted Churners
@@ -376,7 +375,7 @@ export default function ChurnAnalysisPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Prevention Rate
@@ -400,7 +399,7 @@ export default function ChurnAnalysisPage() {
           </TabsList>
 
           <TabsContent value="risk-users" className="space-y-4">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
               <Select
                 value={selectedRiskLevel}
                 onValueChange={setSelectedRiskLevel}
@@ -469,7 +468,7 @@ export default function ChurnAnalysisPage() {
                             </p>
                             <p className="font-medium">
                               {new Date(
-                                user.last_activity
+                                user.last_activity,
                               ).toLocaleDateString()}
                             </p>
                           </div>
@@ -487,7 +486,7 @@ export default function ChurnAnalysisPage() {
                             </p>
                             <p className="font-medium">
                               {new Date(
-                                user.predicted_churn_date
+                                user.predicted_churn_date,
                               ).toLocaleDateString()}
                             </p>
                           </div>
@@ -619,7 +618,7 @@ export default function ChurnAnalysisPage() {
                             })
                           }
                         />
-                        <YAxis />
+                        <YAxis width={45} />
                         <ChartTooltip
                           content={<ChartTooltipContent />}
                           formatter={(value, name) => [
@@ -651,7 +650,7 @@ export default function ChurnAnalysisPage() {
 
           <TabsContent value="distribution" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <Card>
+              <Card className="min-w-0">
                 <CardHeader>
                   <CardTitle>Risk Distribution</CardTitle>
                   <CardDescription>
@@ -700,7 +699,7 @@ export default function ChurnAnalysisPage() {
               </Card>
 
               {churnMetrics && (
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <CardTitle>Risk Breakdown</CardTitle>
                     <CardDescription>
@@ -869,15 +868,15 @@ export default function ChurnAnalysisPage() {
                         >
                           <div className="flex items-center justify-between">
                             <h4 className="font-medium capitalize">
-                              {channel.channel || 'Direct'}
+                              {channel.channel || "Direct"}
                             </h4>
                             <Badge
                               variant={
                                 channel.churn_rate > 50
                                   ? "destructive"
                                   : channel.churn_rate > 25
-                                  ? "secondary"
-                                  : "default"
+                                    ? "secondary"
+                                    : "default"
                               }
                             >
                               {channel.churn_rate?.toFixed(1)}% churn
@@ -885,17 +884,25 @@ export default function ChurnAnalysisPage() {
                           </div>
                           <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
-                              <p className="text-muted-foreground">Total Users</p>
-                              <p className="font-medium">{channel.total_users}</p>
+                              <p className="text-muted-foreground">
+                                Total Users
+                              </p>
+                              <p className="font-medium">
+                                {channel.total_users}
+                              </p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground">Active Users</p>
+                              <p className="text-muted-foreground">
+                                Active Users
+                              </p>
                               <p className="font-medium text-green-600">
                                 {channel.active_users}
                               </p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground">Churned Users</p>
+                              <p className="text-muted-foreground">
+                                Churned Users
+                              </p>
                               <p className="font-medium text-red-600">
                                 {channel.churned_users}
                               </p>
@@ -914,7 +921,8 @@ export default function ChurnAnalysisPage() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-[200px] text-muted-foreground">
-                    No channel data available. Make sure events have channel properties.
+                    No channel data available. Make sure events have channel
+                    properties.
                   </div>
                 )}
               </CardContent>

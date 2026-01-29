@@ -293,7 +293,7 @@ export default function LocationAnalyticsPage() {
           </TabsList>
 
           <TabsContent value="countries" className="space-y-4">
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>Performance by Country</CardTitle>
                 <CardDescription>
@@ -456,7 +456,7 @@ export default function LocationAnalyticsPage() {
           </TabsContent>
 
           <TabsContent value="map" className="space-y-4">
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>Geographic Distribution</CardTitle>
                 <CardDescription>

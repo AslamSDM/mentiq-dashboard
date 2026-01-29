@@ -307,7 +307,7 @@ export default function RevenueLeakagePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle>Revenue Trend</CardTitle>
             <CardDescription>Monthly revenue leakage over time</CardDescription>

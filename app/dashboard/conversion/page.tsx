@@ -85,12 +85,12 @@ export default function ConversionFunnelPage() {
   const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
   const [funnelAnalysis, setFunnelAnalysis] = useState<FunnelAnalysis | null>(
-    null
+    null,
   );
   const [conversionMetrics, setConversionMetrics] =
     useState<ConversionMetrics | null>(null);
   const [conversionTrends, setConversionTrends] = useState<ConversionTrend[]>(
-    []
+    [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFunnel, setSelectedFunnel] = useState("signup");
@@ -386,8 +386,8 @@ export default function ConversionFunnelPage() {
                                     step.completion_rate >= 80
                                       ? "default"
                                       : step.completion_rate >= 60
-                                      ? "secondary"
-                                      : "destructive"
+                                        ? "secondary"
+                                        : "destructive"
                                   }
                                 >
                                   {step.completion_rate?.toFixed(1)}% completion
@@ -441,7 +441,7 @@ export default function ConversionFunnelPage() {
                                   style={{
                                     width: `${step.completion_rate}%`,
                                     backgroundColor: getStepColor(
-                                      step.completion_rate
+                                      step.completion_rate,
                                     ),
                                   }}
                                 />
@@ -457,7 +457,7 @@ export default function ConversionFunnelPage() {
                                   <AlertCircle className="h-4 w-4" />
                                   <span>
                                     {Math.round(
-                                      step.total_users - step.completed_users
+                                      step.total_users - step.completed_users,
                                     ).toLocaleString()}{" "}
                                     users dropped off
                                   </span>
@@ -490,7 +490,7 @@ export default function ConversionFunnelPage() {
           </TabsContent>
 
           <TabsContent value="trends" className="space-y-4">
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>Conversion Trends</CardTitle>
                 <CardDescription>
@@ -528,7 +528,7 @@ export default function ConversionFunnelPage() {
                             })
                           }
                         />
-                        <YAxis />
+                        <YAxis width={45} />
                         <ChartTooltip
                           content={<ChartTooltipContent />}
                           formatter={(value, name) => [
@@ -554,7 +554,7 @@ export default function ConversionFunnelPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="min-w-0">
               <CardHeader>
                 <CardTitle>Conversion Volume</CardTitle>
                 <CardDescription>
@@ -588,7 +588,7 @@ export default function ConversionFunnelPage() {
                             })
                           }
                         />
-                        <YAxis />
+                        <YAxis width={45} />
                         <ChartTooltip content={<ChartTooltipContent />} />
                         <Bar
                           dataKey="conversions"
@@ -633,7 +633,7 @@ export default function ConversionFunnelPage() {
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {Math.round(
-                                step.total_users - step.completed_users
+                                step.total_users - step.completed_users,
                               ).toLocaleString()}{" "}
                               users lost
                             </p>

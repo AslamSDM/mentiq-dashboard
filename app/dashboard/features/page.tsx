@@ -79,7 +79,7 @@ export default function FeatureTrackingDashboard() {
   const [loading, setLoading] = useState(true);
   const [features, setFeatures] = useState<FeatureUsageStats[]>([]);
   const [onboarding, setOnboarding] = useState<OnboardingFunnelStats | null>(
-    null
+    null,
   );
   const [selectedStep, setSelectedStep] = useState<OnboardingStep | null>(null);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -98,7 +98,7 @@ export default function FeatureTrackingDashboard() {
     try {
       const endDate = new Date().toISOString().split("T")[0];
       const startDate = new Date(
-        Date.now() - parseInt(dateRange) * 24 * 60 * 60 * 1000
+        Date.now() - parseInt(dateRange) * 24 * 60 * 60 * 1000,
       )
         .toISOString()
         .split("T")[0];
@@ -118,7 +118,7 @@ export default function FeatureTrackingDashboard() {
       // Fetch feature usage
       const featureResponse = await fetch(
         `${API_BASE_URL}/api/v1/projects/${selectedProjectId}/features/usage?start_date=${startDate}&end_date=${endDate}`,
-        { headers }
+        { headers },
       );
 
       if (featureResponse.ok) {
@@ -133,7 +133,7 @@ export default function FeatureTrackingDashboard() {
       // Fetch onboarding stats
       const onboardingResponse = await fetch(
         `${API_BASE_URL}/api/v1/projects/${selectedProjectId}/onboarding/stats?start_date=${startDate}&end_date=${endDate}`,
-        { headers }
+        { headers },
       );
 
       if (onboardingResponse.ok) {
@@ -174,7 +174,7 @@ export default function FeatureTrackingDashboard() {
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Feature Tracking</h1>
           <p className="text-muted-foreground">
@@ -241,7 +241,7 @@ export default function FeatureTrackingDashboard() {
                   {features.length > 0
                     ? Math.round(
                         features.reduce((sum, f) => sum + f.adoption_rate, 0) /
-                          features.length
+                          features.length,
                       )
                     : 0}
                   %
@@ -263,7 +263,7 @@ export default function FeatureTrackingDashboard() {
                   {features.length > 0
                     ? Math.round(
                         features.reduce((sum, f) => sum + f.retention_rate, 0) /
-                          features.length
+                          features.length,
                       )
                     : 0}
                   %
@@ -514,7 +514,7 @@ export default function FeatureTrackingDashboard() {
                 </Card>
 
                 {/* Horizontal Bar Chart */}
-                <Card>
+                <Card className="min-w-0">
                   <CardHeader>
                     <CardTitle>Onboarding Funnel Overview</CardTitle>
                     <CardDescription>
@@ -545,7 +545,7 @@ export default function FeatureTrackingDashboard() {
                             interval={0}
                             tick={{ fontSize: 12 }}
                           />
-                          <YAxis domain={[0, 100]} />
+                          <YAxis domain={[0, 100]} width={45} />
                           <ChartTooltip
                             content={<ChartTooltipContent />}
                             formatter={(value) => [
@@ -570,12 +570,12 @@ export default function FeatureTrackingDashboard() {
                                   entry.step_name === selectedStep?.step_name
                                     ? "hsl(var(--primary))"
                                     : entry.completion_rate >= 80
-                                    ? "#22c55e"
-                                    : entry.completion_rate >= 60
-                                    ? "#84cc16"
-                                    : entry.completion_rate >= 40
-                                    ? "#eab308"
-                                    : "#ef4444"
+                                      ? "#22c55e"
+                                      : entry.completion_rate >= 60
+                                        ? "#84cc16"
+                                        : entry.completion_rate >= 40
+                                          ? "#eab308"
+                                          : "#ef4444"
                                 }
                                 opacity={
                                   entry.step_name === selectedStep?.step_name
@@ -627,16 +627,16 @@ export default function FeatureTrackingDashboard() {
                                 selectedStep.completion_rate > 80
                                   ? "default"
                                   : selectedStep.completion_rate > 50
-                                  ? "secondary"
-                                  : "destructive"
+                                    ? "secondary"
+                                    : "destructive"
                               }
                               className="mt-2"
                             >
                               {selectedStep.completion_rate > 80
                                 ? "Excellent"
                                 : selectedStep.completion_rate > 50
-                                ? "Good"
-                                : "Needs Attention"}
+                                  ? "Good"
+                                  : "Needs Attention"}
                             </Badge>
                           </div>
                           <div className="p-4 border rounded-lg">
@@ -712,7 +712,7 @@ export default function FeatureTrackingDashboard() {
                             </div>
                             <span className="text-sm font-medium">
                               {formatDuration(
-                                selectedStep.avg_time_to_complete
+                                selectedStep.avg_time_to_complete,
                               )}
                             </span>
                           </div>

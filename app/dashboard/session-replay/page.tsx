@@ -293,7 +293,7 @@ export default function SessionReplayPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-7">
-            <Card className="col-span-2">
+            <Card className="col-span-2 min-w-0">
               <CardHeader>
                 <CardTitle>Recent Sessions</CardTitle>
               </CardHeader>
@@ -346,7 +346,7 @@ export default function SessionReplayPage() {
               </CardContent>
             </Card>
 
-            <Card className="col-span-5">
+            <Card className="col-span-5 min-w-0">
               <CardHeader>
                 <CardTitle>
                   {selectedSession
