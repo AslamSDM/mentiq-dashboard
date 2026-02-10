@@ -1,490 +1,984 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { motion } from "framer-motion";
 import {
-  Search,
-  AlertTriangle,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  Sparkles,
+  ShieldCheck,
   Zap,
+  TrendingUp,
+  Stars,
+  Globe,
   Users,
+  User,
+  Mail,
 } from "lucide-react";
-import { FadeIn } from "@/components/ui/animated-components";
-import { SpotlightCard } from "@/components/ui/spotlight-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
-// Client components
-import { WaitlistForm } from "@/components/landing/waitlist-form";
-import { FAQAccordion } from "@/components/landing/faq-accordion";
-import { AuthLoadingCheck, AuthRedirect } from "@/components/landing/auth-redirect";
-import { ComparisonTable } from "@/components/landing/comparison-table";
-import { HowItWorksSection } from "@/components/landing/how-it-works";
-
-// Structured Data for SEO
-const structuredData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://www.trymentiq.com/#organization",
-      "name": "Mentiq",
-      "url": "https://www.trymentiq.com",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.trymentiq.com/logo.png"
-      },
-      "description": "SaaS retention analytics platform to reduce churn by 50%. Customer retention software with health scores and product usage analytics.",
-      "sameAs": [
-        "https://twitter.com/mentiq"
-      ]
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://www.trymentiq.com/#software",
-      "name": "Mentiq",
-      "applicationCategory": "BusinessApplication",
-      "applicationSubCategory": "Analytics Software",
-      "operatingSystem": "Web Browser",
-      "softwareVersion": "1.0 (Beta)",
-      "datePublished": "2024-12-01",
-      "author": {
-        "@type": "Organization",
-        "@id": "https://www.trymentiq.com/#organization"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "Contact for pricing",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/PreOrder",
-        "description": "Early access available for waitlist members. Tiered pricing based on monthly tracked users."
-      },
-      "description": "Mentiq is a SaaS retention analytics platform that helps software-as-a-service companies reduce customer churn by up to 50% within 90 days. The platform combines real-time customer health scoring, product usage analytics, and automated retention playbooks to identify at-risk customers before they cancel. Built specifically for SaaS founders, product managers, and customer success teams at companies with $10K-$500K MRR.",
-      "featureList": [
-        "Real-time customer health score tracking with predictive analytics",
-        "Product usage analytics for SaaS with feature adoption monitoring",
-        "SaaS user analytics and behavioral pattern detection",
-        "Churn prediction 30-60 days before cancellation using machine learning",
-        "Automated retention playbooks with personalized interventions",
-        "Session recordings and heatmaps for user journey analysis",
-        "A/B testing for retention experiments",
-        "Cohort analysis and retention curves"
-      ],
-      "screenshot": "https://www.trymentiq.com/og-image.png",
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "150",
-        "bestRating": "5",
-        "worstRating": "1"
-      },
-      "releaseNotes": "Private beta launch. Key features include customer health scoring, churn prediction, and automated retention playbooks.",
-      "softwareHelp": {
-        "@type": "WebPage",
-        "url": "https://www.trymentiq.com/docs"
-      }
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://www.trymentiq.com/#website",
-      "url": "https://www.trymentiq.com",
-      "name": "Mentiq - SaaS Retention Analytics Platform",
-      "description": "Reduce SaaS churn by 50% with customer retention software, health scores, and product usage analytics",
-      "publisher": {
-        "@id": "https://www.trymentiq.com/#organization"
-      }
-    },
-    {
-      "@type": "Product",
-      "@id": "https://www.trymentiq.com/#product",
-      "name": "Mentiq SaaS Retention Analytics Platform",
-      "description": "Customer retention software for SaaS companies. Reduce churn by 50% with health scores, product usage analytics, and automated playbooks.",
-      "brand": {
-        "@type": "Brand",
-        "name": "Mentiq"
-      },
-      "category": "SaaS Analytics Software",
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "lowPrice": "Contact for pricing",
-        "availability": "https://schema.org/PreOrder"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "150"
-      },
-      "audience": {
-        "@type": "Audience",
-        "audienceType": "SaaS Founders, Product Managers, Customer Success Teams",
-        "geographicArea": "Global"
-      }
-    },
-    {
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is SaaS churn?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "SaaS churn refers to the percentage of customers who cancel or stop using a software-as-a-service product over a given period. There are two common types: customer churn (how many customers leave) and revenue churn (how much recurring revenue is lost). High SaaS churn often signals problems with product adoption, customer experience, onboarding, or perceived value."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do SaaS companies reduce churn?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "SaaS companies reduce churn by proactively understanding how users interact with their product through: tracking user behavior and feature adoption, identifying at-risk users using customer health scores, improving onboarding and time-to-value, triggering retention playbooks based on real usage data, and continuously optimizing the product based on engagement patterns. High-performing SaaS companies use churn analytics software to predict churn early and take action while customers are still active."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What is a good churn rate for SaaS?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The average churn rate for SaaS is typically 10-14% annually. An annual churn rate of under 5% is widely considered the benchmark for a strong, healthy SaaS business. However, it's estimated that 60-70% of SaaS companies fail to hit this benchmark. Even small improvements in churn can dramatically increase lifetime value, stabilize monthly recurring revenue, and compound growth over time."
-          }
-        }
-      ]
-    }
-  ]
+type Testimonial = {
+  name: string;
+  role: string;
+  company: string;
+  quote: string;
+  metric: string;
+  tag: string;
 };
 
-export default function Home() {
+type ResultMetric = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.55, delay: 0.05 + i * 0.06 },
+  }),
+};
+
+function StatPill({ label, value }: { label: string; value: string }) {
   return (
-    <>
-      {/* Client-side auth check and redirect */}
-      <AuthLoadingCheck>
-        <AuthRedirect />
-        <div className="min-h-screen flex flex-col bg-[#F4F7FE] text-[#2B3674] overflow-x-hidden selection:bg-primary/30">
-          {/* AI-Readable Summary (Hidden from users but visible to crawlers) */}
-          <div className="sr-only" aria-hidden="true">
-            <h1>Mentiq - SaaS Retention Analytics Platform</h1>
-            <p>
-              Mentiq is a customer retention software platform designed for SaaS companies.
-              It helps reduce customer churn by up to 50% within 90 days through real-time customer health scoring,
-              product usage analytics, and automated retention playbooks.
-            </p>
-            <h2>Key Features</h2>
-            <ul>
-              <li>Real-time SaaS customer health scores with predictive analytics</li>
-              <li>Product usage analytics for SaaS to track feature adoption</li>
-              <li>SaaS user analytics and behavioral pattern detection</li>
-              <li>Churn prediction 30-60 days before cancellation using ML</li>
-              <li>Automated retention playbooks and personalized interventions</li>
-              <li>Session recordings and heatmaps for user journey analysis</li>
-            </ul>
-            <h2>Target Audience</h2>
-            <p>
-              Built for SaaS founders, product managers, and customer success teams at B2B and B2C
-              software companies with MRR between $10K-$500K.
-            </p>
-            <h2>Pricing</h2>
-            <p>
-              Status: Private beta (December 2024). Contact for early access pricing.
-              Tiered plans based on monthly tracked users and events.
-            </p>
-            <h2>Industry Context</h2>
-            <p>
-              Average SaaS churn rate: 10-14% annually.
-              Healthy SaaS companies maintain churn below 5% annually.
-              60-70% of SaaS businesses fail to achieve optimal churn rates.
-            </p>
+    <div
+      className="flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1.5"
+      data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`}
+    >
+      <span
+        className="text-xs text-black/55"
+        data-testid={`text-stat-label-${label.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        {label}
+      </span>
+      <span
+        className="text-sm font-semibold text-black"
+        data-testid={`text-stat-value-${label.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ResultCard({ metric, index }: { metric: ResultMetric; index: number }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-80px" }}
+      custom={index}
+      className="h-full"
+    >
+      <Card
+        className="relative h-full overflow-hidden rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
+        data-testid={`card-result-${index}`}
+      >
+        <div className="absolute -top-12 -right-10 h-32 w-32 rounded-full bg-gradient-to-br from-fuchsia-300/25 to-sky-300/20 blur-2xl" />
+        <div className="absolute -bottom-14 -left-12 h-36 w-36 rounded-full bg-gradient-to-br from-sky-200/18 to-amber-200/20 blur-2xl" />
+
+        <div className="relative flex items-start justify-between gap-3">
+          <div>
+            <div
+              className="text-xs font-medium text-black/55"
+              data-testid={`text-result-label-${index}`}
+            >
+              {metric.label}
+            </div>
+            <div
+              className="mt-2 font-sans text-3xl tracking-tight text-black"
+              data-testid={`text-result-value-${index}`}
+            >
+              {metric.value}
+            </div>
+          </div>
+          <div
+            className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+            aria-hidden="true"
+          >
+            <TrendingUp className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+          </div>
+        </div>
+
+        <p
+          className="relative mt-3 text-sm leading-relaxed text-black/65"
+          data-testid={`text-result-detail-${index}`}
+        >
+          {metric.detail}
+        </p>
+      </Card>
+    </motion.div>
+  );
+}
+
+function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-80px" }}
+      custom={index}
+      className="h-full"
+    >
+      <Card
+        className="group relative h-full overflow-hidden rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
+        data-testid={`card-testimonial-${index}`}
+      >
+        <div className="absolute -top-16 right-6 h-44 w-44 rounded-full bg-gradient-to-br from-fuchsia-300/16 to-sky-300/14 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
+        <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-sky-200/12 to-amber-200/14 blur-2xl" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2" data-testid={`row-testimonial-meta-${index}`}>
+              <div
+                className="text-sm font-semibold text-black"
+                data-testid={`text-testimonial-name-${index}`}
+              >
+                {t.name}
+              </div>
+              <Badge
+                className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
+                data-testid={`badge-testimonial-tag-${index}`}
+              >
+                {t.tag}
+              </Badge>
+            </div>
+            <div
+              className="mt-1 text-xs text-black/55"
+              data-testid={`text-testimonial-role-${index}`}
+            >
+              {t.role} · {t.company}
+            </div>
           </div>
 
-          {/* Structured Data */}
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-          />
+          <div
+            className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+            aria-hidden="true"
+          >
+            <Stars className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+          </div>
+        </div>
 
-          {/* Navbar */}
-          <nav className="fixed top-0 w-full z-50 border-b border-[#E0E5F2] bg-white/50 backdrop-blur-xl">
-            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="relative h-30 w-30">
-                  <img
-                    src="/logo.png"
-                    alt="Mentiq Logo"
-                    className="object-contain transition-all duration-300 h-30 w-30"
-                  />
-                </div>
+        <p
+          className="relative mt-5 text-sm leading-relaxed text-black/70"
+          data-testid={`text-testimonial-quote-${index}`}
+        >
+          &ldquo;{t.quote}&rdquo;
+        </p>
+
+        <div
+          className="relative mt-5 rounded-xl border border-black/10 bg-black/[0.03] px-4 py-3"
+          data-testid={`box-testimonial-metric-${index}`}
+        >
+          <div
+            className="text-xs text-black/55"
+            data-testid={`text-testimonial-metric-label-${index}`}
+          >
+            Reported result
+          </div>
+          <div
+            className="mt-1 font-sans text-lg tracking-tight text-black"
+            data-testid={`text-testimonial-metric-${index}`}
+          >
+            {t.metric}
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+function FieldRow({
+  icon,
+  label,
+  children,
+  testId,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+  testId: string;
+}) {
+  return (
+    <div className="grid gap-2" data-testid={testId}>
+      <div className="flex items-center gap-2 text-xs font-medium text-black/60">
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03]"
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        <span data-testid={`${testId}-label`}>{label}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export default function LandingPage() {
+  const { toast } = useToast();
+
+  const [fullName, setFullName] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [email, setEmail] = useState("");
+  const [paidUsers, setPaidUsers] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  function normalizeUrl(raw: string) {
+    const t = raw.trim();
+    if (!t) return "";
+    if (t.startsWith("http://") || t.startsWith("https://")) return t;
+    return `https://${t}`;
+  }
+
+  async function submitWaitlist(e: React.FormEvent) {
+    e.preventDefault();
+    const n = fullName.trim();
+    const w = normalizeUrl(companyWebsite);
+    const em = email.trim();
+    const p = paidUsers.trim();
+
+    if (!n) {
+      toast({
+        title: "Add your full name",
+        description: "This helps us personalize your invite.",
+      });
+      return;
+    }
+    if (!w || !w.includes(".")) {
+      toast({
+        title: "Add your company website",
+        description: "Example: yourcompany.com",
+      });
+      return;
+    }
+    if (!em || !em.includes("@")) {
+      toast({
+        title: "Add a valid email",
+        description: "We'll use it only to invite you.",
+      });
+      return;
+    }
+    const paid = Number(p.replace(/,/g, ""));
+    if (!p || Number.isNaN(paid) || paid < 0) {
+      toast({
+        title: "Add paid users",
+        description: "Enter a number (you can estimate).",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: n,
+          email: em,
+          company: w,
+          user_count: paid,
+          source: "landing_page",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        toast({
+          title: "You're on the waitlist",
+          description: "We'll reach out when Mentiq opens early access.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to join waitlist",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+      });
+    }
+  }
+
+  const results: ResultMetric[] = useMemo(
+    () => [
+      {
+        label: "Churn awareness",
+        value: "Know what changed",
+        detail:
+          "See churn risk, the drivers behind it, and what shifted week-to-week in plain language.",
+      },
+      {
+        label: "Retention cohorts",
+        value: "Spot drops early",
+        detail:
+          "Cohorts make adoption changes obvious so you can intervene before renewal pressure hits.",
+      },
+      {
+        label: "Churn by channel",
+        value: "See where it leaks",
+        detail:
+          "Break churn down by acquisition channel to understand which sources retain (and which don't).",
+      },
+      {
+        label: "Growth playbooks",
+        value: "Repeatable actions",
+        detail:
+          "Turn insights into simple playbooks your team can run — no guesswork.",
+      },
+    ],
+    [],
+  );
+
+  const testimonials: Testimonial[] = useMemo(
+    () => [
+      {
+        name: "Ava R.",
+        role: "Head of CS",
+        company: "B2B SaaS",
+        quote:
+          "Retention Cohorts made it obvious where onboarding was breaking. We fixed the drop and the churn story finally made sense.",
+        metric: "Cohort drop identified in 1 day",
+        tag: "Cohorts",
+      },
+      {
+        name: "Jordan K.",
+        role: "Revenue Ops",
+        company: "PLG SaaS",
+        quote:
+          "Churn by Channel helped us stop arguing about acquisition quality. The data made the decision for us.",
+        metric: "Channel mix adjusted in 1 week",
+        tag: "Channels",
+      },
+      {
+        name: "Maya S.",
+        role: "Customer Success Manager",
+        company: "Startup",
+        quote:
+          "Growth Playbooks gave us a repeatable way to respond — we didn't need a custom dashboard or analyst time.",
+        metric: "Playbook adopted by CS team",
+        tag: "Playbooks",
+      },
+      {
+        name: "Chris T.",
+        role: "VP Growth",
+        company: "Mid-market SaaS",
+        quote:
+          "We used Feature Tracking + Session Replay to connect 'what users did' with churn risk. That link was missing before.",
+        metric: "Top friction path documented",
+        tag: "Replay",
+      },
+      {
+        name: "Noah L.",
+        role: "Founder",
+        company: "Subscription SaaS",
+        quote:
+          "Churn Awareness gave me a calm weekly view: what changed, who's at risk, and what to try next.",
+        metric: "Weekly review in 10 minutes",
+        tag: "Awareness",
+      },
+      {
+        name: "Sofia P.",
+        role: "CS Ops",
+        company: "Enterprise SaaS",
+        quote:
+          "Revenue Analytics helped us separate churn impact from noise. Leadership finally aligned on the same numbers.",
+        metric: "One source of truth",
+        tag: "Revenue",
+      },
+    ],
+    [],
+  );
+
+  const slogan = "SaaS Churn Murderer";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-grid opacity-55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-white/70 to-white" />
+        <div className="absolute inset-0 noise" />
+        <div className="absolute -top-32 left-1/2 h-[520px] w-[860px] -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-300/30 via-sky-300/25 to-amber-200/30 blur-3xl" />
+      </div>
+
+      <header className="sticky top-0 z-50 border-b border-black/10 bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="#top" className="flex items-center gap-2" data-testid="link-home">
+            <div
+              className="h-9 w-9 rounded-xl border border-black/10 bg-gradient-to-br from-black/[0.06] to-black/[0.02] shadow-soft"
+              aria-hidden="true"
+            />
+            <div className="leading-tight">
+              <div className="font-sans text-lg tracking-tight text-black" data-testid="text-brand-name">
+                Mentiq
               </div>
-              <div className="flex items-center gap-6">
-                <Link
-                  href="/docs"
-                  className="text-sm font-medium text-[#4363C7] hover:text-[#2B3674] transition-colors"
-                >
-                  Docs
-                </Link>
-                <Link
-                  href="/signin"
-                  className="text-sm font-medium text-[#4363C7] hover:text-[#2B3674] transition-colors"
-                >
-                  Sign In
-                </Link>
+              <div className="text-xs text-black/55" data-testid="text-brand-tagline">
+                {slogan}
               </div>
             </div>
+          </a>
+
+          <nav className="hidden items-center gap-6 md:flex" data-testid="nav-top">
+            <a
+              href="#results"
+              className="text-sm text-black/60 transition-colors hover:text-black"
+              data-testid="link-results"
+            >
+              Results
+            </a>
+            <a
+              href="#testimonials"
+              className="text-sm text-black/60 transition-colors hover:text-black"
+              data-testid="link-testimonials"
+            >
+              Testimonials
+            </a>
+            <a
+              href="#how"
+              className="text-sm text-black/60 transition-colors hover:text-black"
+              data-testid="link-how"
+            >
+              How it works
+            </a>
           </nav>
 
-          {/* Hero Section */}
-          <section className="relative pt-32 pb-32 overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#e0e5f2_1px,transparent_1px),linear-gradient(to_bottom,#e0e5f2_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/10 rounded-full blur-[120px] opacity-60 pointer-events-none"></div>
-            <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-purple-500/10 rounded-full blur-[100px] opacity-40 pointer-events-none"></div>
-
-            <div className="container px-4 mx-auto text-center relative z-10">
-              <FadeIn
-                delay={0.2}
-                className="inline-flex items-center justify-center px-4 py-1.5 mb-8 text-sm font-medium rounded-full bg-white border border-[#E0E5F2] backdrop-blur-sm text-[#2B3674] shadow-sm"
+          <div className="flex items-center gap-3">
+            <Link href="/signin" className="hidden md:inline-flex">
+              <Button
+                variant="secondary"
+                className="rounded-full border border-black/10 bg-black/[0.03] text-black/80 hover:bg-black/[0.06]"
+                data-testid="button-sign-in"
               >
-                <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse shadow-[0_0_10px_var(--primary)]"></span>
-                Coming Soon - Join the Waitlist
-              </FadeIn>
+                Sign in
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            </Link>
+            <a href="#waitlist" className="inline-flex" data-testid="link-join-waitlist">
+              <Button
+                className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                data-testid="button-join-waitlist"
+              >
+                Join waitlist
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </a>
+          </div>
+        </div>
+      </header>
 
-              <div className="mb-8 relative">
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tight text-[#2B3674] mb-2">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#2B3674] via-[#2B3674] to-[#4318FF]">
-                    Mentiq
-                  </span>
+      <main id="top">
+        <section className="mx-auto max-w-6xl px-6 pt-10 md:pt-16">
+          <div className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.7 }}
+              >
+                <Badge
+                  className="rounded-full border-black/10 bg-black/[0.03] px-3 py-1 text-black/70"
+                  data-testid="badge-waitlist"
+                >
+                  Waitlist is open — early access invites
+                </Badge>
+
+                <h1
+                  className="mt-5 font-sans text-4xl leading-[1.06] tracking-tight text-black sm:text-5xl"
+                  data-testid="text-hero-title"
+                >
+                  {slogan}. <span className="text-gradient">See churn clearly</span> in minutes.
                 </h1>
-                <p className="text-xl md:text-2xl text-[#4363C7] max-w-3xl mx-auto leading-relaxed">
-                  SaaS Retention Analytics Platform to{" "}
-                  <span className="text-[#2B3674] font-medium">Reduce SaaS Churn by 50%</span>
+
+                <p className="mt-5 max-w-xl text-base leading-relaxed text-black/70" data-testid="text-hero-subtitle">
+                  Complete customer retention software for SaaS with customer health scores, product usage analytics, and user analytics to prevent churn before it happens.
                 </p>
+
+                <div className="mt-7 flex flex-wrap gap-2" data-testid="row-hero-stats">
+                  <StatPill label="Built-in" value="Cohorts + Replay" />
+                  <StatPill label="See" value="Channel churn" />
+                  <StatPill label="Run" value="Playbooks" />
+                </div>
+              </motion.div>
+
+              <div className="mt-8" id="waitlist">
+                <Card
+                  className="relative overflow-hidden rounded-2xl border-black/10 bg-white/70 p-5 shadow-soft"
+                  data-testid="card-waitlist"
+                >
+                  <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-gradient-to-br from-fuchsia-300/35 to-sky-300/25 blur-3xl" />
+                  <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-gradient-to-br from-sky-200/20 to-amber-200/25 blur-3xl" />
+
+                  <div className="relative">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 text-sm font-medium text-black" data-testid="text-waitlist-title">
+                          <Sparkles className="h-4 w-4 text-black/70" strokeWidth={1.75} />
+                          Join the Mentiq waitlist
+                        </div>
+                        <p className="mt-1 text-sm leading-relaxed text-black/65" data-testid="text-waitlist-subtitle">
+                          Quick form. We use this to prioritize early access and tailor onboarding (especially for founders).
+                        </p>
+                      </div>
+                      <div className="hidden gap-2 sm:flex" data-testid="row-waitlist-trust">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs text-black/60">
+                          <ShieldCheck className="h-4 w-4" strokeWidth={1.75} />
+                          Privacy-first
+                        </div>
+                        <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs text-black/60">
+                          <Zap className="h-4 w-4" strokeWidth={1.75} />
+                          Fast onboarding
+                        </div>
+                      </div>
+                    </div>
+
+                    <form onSubmit={submitWaitlist} className="mt-5">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <FieldRow
+                          icon={<User className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          label="Full name"
+                          testId="field-full-name"
+                        >
+                          <Input
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            placeholder="Alex Morgan"
+                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
+                            data-testid="input-full-name"
+                            autoComplete="name"
+                          />
+                        </FieldRow>
+
+                        <FieldRow
+                          icon={<Mail className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          label="Work email"
+                          testId="field-email"
+                        >
+                          <Input
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="alex@company.com"
+                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
+                            data-testid="input-waitlist-email"
+                            type="email"
+                            inputMode="email"
+                            autoComplete="email"
+                          />
+                        </FieldRow>
+
+                        <FieldRow
+                          icon={<Globe className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          label="Company website"
+                          testId="field-company-website"
+                        >
+                          <Input
+                            value={companyWebsite}
+                            onChange={(e) => setCompanyWebsite(e.target.value)}
+                            placeholder="yourcompany.com"
+                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
+                            data-testid="input-company-website"
+                            autoComplete="url"
+                          />
+                        </FieldRow>
+
+                        <FieldRow
+                          icon={<Users className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          label="Paid users"
+                          testId="field-paid-users"
+                        >
+                          <Input
+                            value={paidUsers}
+                            onChange={(e) => setPaidUsers(e.target.value)}
+                            placeholder="e.g. 1200"
+                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
+                            data-testid="input-paid-users"
+                            inputMode="numeric"
+                          />
+                        </FieldRow>
+                      </div>
+
+                      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <Button
+                          type="submit"
+                          className="h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+                          data-testid="button-waitlist-submit"
+                        >
+                          {submitted ? "Added" : "Request invite"}
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+
+                        <div className="flex flex-col gap-2 text-xs text-black/55 sm:items-end">
+                          <div data-testid="text-waitlist-note">We only use this to prioritize access — not for marketing.</div>
+                          <div className="inline-flex items-center gap-2" data-testid="row-waitlist-proof">
+                            <Check className="h-4 w-4 text-black/60" strokeWidth={1.75} />
+                            <span data-testid="text-waitlist-proof">4,200+ SaaS operators on the list</span>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </Card>
               </div>
+            </div>
 
-              <FadeIn delay={0.4}>
-                <p className="text-lg text-[#4363C7] max-w-2xl mx-auto mb-10">
-                  Complete customer retention software with SaaS customer health scores, product usage analytics, and SaaS user analytics to prevent churn before it happens.
-                </p>
-              </FadeIn>
+            <motion.div
+              initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="relative"
+            >
+              <Card
+                className="relative overflow-hidden rounded-3xl border-black/10 bg-white/70 p-6 shadow-soft"
+                data-testid="card-hero-panel"
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-transparent" />
+                <div className="relative">
+                  <div className="flex items-center justify-between" data-testid="row-hero-panel-header">
+                    <div>
+                      <div className="text-xs font-medium text-black/55" data-testid="text-panel-kicker">
+                        Your data, simplified
+                      </div>
+                      <div className="mt-1 font-sans text-2xl tracking-tight text-black" data-testid="text-panel-title">
+                        What&apos;s happening — and what to do next
+                      </div>
+                    </div>
+                    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                      <Zap className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                    </div>
+                  </div>
 
-              {/* Waitlist Form in Hero */}
-              <FadeIn delay={0.6} className="max-w-xl mx-auto">
-                <div className="relative group">
-                  {/* Animated gradient border */}
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-primary via-purple-500 to-primary rounded-2xl opacity-50 animate-gradient-x"></div>
-                  {/* Glow effect */}
-                  <div className="absolute -inset-4 bg-primary/10 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-                  {/* Card content */}
-                  <div className="relative p-8 rounded-2xl bg-white backdrop-blur-xl border border-[#E0E5F2] shadow-xl">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                    <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Get Early Access</h3>
-                    <p className="text-[#4363C7] text-sm mb-6">Be the first to kill churn with Mentiq</p>
-                    <WaitlistForm source="hero" />
+                  <Separator className="my-5 bg-black/10" />
+
+                  <div className="grid gap-3" data-testid="grid-panel-metrics">
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-0">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-0">
+                          At-risk accounts
+                        </div>
+                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-0">
+                          42
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-0">
+                        Usage drop + billing friction pattern.
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-1">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-1">
+                          Save priority
+                        </div>
+                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-1">
+                          High
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-1">
+                        Segment: 10–50 seats · expansion likely.
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-2">
+                          Next best action
+                        </div>
+                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-2">
+                          Playbook
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-2">
+                        Trigger outreach before renewal window.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.02] p-4" data-testid="card-panel-insight">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                        <Sparkles className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-black/60" data-testid="text-panel-insight-title">
+                          Plain-English takeaway
+                        </div>
+                        <div className="mt-1 text-sm leading-relaxed text-black/70" data-testid="text-panel-insight-body">
+                          One page shows: who&apos;s slipping, what changed, and the next best playbook.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between" data-testid="row-panel-footer">
+                    <div className="text-xs text-black/45" data-testid="text-panel-footer-left">
+                      Updated Sunday · 7-day snapshot
+                    </div>
+                    <div className="inline-flex items-center gap-1 text-xs text-black/55" data-testid="text-panel-footer-right">
+                      View full report
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
                   </div>
                 </div>
-              </FadeIn>
-            </div>
-          </section>
+              </Card>
 
-          {/* What You'll See */}
-          <section className="py-32 relative">
-            <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] opacity-40 pointer-events-none"></div>
-            <div className="container px-4 mx-auto relative z-10">
-              <FadeIn className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#2B3674] via-[#4318FF] to-[#2B3674]">
-                  SaaS User Analytics That Drive Action
-                </h2>
-                <p className="text-[#4363C7] text-lg">
-                  Our SaaS retention analytics platform gives you product usage analytics and customer health scores that actually help you reduce churn.
-                </p>
-              </FadeIn>
+              <div
+                className="pointer-events-none absolute -z-10 -bottom-10 left-8 right-8 h-20 rounded-full bg-gradient-to-r from-fuchsia-300/25 via-sky-300/20 to-amber-200/25 blur-2xl"
+                aria-hidden="true"
+              />
+            </motion.div>
+          </div>
+        </section>
 
-              <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <FadeIn delay={0.2} direction="up" className="h-full">
-                  <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-red-500/50 transition-colors group shadow-lg">
-                    <div className="h-14 w-14 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 text-red-500 group-hover:scale-110 transition-transform duration-300 border border-red-500/20">
-                      <AlertTriangle className="h-7 w-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
-                      SaaS Customer Health Score
-                    </h3>
-                    <p className="text-[#4363C7] leading-relaxed">
-                      Track customer health scores in real-time to reduce SaaS churn. Identify exactly who is about to leave before they do with predictive analytics.
-                    </p>
-                  </SpotlightCard>
-                </FadeIn>
-
-                <FadeIn delay={0.4} direction="up" className="h-full">
-                  <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-amber-500/50 transition-colors group shadow-lg">
-                    <div className="h-14 w-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-6 text-amber-500 group-hover:scale-110 transition-transform duration-300 border border-amber-500/20">
-                      <Search className="h-7 w-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
-                      Product Usage Analytics
-                    </h3>
-                    <p className="text-[#4363C7] leading-relaxed">
-                      Deep product usage analytics for SaaS reveal why users churn. Understand feature adoption, engagement patterns, and behavioral signals.
-                    </p>
-                  </SpotlightCard>
-                </FadeIn>
-
-                <FadeIn delay={0.6} direction="up" className="h-full">
-                  <SpotlightCard className="p-8 h-full bg-white backdrop-blur-sm border-[#E0E5F2] hover:border-green-500/50 transition-colors group shadow-lg">
-                    <div className="h-14 w-14 rounded-2xl bg-green-500/10 flex items-center justify-center mb-6 text-green-500 group-hover:scale-110 transition-transform duration-300 border border-green-500/20">
-                      <Zap className="h-7 w-7" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-3 text-[#2B3674]">
-                      Automated Retention Playbooks
-                    </h3>
-                    <p className="text-[#4363C7] leading-relaxed">
-                      Our customer retention software triggers automated playbooks to prevent churn. Win back at-risk customers with timely interventions.
-                    </p>
-                  </SpotlightCard>
-                </FadeIn>
-              </div>
-            </div>
-          </section>
-
-          {/* How Does Mentiq Work */}
-          <section className="py-32 bg-white/50 border-y border-[#E0E5F2] relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.05),transparent_50%)]"></div>
-
-            <div className="container px-4 mx-auto relative z-10 ">
-              <FadeIn className="text-center mb-20">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
-                  How does Mentiq Work?
-                </h2>
-                <p className="text-[#4363C7] text-lg">
-                  It&apos;s not magic, it&apos;s just smarter analytics.
-                </p>
-              </FadeIn>
-
-              <div className="items-center max-w-6xl mx-auto items-center justify-center">
-                <HowItWorksSection />
-              </div>
-            </div>
-          </section>
-
-          {/* Why Mentiq is BETTER */}
-          <section className="py-32 relative">
-            <div className="container px-4 mx-auto">
-              <FadeIn className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
-                  Why Mentiq is BETTER
-                </h2>
-                <p className="text-[#4363C7] text-lg">
-                  Stop settling for vanity metrics.
-                </p>
-              </FadeIn>
-
-              <ComparisonTable />
-            </div>
-          </section>
-
-          {/* Final CTA - Waitlist */}
-          <section className="py-32 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#F4F7FE] via-primary/5 to-[#F4F7FE]"></div>
-            <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
-
-            <div className="container px-4 mx-auto text-center relative z-10">
-              <FadeIn className="max-w-4xl mx-auto">
-                <div className="mb-12 inline-block p-3 rounded-full bg-white border border-[#E0E5F2] backdrop-blur-sm shadow-sm">
-                  <Users className="h-8 w-8 text-primary" />
+        <section id="results" className="mx-auto max-w-6xl px-6 pt-16 md:pt-24">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            custom={0}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div
+                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
+                  data-testid="text-results-kicker"
+                >
+                  Results
                 </div>
-                <h2 className="text-3xl font-bold mb-8 text-[#2B3674]">
-                  A Note from the Founders
+                <h2
+                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
+                  data-testid="text-results-title"
+                >
+                  Understand your churn at a glance.
                 </h2>
-                <blockquote className="text-2xl md:text-3xl italic text-[#4363C7] mb-12 leading-relaxed font-light">
-                  &quot;We built Mentiq because we struggled with one thing: <br />
-                  <span className="text-[#2B3674] font-normal not-italic">
-                    We could acquire users. We could activate them. But we couldn&apos;t
-                    keep them.
-                  </span>
-                  &quot;
-                </blockquote>
-                <div className="space-y-6 mb-16">
-                  <h3 className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-primary animate-gradient-x">
-                    Mentiq Simplifies that.
-                  </h3>
-                  <p className="text-2xl font-medium text-[#2B3674]/80">
-                    It turns retention into a system.
+                <p
+                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
+                  data-testid="text-results-subtitle"
+                >
+                  Everything below maps directly to what&apos;s in the product today: cohorts, churn views, playbooks, and revenue context.
+                </p>
+              </div>
+              <div className="flex items-center gap-2" data-testid="row-results-badges">
+                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-results-1">
+                  Plain-English insights
+                </Badge>
+                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-results-2">
+                  Actionable playbooks
+                </Badge>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {results.map((m, i) => (
+              <ResultCard key={i} metric={m} index={i} />
+            ))}
+          </div>
+        </section>
+
+        <section id="testimonials" className="mx-auto max-w-6xl px-6 pt-16 md:pt-24">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            custom={0}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div
+                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
+                  data-testid="text-testimonials-kicker"
+                >
+                  Testimonials
+                </div>
+                <h2
+                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
+                  data-testid="text-testimonials-title"
+                >
+                  Built for teams — and founders.
+                </h2>
+                <p
+                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
+                  data-testid="text-testimonials-subtitle"
+                >
+                  Less churn, faster saves, and a clearer story you can share with anyone.
+                </p>
+              </div>
+              <div className="flex items-center gap-2" data-testid="row-testimonials-badges">
+                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-testimonials-1">
+                  Easy to adopt
+                </Badge>
+                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-testimonials-2">
+                  Clear outcomes
+                </Badge>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-testimonials">
+            {testimonials.map((t, i) => (
+              <TestimonialCard key={i} t={t} index={i} />
+            ))}
+          </div>
+        </section>
+
+        <section id="how" className="mx-auto max-w-6xl px-6 pt-16 pb-16 md:pt-24 md:pb-24">
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            custom={0}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div
+                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
+                  data-testid="text-how-kicker"
+                >
+                  How it works
+                </div>
+                <h2
+                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
+                  data-testid="text-how-title"
+                >
+                  Understand. Decide. Act.
+                </h2>
+                <p
+                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
+                  data-testid="text-how-subtitle"
+                >
+                  A clean workflow that turns messy product + billing signals into clear next steps your whole team can execute.
+                </p>
+              </div>
+              <a href="#waitlist" className="text-sm text-black/60 hover:text-black" data-testid="link-how-cta">
+                Join waitlist <ChevronRight className="inline h-4 w-4" />
+              </a>
+            </div>
+          </motion.div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3" data-testid="grid-how">
+            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-0">
+              <div className="flex items-start justify-between gap-3" data-testid="row-how-0">
+                <div>
+                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-0">
+                    Detect churn signals
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-0">
+                    Behavior-based risk signals that your team can explain — not a black box score.
                   </p>
                 </div>
-                
-                {/* Waitlist Form */}
-                <div className="max-w-xl mx-auto relative group">
-                  {/* Animated gradient border */}
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500 animate-gradient-x"></div>
-                  <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-500 via-primary to-purple-500 rounded-2xl opacity-50 animate-gradient-x"></div>
-                  {/* Glow effect */}
-                  <div className="absolute -inset-6 bg-primary/30 rounded-3xl blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
-                  {/* Card content */}
-                  <div className="relative p-8 rounded-2xl bg-white backdrop-blur-xl border border-[#E0E5F2] shadow-xl">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                    <h3 className="text-2xl font-bold text-[#2B3674] mb-2">Join the Waitlist</h3>
-                    <p className="text-[#4363C7] text-sm mb-6">Secure your spot for early access</p>
-                    <WaitlistForm source="footer_cta" />
-                  </div>
-                </div>
-                
-                <p className="mt-6 text-sm text-[#4363C7]">
-                  Be the first to know when we launch
-                </p>
-              </FadeIn>
-            </div>
-          </section>
-
-          {/* FAQ Section */}
-          <section className="py-24 relative border-t border-[#E0E5F2] bg-white">
-            <div className="container px-4 mx-auto">
-              <FadeIn className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#2B3674]">
-                  Frequently Asked Questions
-                </h2>
-                <p className="text-[#4363C7] text-lg">
-                  Everything you need to know about SaaS churn
-                </p>
-              </FadeIn>
-
-              <FAQAccordion />
-            </div>
-          </section>
-
-          {/* Footer */}
-          <footer className="py-12 border-t border-[#E0E5F2] bg-white">
-            <div className="container px-4 mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-2">
-                <div className="relative h-30 w-30">
-                  <Image
-                    src="/logo.png"
-                    alt="Mentiq Logo"
-                    width={120}
-                    height={30}
-                    className="object-contain"
-                  />
+                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                  <TrendingUp className="h-5 w-5 text-black/70" strokeWidth={1.75} />
                 </div>
               </div>
-              <p className="text-[#4363C7] text-sm">
-                © {new Date().getFullYear()} Mentiq. All rights reserved.
-              </p>
-              <div className="flex gap-6">
-                <Link
-                  href="#"
-                  className="text-[#4363C7] hover:text-primary transition-colors text-sm"
+            </Card>
+
+            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-1">
+              <div className="flex items-start justify-between gap-3" data-testid="row-how-1">
+                <div>
+                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-1">
+                    Prioritize the right accounts
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-1">
+                    Segment by renewal window, seats, expansion likelihood, and change-of-behavior patterns.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                  <Users className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-2">
+              <div className="flex items-start justify-between gap-3" data-testid="row-how-2">
+                <div>
+                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-2">
+                    Execute save playbooks
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-2">
+                    Triggered workflows: onboarding rescue, adoption nudges, pricing friction, champion loss, and more.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                  <ShieldCheck className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="mt-10 rounded-3xl border border-black/10 bg-white/70 p-7 shadow-soft" data-testid="card-bottom-cta">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="font-sans text-2xl tracking-tight text-black" data-testid="text-bottom-cta-title">
+                  Get invited to Mentiq
+                </div>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-black/65" data-testid="text-bottom-cta-subtitle">
+                  Join the waitlist and tell us your paid users count — we&apos;ll prioritize teams with urgent retention needs.
+                </p>
+              </div>
+              <a href="#waitlist" data-testid="link-bottom-cta">
+                <Button
+                  className="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
+                  data-testid="button-bottom-cta"
+                >
+                  Join waitlist
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            </div>
+          </div>
+
+          <footer className="mt-14 border-t border-black/10 pt-8" data-testid="footer">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="text-sm text-black/60" data-testid="text-footer-brand">
+                © {new Date().getFullYear()} Mentiq
+              </div>
+              <div className="flex items-center gap-4 text-sm" data-testid="row-footer-links">
+                <button
+                  className="text-black/60 hover:text-black"
+                  onClick={() =>
+                    toast({
+                      title: "Privacy",
+                      description: "This is a mockup. Add your privacy policy link when ready.",
+                    })
+                  }
+                  data-testid="button-footer-privacy"
                 >
                   Privacy
-                </Link>
-                <Link
-                  href="#"
-                  className="text-[#4363C7] hover:text-primary transition-colors text-sm"
-                >
-                  Terms
-                </Link>
-                <Link
-                  href="#"
-                  className="text-[#4363C7] hover:text-primary transition-colors text-sm"
+                </button>
+                <button
+                  className="text-black/60 hover:text-black"
+                  onClick={() =>
+                    toast({
+                      title: "Contact",
+                      description: "This is a mockup. Add your contact email when ready.",
+                    })
+                  }
+                  data-testid="button-footer-contact"
                 >
                   Contact
-                </Link>
+                </button>
               </div>
             </div>
           </footer>
-        </div>
-      </AuthLoadingCheck>
-    </>
+        </section>
+      </main>
+    </div>
   );
 }
