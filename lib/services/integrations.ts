@@ -51,11 +51,13 @@ export interface SyncResult {
   duration_ms: number;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+import { getAuthToken } from "./base";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 class IntegrationsService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("auth_token");
+    const token = getAuthToken();
     return {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",

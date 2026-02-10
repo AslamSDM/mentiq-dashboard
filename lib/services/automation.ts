@@ -1,4 +1,5 @@
 // Automation Types and API Service
+import { getAuthToken } from "./base";
 
 export interface AutomationSettings {
   id: string;
@@ -97,11 +98,11 @@ export interface GeneratedEmailContent {
   generated_at: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 class AutomationService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("auth_token");
+    const token = getAuthToken();
     return {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
@@ -336,14 +337,36 @@ class AutomationService {
     return response.json();
   }
 
-  // Test automation by generating sample content
-  async testAutomation(projectId: string, automationId: string, testUserId: string): Promise<GeneratedEmailContent> {
+  // Trigger automation to run immediately (processes real users)
+  async triggerAutomation(projectId: string, automationId: string): Promise<{ message: string }> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/automations/${automationId}/trigger`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to trigger automation");
+    }
+
+    return response.json();
+  }
+
+  // Test automation with sample user data (creates test execution with AI-generated content)
+  async testAutomation(
+    projectId: string,
+    automationId: string,
+    testUser: { user_id: string; email: string; name: string }
+  ): Promise<{ message: string; execution: AutomationExecution; email_content?: Record<string, string> }> {
     const response = await fetch(
       `${API_BASE}/api/v1/projects/${projectId}/automations/${automationId}/test`,
       {
         method: "POST",
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ user_id: testUserId }),
+        body: JSON.stringify(testUser),
       }
     );
 

@@ -37,6 +37,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Mail,
   Loader2,
   CheckCircle2,
@@ -49,6 +57,8 @@ import {
   Plus,
   Zap,
   Send,
+  Play,
+  FlaskConical,
 } from "lucide-react";
 import {
   automationService,
@@ -136,6 +146,19 @@ export default function EmailAutomationsPage() {
   // Delete dialog
   const [deleteTarget, setDeleteTarget] = useState<AutomationSettings | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Test dialog
+  const [testTarget, setTestTarget] = useState<AutomationSettings | null>(null);
+  const [testEmail, setTestEmail] = useState("");
+  const [testName, setTestName] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    execution?: any;
+    email_content?: Record<string, string>;
+  } | null>(null);
+
+  // Trigger state
+  const [triggeringId, setTriggeringId] = useState<string | null>(null);
 
   // Mailchimp actions
   const [connecting, setConnecting] = useState(false);
@@ -275,6 +298,61 @@ export default function EmailAutomationsPage() {
   const handleTypeSelect = (type: AutomationType) => {
     setSelectedType(type);
     setFormConfig(getDefaultConfig(type));
+  };
+
+  // Trigger automation to run immediately
+  const handleTriggerAutomation = async (automation: AutomationSettings) => {
+    if (!effectiveProjectId) return;
+    setTriggeringId(automation.id);
+    try {
+      await automationService.triggerAutomation(effectiveProjectId, automation.id);
+      toast({
+        title: "Automation Triggered",
+        description: `"${automation.name}" is now processing eligible users.`,
+      });
+      // Refresh executions after a short delay
+      setTimeout(async () => {
+        const execs = await automationService.getAutomationExecutions(effectiveProjectId);
+        setExecutions(execs ?? []);
+      }, 2000);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setTriggeringId(null);
+    }
+  };
+
+  // Test automation with sample user
+  const handleTestAutomation = async () => {
+    if (!effectiveProjectId || !testTarget || !testEmail.trim()) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await automationService.testAutomation(effectiveProjectId, testTarget.id, {
+        user_id: `test-${Date.now()}`,
+        email: testEmail.trim(),
+        name: testName.trim() || "Test User",
+      });
+      setTestResult(result);
+      toast({
+        title: "Test Completed",
+        description: "Check the generated email content below.",
+      });
+      // Refresh executions
+      const execs = await automationService.getAutomationExecutions(effectiveProjectId);
+      setExecutions(execs ?? []);
+    } catch (error: any) {
+      toast({ title: "Test Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const openTestDialog = (automation: AutomationSettings) => {
+    setTestTarget(automation);
+    setTestEmail("");
+    setTestName("");
+    setTestResult(null);
   };
 
   // Derived stats
@@ -678,7 +756,28 @@ export default function EmailAutomationsPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openTestDialog(automation)}
+                        >
+                          <FlaskConical className="h-4 w-4 mr-1" />
+                          Test
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleTriggerAutomation(automation)}
+                          disabled={triggeringId === automation.id || !automation.is_enabled}
+                        >
+                          {triggeringId === automation.id ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Play className="h-4 w-4 mr-1" />
+                          )}
+                          Run
+                        </Button>
                         <Switch
                           checked={automation.is_enabled}
                           onCheckedChange={() => handleToggleAutomation(automation)}
@@ -877,6 +976,99 @@ export default function EmailAutomationsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Test Automation Dialog */}
+      <Dialog open={!!testTarget} onOpenChange={(open) => !open && setTestTarget(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FlaskConical className="h-5 w-5" />
+              Test Automation: {testTarget?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Send a test email to verify the automation works correctly. This will create a test
+              execution and generate AI-powered email content.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="test-email">Test Email Address *</Label>
+                <Input
+                  id="test-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="test-name">Recipient Name</Label>
+                <Input
+                  id="test-name"
+                  placeholder="Test User"
+                  value={testName}
+                  onChange={(e) => setTestName(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {testResult && (
+              <div className="space-y-3 rounded-lg border p-4 bg-muted/30">
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span className="font-medium">Test execution created!</span>
+                </div>
+
+                {testResult.email_content && (
+                  <div className="space-y-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Subject</Label>
+                      <p className="font-medium">{testResult.email_content.subject}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Email Preview</Label>
+                      <div
+                        className="mt-1 rounded border bg-white p-4 text-sm max-h-60 overflow-auto"
+                        dangerouslySetInnerHTML={{
+                          __html: testResult.email_content.html || testResult.email_content.plain_text || "No content generated",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!testResult.email_content && (
+                  <p className="text-sm text-muted-foreground">
+                    Execution created but no email content was generated. Make sure ANTHROPIC_API_KEY
+                    is set in your backend environment.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTestTarget(null)}>
+              Close
+            </Button>
+            <Button onClick={handleTestAutomation} disabled={testing || !testEmail.trim()}>
+              {testing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Run Test
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
