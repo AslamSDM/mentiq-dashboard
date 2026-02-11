@@ -257,13 +257,6 @@ export default function LandingPage() {
       });
       return;
     }
-    if (!w || !w.includes(".")) {
-      toast({
-        title: "Add your company website",
-        description: "Example: yourcompany.com",
-      });
-      return;
-    }
     if (!em || !em.includes("@")) {
       toast({
         title: "Add a valid email",
