@@ -227,6 +227,27 @@
     background-clip: text;
     color: transparent;
   }
+
+  .text-gradient-animated {
+    background: linear-gradient(90deg, #4318FF 0%, #6AD2FF 25%, #FFCE20 50%, #6AD2FF 75%, #4318FF 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-text 3s ease infinite;
+  }
+
+  @keyframes gradient-text {
+    0% {
+      background-position: 0% center;
+    }
+    50% {
+      background-position: 100% center;
+    }
+    100% {
+      background-position: 0% center;
+    }
+  }
 }
 
 /* Animated gradient border effect */

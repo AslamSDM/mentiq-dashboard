@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -71,7 +72,13 @@ function StatPill({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ResultCard({ metric, index }: { metric: ResultMetric; index: number }) {
+function ResultCard({
+  metric,
+  index,
+}: {
+  metric: ResultMetric;
+  index: number;
+}) {
   return (
     <motion.div
       variants={fadeUp}
@@ -141,7 +148,10 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
 
         <div className="relative flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2" data-testid={`row-testimonial-meta-${index}`}>
+            <div
+              className="flex items-center gap-2"
+              data-testid={`row-testimonial-meta-${index}`}
+            >
               <div
                 className="text-sm font-semibold text-black"
                 data-testid={`text-testimonial-name-${index}`}
@@ -411,22 +421,22 @@ export default function LandingPage() {
 
       <header className="sticky top-0 z-50 border-b border-black/10 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <a href="#top" className="flex items-center gap-2" data-testid="link-home">
-            <div
-              className="h-9 w-9 rounded-xl border border-black/10 bg-gradient-to-br from-black/[0.06] to-black/[0.02] shadow-soft"
-              aria-hidden="true"
-            />
-            <div className="leading-tight">
-              <div className="font-sans text-lg tracking-tight text-black" data-testid="text-brand-name">
-                Mentiq
-              </div>
-              <div className="text-xs text-black/55" data-testid="text-brand-tagline">
-                {slogan}
-              </div>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative h-10 w-32">
+              <Image
+                src="/logo.png"
+                alt="Mentiq"
+                fill
+                className="object-cover h-30 w-40"
+                priority
+              />
             </div>
-          </a>
+          </Link>
 
-          <nav className="hidden items-center gap-6 md:flex" data-testid="nav-top">
+          <nav
+            className="hidden items-center gap-6 md:flex"
+            data-testid="nav-top"
+          >
             <a
               href="#results"
               className="text-sm text-black/60 transition-colors hover:text-black"
@@ -461,7 +471,11 @@ export default function LandingPage() {
                 <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             </Link>
-            <a href="#waitlist" className="inline-flex" data-testid="link-join-waitlist">
+            <a
+              href="#waitlist"
+              className="inline-flex"
+              data-testid="link-join-waitlist"
+            >
               <Button
                 className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                 data-testid="button-join-waitlist"
@@ -494,14 +508,23 @@ export default function LandingPage() {
                   className="mt-5 font-sans text-4xl leading-[1.06] tracking-tight text-black sm:text-5xl"
                   data-testid="text-hero-title"
                 >
-                  {slogan}. <span className="text-gradient">See churn clearly</span> in minutes.
+                  <span className="text-gradient-animated">{slogan}</span>.
+                  Clear Results in Minutes.
                 </h1>
 
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-black/70" data-testid="text-hero-subtitle">
-                  Complete customer retention software for SaaS with customer health scores, product usage analytics, and user analytics to prevent churn before it happens.
+                <p
+                  className="mt-5 max-w-xl text-base leading-relaxed text-black/70"
+                  data-testid="text-hero-subtitle"
+                >
+                  Complete customer retention software for SaaS with customer
+                  health scores, product usage analytics, and user analytics to
+                  prevent churn before it happens.
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-2" data-testid="row-hero-stats">
+                <div
+                  className="mt-7 flex flex-wrap gap-2"
+                  data-testid="row-hero-stats"
+                >
                   <StatPill label="Built-in" value="Cohorts + Replay" />
                   <StatPill label="See" value="Channel churn" />
                   <StatPill label="Run" value="Playbooks" />
@@ -519,15 +542,28 @@ export default function LandingPage() {
                   <div className="relative">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <div className="flex items-center gap-2 text-sm font-medium text-black" data-testid="text-waitlist-title">
-                          <Sparkles className="h-4 w-4 text-black/70" strokeWidth={1.75} />
+                        <div
+                          className="flex items-center gap-2 text-sm font-medium text-black"
+                          data-testid="text-waitlist-title"
+                        >
+                          <Sparkles
+                            className="h-4 w-4 text-black/70"
+                            strokeWidth={1.75}
+                          />
                           Join the Mentiq waitlist
                         </div>
-                        <p className="mt-1 text-sm leading-relaxed text-black/65" data-testid="text-waitlist-subtitle">
-                          Quick form. We use this to prioritize early access and tailor onboarding (especially for founders).
+                        <p
+                          className="mt-1 text-sm leading-relaxed text-black/65"
+                          data-testid="text-waitlist-subtitle"
+                        >
+                          Quick form. We use this to prioritize early access and
+                          tailor onboarding (especially for founders).
                         </p>
                       </div>
-                      <div className="hidden gap-2 sm:flex" data-testid="row-waitlist-trust">
+                      <div
+                        className="hidden gap-2 sm:flex"
+                        data-testid="row-waitlist-trust"
+                      >
                         <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs text-black/60">
                           <ShieldCheck className="h-4 w-4" strokeWidth={1.75} />
                           Privacy-first
@@ -542,7 +578,12 @@ export default function LandingPage() {
                     <form onSubmit={submitWaitlist} className="mt-5">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <FieldRow
-                          icon={<User className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          icon={
+                            <User
+                              className="h-4 w-4 text-black/70"
+                              strokeWidth={1.75}
+                            />
+                          }
                           label="Full name"
                           testId="field-full-name"
                         >
@@ -557,7 +598,12 @@ export default function LandingPage() {
                         </FieldRow>
 
                         <FieldRow
-                          icon={<Mail className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          icon={
+                            <Mail
+                              className="h-4 w-4 text-black/70"
+                              strokeWidth={1.75}
+                            />
+                          }
                           label="Work email"
                           testId="field-email"
                         >
@@ -574,7 +620,12 @@ export default function LandingPage() {
                         </FieldRow>
 
                         <FieldRow
-                          icon={<Globe className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          icon={
+                            <Globe
+                              className="h-4 w-4 text-black/70"
+                              strokeWidth={1.75}
+                            />
+                          }
                           label="Company website"
                           testId="field-company-website"
                         >
@@ -589,7 +640,12 @@ export default function LandingPage() {
                         </FieldRow>
 
                         <FieldRow
-                          icon={<Users className="h-4 w-4 text-black/70" strokeWidth={1.75} />}
+                          icon={
+                            <Users
+                              className="h-4 w-4 text-black/70"
+                              strokeWidth={1.75}
+                            />
+                          }
                           label="Paid users"
                           testId="field-paid-users"
                         >
@@ -615,10 +671,21 @@ export default function LandingPage() {
                         </Button>
 
                         <div className="flex flex-col gap-2 text-xs text-black/55 sm:items-end">
-                          <div data-testid="text-waitlist-note">We only use this to prioritize access — not for marketing.</div>
-                          <div className="inline-flex items-center gap-2" data-testid="row-waitlist-proof">
-                            <Check className="h-4 w-4 text-black/60" strokeWidth={1.75} />
-                            <span data-testid="text-waitlist-proof">4,200+ SaaS operators on the list</span>
+                          <div data-testid="text-waitlist-note">
+                            We only use this to prioritize access — not for
+                            marketing.
+                          </div>
+                          <div
+                            className="inline-flex items-center gap-2"
+                            data-testid="row-waitlist-proof"
+                          >
+                            <Check
+                              className="h-4 w-4 text-black/60"
+                              strokeWidth={1.75}
+                            />
+                            <span data-testid="text-waitlist-proof">
+                              4,200+ SaaS operators on the list
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -640,87 +707,163 @@ export default function LandingPage() {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-transparent" />
                 <div className="relative">
-                  <div className="flex items-center justify-between" data-testid="row-hero-panel-header">
+                  <div
+                    className="flex items-center justify-between"
+                    data-testid="row-hero-panel-header"
+                  >
                     <div>
-                      <div className="text-xs font-medium text-black/55" data-testid="text-panel-kicker">
+                      <div
+                        className="text-xs font-medium text-black/55"
+                        data-testid="text-panel-kicker"
+                      >
                         Your data, simplified
                       </div>
-                      <div className="mt-1 font-sans text-2xl tracking-tight text-black" data-testid="text-panel-title">
+                      <div
+                        className="mt-1 font-sans text-2xl tracking-tight text-black"
+                        data-testid="text-panel-title"
+                      >
                         What&apos;s happening — and what to do next
                       </div>
                     </div>
-                    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
-                      <Zap className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                    <div
+                      className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+                      aria-hidden="true"
+                    >
+                      <Zap
+                        className="h-5 w-5 text-black/70"
+                        strokeWidth={1.75}
+                      />
                     </div>
                   </div>
 
                   <Separator className="my-5 bg-black/10" />
 
                   <div className="grid gap-3" data-testid="grid-panel-metrics">
-                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-0">
+                    <div
+                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                      data-testid="card-panel-metric-0"
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-0">
+                        <div
+                          className="text-xs text-black/55"
+                          data-testid="text-panel-metric-label-0"
+                        >
                           At-risk accounts
                         </div>
-                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-0">
+                        <div
+                          className="text-xs text-emerald-700"
+                          data-testid="text-panel-metric-delta-0"
+                        >
                           42
                         </div>
                       </div>
-                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-0">
+                      <div
+                        className="mt-2 text-sm text-black/70"
+                        data-testid="text-panel-metric-desc-0"
+                      >
                         Usage drop + billing friction pattern.
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-1">
+                    <div
+                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                      data-testid="card-panel-metric-1"
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-1">
+                        <div
+                          className="text-xs text-black/55"
+                          data-testid="text-panel-metric-label-1"
+                        >
                           Save priority
                         </div>
-                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-1">
+                        <div
+                          className="text-xs text-emerald-700"
+                          data-testid="text-panel-metric-delta-1"
+                        >
                           High
                         </div>
                       </div>
-                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-1">
+                      <div
+                        className="mt-2 text-sm text-black/70"
+                        data-testid="text-panel-metric-desc-1"
+                      >
                         Segment: 10–50 seats · expansion likely.
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-black/10 bg-black/[0.02] p-4" data-testid="card-panel-metric-2">
+                    <div
+                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
+                      data-testid="card-panel-metric-2"
+                    >
                       <div className="flex items-center justify-between">
-                        <div className="text-xs text-black/55" data-testid="text-panel-metric-label-2">
+                        <div
+                          className="text-xs text-black/55"
+                          data-testid="text-panel-metric-label-2"
+                        >
                           Next best action
                         </div>
-                        <div className="text-xs text-emerald-700" data-testid="text-panel-metric-delta-2">
+                        <div
+                          className="text-xs text-emerald-700"
+                          data-testid="text-panel-metric-delta-2"
+                        >
                           Playbook
                         </div>
                       </div>
-                      <div className="mt-2 text-sm text-black/70" data-testid="text-panel-metric-desc-2">
+                      <div
+                        className="mt-2 text-sm text-black/70"
+                        data-testid="text-panel-metric-desc-2"
+                      >
                         Trigger outreach before renewal window.
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.02] p-4" data-testid="card-panel-insight">
+                  <div
+                    className="mt-5 rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.02] p-4"
+                    data-testid="card-panel-insight"
+                  >
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
-                        <Sparkles className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                      <div
+                        className="mt-0.5 rounded-xl border border-black/10 bg-black/[0.03] p-2"
+                        aria-hidden="true"
+                      >
+                        <Sparkles
+                          className="h-5 w-5 text-black/70"
+                          strokeWidth={1.75}
+                        />
                       </div>
                       <div>
-                        <div className="text-xs font-medium text-black/60" data-testid="text-panel-insight-title">
+                        <div
+                          className="text-xs font-medium text-black/60"
+                          data-testid="text-panel-insight-title"
+                        >
                           Plain-English takeaway
                         </div>
-                        <div className="mt-1 text-sm leading-relaxed text-black/70" data-testid="text-panel-insight-body">
-                          One page shows: who&apos;s slipping, what changed, and the next best playbook.
+                        <div
+                          className="mt-1 text-sm leading-relaxed text-black/70"
+                          data-testid="text-panel-insight-body"
+                        >
+                          One page shows: who&apos;s slipping, what changed, and
+                          the next best playbook.
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between" data-testid="row-panel-footer">
-                    <div className="text-xs text-black/45" data-testid="text-panel-footer-left">
+                  <div
+                    className="mt-5 flex items-center justify-between"
+                    data-testid="row-panel-footer"
+                  >
+                    <div
+                      className="text-xs text-black/45"
+                      data-testid="text-panel-footer-left"
+                    >
                       Updated Sunday · 7-day snapshot
                     </div>
-                    <div className="inline-flex items-center gap-1 text-xs text-black/55" data-testid="text-panel-footer-right">
+                    <div
+                      className="inline-flex items-center gap-1 text-xs text-black/55"
+                      data-testid="text-panel-footer-right"
+                    >
                       View full report
                       <ChevronRight className="h-4 w-4" />
                     </div>
@@ -762,14 +905,24 @@ export default function LandingPage() {
                   className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
                   data-testid="text-results-subtitle"
                 >
-                  Everything below maps directly to what&apos;s in the product today: cohorts, churn views, playbooks, and revenue context.
+                  Everything below maps directly to what&apos;s in the product
+                  today: cohorts, churn views, playbooks, and revenue context.
                 </p>
               </div>
-              <div className="flex items-center gap-2" data-testid="row-results-badges">
-                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-results-1">
+              <div
+                className="flex items-center gap-2"
+                data-testid="row-results-badges"
+              >
+                <Badge
+                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
+                  data-testid="badge-results-1"
+                >
                   Plain-English insights
                 </Badge>
-                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-results-2">
+                <Badge
+                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
+                  data-testid="badge-results-2"
+                >
                   Actionable playbooks
                 </Badge>
               </div>
@@ -783,7 +936,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="testimonials" className="mx-auto max-w-6xl px-6 pt-16 md:pt-24">
+        <section
+          id="testimonials"
+          className="mx-auto max-w-6xl px-6 pt-16 md:pt-24"
+        >
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -809,28 +965,44 @@ export default function LandingPage() {
                   className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
                   data-testid="text-testimonials-subtitle"
                 >
-                  Less churn, faster saves, and a clearer story you can share with anyone.
+                  Less churn, faster saves, and a clearer story you can share
+                  with anyone.
                 </p>
               </div>
-              <div className="flex items-center gap-2" data-testid="row-testimonials-badges">
-                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-testimonials-1">
+              <div
+                className="flex items-center gap-2"
+                data-testid="row-testimonials-badges"
+              >
+                <Badge
+                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
+                  data-testid="badge-testimonials-1"
+                >
                   Easy to adopt
                 </Badge>
-                <Badge className="rounded-full border-black/10 bg-black/[0.03] text-black/70" data-testid="badge-testimonials-2">
+                <Badge
+                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
+                  data-testid="badge-testimonials-2"
+                >
                   Clear outcomes
                 </Badge>
               </div>
             </div>
           </motion.div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-testimonials">
+          <div
+            className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+            data-testid="grid-testimonials"
+          >
             {testimonials.map((t, i) => (
               <TestimonialCard key={i} t={t} index={i} />
             ))}
           </div>
         </section>
 
-        <section id="how" className="mx-auto max-w-6xl px-6 pt-16 pb-16 md:pt-24 md:pb-24">
+        <section
+          id="how"
+          className="mx-auto max-w-6xl px-6 pt-16 pb-16 md:pt-24 md:pb-24"
+        >
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -856,73 +1028,145 @@ export default function LandingPage() {
                   className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
                   data-testid="text-how-subtitle"
                 >
-                  A clean workflow that turns messy product + billing signals into clear next steps your whole team can execute.
+                  A clean workflow that turns messy product + billing signals
+                  into clear next steps your whole team can execute.
                 </p>
               </div>
-              <a href="#waitlist" className="text-sm text-black/60 hover:text-black" data-testid="link-how-cta">
+              <a
+                href="#waitlist"
+                className="text-sm text-black/60 hover:text-black"
+                data-testid="link-how-cta"
+              >
                 Join waitlist <ChevronRight className="inline h-4 w-4" />
               </a>
             </div>
           </motion.div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3" data-testid="grid-how">
-            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-0">
-              <div className="flex items-start justify-between gap-3" data-testid="row-how-0">
+          <div
+            className="mt-8 grid gap-4 md:grid-cols-3"
+            data-testid="grid-how"
+          >
+            <Card
+              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
+              data-testid="card-how-0"
+            >
+              <div
+                className="flex items-start justify-between gap-3"
+                data-testid="row-how-0"
+              >
                 <div>
-                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-0">
+                  <div
+                    className="text-sm font-semibold text-black"
+                    data-testid="text-how-title-0"
+                  >
                     Detect churn signals
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-0">
-                    Behavior-based risk signals that your team can explain — not a black box score.
+                  <p
+                    className="mt-2 text-sm leading-relaxed text-black/65"
+                    data-testid="text-how-body-0"
+                  >
+                    Behavior-based risk signals that your team can explain — not
+                    a black box score.
                   </p>
                 </div>
-                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
-                  <TrendingUp className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                <div
+                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+                  aria-hidden="true"
+                >
+                  <TrendingUp
+                    className="h-5 w-5 text-black/70"
+                    strokeWidth={1.75}
+                  />
                 </div>
               </div>
             </Card>
 
-            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-1">
-              <div className="flex items-start justify-between gap-3" data-testid="row-how-1">
+            <Card
+              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
+              data-testid="card-how-1"
+            >
+              <div
+                className="flex items-start justify-between gap-3"
+                data-testid="row-how-1"
+              >
                 <div>
-                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-1">
+                  <div
+                    className="text-sm font-semibold text-black"
+                    data-testid="text-how-title-1"
+                  >
                     Prioritize the right accounts
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-1">
-                    Segment by renewal window, seats, expansion likelihood, and change-of-behavior patterns.
+                  <p
+                    className="mt-2 text-sm leading-relaxed text-black/65"
+                    data-testid="text-how-body-1"
+                  >
+                    Segment by renewal window, seats, expansion likelihood, and
+                    change-of-behavior patterns.
                   </p>
                 </div>
-                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
+                <div
+                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+                  aria-hidden="true"
+                >
                   <Users className="h-5 w-5 text-black/70" strokeWidth={1.75} />
                 </div>
               </div>
             </Card>
 
-            <Card className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft" data-testid="card-how-2">
-              <div className="flex items-start justify-between gap-3" data-testid="row-how-2">
+            <Card
+              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
+              data-testid="card-how-2"
+            >
+              <div
+                className="flex items-start justify-between gap-3"
+                data-testid="row-how-2"
+              >
                 <div>
-                  <div className="text-sm font-semibold text-black" data-testid="text-how-title-2">
+                  <div
+                    className="text-sm font-semibold text-black"
+                    data-testid="text-how-title-2"
+                  >
                     Execute save playbooks
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-black/65" data-testid="text-how-body-2">
-                    Triggered workflows: onboarding rescue, adoption nudges, pricing friction, champion loss, and more.
+                  <p
+                    className="mt-2 text-sm leading-relaxed text-black/65"
+                    data-testid="text-how-body-2"
+                  >
+                    Triggered workflows: onboarding rescue, adoption nudges,
+                    pricing friction, champion loss, and more.
                   </p>
                 </div>
-                <div className="rounded-xl border border-black/10 bg-black/[0.03] p-2" aria-hidden="true">
-                  <ShieldCheck className="h-5 w-5 text-black/70" strokeWidth={1.75} />
+                <div
+                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
+                  aria-hidden="true"
+                >
+                  <ShieldCheck
+                    className="h-5 w-5 text-black/70"
+                    strokeWidth={1.75}
+                  />
                 </div>
               </div>
             </Card>
           </div>
 
-          <div className="mt-10 rounded-3xl border border-black/10 bg-white/70 p-7 shadow-soft" data-testid="card-bottom-cta">
+          <div
+            className="mt-10 rounded-3xl border border-black/10 bg-white/70 p-7 shadow-soft"
+            data-testid="card-bottom-cta"
+          >
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="font-sans text-2xl tracking-tight text-black" data-testid="text-bottom-cta-title">
+                <div
+                  className="font-sans text-2xl tracking-tight text-black"
+                  data-testid="text-bottom-cta-title"
+                >
                   Get invited to Mentiq
                 </div>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-black/65" data-testid="text-bottom-cta-subtitle">
-                  Join the waitlist and tell us your paid users count — we&apos;ll prioritize teams with urgent retention needs.
+                <p
+                  className="mt-2 max-w-xl text-sm leading-relaxed text-black/65"
+                  data-testid="text-bottom-cta-subtitle"
+                >
+                  Join the waitlist and tell us your paid users count —
+                  we&apos;ll prioritize teams with urgent retention needs.
                 </p>
               </div>
               <a href="#waitlist" data-testid="link-bottom-cta">
@@ -937,30 +1181,37 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <footer className="mt-14 border-t border-black/10 pt-8" data-testid="footer">
+          <footer
+            className="mt-14 border-t border-black/10 pt-8"
+            data-testid="footer"
+          >
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="text-sm text-black/60" data-testid="text-footer-brand">
+              <div
+                className="text-sm text-black/60"
+                data-testid="text-footer-brand"
+              >
                 © {new Date().getFullYear()} Mentiq
               </div>
-              <div className="flex items-center gap-4 text-sm" data-testid="row-footer-links">
-                <button
+              <div
+                className="flex items-center gap-4 text-sm"
+                data-testid="row-footer-links"
+              >
+                <Link
+                  href="/docs/Privacy Policy MENTIQ.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-black/60 hover:text-black"
-                  onClick={() =>
-                    toast({
-                      title: "Privacy",
-                      description: "This is a mockup. Add your privacy policy link when ready.",
-                    })
-                  }
                   data-testid="button-footer-privacy"
                 >
                   Privacy
-                </button>
+                </Link>
                 <button
                   className="text-black/60 hover:text-black"
                   onClick={() =>
                     toast({
                       title: "Contact",
-                      description: "This is a mockup. Add your contact email when ready.",
+                      description:
+                        "This is a mockup. Add your contact email when ready.",
                     })
                   }
                   data-testid="button-footer-contact"

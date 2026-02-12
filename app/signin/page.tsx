@@ -14,10 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
-import {
-  sanitizeEmail,
-  sanitizePassword,
-} from "@/lib/sanitization";
+import { sanitizeEmail, sanitizePassword } from "@/lib/sanitization";
 
 // Zod validation schema
 const signInSchema = z.object({
@@ -118,7 +115,9 @@ export default function SignInPage() {
           const errorObj = JSON.parse(result.error);
           if (errorObj.requiresVerification) {
             setShowVerificationMessage(true);
-            setVerificationEmail(sanitizeEmail(errorObj.email) || sanitizedEmail);
+            setVerificationEmail(
+              sanitizeEmail(errorObj.email) || sanitizedEmail,
+            );
             setError("");
           } else {
             // Use generic error message to prevent user enumeration
@@ -158,7 +157,7 @@ export default function SignInPage() {
     setIsGoogleLoading(true);
     setError("");
     setLastAttempt(Date.now());
-    
+
     try {
       await signIn("google", { callbackUrl: "/dashboard" });
     } catch {
@@ -180,7 +179,7 @@ export default function SignInPage() {
     }
 
     setLastAttempt(Date.now());
-    
+
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       if (!apiBaseUrl) {
@@ -188,21 +187,20 @@ export default function SignInPage() {
         return;
       }
 
-      const response = await fetch(
-        `${apiBaseUrl}/resend-verification`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: sanitizedVerificationEmail }),
-        }
-      );
-      
+      const response = await fetch(`${apiBaseUrl}/resend-verification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: sanitizedVerificationEmail }),
+      });
+
       if (response.ok) {
         setError("");
         // Use a more user-friendly notification instead of alert
         setShowVerificationMessage(true);
       } else {
-        setError("Failed to resend verification email. Please try again later.");
+        setError(
+          "Failed to resend verification email. Please try again later.",
+        );
       }
     } catch {
       setError("Failed to resend verification email. Please try again later.");
@@ -258,7 +256,10 @@ export default function SignInPage() {
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8 lg:p-12 bg-white">
         <div className="w-full max-w-md space-y-6 sm:space-y-8">
           {/* Mobile Logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-3 mb-4 sm:mb-8">
+          <Link
+            href="/"
+            className="lg:hidden flex items-center gap-3 mb-4 sm:mb-8"
+          >
             <div className="relative h-30 w-30">
               <Image
                 src="/logo.png"
@@ -271,14 +272,16 @@ export default function SignInPage() {
           </Link>
 
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[#2B3674]">Sign in</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#2B3674]">
+              Sign in
+            </h2>
             <p className="text-sm sm:text-base text-[#4363C7]">
               Enter your credentials to access your dashboard
             </p>
           </div>
 
           {/* Google Sign In Button */}
-          <Button
+          {/* <Button
             variant="outline"
             onClick={handleGoogleSignIn}
             disabled={isGoogleLoading}
@@ -290,7 +293,7 @@ export default function SignInPage() {
               <GoogleIcon className="mr-2 h-5 w-5" />
             )}
             Continue with Google
-          </Button>
+          </Button> */}
 
           {/* Divider */}
           <div className="relative">
@@ -304,7 +307,10 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4 sm:space-y-6">
+          <form
+            onSubmit={handleSubmit(handleSignIn)}
+            className="space-y-4 sm:space-y-6"
+          >
             {error && (
               <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
                 {error}
@@ -387,11 +393,17 @@ export default function SignInPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#4363C7] hover:text-[#2B3674] transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 

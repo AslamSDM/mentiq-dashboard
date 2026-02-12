@@ -57,17 +57,11 @@ const signUpSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[A-Z])/,
-      "Password must contain at least one capital letter"
-    )
-    .regex(
-      /^(?=.*[0-9])/,
-      "Password must contain at least one number"
-    )
+    .regex(/^(?=.*[A-Z])/, "Password must contain at least one capital letter")
+    .regex(/^(?=.*[0-9])/, "Password must contain at least one number")
     .regex(
       /^(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
-      "Password must contain at least one special character"
+      "Password must contain at least one special character",
     ),
   acceptedTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the Terms and Conditions",
@@ -107,16 +101,17 @@ const TIER_ICONS: Record<string, React.ReactNode> = {
   enterprise: <Crown className="h-5 w-5" />,
 };
 
-
 function SignUpForm() {
   const searchParams = useSearchParams();
 
   const preselectedPlanId = searchParams.get("plan");
   const preselectedUsers = searchParams.get("users");
 
-  const [step, setStep] = useState<"details" | "plan" | "verification">("details");
+  const [step, setStep] = useState<"details" | "plan" | "verification">(
+    "details",
+  );
   const [userCount, setUserCount] = useState(
-    preselectedUsers ? parseInt(preselectedUsers) : 250
+    preselectedUsers ? parseInt(preselectedUsers) : 250,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -169,7 +164,12 @@ function SignUpForm() {
     const sanitizedPassword = sanitizePassword(data.password);
 
     // Validate sanitized data
-    if (!sanitizedFullName || !sanitizedCompanyName || !sanitizedEmail || !sanitizedPassword) {
+    if (
+      !sanitizedFullName ||
+      !sanitizedCompanyName ||
+      !sanitizedEmail ||
+      !sanitizedPassword
+    ) {
       setError("Please fill in all fields correctly.");
       setIsLoading(false);
       return;
@@ -217,7 +217,7 @@ function SignUpForm() {
         setStep("plan");
       } else {
         setError(
-          "Account created but failed to sign in. Please try signing in manually."
+          "Account created but failed to sign in. Please try signing in manually.",
         );
       }
     } catch (error) {
@@ -306,11 +306,9 @@ function SignUpForm() {
               </span>
             </h1>
             <p className="text-xl text-blue-100 max-w-md">
-              Join thousands of SaaS founders who&apos;ve turned retention into their
-              competitive advantage.
+              Join thousands of SaaS founders who&apos;ve turned retention into
+              their competitive advantage.
             </p>
-
-      
           </div>
 
           <div className="flex items-center gap-8 text-sm text-blue-200">
@@ -392,14 +390,16 @@ function SignUpForm() {
           {step === "details" && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">Create your account</h2>
+                <h2 className="text-3xl font-bold text-[#2B3674]">
+                  Create your account
+                </h2>
                 <p className="text-[#4363C7]">
                   Fill in your details to get started
                 </p>
               </div>
 
               {/* Google Sign Up Button */}
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={handleGoogleSignUp}
                 disabled={isGoogleLoading}
@@ -411,7 +411,7 @@ function SignUpForm() {
                   <GoogleIcon className="mr-2 h-5 w-5" />
                 )}
                 Continue with Google
-              </Button>
+              </Button> */}
 
               {/* Divider */}
               <div className="relative">
@@ -431,7 +431,10 @@ function SignUpForm() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(handleRegisterUser)} className="space-y-4">
+              <form
+                onSubmit={handleSubmit(handleRegisterUser)}
+                className="space-y-4"
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label
@@ -448,12 +451,16 @@ function SignUpForm() {
                         placeholder="John Doe"
                         {...register("fullName")}
                         className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                          errors.fullName ? "border-red-500 ring-1 ring-red-500" : ""
+                          errors.fullName
+                            ? "border-red-500 ring-1 ring-red-500"
+                            : ""
                         }`}
                       />
                     </div>
                     {errors.fullName && (
-                      <p className="text-sm text-red-500">{errors.fullName.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.fullName.message}
+                      </p>
                     )}
                   </div>
 
@@ -472,12 +479,16 @@ function SignUpForm() {
                         placeholder="Your Company"
                         {...register("companyName")}
                         className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                          errors.companyName ? "border-red-500 ring-1 ring-red-500" : ""
+                          errors.companyName
+                            ? "border-red-500 ring-1 ring-red-500"
+                            : ""
                         }`}
                       />
                     </div>
                     {errors.companyName && (
-                      <p className="text-sm text-red-500">{errors.companyName.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.companyName.message}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -502,7 +513,9 @@ function SignUpForm() {
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email.message}</p>
+                    <p className="text-sm text-red-500">
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
 
@@ -521,15 +534,20 @@ function SignUpForm() {
                       placeholder="At least 8 characters"
                       {...register("password")}
                       className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                        errors.password ? "border-red-500 ring-1 ring-red-500" : ""
+                        errors.password
+                          ? "border-red-500 ring-1 ring-red-500"
+                          : ""
                       }`}
                     />
                   </div>
                   {errors.password ? (
-                    <p className="text-sm text-red-500">{errors.password.message}</p>
+                    <p className="text-sm text-red-500">
+                      {errors.password.message}
+                    </p>
                   ) : (
                     <p className="text-xs text-[#4363C7]">
-                      Must be at least 8 characters with 1 capital letter, 1 number, and 1 special character
+                      Must be at least 8 characters with 1 capital letter, 1
+                      number, and 1 special character
                     </p>
                   )}
                 </div>
@@ -584,7 +602,9 @@ function SignUpForm() {
                   </label>
                 </div>
                 {errors.acceptedTerms && (
-                  <p className="text-sm text-red-500 -mt-2">{errors.acceptedTerms.message}</p>
+                  <p className="text-sm text-red-500 -mt-2">
+                    {errors.acceptedTerms.message}
+                  </p>
                 )}
 
                 <Button
@@ -638,15 +658,20 @@ function SignUpForm() {
               </div>
 
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">Check your email</h2>
+                <h2 className="text-3xl font-bold text-[#2B3674]">
+                  Check your email
+                </h2>
                 <p className="text-[#4363C7]">
-                  We&apos;ve sent a verification link to <strong className="text-[#2B3674]">{watch("email")}</strong>
+                  We&apos;ve sent a verification link to{" "}
+                  <strong className="text-[#2B3674]">{watch("email")}</strong>
                 </p>
               </div>
 
               <div className="bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg p-4 space-y-3">
                 <p className="text-sm text-[#4363C7]">
-                  Click the link in your email to verify your account. Once verified, you can sign in and complete your subscription setup.
+                  Click the link in your email to verify your account. Once
+                  verified, you can sign in and complete your subscription
+                  setup.
                 </p>
                 <p className="text-xs text-[#4363C7]">
                   Didn&apos;t receive the email? Check your spam folder or{" "}
@@ -659,7 +684,7 @@ function SignUpForm() {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ email: watch("email") }),
-                          }
+                          },
                         );
                         if (response.ok) {
                           alert("Verification email resent!");
@@ -687,7 +712,9 @@ function SignUpForm() {
           {step === "plan" && (
             <div className="space-y-6">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">Choose your plan</h2>
+                <h2 className="text-3xl font-bold text-[#2B3674]">
+                  Choose your plan
+                </h2>
                 <p className="text-[#4363C7]">
                   Select the number of paid users you have
                 </p>
@@ -785,8 +812,9 @@ function SignUpForm() {
               </Button>
 
               <p className="text-xs text-center text-[#4363C7]">
-                You&apos;ll be redirected to Stripe for secure payment processing.
-                After payment, you&apos;ll be able to create your first project.
+                You&apos;ll be redirected to Stripe for secure payment
+                processing. After payment, you&apos;ll be able to create your
+                first project.
               </p>
             </div>
           )}
