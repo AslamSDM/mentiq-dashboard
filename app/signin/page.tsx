@@ -296,7 +296,7 @@ export default function SignInPage() {
           </Button> */}
 
           {/* Divider */}
-          <div className="relative">
+          {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-[#E0E5F2]"></div>
             </div>
@@ -305,7 +305,7 @@ export default function SignInPage() {
                 or continue with email
               </span>
             </div>
-          </div>
+          </div> */}
 
           <form
             onSubmit={handleSubmit(handleSignIn)}

@@ -936,7 +936,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section
+        {/* <section
           id="testimonials"
           className="mx-auto max-w-6xl px-6 pt-16 md:pt-24"
         >
@@ -997,7 +997,7 @@ export default function LandingPage() {
               <TestimonialCard key={i} t={t} index={i} />
             ))}
           </div>
-        </section>
+        </section> */}
 
         <section
           id="how"

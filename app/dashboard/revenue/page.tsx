@@ -49,14 +49,16 @@ import {
   Target,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, ChevronUp, Key } from "lucide-react";
 
 export default function RevenuePage() {
-  const { getEffectiveProjectId } = useStore();
+  const { getEffectiveProjectId, projects } = useStore();
   const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
 
   const [stripeApiKey, setStripeApiKey] = useState("");
   const [isUpdatingKey, setIsUpdatingKey] = useState(false);
+  const [isStripeConfigExpanded, setIsStripeConfigExpanded] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [revenueMetrics, setRevenueMetrics] = useState<RevenueMetrics | null>(
     null,
@@ -66,6 +68,11 @@ export default function RevenuePage() {
   const [customerAnalytics, setCustomerAnalytics] =
     useState<CustomerAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check if Stripe key is already configured
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+  const hasStripeKeyConfigured = !!selectedProject?.stripeApiKey;
+
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       .toISOString()
@@ -174,6 +181,13 @@ export default function RevenuePage() {
     fetchAllData();
   }, [selectedProjectId, dateRange]);
 
+  // Auto-expand stripe config if no key is configured
+  useEffect(() => {
+    if (!hasStripeKeyConfigured) {
+      setIsStripeConfigExpanded(true);
+    }
+  }, [hasStripeKeyConfigured]);
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -211,85 +225,104 @@ export default function RevenuePage() {
       <div className="flex-1 p-6 space-y-6">
         {/* Stripe Configuration */}
         <Card>
-          <CardHeader>
-            <CardTitle>Stripe Configuration</CardTitle>
+          <CardHeader className="cursor-pointer" onClick={() => setIsStripeConfigExpanded(!isStripeConfigExpanded)}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CardTitle>Stripe Configuration</CardTitle>
+                {hasStripeKeyConfigured && (
+                  <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
+                    <Key className="h-3 w-3 mr-1" />
+                    Configured
+                  </Badge>
+                )}
+              </div>
+              <Button variant="ghost" size="sm">
+                {isStripeConfigExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
             <CardDescription>
-              Configure your Stripe restricted API key to start tracking revenue
-              metrics. For security, use a restricted key with read-only
-              permissions for customers, subscriptions, and invoices.
+              {hasStripeKeyConfigured
+                ? "Your Stripe key is configured. Click to update or sync data."
+                : "Configure your Stripe restricted API key to start tracking revenue metrics."}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800 font-medium">
-                  🔒 Security Best Practice
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  Create a <strong>restricted API key</strong> in your Stripe
-                  dashboard with read-only access to: Customers, Subscriptions,
-                  Invoices, and Charges. Never use your secret key here.
-                </p>
-                <div className="mt-2">
-                  <a
-                    href="https://dashboard.stripe.com/apikeys"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-700 underline hover:text-blue-800"
-                  >
-                    → Create Restricted Key in Stripe Dashboard
-                  </a>
+          {isStripeConfigExpanded && (
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-800 font-medium">
+                    🔒 Security Best Practice
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Create a <strong>restricted API key</strong> in your Stripe
+                    dashboard with read-only access to: Customers, Subscriptions,
+                    Invoices, and Charges. Never use your secret key here.
+                  </p>
+                  <div className="mt-2">
+                    <a
+                      href="https://dashboard.stripe.com/apikeys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-700 underline hover:text-blue-800"
+                    >
+                      → Create Restricted Key in Stripe Dashboard
+                    </a>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                  <p className="text-sm text-gray-800 font-medium">
+                    📋 Required Permissions (Read Only)
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-600">
+                    <div>• Customers</div>
+                    <div>• Invoices</div>
+                    <div>• Subscriptions</div>
+                    <div>• Charges</div>
+                  </div>
                 </div>
               </div>
-              <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                <p className="text-sm text-gray-800 font-medium">
-                  📋 Required Permissions (Read Only)
-                </p>
-                <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-600">
-                  <div>• Customers</div>
-                  <div>• Invoices</div>
-                  <div>• Subscriptions</div>
-                  <div>• Charges</div>
+              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+                <div className="flex-1">
+                  <Label htmlFor="stripe-key">Stripe Restricted API Key</Label>
+                  <Input
+                    id="stripe-key"
+                    type="password"
+                    placeholder="rk_live_... or rk_test_..."
+                    value={stripeApiKey}
+                    onChange={(e) => setStripeApiKey(e.target.value)}
+                  />
                 </div>
+                <Button onClick={handleUpdateStripeKey} disabled={isUpdatingKey}>
+                  {isUpdatingKey && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {hasStripeKeyConfigured ? "Update Key" : "Configure Key"}
+                </Button>
               </div>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
-              <div className="flex-1">
-                <Label htmlFor="stripe-key">Stripe Restricted API Key</Label>
-                <Input
-                  id="stripe-key"
-                  type="password"
-                  placeholder="rk_live_... or rk_test_..."
-                  value={stripeApiKey}
-                  onChange={(e) => setStripeApiKey(e.target.value)}
-                />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  onClick={handleSyncStripeData}
+                  disabled={isSyncing}
+                  variant="outline"
+                >
+                  {isSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Sync Stripe Data
+                </Button>
+                <Button
+                  onClick={fetchAllData}
+                  disabled={isLoading}
+                  variant="outline"
+                >
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Refresh Data
+                </Button>
               </div>
-              <Button onClick={handleUpdateStripeKey} disabled={isUpdatingKey}>
-                {isUpdatingKey && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Update Key
-              </Button>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                onClick={handleSyncStripeData}
-                disabled={isSyncing}
-                variant="outline"
-              >
-                {isSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sync Stripe Data
-              </Button>
-              <Button
-                onClick={fetchAllData}
-                disabled={isLoading}
-                variant="outline"
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Refresh Data
-              </Button>
-            </div>
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
 
         {/* Loading State */}
