@@ -1205,19 +1205,13 @@ export default function LandingPage() {
                 >
                   Privacy
                 </Link>
-                <button
+                <a
+                  href="mailto:info@trymentiq.com"
                   className="text-black/60 hover:text-black"
-                  onClick={() =>
-                    toast({
-                      title: "Contact",
-                      description:
-                        "This is a mockup. Add your contact email when ready.",
-                    })
-                  }
                   data-testid="button-footer-contact"
                 >
                   Contact
-                </button>
+                </a>
               </div>
             </div>
           </footer>
