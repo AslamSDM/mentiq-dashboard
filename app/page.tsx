@@ -444,13 +444,13 @@ export default function LandingPage() {
             >
               Results
             </a>
-            <a
+            {/* <a
               href="#testimonials"
               className="text-sm text-black/60 transition-colors hover:text-black"
               data-testid="link-testimonials"
             >
               Testimonials
-            </a>
+            </a> */}
             <a
               href="#how"
               className="text-sm text-black/60 transition-colors hover:text-black"
