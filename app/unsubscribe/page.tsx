@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle, XCircle, Loader2, MailOff } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, MailX } from "lucide-react";
 
 function UnsubscribeContent() {
   const searchParams = useSearchParams();
@@ -162,7 +162,7 @@ function UnsubscribeContent() {
               <>
                 <div className="flex justify-center">
                   <div className="h-20 w-20 rounded-full bg-yellow-50 flex items-center justify-center">
-                    <MailOff className="h-10 w-10 text-yellow-600" />
+                    <MailX className="h-10 w-10 text-yellow-600" />
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-yellow-600">

@@ -509,6 +509,7 @@ export default function LandingPage() {
                   data-testid="text-hero-title"
                 >
                   <span className="text-gradient-animated">{slogan}</span>.
+                  <br />
                   Clear Results in Minutes.
                 </h1>
 
