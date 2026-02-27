@@ -268,10 +268,19 @@ export interface RevenueMetrics {
   arpu: number;
   customer_lifetime_value: number;
   trial_to_pay_conversion_rate: number;
+  total_customers: number;
+  active_customers: number;
   last_updated: string;
   time_series?: Array<{
     date: string;
+    mrr: number;
+    arr: number;
     revenue: number;
+    active_subscriptions: number;
+    churn_rate: number;
+    arpu: number;
+    new_customers: number;
+    total_customers: number;
   }>;
   date_range?: {
     start: string;

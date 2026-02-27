@@ -15,21 +15,16 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Line,
-  LineChart,
   ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
+  Line,
+  LineChart,
+  Tooltip,
 } from "recharts";
 import {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useStore } from "@/lib/store";
 import { centralizedData } from "@/lib/services/centralized-data";
@@ -43,8 +38,6 @@ import {
   Loader2,
   DollarSign,
   Users,
-  TrendingUp,
-  TrendingDown,
   CreditCard,
   Target,
 } from "lucide-react";
@@ -410,16 +403,16 @@ export default function RevenuePage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">
-                    Churn Rate
+                    Total Customers
                   </CardTitle>
-                  <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {formatPercentage(revenueMetrics.churn_rate)}
+                    {revenueMetrics.total_customers ?? 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {revenueMetrics.churned_subscriptions} canceled this month
+                    {formatPercentage(revenueMetrics.churn_rate)} churn rate
                   </p>
                 </CardContent>
               </Card>
@@ -450,36 +443,40 @@ export default function RevenuePage() {
             </TabsList>
 
             <TabsContent value="analytics" className="space-y-4">
-              {revenueAnalytics && (
+              {revenueMetrics?.time_series && revenueMetrics.time_series.length > 0 ? (
                 <>
-                  {/* MRR Trend Chart */}
-                  <Card className="min-w-0">
+                  {/* MRR & Revenue Trend */}
+                  <Card className="min-w-0 overflow-hidden">
                     <CardHeader>
-                      <CardTitle>MRR Trend</CardTitle>
-                      <CardDescription>
-                        Monthly Recurring Revenue over time
+                      <CardTitle className="text-[#2B3674] font-bold">MRR & Revenue Trend</CardTitle>
+                      <CardDescription className="text-[#4363C7]">
+                        Monthly Recurring Revenue and daily revenue over time
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="px-2">
+                    <CardContent className="px-2 overflow-hidden">
                       <ChartContainer
                         config={{
                           mrr: {
                             label: "MRR",
-                            color: "hsl(var(--chart-1))",
+                            color: "#4318FF",
+                          },
+                          revenue: {
+                            label: "Revenue",
+                            color: "#05CD99",
                           },
                         }}
-                        className="h-[300px]"
+                        className="h-[300px] w-full"
                       >
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={revenueAnalytics.time_series}>
+                          <LineChart data={revenueMetrics.time_series}>
                             <CartesianGrid
                               strokeDasharray="3 3"
-                              className="stroke-muted/20"
+                              className="stroke-[#E0E5F2]"
                               vertical={false}
                             />
                             <XAxis
                               dataKey="date"
-                              className="text-xs text-muted-foreground"
+                              className="text-xs text-[#4363C7]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -492,7 +489,7 @@ export default function RevenuePage() {
                               }
                             />
                             <YAxis
-                              className="text-xs text-muted-foreground"
+                              className="text-xs text-[#4363C7]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -501,53 +498,79 @@ export default function RevenuePage() {
                               }
                               width={45}
                             />
-                            <ChartTooltip
-                              content={<ChartTooltipContent />}
-                              formatter={(value) => [
+                            <Tooltip
+                              cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                              contentStyle={{
+                                borderRadius: "12px",
+                                border: "none",
+                                boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                              }}
+                              formatter={(value: number, name: string) => [
                                 formatCurrency(Number(value)),
-                                "MRR",
+                                name === "mrr" ? "MRR" : "Revenue",
                               ]}
                             />
-                            <Bar
+                            <Line
+                              type="monotone"
                               dataKey="mrr"
-                              fill="var(--color-mrr)"
-                              radius={[4, 4, 0, 0]}
+                              stroke="#4318FF"
+                              strokeWidth={3}
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#4318FF",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
                             />
-                          </BarChart>
+                            <Line
+                              type="monotone"
+                              dataKey="revenue"
+                              stroke="#05CD99"
+                              strokeWidth={3}
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#05CD99",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
+                            />
+                          </LineChart>
                         </ResponsiveContainer>
                       </ChartContainer>
                     </CardContent>
                   </Card>
 
-                  {/* Subscriptions and Churn Chart */}
+                  {/* Customer Growth & Subscriptions */}
                   <div className="grid gap-4 md:grid-cols-2">
-                    <Card className="min-w-0">
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
-                        <CardTitle>Active Subscriptions</CardTitle>
-                        <CardDescription>
-                          Number of active subscriptions over time
+                        <CardTitle className="text-[#2B3674] font-bold">Customer Growth</CardTitle>
+                        <CardDescription className="text-[#4363C7]">
+                          Total customers over time
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="px-2">
+                      <CardContent className="px-2 overflow-hidden">
                         <ChartContainer
                           config={{
-                            active_subscriptions: {
-                              label: "Active Subscriptions",
-                              color: "hsl(var(--chart-2))",
+                            total_customers: {
+                              label: "Total Customers",
+                              color: "#FFCE20",
                             },
                           }}
-                          className="h-[200px]"
+                          className="h-[200px] w-full"
                         >
                           <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={revenueAnalytics.time_series}>
+                            <LineChart data={revenueMetrics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-muted/20"
+                                className="stroke-[#E0E5F2]"
                                 vertical={false}
                               />
                               <XAxis
                                 dataKey="date"
-                                className="text-xs text-muted-foreground"
+                                className="text-xs text-[#4363C7]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -560,23 +583,33 @@ export default function RevenuePage() {
                                 }
                               />
                               <YAxis
-                                className="text-xs text-muted-foreground"
+                                className="text-xs text-[#4363C7]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
-                                width={45}
+                                width={35}
+                                allowDecimals={false}
                               />
-                              <ChartTooltip content={<ChartTooltipContent />} />
+                              <Tooltip
+                                cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                                contentStyle={{
+                                  borderRadius: "12px",
+                                  border: "none",
+                                  boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                                }}
+                              />
                               <Line
                                 type="monotone"
-                                dataKey="active_subscriptions"
-                                stroke="var(--color-active_subscriptions)"
-                                strokeWidth={2}
-                                dot={{
-                                  fill: "var(--color-active_subscriptions)",
-                                  r: 4,
+                                dataKey="total_customers"
+                                stroke="#FFCE20"
+                                strokeWidth={3}
+                                dot={false}
+                                activeDot={{
+                                  r: 6,
+                                  fill: "#FFCE20",
+                                  stroke: "#fff",
+                                  strokeWidth: 2,
                                 }}
-                                activeDot={{ r: 6 }}
                               />
                             </LineChart>
                           </ResponsiveContainer>
@@ -584,33 +617,33 @@ export default function RevenuePage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="min-w-0">
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
-                        <CardTitle>Churn Rate</CardTitle>
-                        <CardDescription>
-                          Percentage of customers churning over time
+                        <CardTitle className="text-[#2B3674] font-bold">Active Subscriptions</CardTitle>
+                        <CardDescription className="text-[#4363C7]">
+                          Number of active subscriptions over time
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="px-2">
+                      <CardContent className="px-2 overflow-hidden">
                         <ChartContainer
                           config={{
-                            churn_rate: {
-                              label: "Churn Rate",
-                              color: "hsl(var(--chart-3))",
+                            active_subscriptions: {
+                              label: "Active Subscriptions",
+                              color: "#00A3FF",
                             },
                           }}
-                          className="h-[200px]"
+                          className="h-[200px] w-full"
                         >
                           <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={revenueAnalytics.time_series}>
+                            <LineChart data={revenueMetrics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-muted/20"
+                                className="stroke-[#E0E5F2]"
                                 vertical={false}
                               />
                               <XAxis
                                 dataKey="date"
-                                className="text-xs text-muted-foreground"
+                                className="text-xs text-[#4363C7]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -623,26 +656,33 @@ export default function RevenuePage() {
                                 }
                               />
                               <YAxis
-                                className="text-xs text-muted-foreground"
+                                className="text-xs text-[#4363C7]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
-                                width={45}
+                                width={35}
+                                allowDecimals={false}
                               />
-                              <ChartTooltip
-                                content={<ChartTooltipContent />}
-                                formatter={(value) => [
-                                  formatPercentage(Number(value)),
-                                  "Churn Rate",
-                                ]}
+                              <Tooltip
+                                cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                                contentStyle={{
+                                  borderRadius: "12px",
+                                  border: "none",
+                                  boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                                }}
                               />
                               <Line
                                 type="monotone"
-                                dataKey="churn_rate"
-                                stroke="var(--color-churn_rate)"
-                                strokeWidth={2}
-                                dot={{ fill: "var(--color-churn_rate)", r: 4 }}
-                                activeDot={{ r: 6 }}
+                                dataKey="active_subscriptions"
+                                stroke="#00A3FF"
+                                strokeWidth={3}
+                                dot={false}
+                                activeDot={{
+                                  r: 6,
+                                  fill: "#00A3FF",
+                                  stroke: "#fff",
+                                  strokeWidth: 2,
+                                }}
                               />
                             </LineChart>
                           </ResponsiveContainer>
@@ -651,6 +691,18 @@ export default function RevenuePage() {
                     </Card>
                   </div>
                 </>
+              ) : !isLoading && (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center h-40">
+                    <p className="text-muted-foreground mb-4">
+                      No analytics data available. Click Sync to pull data from Stripe.
+                    </p>
+                    <Button onClick={handleSyncStripeData} disabled={isSyncing} variant="outline">
+                      {isSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Sync Stripe Data
+                    </Button>
+                  </CardContent>
+                </Card>
               )}
             </TabsContent>
 
