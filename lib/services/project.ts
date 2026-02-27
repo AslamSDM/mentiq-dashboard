@@ -6,6 +6,7 @@ export interface Project {
   description?: string;
   apiKey?: string;
   stripeApiKey?: string;
+  hasStripeKey?: boolean;
   createdAt: string;
   updatedAt: string;
   accountId: string;

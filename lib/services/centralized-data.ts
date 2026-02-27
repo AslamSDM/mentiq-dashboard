@@ -73,6 +73,33 @@ class CentralizedDataService {
   private prefetchInProgress = false;
 
   /**
+   * Invalidate all revenue-related cache entries for a project
+   */
+  invalidateRevenueCache(projectId: string) {
+    const paths: (keyof CentralizedCache)[] = [
+      "revenueMetrics",
+      "revenueAnalytics",
+      "customerAnalytics",
+    ];
+    for (const path of paths) {
+      const store = this.cache[path] as Record<string, any> | undefined;
+      if (store) {
+        for (const key of Object.keys(store)) {
+          if (key.startsWith(projectId)) {
+            delete store[key];
+          }
+        }
+      }
+    }
+    // Also clear any in-flight promises for these
+    for (const key of this.fetchPromises.keys()) {
+      if (key.startsWith(projectId)) {
+        this.fetchPromises.delete(key);
+      }
+    }
+  }
+
+  /**
    * Get data from cache or fetch if expired/missing
    */
   private async getCachedOrFetch<T>(

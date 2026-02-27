@@ -52,7 +52,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronUp, Key } from "lucide-react";
 
 export default function RevenuePage() {
-  const { getEffectiveProjectId, projects } = useStore();
+  const { getEffectiveProjectId, projects, fetchProjects } = useStore();
   const selectedProjectId = getEffectiveProjectId();
   const { toast } = useToast();
 
@@ -71,7 +71,7 @@ export default function RevenuePage() {
 
   // Check if Stripe key is already configured
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
-  const hasStripeKeyConfigured = !!selectedProject?.stripeApiKey;
+  const hasStripeKeyConfigured = !!selectedProject?.hasStripeKey;
 
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -112,6 +112,10 @@ export default function RevenuePage() {
         description: "Stripe API key updated successfully",
       });
       setStripeApiKey("");
+      // Invalidate frontend caches and refresh
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchProjects();
+      await fetchAllData();
     } catch (error) {
       toast({
         title: "Configuration Failed",
@@ -134,7 +138,9 @@ export default function RevenuePage() {
         title: "Success",
         description: "Stripe data synced successfully",
       });
-      await fetchAllData(); // Refresh data after sync
+      // Invalidate frontend caches before refreshing
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchAllData();
     } catch (error) {
       toast({
         title: "Sync Failed",
@@ -335,44 +341,35 @@ export default function RevenuePage() {
           </Card>
         )}
 
-        {/* Empty State - No Stripe Data */}
-        {!isLoading &&
-          revenueMetrics &&
-          revenueMetrics.mrr === 0 &&
-          revenueMetrics.active_subscriptions === 0 &&
-          revenueMetrics.total_revenue === 0 && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center h-40">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
-                    <Target className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">No Revenue Data</h3>
-                    <p className="text-muted-foreground">
-                      Configure your Stripe API key and sync data to see revenue
-                      metrics
-                    </p>
-                  </div>
-                  <Button onClick={handleSyncStripeData} disabled={isSyncing}>
-                    {isSyncing && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Sync Stripe Data
-                  </Button>
+        {/* Empty State - No Stripe key or failed to fetch */}
+        {!isLoading && !revenueMetrics && (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center h-40">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center">
+                  <Target className="h-8 w-8 text-blue-600" />
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div>
+                  <h3 className="text-lg font-semibold">No Revenue Data</h3>
+                  <p className="text-muted-foreground">
+                    {hasStripeKeyConfigured
+                      ? "Click Sync to pull the latest data from Stripe."
+                      : "Configure your Stripe API key to start tracking revenue metrics."}
+                  </p>
+                </div>
+                <Button onClick={hasStripeKeyConfigured ? handleSyncStripeData : undefined} disabled={isSyncing || !hasStripeKeyConfigured}>
+                  {isSyncing && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {hasStripeKeyConfigured ? "Sync Stripe Data" : "Configure Key Above"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Revenue Metrics Overview */}
-        {!isLoading &&
-          revenueMetrics &&
-          !(
-            revenueMetrics.mrr === 0 &&
-            revenueMetrics.active_subscriptions === 0 &&
-            revenueMetrics.total_revenue === 0
-          ) && (
+        {!isLoading && revenueMetrics && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
