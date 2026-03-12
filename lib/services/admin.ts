@@ -209,6 +209,20 @@ class AdminService extends BaseHttpService {
       },
     );
   }
+
+  /**
+   * Delete a waitlist entry (admin only)
+   */
+  async deleteWaitlistEntry(
+    id: string,
+  ): Promise<{ message: string }> {
+    return this.request<{ message: string }>(
+      `/api/v1/admin/waitlist/${id}`,
+      {
+        method: "DELETE",
+      },
+    );
+  }
 }
 
 export const adminService = new AdminService();

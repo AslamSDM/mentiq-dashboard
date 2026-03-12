@@ -33,6 +33,7 @@ import {
   Mail,
   Building,
   Calendar,
+  Trash2,
 } from "lucide-react";
 
 export default function AdminWaitlistPage() {
@@ -44,6 +45,7 @@ export default function AdminWaitlistPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [grantingAccess, setGrantingAccess] = useState<string | null>(null);
+  const [deletingEntry, setDeletingEntry] = useState<string | null>(null);
 
   // Check if user is admin
   useEffect(() => {
@@ -102,6 +104,31 @@ export default function AdminWaitlistPage() {
       });
     } finally {
       setGrantingAccess(null);
+    }
+  };
+
+  // Handle deleting a waitlist entry
+  const handleDeleteEntry = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}" from the waitlist?`)) {
+      return;
+    }
+    setDeletingEntry(id);
+    try {
+      await adminService.deleteWaitlistEntry(id);
+      setWaitlistEntries((prev) => prev.filter((entry) => entry.id !== id));
+      toast({
+        title: "Entry Deleted",
+        description: `"${name}" has been removed from the waitlist.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Failed to delete entry. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingEntry(null);
     }
   };
 
@@ -305,31 +332,45 @@ export default function AdminWaitlistPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {entry.access_granted ? (
-                            <span className="text-xs text-slate-400">
-                              {entry.access_granted_at
-                                ? formatDate(entry.access_granted_at)
-                                : "Granted"}
-                            </span>
-                          ) : (
+                          <div className="flex items-center gap-2">
+                            {entry.access_granted ? (
+                              <span className="text-xs text-slate-400">
+                                {entry.access_granted_at
+                                  ? formatDate(entry.access_granted_at)
+                                  : "Granted"}
+                              </span>
+                            ) : (
+                              <Button
+                                size="sm"
+                                onClick={() => handleGrantAccess(entry.id)}
+                                disabled={grantingAccess === entry.id}
+                              >
+                                {grantingAccess === entry.id ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Granting...
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Grant Access
+                                  </>
+                                )}
+                              </Button>
+                            )}
                             <Button
                               size="sm"
-                              onClick={() => handleGrantAccess(entry.id)}
-                              disabled={grantingAccess === entry.id}
+                              variant="destructive"
+                              onClick={() => handleDeleteEntry(entry.id, entry.full_name)}
+                              disabled={deletingEntry === entry.id}
                             >
-                              {grantingAccess === entry.id ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Granting...
-                                </>
+                              {deletingEntry === entry.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Grant Access
-                                </>
+                                <Trash2 className="h-4 w-4" />
                               )}
                             </Button>
-                          )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
