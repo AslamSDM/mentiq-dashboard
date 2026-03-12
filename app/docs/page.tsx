@@ -13,19 +13,17 @@ import {
   Zap,
   Package,
   BookOpen,
-  Settings,
-  Eye,
-  Activity,
-  Shield,
-  Cpu,
   Users,
   ListChecks,
+  Activity,
+  Settings,
+  BarChart3,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-// Code block component with syntax highlighting
+/* ─── Code Block ─── */
 function CodeBlock({
   code,
   language = "javascript",
@@ -90,7 +88,7 @@ function CodeBlock({
   );
 }
 
-// Section component
+/* ─── Section ─── */
 function Section({
   id,
   title,
@@ -111,39 +109,64 @@ function Section({
   );
 }
 
-// Badge component for auto/manual labels
-function Badge({ type }: { type: "auto" | "manual" | "opt-in" }) {
-  const styles = {
-    auto: "bg-green-500/15 text-green-400 border-green-500/30",
-    manual: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    "opt-in": "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  };
-  const labels = { auto: "Auto", manual: "Manual", "opt-in": "Opt-in flag" };
+/* ─── Step Card ─── */
+function StepCard({
+  step,
+  title,
+  children,
+}: {
+  step: number;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${styles[type]}`}
-    >
-      {labels[type]}
-    </span>
+    <div className="relative pl-10 pb-8 border-l-2 border-white/10 last:border-l-0 last:pb-0">
+      <div className="absolute -left-[13px] top-0 w-6 h-6 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
+        <span className="text-xs font-bold text-primary">{step}</span>
+      </div>
+      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+      <div className="space-y-4 text-gray-400">{children}</div>
+    </div>
   );
 }
 
-// Navigation items for sidebar
+/* ─── Callout ─── */
+function Callout({
+  type = "tip",
+  children,
+}: {
+  type?: "tip" | "warning" | "info";
+  children: React.ReactNode;
+}) {
+  const styles = {
+    tip: "bg-primary/10 border-primary/20 text-primary",
+    warning: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+    info: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+  };
+  const labels = { tip: "💡 Tip", warning: "⚠️ Note", info: "ℹ️ Info" };
+
+  return (
+    <div className={`rounded-xl p-4 border ${styles[type]}`}>
+      <p className="text-sm">
+        <strong>{labels[type]}:</strong> {children}
+      </p>
+    </div>
+  );
+}
+
+/* ─── Sidebar Items ─── */
 const navItems = [
   { id: "installation", label: "Installation", icon: Package },
   { id: "quick-start", label: "Quick Start", icon: Zap },
-  { id: "provider-setup", label: "Provider Setup", icon: Settings },
-  { id: "auto-setup", label: "What's Auto Set Up", icon: Cpu },
-  { id: "tracking-events", label: "Tracking Events", icon: Activity },
-  { id: "user-identification", label: "User Identification", icon: Users },
-  { id: "onboarding-tracking", label: "Onboarding Tracking", icon: ListChecks },
-  { id: "page-tracking", label: "Page Tracking", icon: Eye },
-  { id: "heatmaps", label: "Heatmap Tracking", icon: Activity },
-  { id: "session-recording", label: "Session Recording", icon: Terminal },
+  { id: "identify-users", label: "Identify Users", icon: Users },
+  { id: "onboarding", label: "Onboarding Flow", icon: ListChecks },
+  { id: "feature-tracking", label: "Feature & Funnel Tracking", icon: BarChart3 },
+  { id: "custom-events", label: "Custom Events", icon: Activity },
+  { id: "api-reference", label: "Hooks & API Reference", icon: Code2 },
   { id: "configuration", label: "Configuration", icon: Settings },
-  { id: "api-reference", label: "API Reference", icon: Code2 },
 ];
 
+/* ─── Page ─── */
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("installation");
 
@@ -184,7 +207,7 @@ export default function DocsPage() {
         <aside className="hidden lg:block w-64 fixed left-0 top-16 bottom-0 border-r border-white/10 bg-black/50 overflow-y-auto">
           <nav className="p-6 space-y-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              Documentation
+              Getting Started
             </p>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -222,43 +245,36 @@ export default function DocsPage() {
                 mentiq-sdk v1.0.6
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                Mentiq SDK Documentation
+                Mentiq SDK
               </h1>
               <p className="text-xl text-gray-400">
-                A comprehensive analytics SDK for React and Next.js with event
-                tracking, session monitoring, heatmaps, and session recording.
+                Analytics for React &amp; Next.js — track onboarding, feature
+                adoption, funnels, and more in minutes.
               </p>
             </div>
 
-            {/* Installation */}
+            {/* ───────────────────── 1. Installation ───────────────────── */}
             <Section id="installation" title="Installation">
-              <p className="text-gray-400 mb-4">
-                Install the Mentiq SDK using npm or yarn:
-              </p>
               <CodeBlock
                 language="bash"
                 title="Terminal"
-                code={`$ npm install mentiq-sdk
+                code={`npm install mentiq-sdk
 
-# or with yarn
-$ yarn add mentiq-sdk`}
+# or
+yarn add mentiq-sdk`}
               />
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mt-4">
-                <p className="text-sm text-amber-400">
-                  <strong>Note:</strong> The SDK requires React 16.8+ and rrweb
-                  2.0+ as peer dependencies for session recording.
-                </p>
-              </div>
+              <Callout type="warning">
+                Requires <code className="text-amber-300">React&nbsp;16.8+</code>.
+                If you plan to use session recording, also install{" "}
+                <code className="text-amber-300">rrweb&nbsp;2.0+</code> as a
+                peer dependency.
+              </Callout>
             </Section>
 
-            {/* Quick Start */}
+            {/* ───────────────────── 2. Quick Start ───────────────────── */}
             <Section id="quick-start" title="Quick Start">
-              <p className="text-gray-400 mb-4">
-                Wrap your app with the{" "}
-                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  MentiqAnalyticsProvider
-                </code>{" "}
-                and start tracking in minutes. Only{" "}
+              <p className="text-gray-400">
+                Wrap your app with the provider. Only{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   apiKey
                 </code>{" "}
@@ -266,7 +282,7 @@ $ yarn add mentiq-sdk`}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   projectId
                 </code>{" "}
-                are required.
+                are required — everything else has sensible defaults.
               </p>
               <CodeBlock
                 language="tsx"
@@ -290,458 +306,225 @@ export default function RootLayout({ children }) {
   );
 }`}
               />
-              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-4">
-                <p className="text-sm text-primary">
-                  <strong>💡 Tip:</strong> Find your API key in the{" "}
-                  <Link href="/dashboard/projects" className="underline">
-                    Projects page
-                  </Link>{" "}
-                  of your dashboard. An API key is automatically created when
-                  you create a project.
-                </p>
-              </div>
-            </Section>
+              <Callout type="tip">
+                Find your API key in the{" "}
+                <Link href="/dashboard/projects" className="underline">
+                  Projects page
+                </Link>{" "}
+                of your dashboard. A key is created automatically with every new
+                project.
+              </Callout>
 
-            {/* Provider Setup */}
-            <Section id="provider-setup" title="Provider Setup">
-              <p className="text-gray-400 mb-4">
-                The provider accepts a full config object. Here is an example
-                with all available options:
-              </p>
-              <CodeBlock
-                language="tsx"
-                title="app/layout.tsx — Full config"
-                code={`<MentiqAnalyticsProvider
-  config={{
-    // Required
-    apiKey: "mentiq_live_abc123",
-    projectId: "my-project",
-
-    // Optional — defaults shown
-    endpoint: "https://api.mentiq.io",   // Backend URL
-    debug: false,                         // Console logs
-    sessionTimeout: 1800000,              // 30 min inactivity resets session
-
-    // Batching
-    batchSize: 20,                        // Events per batch
-    flushInterval: 10000,                 // Auto-flush every 10 s
-    maxQueueSize: 1000,                   // Max queued events
-
-    // Retry
-    retryAttempts: 3,
-    retryDelay: 1000,                     // Exponential backoff base
-
-    // Feature flags (all false by default)
-    enableAutoPageTracking: true,         // On by default — set false to disable
-    enablePerformanceTracking: false,
-    enableHeatmapTracking: false,
-    enableSessionRecording: false,
-    enableErrorTracking: false,
-    enableABTesting: false,
-  }}
->
-  <App />
-</MentiqAnalyticsProvider>`}
-              />
-            </Section>
-
-            {/* Auto Setup */}
-            <Section id="auto-setup" title="What's Automatically Set Up">
-              <p className="text-gray-400">
-                The moment the provider mounts on the client, the following
-                happen with{" "}
-                <strong className="text-white">zero extra config</strong>:
-              </p>
-
-              <div className="space-y-3">
-                {[
-                  {
-                    title: "Anonymous ID & Session ID",
-                    desc: "A persistent UUID is created in localStorage as mentiq_anonymous_id. A fresh session UUID is created per session.",
-                  },
-                  {
-                    title: "Session Tracking",
-                    desc: "Listens to mousedown, mousemove, keypress, scroll, touchstart to track duration, scroll depth, click count and page changes. After 30 min of inactivity a session_end event is fired and a new session begins.",
-                  },
-                  {
-                    title: "Auto Page Tracking",
-                    desc: "Fires a page_view on mount, patches history.pushState / replaceState for SPA navigation, and listens to popstate. Disable with enableAutoPageTracking: false.",
-                  },
-                  {
-                    title: "Event Queue & Batching",
-                    desc: "Events are queued and auto-flushed every 10 s or when the queue hits 20 events. Failed batches retry up to 3 times with exponential backoff.",
-                  },
-                  {
-                    title: "Email Auto-Detection",
-                    desc: "Scans NextAuth, Supabase, Firebase, Clerk, Auth0, generic localStorage keys, and cookies for the current user's email. If found, it's appended to every event automatically.",
-                  },
-                  {
-                    title: "Subscription Auto-Detection",
-                    desc: "1 second after mount, scans window globals and localStorage for Stripe, Paddle, or Chargebee subscription data. Detected plan/status/MRR is cached and enriched into every event.",
-                  },
-                  {
-                    title: "SSR Safety",
-                    desc: "The Analytics class is dynamically imported — on the server the provider renders children transparently with no side effects.",
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-4 p-4 rounded-xl bg-green-500/5 border border-green-500/20"
-                  >
-                    <div className="mt-0.5 flex-shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-green-400 mt-1.5" />
+              <div className="mt-2">
+                <h3 className="text-lg font-semibold text-white mb-3">
+                  What happens automatically
+                </h3>
+                <div className="grid gap-2">
+                  {[
+                    "Anonymous ID & session created in localStorage",
+                    "Page views tracked on every navigation (SPA-aware)",
+                    "Session duration, scroll depth & click count recorded",
+                    "Email auto-detected from NextAuth, Supabase, Firebase, Clerk, Auth0",
+                    "Events batched (20 per batch) and flushed every 10 s",
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-green-500/5 border border-green-500/20"
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                      <span className="text-sm text-gray-300">{item}</span>
                     </div>
-                    <div>
-                      <p className="text-white font-medium text-sm">
-                        {item.title}
-                      </p>
-                      <p className="text-gray-400 text-sm mt-0.5">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <h3 className="text-lg font-semibold text-white mt-8 mb-3">
-                Opt-in Features (disabled by default)
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Flag
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        What it enables
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {[
-                      {
-                        flag: "enablePerformanceTracking",
-                        desc: "Fires page_performance event with load_time, dom_ready, first_byte, dns_lookup on page load",
-                      },
-                      {
-                        flag: "enableHeatmapTracking",
-                        desc: "Global click, mousemove (500 ms debounce), and scroll (1 s debounce) listeners — sends heatmap events with coordinates and element selectors",
-                      },
-                      {
-                        flag: "enableErrorTracking",
-                        desc: "Global error and unhandledrejection listeners — fires javascript_error and unhandled_rejection events",
-                      },
-                      {
-                        flag: "enableSessionRecording",
-                        desc: "Starts SessionRecorder (rrweb) automatically and streams DOM mutations to the backend",
-                      },
-                      {
-                        flag: "enableABTesting",
-                        desc: "Activates the A/B testing system — requires abTestConfig",
-                      },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="py-3 px-4 font-mono text-primary whitespace-nowrap">
-                          {row.flag}
-                        </td>
-                        <td className="py-3 px-4">{row.desc}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Section>
-
-            {/* Tracking Events */}
-            <Section id="tracking-events" title="Tracking Events">
-              <p className="text-gray-400 mb-4">
-                Use the{" "}
-                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  useAnalytics
-                </code>{" "}
-                hook to track custom events anywhere in your app:
-              </p>
-              <CodeBlock
-                language="tsx"
-                title="Component.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
-
-function SignupButton() {
-  const { track } = useAnalytics();
-
-  return (
-    <button onClick={() => track("button_clicked", { button: "signup_cta", page: "hero" })}>
-      Sign Up
-    </button>
-  );
-}
-
-// Feature usage — feeds churn risk calculation
-function ExportButton() {
-  const { analytics } = useAnalytics();
-
-  const handleExport = () => {
-    analytics.trackFeatureUsage("export_report", {
-      format: "pdf",
-      row_count: 150,
-    });
-  };
-
-  return <button onClick={handleExport}>Export PDF</button>;
-}`}
-              />
-
-              <h3 className="text-lg font-semibold text-white mt-8 mb-4">
-                How Event Batching Works
-              </h3>
-              <div className="text-gray-400 space-y-2">
-                <p>Events are automatically batched for optimal performance:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>
-                    <strong className="text-white">By size:</strong> When queue
-                    reaches batchSize (default: 20 events)
-                  </li>
-                  <li>
-                    <strong className="text-white">By time:</strong> Every
-                    flushInterval (default: 10 seconds)
-                  </li>
-                  <li>
-                    <strong className="text-white">On destroy:</strong> When the
-                    provider unmounts
-                  </li>
-                  <li>
-                    <strong className="text-white">Manual:</strong> When you
-                    call{" "}
-                    <code className="text-primary bg-primary/10 px-1 rounded">
-                      flush()
-                    </code>
-                  </li>
-                </ul>
-              </div>
-            </Section>
-
-            {/* User Identification */}
-            <Section id="user-identification" title="User Identification">
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 mb-6">
-                <Shield className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-gray-300">
-                  <p className="font-medium text-white mb-1">
-                    Identification is split — email is auto-detected, userId is
-                    always manual.
-                  </p>
-                  <p className="text-gray-400">
-                    The SDK cannot know your internal user ID (database UUID
-                    etc.). Until{" "}
-                    <code className="text-primary bg-primary/10 px-1 rounded">
-                      identify()
-                    </code>{" "}
-                    is called, all events are sent under{" "}
-                    <code className="text-primary bg-primary/10 px-1 rounded">
-                      anonymousId
-                    </code>{" "}
-                    and won't be linked to a user in the dashboard.
-                  </p>
+                  ))}
                 </div>
               </div>
-
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                Email Auto-Detection <Badge type="auto" />
-              </h3>
-              <p className="text-gray-400 mb-4">
-                On every mount and on every event, the SDK scans for the current
-                user's email in this priority order:
-              </p>
-              <div className="overflow-x-auto mb-6">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium w-8">
-                        #
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Auth Provider
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Where it looks
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {[
-                      {
-                        src: "mentiq_user_email",
-                        where:
-                          "localStorage — set by a previous identify() call",
-                      },
-                      {
-                        src: "NextAuth / Auth.js",
-                        where:
-                          "sessionStorage.__next_auth_session__ → .user.email",
-                      },
-                      {
-                        src: "Supabase",
-                        where: "localStorage sb-*-auth-token → .user.email",
-                      },
-                      {
-                        src: "Firebase",
-                        where: "localStorage firebase:authUser:* → .email",
-                      },
-                      {
-                        src: "Clerk",
-                        where:
-                          "sessionStorage clerk user keys → .primaryEmailAddress.emailAddress",
-                      },
-                      {
-                        src: "Auth0",
-                        where:
-                          "localStorage @@auth0* → .body.decodedToken.user.email",
-                      },
-                      {
-                        src: "Generic patterns",
-                        where:
-                          "localStorage/sessionStorage: user, currentUser, auth, session → .email",
-                      },
-                      { src: "Cookies", where: "email= in document.cookie" },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="py-3 px-4 text-gray-500">{i + 1}</td>
-                        <td className="py-3 px-4 font-medium text-white">
-                          {row.src}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-xs text-gray-400">
-                          {row.where}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
-                <p className="text-sm text-amber-400">
-                  <strong>Caveat:</strong> This only works if your auth provider
-                  persists session data to localStorage / sessionStorage /
-                  cookies. JWTs in httpOnly cookies (server-side Next.js
-                  sessions) are invisible to the SDK.
-                </p>
-              </div>
-
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                Subscription Auto-Detection <Badge type="auto" />
-              </h3>
-              <p className="text-gray-400 mb-6">
-                1 second after mount, the SDK scans{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  window.Stripe
-                </code>
-                ,{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  window.Paddle
-                </code>
-                ,{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  window.Chargebee
-                </code>{" "}
-                and related localStorage keys to read plan, status, MRR, and
-                billing interval. The result is cached and automatically
-                enriched into every event as{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  subscription_status
-                </code>
-                ,{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  subscription_plan
-                </code>
-                ,{" "}
-                <code className="text-primary bg-primary/10 px-1 rounded">
-                  is_paid_user
-                </code>
-                , etc.
-              </p>
-
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                Calling identify() <Badge type="manual" />
-              </h3>
-              <p className="text-gray-400 mb-4">
-                Call this after login to link events to a known user in the
-                dashboard:
-              </p>
-              <CodeBlock
-                language="tsx"
-                title="auth.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
-
-function LoginHandler() {
-  const { identify, reset } = useAnalytics();
-
-  const handleLogin = async (user) => {
-    identify(user.id, {
-      email: user.email,         // safe to pass even if auto-detected
-      name: user.name,
-      plan: user.subscription.plan,
-      created_at: user.createdAt,
-      // Pass full subscription object for enrichment
-      subscription: {
-        status: "active",
-        plan_name: "Pro",
-        mrr: 4900,
-        provider: "stripe",
-      },
-    });
-  };
-
-  const handleLogout = () => {
-    reset(); // Clears userId, empties queue, starts fresh anonymous session
-  };
-}`}
-              />
             </Section>
 
-            {/* Onboarding Tracking */}
-            <Section id="onboarding-tracking" title="Onboarding Tracking">
-              <p className="text-gray-400 mb-2">
-                The SDK ships an{" "}
+            {/* ───────────────────── 3. Identify Users ───────────────────── */}
+            <Section id="identify-users" title="Identify Users">
+              <p className="text-gray-400">
+                Until you call{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  OnboardingTracker
-                </code>{" "}
-                class —{" "}
-                <strong className="text-white">
-                  nothing runs automatically
-                </strong>
-                . You instantiate it with your step definitions and call its
-                methods at the right points in your UI.
+                  identify()
+                </code>
+                , events are anonymous. Call it after login to link all past and
+                future events to a known user.
               </p>
               <CodeBlock
                 language="tsx"
-                title="OnboardingFlow.tsx"
-                code={`import { OnboardingTracker } from "mentiq-sdk";
-import { useAnalytics } from "mentiq-sdk";
+                title="after-login.tsx"
+                code={`import { useAnalytics } from "mentiq-sdk";
 
-function useOnboarding() {
+function AfterLogin({ user }) {
+  const { identify, reset } = useAnalytics();
+
+  // Call once after login
+  identify(user.id, {
+    email: user.email,
+    name: user.name,
+    plan: user.plan,        // optional traits
+    created_at: user.createdAt,
+  });
+
+  // On logout — clears userId, empties queue, starts fresh session
+  const handleLogout = () => reset();
+}`}
+              />
+              <Callout type="info">
+                Email is also auto-detected from common auth providers
+                (NextAuth, Supabase, Firebase, Clerk, Auth0). Passing it in{" "}
+                <code className="text-blue-300">identify()</code> is still
+                recommended for reliability.
+              </Callout>
+            </Section>
+
+            {/* ───────────────────── 4. Onboarding Flow ⭐ ───────────────────── */}
+            <Section id="onboarding" title="Onboarding Flow">
+              <p className="text-gray-400 mb-2">
+                Track every step of your user onboarding with the built-in{" "}
+                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  OnboardingTracker
+                </code>
+                . Nothing runs automatically — you define the steps and call
+                methods at the right points in your UI.
+              </p>
+
+              {/* Step 1 */}
+              <StepCard step={1} title="Define your onboarding steps">
+                <p>
+                  Create a tracker by passing the analytics instance and an
+                  array of steps. Mark steps as{" "}
+                  <code className="text-white">required</code> or optional.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  title="hooks/use-onboarding.ts"
+                  code={`import { OnboardingTracker, useAnalytics } from "mentiq-sdk";
+
+export function useOnboarding() {
   const { analytics } = useAnalytics();
 
   const tracker = new OnboardingTracker(analytics, {
     steps: [
-      { name: "profile_setup",  index: 0, required: true },
-      { name: "invite_team",    index: 1, required: false },
-      { name: "first_project",  index: 2, required: true },
+      { name: "create_account",   index: 0, required: true  },
+      { name: "complete_profile", index: 1, required: true  },
+      { name: "invite_team",      index: 2, required: false }, // optional
+      { name: "create_project",   index: 3, required: true  },
+      { name: "install_sdk",      index: 4, required: true  },
     ],
   });
 
   return tracker;
-}
+}`}
+                />
+              </StepCard>
 
-// Usage
-tracker.start();                           // → fires onboarding_started
-tracker.completeStep("profile_setup");     // → fires onboarding_step_completed
-tracker.skipStep("invite_team", "later");  // → fires onboarding_step_skipped
-tracker.completeStep("first_project");     // → fires onboarding_step_completed
-                                           //   + auto-fires onboarding_completed
-                                           //     (triggered when ALL steps done)
-tracker.abandon("closed_modal");           // → fires onboarding_abandoned`}
-              />
+              {/* Step 2 */}
+              <StepCard step={2} title="Start the onboarding">
+                <p>
+                  Call <code className="text-white">start()</code> when the user
+                  begins onboarding. This fires an{" "}
+                  <code className="text-primary">onboarding_started</code>{" "}
+                  event.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  title="OnboardingWizard.tsx"
+                  code={`function OnboardingWizard() {
+  const tracker = useOnboarding();
 
-              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
+  useEffect(() => {
+    tracker.start(); // → fires "onboarding_started" { total_steps: 5 }
+  }, []);
+
+  // ...
+}`}
+                />
+              </StepCard>
+
+              {/* Step 3 */}
+              <StepCard step={3} title="Complete or skip steps">
+                <p>
+                  Call{" "}
+                  <code className="text-white">completeStep(&quot;step_name&quot;)</code>{" "}
+                  when the user finishes a step. For optional steps you can call{" "}
+                  <code className="text-white">
+                    skipStep(&quot;step_name&quot;, &quot;reason&quot;)
+                  </code>
+                  .
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  title="Step handlers"
+                  code={`// User finished their profile
+tracker.completeStep("complete_profile");
+// → fires "onboarding_step_completed" {
+//     step_name: "complete_profile",
+//     step_index: 1,
+//     progress: 40,            // percentage
+//     time_since_start: 23000  // ms since start()
+//   }
+
+// User skips the optional "invite_team" step
+tracker.skipStep("invite_team", "will do later");
+// → fires "onboarding_step_skipped" {
+//     step_name: "invite_team",
+//     reason: "will do later"
+//   }
+// Note: skipStep() is ignored for required steps.`}
+                />
+              </StepCard>
+
+              {/* Step 4 */}
+              <StepCard step={4} title="Completion & abandonment">
+                <p>
+                  When the last step is completed,{" "}
+                  <code className="text-primary">onboarding_completed</code>{" "}
+                  fires <strong className="text-white">automatically</strong>.
+                  If the user leaves early, call{" "}
+                  <code className="text-white">abandon()</code>.
+                </p>
+                <CodeBlock
+                  language="tsx"
+                  title="Completion & abandon"
+                  code={`// Last required step done → auto-fires "onboarding_completed"
+tracker.completeStep("install_sdk");
+// → "onboarding_completed" {
+//     completion_rate: 100,
+//     duration_seconds: 142
+//   }
+
+// If user closes the wizard early
+tracker.abandon("closed_modal");
+// → "onboarding_abandoned" {
+//     step_name: "create_project",
+//     progress: 60,
+//     reason: "closed_modal"
+//   }`}
+                />
+              </StepCard>
+
+              {/* Step 5 */}
+              <StepCard step={5} title="Read progress anytime">
+                <CodeBlock
+                  language="tsx"
+                  title="Reading state"
+                  code={`const progress = tracker.getProgress();
+// {
+//   currentStep: "complete_profile",
+//   currentStepIndex: 1,
+//   completedSteps: ["create_account", "complete_profile"],
+//   totalSteps: 5,
+//   progressPercent: 40,
+//   duration: 23000  // ms
+// }
+
+tracker.isStepCompleted("invite_team"); // → false
+tracker.reset();                        // clear all state`}
+                />
+              </StepCard>
+
+              {/* Events table */}
+              <h3 className="text-lg font-semibold text-white mt-4 mb-3">
                 Events fired by OnboardingTracker
               </h3>
               <div className="overflow-x-auto">
@@ -758,21 +541,24 @@ tracker.abandon("closed_modal");           // → fires onboarding_abandoned`}
                   </thead>
                   <tbody className="text-gray-300">
                     {[
-                      { event: "onboarding_started", props: "total_steps" },
+                      {
+                        event: "onboarding_started",
+                        props: "total_steps",
+                      },
                       {
                         event: "onboarding_step_completed",
                         props:
-                          "step_name, step_index, required, steps_completed, progress (%), time_since_start",
+                          "step_name, step_index, required, progress (%), time_since_start",
                       },
                       {
                         event: "onboarding_step_skipped",
                         props:
-                          "step_name, step_index, reason, steps_completed — only for required: false steps",
+                          "step_name, step_index, reason — only fires for optional steps",
                       },
                       {
                         event: "onboarding_completed",
                         props:
-                          "steps_completed, completion_rate (%), duration_ms, duration_seconds",
+                          "completion_rate (%), duration_ms, duration_seconds",
                       },
                       {
                         event: "onboarding_abandoned",
@@ -784,298 +570,189 @@ tracker.abandon("closed_modal");           // → fires onboarding_abandoned`}
                         <td className="py-3 px-4 font-mono text-primary whitespace-nowrap">
                           {row.event}
                         </td>
-                        <td className="py-3 px-4 text-gray-400">{row.props}</td>
+                        <td className="py-3 px-4 text-gray-400">
+                          {row.props}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-4">
-                <p className="text-sm text-primary">
-                  <strong>💡 Note:</strong>{" "}
-                  <code className="bg-primary/20 px-1 rounded">
-                    onboarding_completed
-                  </code>{" "}
-                  fires automatically when{" "}
-                  <code className="bg-primary/20 px-1 rounded">
-                    completeStep()
-                  </code>{" "}
-                  marks the last step done — you don't need to call{" "}
-                  <code className="bg-primary/20 px-1 rounded">complete()</code>{" "}
-                  manually.
-                </p>
-              </div>
-
-              <CodeBlock
-                language="tsx"
-                title="Reading progress"
-                code={`// Read progress at any time
-const { currentStep, progressPercent, completedSteps, duration } =
-  tracker.getProgress();
-
-tracker.isStepCompleted("profile_setup"); // → boolean
-tracker.reset();                          // → clears all state`}
-              />
-            </Section>
-
-            {/* Page Tracking */}
-            <Section id="page-tracking" title="Page Tracking">
-              <p className="text-gray-400 mb-2">
-                Page views are tracked{" "}
-                <strong className="text-white">automatically</strong> for SPA
-                navigation (pushState / replaceState / popstate). For
-                component-level control use the{" "}
+              {/* React hook shortcut */}
+              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
+                React hook shortcut
+              </h3>
+              <p className="text-gray-400 mb-3">
+                The SDK also exports{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  usePageTracking
+                  useOnboardingTracker
                 </code>{" "}
-                hook:
+                if you prefer a more concise setup:
               </p>
               <CodeBlock
                 language="tsx"
-                title="page.tsx"
-                code={`"use client";
+                title="Using the hook"
+                code={`import { useOnboardingTracker, useAnalytics } from "mentiq-sdk";
 
-import { usePageTracking, useAnalytics } from "mentiq-sdk";
+function Onboarding() {
+  const { analytics } = useAnalytics();
 
-// Auto-fires page_view for this route on mount
-export default function DashboardPage() {
-  usePageTracking();
-  return <div>Dashboard Content</div>;
-}
+  const tracker = useOnboardingTracker(analytics, {
+    steps: [
+      { name: "profile", index: 0, required: true },
+      { name: "team",    index: 1, required: false },
+      { name: "project", index: 2, required: true },
+    ],
+  });
 
-// Manual — useful if enableAutoPageTracking is false
-function CustomPage() {
-  const { page } = useAnalytics();
+  // tracker is null if analytics isn't ready yet
+  if (!tracker) return <Loading />;
 
-  useEffect(() => {
-    page({ path: "/custom-page", title: "Custom Page | My App" });
-  }, []);
+  return <OnboardingUI tracker={tracker} />;
 }`}
               />
             </Section>
 
-            {/* Heatmaps */}
-            <Section id="heatmaps" title="Heatmap Tracking">
+            {/* ───────────────── 5. Feature & Funnel Tracking ⭐ ───────────────── */}
+            <Section id="feature-tracking" title="Feature & Funnel Tracking">
+              {/* Feature Usage */}
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Track feature usage
+              </h3>
               <p className="text-gray-400 mb-4">
-                Enable heatmap tracking via a config flag to capture clicks,
-                mouse movements, and scroll depth globally. Use{" "}
+                Call{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  {"<HeatmapTracker>"}
+                  trackFeatureUsage()
                 </code>{" "}
-                for element-level tracking:
+                every time a user interacts with a key feature. This fires a{" "}
+                <code className="text-primary">feature_used</code> event and
+                feeds into the churn-risk feature-adoption score.
               </p>
               <CodeBlock
                 language="tsx"
-                title="Global heatmap (config flag)"
-                code={`<MentiqAnalyticsProvider
-  config={{
-    apiKey: "mentiq_live_abc123",
-    projectId: "my-project",
-    enableHeatmapTracking: true,  // global click / mousemove / scroll
-  }}
->
-  <App />
-</MentiqAnalyticsProvider>`}
-              />
-              <CodeBlock
-                language="tsx"
-                title="Element-level heatmap (component)"
-                code={`import { HeatmapTracker } from "mentiq-sdk";
+                title="FeatureTracking.tsx"
+                code={`import { useAnalytics } from "mentiq-sdk";
 
-<HeatmapTracker
-  element="pricing-section"
-  trackClicks   // default true
-  trackHovers   // default false
-  trackScrolls  // default false
->
-  <PricingSection />
-</HeatmapTracker>`}
-              />
-              <div className="text-gray-400 mt-4 space-y-2">
-                <p>When the global flag is enabled, the SDK tracks:</p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
-                  <li>
-                    <strong className="text-white">Clicks:</strong> X/Y
-                    coordinates + element selector
-                  </li>
-                  <li>
-                    <strong className="text-white">Mouse movements:</strong>{" "}
-                    Debounced every 500 ms
-                  </li>
-                  <li>
-                    <strong className="text-white">Scroll:</strong> Page offsets
-                    debounced every 1 s
-                  </li>
-                </ul>
-              </div>
-            </Section>
+function ExportButton() {
+  const { analytics } = useAnalytics();
 
-            {/* Session Recording */}
-            <Section id="session-recording" title="Session Recording">
+  const handleExport = () => {
+    analytics.trackFeatureUsage("export_report", {
+      format: "pdf",
+      row_count: 150,
+    });
+    // → fires "feature_used" { feature_name: "export_report", format: "pdf", ... }
+  };
+
+  return <button onClick={handleExport}>Export PDF</button>;
+}
+
+function AIAssistant() {
+  const { analytics } = useAnalytics();
+
+  const handleAsk = (question: string) => {
+    analytics.trackFeatureUsage("ai_assistant", {
+      question_length: question.length,
+      category: "support",
+    });
+  };
+}`}
+              />
+
+              {/* Funnel Tracking */}
+              <h3 className="text-lg font-semibold text-white mt-8 mb-3">
+                Conversion funnels
+              </h3>
               <p className="text-gray-400 mb-4">
-                Enable session recording to stream full DOM snapshots to the
-                backend for replay in the dashboard:
+                Track multi-step flows like checkout, upgrade, or signup. The
+                SDK manages funnel state and auto-abandons after 5 minutes of
+                inactivity.
               </p>
               <CodeBlock
                 language="tsx"
-                title="Enable Session Recording"
-                code={`<MentiqAnalyticsProvider
-  config={{
-    apiKey: "mentiq_live_abc123",
-    projectId: "my-project",
-    enableSessionRecording: true,
-  }}
->
-  <App />
-</MentiqAnalyticsProvider>
+                title="CheckoutFunnel.tsx"
+                code={`import { useAnalytics } from "mentiq-sdk";
 
-// Control recording manually
-analytics.startRecording();
-analytics.pauseRecording();
-analytics.resumeRecording();
-analytics.stopRecording();
-analytics.isRecordingActive(); // → boolean`}
+function Checkout() {
+  const { analytics } = useAnalytics();
+
+  // 1. Start the funnel (sets a 5-min auto-abandon timer)
+  const beginCheckout = () => {
+    analytics.startFunnel("checkout");
+    // → fires "funnel_step" { funnel_name: "checkout", step_name: "start", step_index: 0 }
+  };
+
+  // 2. Advance through steps
+  const selectPlan = (plan: string) => {
+    analytics.advanceFunnel("checkout", "select_plan", { plan });
+    // → fires "funnel_step" { step_name: "select_plan", step_index: 1, time_in_funnel: 12000 }
+  };
+
+  const enterPayment = () => {
+    analytics.advanceFunnel("checkout", "payment_info");
+  };
+
+  // 3. Complete or abandon
+  const confirmPurchase = () => {
+    analytics.completeFunnel("checkout", { total: 4900 });
+    // → fires "funnel_completed" { funnel_name: "checkout", total: 4900 }
+  };
+
+  const cancel = () => {
+    analytics.abandonFunnel("checkout", "user_cancelled");
+    // → fires "funnel_abandoned" { abandoned_at_step: 2, abandon_reason: "user_cancelled" }
+  };
+}`}
               />
-            </Section>
 
-            {/* Configuration */}
-            <Section id="configuration" title="Configuration Options">
-              <p className="text-gray-400 mb-4">
-                Complete list of configuration options:
-              </p>
+              <Callout type="tip">
+                Use{" "}
+                <code className="text-primary">analytics.getFunnelState(&quot;checkout&quot;)</code>{" "}
+                to read the current step, time in funnel, and step history at
+                any point.
+              </Callout>
+
+              {/* Funnel events reference */}
+              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
+                Funnel events reference
+              </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10">
                       <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Option
+                        Event
                       </th>
                       <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Type
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Default
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Description
+                        Key properties
                       </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
                     {[
                       {
-                        opt: "apiKey",
-                        type: "string",
-                        def: "required",
-                        desc: "Your Mentiq API key",
+                        event: "funnel_step",
+                        props:
+                          "funnel_name, step_name, step_index, time_in_funnel, previous_step",
                       },
                       {
-                        opt: "projectId",
-                        type: "string",
-                        def: "required",
-                        desc: "Your Mentiq project ID",
+                        event: "funnel_completed",
+                        props: "funnel_name, + your custom props",
                       },
                       {
-                        opt: "endpoint",
-                        type: "string",
-                        def: "https://api.mentiq.io",
-                        desc: "Backend API URL",
-                      },
-                      {
-                        opt: "debug",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Enable console logs",
-                      },
-                      {
-                        opt: "userId",
-                        type: "string",
-                        def: "undefined",
-                        desc: "Pre-seed user ID at init",
-                      },
-                      {
-                        opt: "sessionTimeout",
-                        type: "number",
-                        def: "1800000",
-                        desc: "Inactivity timeout (ms)",
-                      },
-                      {
-                        opt: "batchSize",
-                        type: "number",
-                        def: "20",
-                        desc: "Events per batch",
-                      },
-                      {
-                        opt: "flushInterval",
-                        type: "number",
-                        def: "10000",
-                        desc: "Auto-flush interval (ms)",
-                      },
-                      {
-                        opt: "maxQueueSize",
-                        type: "number",
-                        def: "1000",
-                        desc: "Max queue size before oldest dropped",
-                      },
-                      {
-                        opt: "retryAttempts",
-                        type: "number",
-                        def: "3",
-                        desc: "Retry count for failed batches",
-                      },
-                      {
-                        opt: "retryDelay",
-                        type: "number",
-                        def: "1000",
-                        desc: "Base retry delay in ms (exponential backoff)",
-                      },
-                      {
-                        opt: "enableAutoPageTracking",
-                        type: "boolean",
-                        def: "true",
-                        desc: "Auto-track SPA page views",
-                      },
-                      {
-                        opt: "enableHeatmapTracking",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Global click/move/scroll heatmap",
-                      },
-                      {
-                        opt: "enableSessionRecording",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Stream DOM recording to backend",
-                      },
-                      {
-                        opt: "enablePerformanceTracking",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Track Web Vitals on page load",
-                      },
-                      {
-                        opt: "enableErrorTracking",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Auto-track JS errors & rejections",
-                      },
-                      {
-                        opt: "enableABTesting",
-                        type: "boolean",
-                        def: "false",
-                        desc: "Activate A/B testing system",
+                        event: "funnel_abandoned",
+                        props:
+                          "funnel_name, abandoned_at_step, abandon_reason, time_before_abandon, completion_percentage",
                       },
                     ].map((row, i) => (
                       <tr key={i} className="border-b border-white/5">
                         <td className="py-3 px-4 font-mono text-primary whitespace-nowrap">
-                          {row.opt}
+                          {row.event}
                         </td>
-                        <td className="py-3 px-4 text-gray-400">{row.type}</td>
-                        <td className="py-3 px-4 text-gray-500 whitespace-nowrap">
-                          {row.def}
+                        <td className="py-3 px-4 text-gray-400">
+                          {row.props}
                         </td>
-                        <td className="py-3 px-4">{row.desc}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1083,105 +760,50 @@ analytics.isRecordingActive(); // → boolean`}
               </div>
             </Section>
 
-            {/* API Reference */}
-            <Section id="api-reference" title="API Reference">
+            {/* ───────────────────── 6. Custom Events ───────────────────── */}
+            <Section id="custom-events" title="Custom Events">
               <p className="text-gray-400 mb-4">
-                The{" "}
+                Use{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  useAnalytics()
+                  track()
                 </code>{" "}
-                /{" "}
-                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  useMentiqAnalytics()
-                </code>{" "}
-                hook exposes:
+                for any event not covered by the built-in methods:
               </p>
+              <CodeBlock
+                language="tsx"
+                title="Component.tsx"
+                code={`import { useAnalytics } from "mentiq-sdk";
 
-              <div className="space-y-3">
-                {[
-                  {
-                    method: "track(eventName, properties?)",
-                    desc: "Track a custom event with optional properties",
-                  },
-                  {
-                    method: "page(properties?)",
-                    desc: "Manually fire a page view event",
-                  },
-                  {
-                    method: "identify(userId, traits?)",
-                    desc: "Link events to a known user — must call after login",
-                  },
-                  {
-                    method: "reset()",
-                    desc: "Clear userId, empty the queue, start a fresh anonymous session",
-                  },
-                  {
-                    method: "flush()",
-                    desc: "Manually flush the event queue to the backend",
-                  },
-                  {
-                    method: "trackCustomError(error, properties?)",
-                    desc: "Report a custom error event",
-                  },
-                  {
-                    method: "analytics.trackFeatureUsage(featureName, props?)",
-                    desc: "Fires feature_used — also feeds churn risk feature adoption score",
-                  },
-                  {
-                    method: "analytics.startFunnel(name)",
-                    desc: "Begin a named conversion funnel (5-min auto-abandon timer)",
-                  },
-                  {
-                    method: "analytics.advanceFunnel(name, step)",
-                    desc: "Move to the next step in a funnel",
-                  },
-                  {
-                    method: "analytics.completeFunnel(name)",
-                    desc: "Mark a funnel as completed",
-                  },
-                  {
-                    method: "analytics.abandonFunnel(name, reason?)",
-                    desc: "Mark a funnel as abandoned",
-                  },
-                  {
-                    method: "analytics.calculateChurnRisk()",
-                    desc: "Returns risk_score (0–100), risk_category, and intervention_recommended based on local session data",
-                  },
-                  {
-                    method: "analytics.getSessionData()",
-                    desc: "Returns current session metrics (duration, pageViews, clicks, scrollDepth, engagementScore)",
-                  },
-                  {
-                    method: "analytics.trackSubscriptionStarted(props)",
-                    desc: "Track a new subscription event",
-                  },
-                  {
-                    method: "analytics.trackSubscriptionUpgraded(props)",
-                    desc: "Track a plan upgrade",
-                  },
-                  {
-                    method: "analytics.trackSubscriptionCanceled(props)",
-                    desc: "Track a cancellation",
-                  },
-                  {
-                    method: "analytics.trackPaymentFailed(props)",
-                    desc: "Track a payment failure",
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-4 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-colors"
-                  >
-                    <code className="font-mono text-sm text-primary bg-primary/10 px-2 py-1 rounded whitespace-nowrap">
-                      {item.method}
-                    </code>
-                    <p className="text-gray-400 text-sm">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
+function SignupButton() {
+  const { track } = useAnalytics();
 
-              <h3 className="text-lg font-semibold text-white mt-8 mb-4">
-                Available Hooks
+  return (
+    <button
+      onClick={() =>
+        track("button_clicked", {
+          button: "signup_cta",
+          page: "hero",
+          variant: "blue",
+        })
+      }
+    >
+      Sign Up Free
+    </button>
+  );
+}`}
+              />
+              <Callout type="info">
+                Events are batched (20 per batch) and flushed automatically
+                every 10 seconds. Call{" "}
+                <code className="text-blue-300">flush()</code> to send
+                immediately.
+              </Callout>
+            </Section>
+
+            {/* ───────────────────── 7. Hooks & API Reference ───────────────────── */}
+            <Section id="api-reference" title="Hooks & API Reference">
+              <h3 className="text-lg font-semibold text-white mb-3">
+                React Hooks
               </h3>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -1191,71 +813,196 @@ analytics.isRecordingActive(); // → boolean`}
                         Hook
                       </th>
                       <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Purpose
+                        Returns
                       </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
                     {[
                       {
-                        hook: "useAnalytics() / useMentiqAnalytics()",
-                        desc: "Primary hook — track, page, identify, flush, raw analytics instance",
+                        hook: "useAnalytics()",
+                        returns:
+                          "track, page, identify, reset, flush, analytics instance",
                       },
                       {
                         hook: "usePageTracking()",
-                        desc: "Auto-fires page_view for the current route on mount",
+                        returns: "Auto-fires page_view on mount",
                       },
                       {
                         hook: "useInteractionTracking()",
-                        desc: "Returns trackClick, trackHover, trackView helpers",
+                        returns: "trackClick, trackHover, trackView helpers",
                       },
                       {
-                        hook: "useElementTracking(ref, event)",
-                        desc: "IntersectionObserver-based element visibility tracking",
+                        hook: "useElementTracking(ref)",
+                        returns:
+                          "IntersectionObserver visibility tracking",
                       },
                       {
                         hook: "useSessionTracking()",
-                        desc: "Read session metrics: duration, pageViews, scrollDepth, clicks",
+                        returns:
+                          "duration, pageViews, clicks, scrollDepth",
                       },
                       {
                         hook: "useErrorTracking()",
-                        desc: "Manual error helpers + auto global error listeners",
+                        returns: "trackJavaScriptError, trackCustomError",
                       },
                       {
                         hook: "usePerformanceTracking()",
-                        desc: "Auto Web Vitals + measureCustomPerformance(label) helper",
+                        returns: "Web Vitals + measureCustomPerformance",
                       },
                       {
                         hook: "useSubscriptionTracking()",
-                        desc: "Subscription event helpers (started, upgraded, canceled etc.)",
+                        returns:
+                          "Subscription event helpers (started, upgraded, canceled …)",
                       },
                       {
                         hook: "useChurnRisk()",
-                        desc: "Reactive churn risk score updated on a configurable interval",
+                        returns:
+                          "risk_score (0–100), risk_category, intervention_recommended",
                       },
                       {
-                        hook: "useSyncSubscription(sub, opts?)",
-                        desc: "Sync subscription state from your data source; auto-fires upgrade/downgrade events",
+                        hook: "useSyncSubscription(sub)",
+                        returns:
+                          "Syncs subscription state; auto-fires upgrade/downgrade",
                       },
                     ].map((row, i) => (
                       <tr key={i} className="border-b border-white/5">
                         <td className="py-3 px-4 font-mono text-primary text-xs whitespace-nowrap">
                           {row.hook}
                         </td>
-                        <td className="py-3 px-4 text-gray-400">{row.desc}</td>
+                        <td className="py-3 px-4 text-gray-400">
+                          {row.returns}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              <h3 className="text-lg font-semibold text-white mt-8 mb-3">
+                Analytics instance methods
+              </h3>
+              <div className="space-y-2">
+                {[
+                  {
+                    method: "track(event, props?)",
+                    desc: "Track a custom event",
+                  },
+                  {
+                    method: "page(props?)",
+                    desc: "Manual page view",
+                  },
+                  {
+                    method: "identify(userId, traits?)",
+                    desc: "Link events to a known user",
+                  },
+                  {
+                    method: "reset()",
+                    desc: "Clear user, empty queue, new session",
+                  },
+                  {
+                    method: "flush()",
+                    desc: "Send queued events immediately",
+                  },
+                  {
+                    method: "trackFeatureUsage(name, props?)",
+                    desc: "Fires feature_used — feeds churn risk",
+                  },
+                  {
+                    method: "startFunnel(name)",
+                    desc: "Begin a funnel (5-min auto-abandon)",
+                  },
+                  {
+                    method: "advanceFunnel(name, step)",
+                    desc: "Move to next funnel step",
+                  },
+                  {
+                    method: "completeFunnel(name)",
+                    desc: "Mark funnel as completed",
+                  },
+                  {
+                    method: "abandonFunnel(name, reason?)",
+                    desc: "Mark funnel as abandoned",
+                  },
+                  {
+                    method: "calculateChurnRisk()",
+                    desc: "Returns risk_score, risk_category, factors",
+                  },
+                  {
+                    method: "getActiveSession()",
+                    desc: "Session metrics (duration, pageViews, clicks, scrollDepth)",
+                  },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-colors"
+                  >
+                    <code className="font-mono text-sm text-primary bg-primary/10 px-2 py-1 rounded whitespace-nowrap">
+                      {item.method}
+                    </code>
+                    <p className="text-gray-400 text-sm">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* ───────────────────── 8. Configuration ───────────────────── */}
+            <Section id="configuration" title="Configuration">
+              <p className="text-gray-400 mb-4">
+                All config options with defaults. Only{" "}
+                <code className="text-primary bg-primary/10 px-1 rounded">
+                  apiKey
+                </code>{" "}
+                and{" "}
+                <code className="text-primary bg-primary/10 px-1 rounded">
+                  projectId
+                </code>{" "}
+                are required.
+              </p>
+              <CodeBlock
+                language="tsx"
+                title="Full config reference"
+                code={`<MentiqAnalyticsProvider
+  config={{
+    // Required
+    apiKey: "mentiq_live_abc123",
+    projectId: "my-project",
+
+    // Optional — defaults shown
+    endpoint: "https://api.mentiq.io",
+    debug: false,
+    sessionTimeout: 1800000,           // 30 min
+
+    // Batching
+    batchSize: 20,
+    flushInterval: 10000,              // 10 s
+    maxQueueSize: 1000,
+
+    // Retry
+    retryAttempts: 3,
+    retryDelay: 1000,                  // exponential backoff base
+
+    // Feature flags (all default to false except autoPageTracking)
+    enableAutoPageTracking: true,
+    enableHeatmapTracking: false,
+    enableSessionRecording: false,
+    enablePerformanceTracking: false,
+    enableErrorTracking: false,
+    enableABTesting: false,
+  }}
+>
+  <App />
+</MentiqAnalyticsProvider>`}
+              />
             </Section>
 
             {/* Need Help */}
             <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-              <h3 className="text-2xl font-bold text-white mb-2">Need Help?</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Need Help?
+              </h3>
               <p className="text-gray-400 mb-6">
-                Check out the full SDK source on GitHub or contact our support
-                team.
+                Check out the SDK source on GitHub or reach out to support.
               </p>
               <div className="flex flex-wrap gap-4">
                 <a
