@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -207,6 +208,79 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
         </div>
       </Card>
     </motion.div>
+  );
+}
+
+const testimonialSlides = [
+  {
+    src: "/testimonials/subscriber-churn.png",
+    alt: "Subscriber churn rate dropping from 20% to 5.52%",
+  },
+  {
+    src: "/testimonials/subscriber-ltv.png",
+    alt: "Subscriber lifetime value rising to $322.64",
+  },
+];
+
+function TestimonialCarousel() {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    emblaApi.on("select", onSelect);
+    onSelect();
+
+    const interval = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 4000);
+
+    return () => {
+      clearInterval(interval);
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <div className="relative flex flex-col items-center justify-center border-t border-black/10 bg-black/[0.02] p-6 md:border-l md:border-t-0 md:p-8">
+      <div className="w-full overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {testimonialSlides.map((slide, i) => (
+            <div key={i} className="min-w-0 flex-[0_0_100%]">
+              <div className="flex items-center justify-center px-2">
+                <Image
+                  src={slide.src}
+                  alt={slide.alt}
+                  width={380}
+                  height={380}
+                  className="rounded-xl shadow-sm"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        {testimonialSlides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => emblaApi?.scrollTo(i)}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === selectedIndex
+                ? "w-6 bg-black/40"
+                : "w-2 bg-black/15 hover:bg-black/25"
+            }`}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -937,7 +1011,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* <section
+        <section
           id="testimonials"
           className="mx-auto max-w-6xl px-6 pt-16 md:pt-24"
         >
@@ -990,15 +1064,61 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          <div
-            className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-            data-testid="grid-testimonials"
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            custom={1}
+            className="mt-8"
           >
-            {testimonials.map((t, i) => (
-              <TestimonialCard key={i} t={t} index={i} />
-            ))}
-          </div>
-        </section> */}
+            <Card
+              className="group relative overflow-hidden rounded-2xl border-black/10 bg-white/70 shadow-soft"
+              data-testid="card-testimonial-featured"
+            >
+              <div className="absolute -top-16 right-6 h-44 w-44 rounded-full bg-gradient-to-br from-fuchsia-300/16 to-sky-300/14 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
+              <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-sky-200/12 to-amber-200/14 blur-2xl" />
+
+              <div className="relative grid md:grid-cols-2">
+                <div className="flex flex-col justify-center p-8 md:p-10">
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src="/testimonials/caktuslogo1.png"
+                      alt="Caktus logo"
+                      width={40}
+                      height={40}
+                      className="rounded-lg"
+                    />
+                    <div>
+                      <div
+                        className="text-sm font-semibold text-black"
+                        data-testid="text-testimonial-name-featured"
+                      >
+                        Harrison
+                      </div>
+                      <div className="text-xs text-black/55">
+                        Founder · Caktus
+                      </div>
+                    </div>
+                  </div>
+
+                  <p
+                    className="mt-6 text-lg leading-relaxed text-black/80 md:text-xl"
+                    data-testid="text-testimonial-quote-featured"
+                  >
+                    &ldquo;Mentiq helped me identify where my users were
+                    leaking, and automatically saved multiple users from
+                    churning. Saved me tens of thousands of dollars, while
+                    barely lifting a finger.&rdquo;
+                  </p>
+
+                </div>
+
+                <TestimonialCarousel />
+              </div>
+            </Card>
+          </motion.div>
+        </section>
 
         <section
           id="how"
