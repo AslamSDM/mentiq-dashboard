@@ -47,6 +47,14 @@ export function WaitlistForm({ source = "landing_page" }: { source?: string }) {
 
       if (data.success) {
         setSubmitted(true);
+
+        // X (Twitter) conversion tracking
+        if (typeof window !== "undefined" && typeof (window as any).twq === "function") {
+          (window as any).twq("event", "tw-r9gi0-r9gkd", {
+            email_address: formData.email,
+          });
+        }
+
         toast({
           title: "You're on the list! 🎉",
           description: "Check your email for confirmation.",
