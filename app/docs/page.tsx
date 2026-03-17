@@ -8,22 +8,18 @@ import {
   ArrowLeft,
   Copy,
   Check,
-  Terminal,
-  Code2,
-  Zap,
   Package,
-  BookOpen,
+  Zap,
   Users,
   ListChecks,
   Activity,
   Settings,
-  BarChart3,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-/* ─── Code Block ─── */
+/* --- Code Block --- */
 function CodeBlock({
   code,
   language = "javascript",
@@ -88,7 +84,7 @@ function CodeBlock({
   );
 }
 
-/* ─── Section ─── */
+/* --- Section --- */
 function Section({
   id,
   title,
@@ -109,28 +105,7 @@ function Section({
   );
 }
 
-/* ─── Step Card ─── */
-function StepCard({
-  step,
-  title,
-  children,
-}: {
-  step: number;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="relative pl-10 pb-8 border-l-2 border-white/10 last:border-l-0 last:pb-0">
-      <div className="absolute -left-[13px] top-0 w-6 h-6 rounded-full bg-primary/20 border-2 border-primary flex items-center justify-center">
-        <span className="text-xs font-bold text-primary">{step}</span>
-      </div>
-      <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-      <div className="space-y-4 text-gray-400">{children}</div>
-    </div>
-  );
-}
-
-/* ─── Callout ─── */
+/* --- Callout --- */
 function Callout({
   type = "tip",
   children,
@@ -143,7 +118,7 @@ function Callout({
     warning: "bg-amber-500/10 border-amber-500/20 text-amber-400",
     info: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   };
-  const labels = { tip: "💡 Tip", warning: "⚠️ Note", info: "ℹ️ Info" };
+  const labels = { tip: "Tip", warning: "Note", info: "Info" };
 
   return (
     <div className={`rounded-xl p-4 border ${styles[type]}`}>
@@ -154,19 +129,17 @@ function Callout({
   );
 }
 
-/* ─── Sidebar Items ─── */
+/* --- Sidebar Items --- */
 const navItems = [
   { id: "installation", label: "Installation", icon: Package },
   { id: "quick-start", label: "Quick Start", icon: Zap },
   { id: "identify-users", label: "Identify Users", icon: Users },
-  { id: "onboarding", label: "Onboarding Flow", icon: ListChecks },
-  { id: "feature-tracking", label: "Feature & Funnel Tracking", icon: BarChart3 },
+  { id: "onboarding", label: "Onboarding Tracking", icon: ListChecks },
   { id: "custom-events", label: "Custom Events", icon: Activity },
-  { id: "api-reference", label: "Hooks & API Reference", icon: Code2 },
   { id: "configuration", label: "Configuration", icon: Settings },
 ];
 
-/* ─── Page ─── */
+/* --- Page --- */
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("installation");
 
@@ -242,36 +215,27 @@ export default function DocsPage() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-4">
                 <Package className="h-4 w-4" />
-                mentiq-sdk v1.0.6
+                mentiq-sdk
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Mentiq SDK
               </h1>
               <p className="text-xl text-gray-400">
-                Analytics for React &amp; Next.js — track onboarding, feature
-                adoption, funnels, and more in minutes.
+                Track user onboarding, identify users, and send custom events
+                in your React &amp; Next.js app — in minutes.
               </p>
             </div>
 
-            {/* ───────────────────── 1. Installation ───────────────────── */}
+            {/* 1. Installation */}
             <Section id="installation" title="Installation">
               <CodeBlock
                 language="bash"
                 title="Terminal"
-                code={`npm install mentiq-sdk
-
-# or
-yarn add mentiq-sdk`}
+                code={`npm install mentiq-sdk`}
               />
-              <Callout type="warning">
-                Requires <code className="text-amber-300">React&nbsp;16.8+</code>.
-                If you plan to use session recording, also install{" "}
-                <code className="text-amber-300">rrweb&nbsp;2.0+</code> as a
-                peer dependency.
-              </Callout>
             </Section>
 
-            {/* ───────────────────── 2. Quick Start ───────────────────── */}
+            {/* 2. Quick Start */}
             <Section id="quick-start" title="Quick Start">
               <p className="text-gray-400">
                 Wrap your app with the provider. Only{" "}
@@ -282,7 +246,7 @@ yarn add mentiq-sdk`}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   projectId
                 </code>{" "}
-                are required — everything else has sensible defaults.
+                are required.
               </p>
               <CodeBlock
                 language="tsx"
@@ -325,7 +289,7 @@ export default function RootLayout({ children }) {
                     "Page views tracked on every navigation (SPA-aware)",
                     "Session duration, scroll depth & click count recorded",
                     "Email auto-detected from NextAuth, Supabase, Firebase, Clerk, Auth0",
-                    "Events batched (20 per batch) and flushed every 10 s",
+                    "Events batched and flushed every 10 seconds",
                   ].map((item, i) => (
                     <div
                       key={i}
@@ -339,7 +303,7 @@ export default function RootLayout({ children }) {
               </div>
             </Section>
 
-            {/* ───────────────────── 3. Identify Users ───────────────────── */}
+            {/* 3. Identify Users */}
             <Section id="identify-users" title="Identify Users">
               <p className="text-gray-400">
                 Until you call{" "}
@@ -355,419 +319,93 @@ export default function RootLayout({ children }) {
                 code={`import { useAnalytics } from "mentiq-sdk";
 
 function AfterLogin({ user }) {
-  const { identify, reset } = useAnalytics();
+  const { identify } = useAnalytics();
 
   // Call once after login
   identify(user.id, {
     email: user.email,
     name: user.name,
-    plan: user.plan,        // optional traits
-    created_at: user.createdAt,
+    plan: user.plan,
   });
-
-  // On logout — clears userId, empties queue, starts fresh session
-  const handleLogout = () => reset();
 }`}
               />
-              <Callout type="info">
-                Email is also auto-detected from common auth providers
-                (NextAuth, Supabase, Firebase, Clerk, Auth0). Passing it in{" "}
-                <code className="text-blue-300">identify()</code> is still
-                recommended for reliability.
-              </Callout>
             </Section>
 
-            {/* ───────────────────── 4. Onboarding Flow ⭐ ───────────────────── */}
-            <Section id="onboarding" title="Onboarding Flow">
+            {/* 4. Onboarding Tracking */}
+            <Section id="onboarding" title="Onboarding Tracking">
               <p className="text-gray-400 mb-2">
-                Track every step of your user onboarding with the built-in{" "}
-                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  OnboardingTracker
-                </code>
-                . Nothing runs automatically — you define the steps and call
-                methods at the right points in your UI.
-              </p>
-
-              {/* Step 1 */}
-              <StepCard step={1} title="Define your onboarding steps">
-                <p>
-                  Create a tracker by passing the analytics instance and an
-                  array of steps. Mark steps as{" "}
-                  <code className="text-white">required</code> or optional.
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  title="hooks/use-onboarding.ts"
-                  code={`import { OnboardingTracker, useAnalytics } from "mentiq-sdk";
-
-export function useOnboarding() {
-  const { analytics } = useAnalytics();
-
-  const tracker = new OnboardingTracker(analytics, {
-    steps: [
-      { name: "create_account",   index: 0, required: true  },
-      { name: "complete_profile", index: 1, required: true  },
-      { name: "invite_team",      index: 2, required: false }, // optional
-      { name: "create_project",   index: 3, required: true  },
-      { name: "install_sdk",      index: 4, required: true  },
-    ],
-  });
-
-  return tracker;
-}`}
-                />
-              </StepCard>
-
-              {/* Step 2 */}
-              <StepCard step={2} title="Start the onboarding">
-                <p>
-                  Call <code className="text-white">start()</code> when the user
-                  begins onboarding. This fires an{" "}
-                  <code className="text-primary">onboarding_started</code>{" "}
-                  event.
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  title="OnboardingWizard.tsx"
-                  code={`function OnboardingWizard() {
-  const tracker = useOnboarding();
-
-  useEffect(() => {
-    tracker.start(); // → fires "onboarding_started" { total_steps: 5 }
-  }, []);
-
-  // ...
-}`}
-                />
-              </StepCard>
-
-              {/* Step 3 */}
-              <StepCard step={3} title="Complete or skip steps">
-                <p>
-                  Call{" "}
-                  <code className="text-white">completeStep(&quot;step_name&quot;)</code>{" "}
-                  when the user finishes a step. For optional steps you can call{" "}
-                  <code className="text-white">
-                    skipStep(&quot;step_name&quot;, &quot;reason&quot;)
-                  </code>
-                  .
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  title="Step handlers"
-                  code={`// User finished their profile
-tracker.completeStep("complete_profile");
-// → fires "onboarding_step_completed" {
-//     step_name: "complete_profile",
-//     step_index: 1,
-//     progress: 40,            // percentage
-//     time_since_start: 23000  // ms since start()
-//   }
-
-// User skips the optional "invite_team" step
-tracker.skipStep("invite_team", "will do later");
-// → fires "onboarding_step_skipped" {
-//     step_name: "invite_team",
-//     reason: "will do later"
-//   }
-// Note: skipStep() is ignored for required steps.`}
-                />
-              </StepCard>
-
-              {/* Step 4 */}
-              <StepCard step={4} title="Completion & abandonment">
-                <p>
-                  When the last step is completed,{" "}
-                  <code className="text-primary">onboarding_completed</code>{" "}
-                  fires <strong className="text-white">automatically</strong>.
-                  If the user leaves early, call{" "}
-                  <code className="text-white">abandon()</code>.
-                </p>
-                <CodeBlock
-                  language="tsx"
-                  title="Completion & abandon"
-                  code={`// Last required step done → auto-fires "onboarding_completed"
-tracker.completeStep("install_sdk");
-// → "onboarding_completed" {
-//     completion_rate: 100,
-//     duration_seconds: 142
-//   }
-
-// If user closes the wizard early
-tracker.abandon("closed_modal");
-// → "onboarding_abandoned" {
-//     step_name: "create_project",
-//     progress: 60,
-//     reason: "closed_modal"
-//   }`}
-                />
-              </StepCard>
-
-              {/* Step 5 */}
-              <StepCard step={5} title="Read progress anytime">
-                <CodeBlock
-                  language="tsx"
-                  title="Reading state"
-                  code={`const progress = tracker.getProgress();
-// {
-//   currentStep: "complete_profile",
-//   currentStepIndex: 1,
-//   completedSteps: ["create_account", "complete_profile"],
-//   totalSteps: 5,
-//   progressPercent: 40,
-//   duration: 23000  // ms
-// }
-
-tracker.isStepCompleted("invite_team"); // → false
-tracker.reset();                        // clear all state`}
-                />
-              </StepCard>
-
-              {/* Events table */}
-              <h3 className="text-lg font-semibold text-white mt-4 mb-3">
-                Events fired by OnboardingTracker
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Event
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Key properties
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {[
-                      {
-                        event: "onboarding_started",
-                        props: "total_steps",
-                      },
-                      {
-                        event: "onboarding_step_completed",
-                        props:
-                          "step_name, step_index, required, progress (%), time_since_start",
-                      },
-                      {
-                        event: "onboarding_step_skipped",
-                        props:
-                          "step_name, step_index, reason — only fires for optional steps",
-                      },
-                      {
-                        event: "onboarding_completed",
-                        props:
-                          "completion_rate (%), duration_ms, duration_seconds",
-                      },
-                      {
-                        event: "onboarding_abandoned",
-                        props:
-                          "step_name, step_index, progress (%), duration_ms, reason",
-                      },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="py-3 px-4 font-mono text-primary whitespace-nowrap">
-                          {row.event}
-                        </td>
-                        <td className="py-3 px-4 text-gray-400">
-                          {row.props}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* React hook shortcut */}
-              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
-                React hook shortcut
-              </h3>
-              <p className="text-gray-400 mb-3">
-                The SDK also exports{" "}
+                Use the{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   useOnboardingTracker
                 </code>{" "}
-                if you prefer a more concise setup:
+                hook to track every step of your user onboarding. Define your
+                steps, then call methods as users progress.
               </p>
+
               <CodeBlock
                 language="tsx"
-                title="Using the hook"
+                title="onboarding.tsx"
                 code={`import { useOnboardingTracker, useAnalytics } from "mentiq-sdk";
 
-function Onboarding() {
+function OnboardingWizard() {
   const { analytics } = useAnalytics();
 
   const tracker = useOnboardingTracker(analytics, {
     steps: [
-      { name: "profile", index: 0, required: true },
-      { name: "team",    index: 1, required: false },
-      { name: "project", index: 2, required: true },
+      { name: "create_account",   index: 0, required: true  },
+      { name: "complete_profile", index: 1, required: true  },
+      { name: "invite_team",      index: 2, required: false },
+      { name: "create_project",   index: 3, required: true  },
     ],
   });
 
-  // tracker is null if analytics isn't ready yet
-  if (!tracker) return <Loading />;
+  if (!tracker) return null;
 
-  return <OnboardingUI tracker={tracker} />;
-}`}
-              />
-            </Section>
-
-            {/* ───────────────── 5. Feature & Funnel Tracking ⭐ ───────────────── */}
-            <Section id="feature-tracking" title="Feature & Funnel Tracking">
-              {/* Feature Usage */}
-              <h3 className="text-lg font-semibold text-white mb-3">
-                Track feature usage
-              </h3>
-              <p className="text-gray-400 mb-4">
-                Call{" "}
-                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                  trackFeatureUsage()
-                </code>{" "}
-                every time a user interacts with a key feature. This fires a{" "}
-                <code className="text-primary">feature_used</code> event and
-                feeds into the churn-risk feature-adoption score.
-              </p>
-              <CodeBlock
-                language="tsx"
-                title="FeatureTracking.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
-
-function ExportButton() {
-  const { analytics } = useAnalytics();
-
-  const handleExport = () => {
-    analytics.trackFeatureUsage("export_report", {
-      format: "pdf",
-      row_count: 150,
-    });
-    // → fires "feature_used" { feature_name: "export_report", format: "pdf", ... }
-  };
-
-  return <button onClick={handleExport}>Export PDF</button>;
-}
-
-function AIAssistant() {
-  const { analytics } = useAnalytics();
-
-  const handleAsk = (question: string) => {
-    analytics.trackFeatureUsage("ai_assistant", {
-      question_length: question.length,
-      category: "support",
-    });
-  };
+  return <YourOnboardingUI tracker={tracker} />;
 }`}
               />
 
-              {/* Funnel Tracking */}
-              <h3 className="text-lg font-semibold text-white mt-8 mb-3">
-                Conversion funnels
+              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
+                Track progress
               </h3>
-              <p className="text-gray-400 mb-4">
-                Track multi-step flows like checkout, upgrade, or signup. The
-                SDK manages funnel state and auto-abandons after 5 minutes of
-                inactivity.
+              <p className="text-gray-400 mb-3">
+                Call these methods at the right points in your UI:
               </p>
               <CodeBlock
                 language="tsx"
-                title="CheckoutFunnel.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
+                title="Using the tracker"
+                code={`// Start onboarding
+tracker.start();
 
-function Checkout() {
-  const { analytics } = useAnalytics();
+// When a user finishes a step
+tracker.completeStep("complete_profile");
 
-  // 1. Start the funnel (sets a 5-min auto-abandon timer)
-  const beginCheckout = () => {
-    analytics.startFunnel("checkout");
-    // → fires "funnel_step" { funnel_name: "checkout", step_name: "start", step_index: 0 }
-  };
+// Skip an optional step
+tracker.skipStep("invite_team", "will do later");
 
-  // 2. Advance through steps
-  const selectPlan = (plan: string) => {
-    analytics.advanceFunnel("checkout", "select_plan", { plan });
-    // → fires "funnel_step" { step_name: "select_plan", step_index: 1, time_in_funnel: 12000 }
-  };
+// If the user leaves early
+tracker.abandon("closed_modal");
 
-  const enterPayment = () => {
-    analytics.advanceFunnel("checkout", "payment_info");
-  };
-
-  // 3. Complete or abandon
-  const confirmPurchase = () => {
-    analytics.completeFunnel("checkout", { total: 4900 });
-    // → fires "funnel_completed" { funnel_name: "checkout", total: 4900 }
-  };
-
-  const cancel = () => {
-    analytics.abandonFunnel("checkout", "user_cancelled");
-    // → fires "funnel_abandoned" { abandoned_at_step: 2, abandon_reason: "user_cancelled" }
-  };
-}`}
+// Check progress anytime
+const progress = tracker.getProgress();
+// => { currentStep, completedSteps, totalSteps, progressPercent, duration }`}
               />
 
               <Callout type="tip">
-                Use{" "}
-                <code className="text-primary">analytics.getFunnelState(&quot;checkout&quot;)</code>{" "}
-                to read the current step, time in funnel, and step history at
-                any point.
+                When all required steps are completed, an{" "}
+                <code className="text-primary">onboarding_completed</code>{" "}
+                event fires automatically — no extra code needed.
               </Callout>
-
-              {/* Funnel events reference */}
-              <h3 className="text-lg font-semibold text-white mt-6 mb-3">
-                Funnel events reference
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Event
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Key properties
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {[
-                      {
-                        event: "funnel_step",
-                        props:
-                          "funnel_name, step_name, step_index, time_in_funnel, previous_step",
-                      },
-                      {
-                        event: "funnel_completed",
-                        props: "funnel_name, + your custom props",
-                      },
-                      {
-                        event: "funnel_abandoned",
-                        props:
-                          "funnel_name, abandoned_at_step, abandon_reason, time_before_abandon, completion_percentage",
-                      },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="py-3 px-4 font-mono text-primary whitespace-nowrap">
-                          {row.event}
-                        </td>
-                        <td className="py-3 px-4 text-gray-400">
-                          {row.props}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </Section>
 
-            {/* ───────────────────── 6. Custom Events ───────────────────── */}
+            {/* 5. Custom Events */}
             <Section id="custom-events" title="Custom Events">
               <p className="text-gray-400 mb-4">
                 Use{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   track()
                 </code>{" "}
-                for any event not covered by the built-in methods:
+                to send any custom event:
               </p>
               <CodeBlock
                 language="tsx"
@@ -783,7 +421,6 @@ function SignupButton() {
         track("button_clicked", {
           button: "signup_cta",
           page: "hero",
-          variant: "blue",
         })
       }
     >
@@ -792,164 +429,12 @@ function SignupButton() {
   );
 }`}
               />
-              <Callout type="info">
-                Events are batched (20 per batch) and flushed automatically
-                every 10 seconds. Call{" "}
-                <code className="text-blue-300">flush()</code> to send
-                immediately.
-              </Callout>
             </Section>
 
-            {/* ───────────────────── 7. Hooks & API Reference ───────────────────── */}
-            <Section id="api-reference" title="Hooks & API Reference">
-              <h3 className="text-lg font-semibold text-white mb-3">
-                React Hooks
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Hook
-                      </th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
-                        Returns
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-gray-300">
-                    {[
-                      {
-                        hook: "useAnalytics()",
-                        returns:
-                          "track, page, identify, reset, flush, analytics instance",
-                      },
-                      {
-                        hook: "usePageTracking()",
-                        returns: "Auto-fires page_view on mount",
-                      },
-                      {
-                        hook: "useInteractionTracking()",
-                        returns: "trackClick, trackHover, trackView helpers",
-                      },
-                      {
-                        hook: "useElementTracking(ref)",
-                        returns:
-                          "IntersectionObserver visibility tracking",
-                      },
-                      {
-                        hook: "useSessionTracking()",
-                        returns:
-                          "duration, pageViews, clicks, scrollDepth",
-                      },
-                      {
-                        hook: "useErrorTracking()",
-                        returns: "trackJavaScriptError, trackCustomError",
-                      },
-                      {
-                        hook: "usePerformanceTracking()",
-                        returns: "Web Vitals + measureCustomPerformance",
-                      },
-                      {
-                        hook: "useSubscriptionTracking()",
-                        returns:
-                          "Subscription event helpers (started, upgraded, canceled …)",
-                      },
-                      {
-                        hook: "useChurnRisk()",
-                        returns:
-                          "risk_score (0–100), risk_category, intervention_recommended",
-                      },
-                      {
-                        hook: "useSyncSubscription(sub)",
-                        returns:
-                          "Syncs subscription state; auto-fires upgrade/downgrade",
-                      },
-                    ].map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="py-3 px-4 font-mono text-primary text-xs whitespace-nowrap">
-                          {row.hook}
-                        </td>
-                        <td className="py-3 px-4 text-gray-400">
-                          {row.returns}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <h3 className="text-lg font-semibold text-white mt-8 mb-3">
-                Analytics instance methods
-              </h3>
-              <div className="space-y-2">
-                {[
-                  {
-                    method: "track(event, props?)",
-                    desc: "Track a custom event",
-                  },
-                  {
-                    method: "page(props?)",
-                    desc: "Manual page view",
-                  },
-                  {
-                    method: "identify(userId, traits?)",
-                    desc: "Link events to a known user",
-                  },
-                  {
-                    method: "reset()",
-                    desc: "Clear user, empty queue, new session",
-                  },
-                  {
-                    method: "flush()",
-                    desc: "Send queued events immediately",
-                  },
-                  {
-                    method: "trackFeatureUsage(name, props?)",
-                    desc: "Fires feature_used — feeds churn risk",
-                  },
-                  {
-                    method: "startFunnel(name)",
-                    desc: "Begin a funnel (5-min auto-abandon)",
-                  },
-                  {
-                    method: "advanceFunnel(name, step)",
-                    desc: "Move to next funnel step",
-                  },
-                  {
-                    method: "completeFunnel(name)",
-                    desc: "Mark funnel as completed",
-                  },
-                  {
-                    method: "abandonFunnel(name, reason?)",
-                    desc: "Mark funnel as abandoned",
-                  },
-                  {
-                    method: "calculateChurnRisk()",
-                    desc: "Returns risk_score, risk_category, factors",
-                  },
-                  {
-                    method: "getActiveSession()",
-                    desc: "Session metrics (duration, pageViews, clicks, scrollDepth)",
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4 p-3 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-colors"
-                  >
-                    <code className="font-mono text-sm text-primary bg-primary/10 px-2 py-1 rounded whitespace-nowrap">
-                      {item.method}
-                    </code>
-                    <p className="text-gray-400 text-sm">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </Section>
-
-            {/* ───────────────────── 8. Configuration ───────────────────── */}
+            {/* 6. Configuration */}
             <Section id="configuration" title="Configuration">
               <p className="text-gray-400 mb-4">
-                All config options with defaults. Only{" "}
+                Only{" "}
                 <code className="text-primary bg-primary/10 px-1 rounded">
                   apiKey
                 </code>{" "}
@@ -957,38 +442,21 @@ function SignupButton() {
                 <code className="text-primary bg-primary/10 px-1 rounded">
                   projectId
                 </code>{" "}
-                are required.
+                are required. You can optionally pass:
               </p>
               <CodeBlock
                 language="tsx"
-                title="Full config reference"
+                title="Optional config"
                 code={`<MentiqAnalyticsProvider
   config={{
-    // Required
     apiKey: "mentiq_live_abc123",
     projectId: "my-project",
 
-    // Optional — defaults shown
+    // Optional
     endpoint: "https://api.mentiq.io",
     debug: false,
-    sessionTimeout: 1800000,           // 30 min
-
-    // Batching
     batchSize: 20,
-    flushInterval: 10000,              // 10 s
-    maxQueueSize: 1000,
-
-    // Retry
-    retryAttempts: 3,
-    retryDelay: 1000,                  // exponential backoff base
-
-    // Feature flags (all default to false except autoPageTracking)
-    enableAutoPageTracking: true,
-    enableHeatmapTracking: false,
-    enableSessionRecording: false,
-    enablePerformanceTracking: false,
-    enableErrorTracking: false,
-    enableABTesting: false,
+    flushInterval: 10000, // 10 seconds
   }}
 >
   <App />
