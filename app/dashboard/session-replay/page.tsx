@@ -311,9 +311,9 @@ export default function SessionReplayPage() {
                     sessions?.slice(0, 10).map((session) => (
                       <div
                         key={session.id}
-                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-accent transition-colors ${
+                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/60 transition-colors ${
                           selectedSession?.id === session.id
-                            ? "bg-accent border-primary"
+                            ? "bg-muted/80 border-primary"
                             : ""
                         }`}
                         onClick={() => selectSession(session)}
