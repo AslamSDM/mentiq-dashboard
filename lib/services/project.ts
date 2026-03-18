@@ -263,6 +263,10 @@ export interface RevenueMetrics {
   expansion_revenue: number;
   contraction_revenue: number;
   net_revenue: number;
+  expansion_mrr: number;
+  downgrade_mrr: number;
+  churned_mrr: number;
+  net_revenue_churn: number;
   churn_rate: number;
   growth_rate: number;
   arpu: number;
@@ -281,6 +285,10 @@ export interface RevenueMetrics {
     arpu: number;
     new_customers: number;
     total_customers: number;
+    expansion_mrr: number;
+    downgrade_mrr: number;
+    churned_mrr: number;
+    net_revenue_churn: number;
   }>;
   date_range?: {
     start: string;

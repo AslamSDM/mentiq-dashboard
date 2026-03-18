@@ -40,6 +40,9 @@ import {
   Users,
   CreditCard,
   Target,
+  TrendingUp,
+  TrendingDown,
+  Activity,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronUp, Key } from "lucide-react";
@@ -434,6 +437,62 @@ export default function RevenuePage() {
             </div>
           )}
 
+        {/* MRR Movements Cards */}
+        {!isLoading && revenueMetrics && (
+            <div className="grid gap-4 md:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Expansion MRR
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    +{formatCurrency(revenueMetrics.expansion_mrr ?? 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Revenue from upgrades & expansions
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Downgrade MRR
+                  </CardTitle>
+                  <TrendingDown className="h-4 w-4 text-orange-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-orange-600">
+                    -{formatCurrency(revenueMetrics.downgrade_mrr ?? 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Revenue lost from downgrades
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Net Revenue Churn
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-purple-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${(revenueMetrics.net_revenue_churn ?? 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {formatPercentage(revenueMetrics.net_revenue_churn ?? 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Churned MRR: {formatCurrency(revenueMetrics.churned_mrr ?? 0)}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
         {!isLoading && (
           <Tabs defaultValue="analytics" className="space-y-4">
             <TabsList>
@@ -532,6 +591,158 @@ export default function RevenuePage() {
                               activeDot={{
                                 r: 6,
                                 fill: "#05CD99",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </ChartContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* MRR Movements */}
+                  <Card className="min-w-0 overflow-hidden">
+                    <CardHeader>
+                      <CardTitle className="text-[#2B3674] font-bold">MRR Movements</CardTitle>
+                      <CardDescription className="text-[#4363C7]">
+                        Expansion, downgrade, and churned MRR over time
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="px-2 overflow-hidden">
+                      <ChartContainer
+                        config={{
+                          expansion_mrr: {
+                            label: "Expansion MRR",
+                            color: "#05CD99",
+                          },
+                          downgrade_mrr: {
+                            label: "Downgrade MRR",
+                            color: "#FF6B00",
+                          },
+                          churned_mrr: {
+                            label: "Churned MRR",
+                            color: "#EE5D50",
+                          },
+                          net_revenue_churn: {
+                            label: "Net Revenue Churn %",
+                            color: "#7551FF",
+                          },
+                        }}
+                        className="h-[300px] w-full"
+                      >
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={revenueMetrics.time_series}>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              className="stroke-[#E0E5F2]"
+                              vertical={false}
+                            />
+                            <XAxis
+                              dataKey="date"
+                              className="text-xs text-[#4363C7]"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              minTickGap={30}
+                              tickFormatter={(value) =>
+                                new Date(value).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })
+                              }
+                            />
+                            <YAxis
+                              yAxisId="left"
+                              className="text-xs text-[#4363C7]"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              tickFormatter={(value) =>
+                                `$${value.toLocaleString()}`
+                              }
+                              width={45}
+                            />
+                            <YAxis
+                              yAxisId="right"
+                              orientation="right"
+                              className="text-xs text-[#7551FF]"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              tickFormatter={(value) => `${value}%`}
+                              width={40}
+                            />
+                            <Tooltip
+                              cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                              contentStyle={{
+                                borderRadius: "12px",
+                                border: "none",
+                                boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
+                              }}
+                              formatter={(value: number, name: string) => {
+                                if (name === "net_revenue_churn") return [`${Number(value).toFixed(2)}%`, "Net Revenue Churn"];
+                                const labels: Record<string, string> = {
+                                  expansion_mrr: "Expansion MRR",
+                                  downgrade_mrr: "Downgrade MRR",
+                                  churned_mrr: "Churned MRR",
+                                };
+                                return [formatCurrency(Number(value)), labels[name] || name];
+                              }}
+                            />
+                            <Line
+                              yAxisId="left"
+                              type="monotone"
+                              dataKey="expansion_mrr"
+                              stroke="#05CD99"
+                              strokeWidth={3}
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#05CD99",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
+                            />
+                            <Line
+                              yAxisId="left"
+                              type="monotone"
+                              dataKey="downgrade_mrr"
+                              stroke="#FF6B00"
+                              strokeWidth={3}
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#FF6B00",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
+                            />
+                            <Line
+                              yAxisId="left"
+                              type="monotone"
+                              dataKey="churned_mrr"
+                              stroke="#EE5D50"
+                              strokeWidth={3}
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#EE5D50",
+                                stroke: "#fff",
+                                strokeWidth: 2,
+                              }}
+                            />
+                            <Line
+                              yAxisId="right"
+                              type="monotone"
+                              dataKey="net_revenue_churn"
+                              stroke="#7551FF"
+                              strokeWidth={2}
+                              strokeDasharray="5 5"
+                              dot={false}
+                              activeDot={{
+                                r: 6,
+                                fill: "#7551FF",
                                 stroke: "#fff",
                                 strokeWidth: 2,
                               }}
@@ -848,9 +1059,27 @@ export default function RevenuePage() {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Expansion Revenue:</span>
-                        <span className="font-medium">
-                          {formatCurrency(revenueMetrics.expansion_revenue)}
+                        <span>Expansion MRR:</span>
+                        <span className="font-medium text-green-600">
+                          +{formatCurrency(revenueMetrics.expansion_mrr ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Downgrade MRR:</span>
+                        <span className="font-medium text-orange-600">
+                          -{formatCurrency(revenueMetrics.downgrade_mrr ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Churned MRR:</span>
+                        <span className="font-medium text-red-600">
+                          -{formatCurrency(revenueMetrics.churned_mrr ?? 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Net Revenue Churn:</span>
+                        <span className={`font-medium ${(revenueMetrics.net_revenue_churn ?? 0) > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                          {formatPercentage(revenueMetrics.net_revenue_churn ?? 0)}
                         </span>
                       </div>
                       <div className="flex justify-between">
