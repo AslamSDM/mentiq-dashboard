@@ -873,59 +873,51 @@ export default function ProjectsPage() {
               />
             </div>
 
-            {/* Step 2: Provider Setup */}
+            {/* Step 2: Add to Layout */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
                   <span className="text-xs font-bold text-[#4318FF]">2</span>
                 </div>
-                <Label className="text-[#2B3674] font-semibold">Provider Setup (app/layout.tsx)</Label>
+                <Label className="text-[#2B3674] font-semibold">Add to your layout (app/layout.tsx)</Label>
               </div>
               <CodeBlock
-                code={`import { MentiqAnalyticsProvider } from "mentiq-sdk";
+                code={`import { Mentiq } from "mentiq-sdk";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <MentiqAnalyticsProvider
-          config={{
-            projectId: "${projects?.[0]?.id || 'your-project-id'}",
-            apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
-            endpoint: "https://app.trymentiq.com",
-            enableHeatmapTracking: true,
-            enableSessionRecording: true,
-          }}
+        <Mentiq
+          apiKey="${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}"
+          projectId="${projects?.[0]?.id || 'your-project-id'}"
+          endpoint="https://app.trymentiq.com"
         >
           {children}
-        </MentiqAnalyticsProvider>
+        </Mentiq>
       </body>
     </html>
   );
 }`}
                 language="tsx"
-                onCopy={() => handleCopyItem(`import { MentiqAnalyticsProvider } from "mentiq-sdk";
+                onCopy={() => handleCopyItem(`import { Mentiq } from "mentiq-sdk";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <MentiqAnalyticsProvider
-          config={{
-            projectId: "${projects?.[0]?.id || 'your-project-id'}",
-            apiKey: "${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}",
-            endpoint: "https://app.trymentiq.com",
-            enableHeatmapTracking: true,
-            enableSessionRecording: true,
-          }}
+        <Mentiq
+          apiKey="${apiKeys[projects?.[0]?.id]?.[0]?.key || 'mentiq_live_your_api_key'}"
+          projectId="${projects?.[0]?.id || 'your-project-id'}"
+          endpoint="https://app.trymentiq.com"
         >
           {children}
-        </MentiqAnalyticsProvider>
+        </Mentiq>
       </body>
     </html>
   );
 }`)}
-                isCopied={copiedItem?.includes("MentiqAnalyticsProvider") || false}
+                isCopied={copiedItem?.includes("Mentiq") && !copiedItem?.includes("useMentiq") || false}
               />
             </div>
 
@@ -938,10 +930,10 @@ export default function RootLayout({ children }) {
                 <Label className="text-[#2B3674] font-semibold">Track Custom Events</Label>
               </div>
               <CodeBlock
-                code={`import { useAnalytics } from "mentiq-sdk";
+                code={`import { useMentiq } from "mentiq-sdk";
 
 function SignupButton() {
-  const { track } = useAnalytics();
+  const { track } = useMentiq();
 
   const handleClick = () => {
     track("button_clicked", {
@@ -954,10 +946,10 @@ function SignupButton() {
   return <button onClick={handleClick}>Sign Up</button>;
 }`}
                 language="tsx"
-                onCopy={() => handleCopyItem(`import { useAnalytics } from "mentiq-sdk";
+                onCopy={() => handleCopyItem(`import { useMentiq } from "mentiq-sdk";
 
 function SignupButton() {
-  const { track } = useAnalytics();
+  const { track } = useMentiq();
 
   const handleClick = () => {
     track("button_clicked", {
@@ -969,7 +961,7 @@ function SignupButton() {
 
   return <button onClick={handleClick}>Sign Up</button>;
 }`)}
-                isCopied={(copiedItem?.includes("useAnalytics") && !copiedItem?.includes("identify")) || false}
+                isCopied={(copiedItem?.includes("useMentiq") && !copiedItem?.includes("identify")) || false}
               />
             </div>
 
@@ -982,10 +974,10 @@ function SignupButton() {
                 <Label className="text-[#2B3674] font-semibold">Identify Users</Label>
               </div>
               <CodeBlock
-                code={`import { useAnalytics } from "mentiq-sdk";
+                code={`import { useMentiq } from "mentiq-sdk";
 
 function LoginHandler() {
-  const { identify } = useAnalytics();
+  const { identify } = useMentiq();
 
   const handleLogin = async (user) => {
     identify(user.id, {
@@ -996,10 +988,10 @@ function LoginHandler() {
   };
 }`}
                 language="tsx"
-                onCopy={() => handleCopyItem(`import { useAnalytics } from "mentiq-sdk";
+                onCopy={() => handleCopyItem(`import { useMentiq } from "mentiq-sdk";
 
 function LoginHandler() {
-  const { identify } = useAnalytics();
+  const { identify } = useMentiq();
 
   const handleLogin = async (user) => {
     identify(user.id, {

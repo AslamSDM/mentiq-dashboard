@@ -261,7 +261,7 @@ export default function MailchimpSettingsPage() {
                   <SelectValue placeholder="Select an audience" />
                 </SelectTrigger>
                 <SelectContent>
-                  {audiences.map((audience) => (
+                  {audiences.filter((audience) => audience.id).map((audience) => (
                     <SelectItem key={audience.id} value={audience.id}>
                       {audience.name} ({audience.member_count.toLocaleString()} members)
                     </SelectItem>

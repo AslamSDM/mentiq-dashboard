@@ -228,7 +228,7 @@ export default function HeatmapsPage() {
                         Loading pages...
                       </SelectItem>
                     ) : heatmapPages?.length > 0 ? (
-                      heatmapPages.map((page) => (
+                      heatmapPages.filter((page) => page.url).map((page) => (
                         <SelectItem key={page.id} value={page.url}>
                           {page.title || page.url}
                         </SelectItem>

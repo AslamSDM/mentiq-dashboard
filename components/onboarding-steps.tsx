@@ -426,29 +426,41 @@ export function SDKSetup({
   onComplete,
   onSkip,
 }: SDKSetupProps) {
-  const installCode = `npm install @mentiq-sdk`;
-  const setupCode = `import Mentiq from '@mentiq-sdk';
+  const installCode = `npm install mentiq-sdk`;
+  const setupCode = `import { Mentiq } from "mentiq-sdk";
 
-Mentiq.init({
-  projectId: '${projectId}',
-  apiKey: '${apiKey}',
-  // Optional configuration
-  autoTrack: true,
-  captureClicks: true,
-  capturePageViews: true,
-});`;
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <Mentiq
+          apiKey="${apiKey}"
+          projectId="${projectId}"
+        >
+          {children}
+        </Mentiq>
+      </body>
+    </html>
+  );
+}`;
 
-  const trackEventCode = `// Track custom events
-Mentiq.track('button_clicked', {
-  button_name: 'Sign Up',
-  page: 'Home',
-});
+  const trackEventCode = `import { useMentiq } from "mentiq-sdk";
 
-// Identify users
-Mentiq.identify('user-123', {
-  email: 'user@example.com',
-  plan: 'premium',
-});`;
+function MyComponent() {
+  const { track, identify } = useMentiq();
+
+  // Track custom events
+  track("button_clicked", {
+    button_name: "Sign Up",
+    page: "Home",
+  });
+
+  // Identify users after login
+  identify("user-123", {
+    email: "user@example.com",
+    plan: "premium",
+  });
+}`;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE] p-6">
@@ -511,7 +523,7 @@ Mentiq.identify('user-123', {
                   <span className="text-sm font-bold text-[#4318FF]">2</span>
                 </div>
                 <h3 className="text-xl font-bold text-[#2B3674]">
-                  Initialize in your app
+                  Add to your layout
                 </h3>
               </div>
               <div className="relative">

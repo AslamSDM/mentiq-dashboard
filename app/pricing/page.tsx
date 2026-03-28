@@ -33,12 +33,9 @@ import { UserCountSlider, TIER_COLORS } from "@/components/user-count-slider";
 
 // Icon mapping for tiers
 const TIER_ICONS: Record<string, React.ReactNode> = {
-  launch: <Zap className="h-6 w-6" />,
-  traction: <TrendingUp className="h-6 w-6" />,
-  momentum: <Rocket className="h-6 w-6" />,
+  starter: <Zap className="h-6 w-6" />,
+  growth: <TrendingUp className="h-6 w-6" />,
   scale: <Building2 className="h-6 w-6" />,
-  expansion: <Crown className="h-6 w-6" />,
-  enterprise: <Crown className="h-6 w-6" />,
 };
 
 function PricingContent() {
@@ -274,12 +271,14 @@ function PricingContent() {
                 ref={carouselRef}
                 className="flex gap-6 overflow-x-auto pb-8 pt-8 px-4 snap-x snap-mandatory scrollbar-hide min-h-[750px]"
               >
-                {PRICING_TIERS.filter((tier) => tier.id !== "enterprise").map(
+                {PRICING_TIERS.map(
                   (tier) => {
                     const isCurrentTier = currentTier?.id === tier.id;
                     const price = calculatePrice(tier);
                     const isInRange =
-                      userCount >= tier.range[0] && userCount <= tier.range[1];
+                      userCount <= tier.included.paidUsers &&
+                      (PRICING_TIERS.indexOf(tier) === 0 ||
+                        userCount > PRICING_TIERS[PRICING_TIERS.indexOf(tier) - 1].included.paidUsers);
 
                     return (
                       <Card
@@ -345,8 +344,8 @@ function PricingContent() {
                               <span className="text-[#4363C7]">/month</span>
                             </div>
                             <p className="text-sm text-[#4363C7] mt-1">
-                              {tier.range[0].toLocaleString()} -{" "}
-                              {tier.range[1].toLocaleString()} users
+                              Up to{" "}
+                              {tier.included.paidUsers.toLocaleString()} paid users
                             </p>
                           </div>
                         </CardHeader>
@@ -534,8 +533,9 @@ function PricingContent() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-[#4363C7]">
-                    Yes! All plans include a 14-day free trial. No credit card
-                    required to start. Cancel anytime during the trial period.
+                    Yes! Starter and Growth plans include a 3-day free trial,
+                    and the Scale plan includes a 14-day free trial. Cancel
+                    anytime during the trial period.
                   </p>
                 </CardContent>
               </Card>

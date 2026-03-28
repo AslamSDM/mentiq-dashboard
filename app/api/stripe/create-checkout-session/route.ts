@@ -14,11 +14,9 @@ const PRICING_CONFIG: Record<
     basePrice: number;
   }
 > = {
-  launch: { name: "Launch", basePrice: 49 },
-  traction: { name: "Traction", basePrice: 149 },
-  momentum: { name: "Momentum", basePrice: 299 },
-  scale: { name: "Scale", basePrice: 699 },
-  expansion: { name: "Expansion", basePrice: 1499 },
+  starter: { name: "Starter", basePrice: 59 },
+  growth: { name: "Growth", basePrice: 149 },
+  scale: { name: "Scale", basePrice: 399 },
 };
 
 export async function POST(req: NextRequest) {
@@ -44,22 +42,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
     }
 
-    // Calculate price based on user count (same logic as frontend)
-    const getTierRange = (tier: string) => {
-      const ranges: Record<string, [number, number]> = {
-        launch: [1, 100],
-        traction: [101, 500],
-        momentum: [501, 1000],
-        scale: [1001, 5000],
-        expansion: [5001, 10000],
-      };
-      return ranges[tier];
-    };
-
-    const range = getTierRange(tierId);
-    const multiplier =
-      1 + ((userCount - range[0]) / (range[1] - range[0])) * 0.3;
-    const finalPrice = Math.round(tierConfig.basePrice * multiplier);
+    // Fixed pricing per tier — overages are billed separately
+    const finalPrice = tierConfig.basePrice;
 
     // Create Stripe checkout session
     const checkoutSession = await stripe.checkout.sessions.create({

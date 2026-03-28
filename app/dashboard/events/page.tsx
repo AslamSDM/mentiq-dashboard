@@ -252,7 +252,7 @@ export default function EventsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Events</SelectItem>
-                  {eventTypes?.map((type) => (
+                  {eventTypes?.filter((type) => type).map((type) => (
                     <SelectItem key={type} value={type}>
                       {sanitizeText(type)}
                     </SelectItem>

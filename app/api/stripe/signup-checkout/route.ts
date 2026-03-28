@@ -14,11 +14,9 @@ const PRICING_CONFIG: Record<
     basePrice: number;
   }
 > = {
-  launch: { name: "Launch", basePrice: 49 },
-  traction: { name: "Traction", basePrice: 149 },
-  momentum: { name: "Momentum", basePrice: 299 },
-  scale: { name: "Scale", basePrice: 699 },
-  expansion: { name: "Expansion", basePrice: 1499 },
+  starter: { name: "Starter", basePrice: 59 },
+  growth: { name: "Growth", basePrice: 149 },
+  scale: { name: "Scale", basePrice: 399 },
 };
 
 export async function POST(req: NextRequest) {
@@ -78,11 +76,7 @@ export async function POST(req: NextRequest) {
       },
       subscription_data: {
         trial_period_days:
-          tierConfig.name === "Launch" ||
-          tierConfig.name === "Traction" ||
-          tierConfig.name === "Momentum"
-            ? 3
-            : 14,
+          tierId === "scale" ? 14 : 3,
         metadata: {
           accountId: (session.user as any).id || session.user.email!,
           tier: tierId,

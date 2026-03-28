@@ -9,6 +9,7 @@ export interface AutomationSettings {
   type: "churn_prevention" | "feature_adoption" | "engagement";
   is_enabled: boolean;
   config: Record<string, any>;
+  custom_prompt?: string;
   created_at: string;
   updated_at: string;
 }
@@ -53,9 +54,18 @@ export interface AutomationExecution {
   status: "pending" | "sent" | "failed" | "skipped";
   trigger_reason: string;
   personalization: Record<string, any>;
+  execution_result?: Record<string, any>;
   scheduled_at?: string;
   sent_at?: string;
+  failed_at?: string;
+  failure_reason?: string;
   created_at: string;
+  // Stored email content
+  email_subject?: string;
+  email_html?: string;
+  email_plain_text?: string;
+  // Preloaded relation
+  automation?: AutomationSettings;
 }
 
 export interface CreateAutomationRequest {
@@ -64,6 +74,7 @@ export interface CreateAutomationRequest {
   type: "churn_prevention" | "feature_adoption" | "engagement";
   config: Record<string, any>;
   is_enabled?: boolean;
+  custom_prompt?: string;
 }
 
 export interface CreateEmailTemplateRequest {
@@ -332,6 +343,62 @@ class AutomationService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.error || "Failed to generate email content");
+    }
+
+    return response.json();
+  }
+
+  // Get a single execution with full email content
+  async getAutomationExecution(
+    projectId: string,
+    executionId: string
+  ): Promise<AutomationExecution> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/automation-executions/${executionId}`,
+      { headers: this.getAuthHeaders() }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch execution");
+    }
+
+    return response.json();
+  }
+
+  // Preview email generation with a prompt (does not create an execution)
+  async previewEmail(
+    projectId: string,
+    automationId: string,
+    data: { custom_prompt?: string; user_name?: string; user_email?: string }
+  ): Promise<{ subject: string; html: string; plain_text: string; prompt_used: string }> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/automations/${automationId}/preview`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to generate preview");
+    }
+
+    return response.json();
+  }
+
+  // Get the default prompt for an automation type
+  async getDefaultPrompt(
+    automationType: string
+  ): Promise<{ type: string; default_prompt: string }> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/automations/default-prompt/${automationType}`,
+      { headers: this.getAuthHeaders() }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch default prompt");
     }
 
     return response.json();

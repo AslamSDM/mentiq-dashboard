@@ -53,7 +53,7 @@ export function ProjectSelector() {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {projects?.map((project) => (
+            {projects?.filter((project) => project.id).map((project) => (
               <SelectItem key={project.id} value={project.id}>
                 {project.name}
               </SelectItem>

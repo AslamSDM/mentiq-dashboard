@@ -28,6 +28,8 @@ import {
   Shield,
   Plug,
   Clock,
+  Gauge,
+  Send,
 } from "lucide-react";
 
 const navigation = [
@@ -70,6 +72,11 @@ const navigation = [
     name: "Email Automations",
     href: "/dashboard/playbooks",
     icon: <Mail className="h-5 w-5" />,
+  },
+  {
+    name: "Sent Emails",
+    href: "/dashboard/emails",
+    icon: <Send className="h-5 w-5" />,
   },
   {
     name: "Projects",
@@ -123,6 +130,11 @@ const adminNavigation = [
     name: "Admin Tickets",
     href: "/dashboard/admin/tickets",
     icon: <Ticket className="h-5 w-5" />,
+  },
+  {
+    name: "Usage Limits",
+    href: "/dashboard/admin/limits",
+    icon: <Gauge className="h-5 w-5" />,
   },
 ];
 
@@ -229,6 +241,7 @@ export function DashboardSidebar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsMobileOpen(false)}
+                data-tour-id={item.name}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group my-1",
                   isActive

@@ -93,12 +93,9 @@ const GoogleIcon = ({ className }: { className?: string }) => (
 );
 
 const TIER_ICONS: Record<string, React.ReactNode> = {
-  launch: <Zap className="h-5 w-5" />,
-  traction: <TrendingUp className="h-5 w-5" />,
-  momentum: <Rocket className="h-5 w-5" />,
+  starter: <Zap className="h-5 w-5" />,
+  growth: <TrendingUp className="h-5 w-5" />,
   scale: <Building2 className="h-5 w-5" />,
-  expansion: <Crown className="h-5 w-5" />,
-  enterprise: <Crown className="h-5 w-5" />,
 };
 
 function SignUpForm() {
@@ -111,7 +108,7 @@ function SignUpForm() {
     "details",
   );
   const [userCount, setUserCount] = useState(
-    preselectedUsers ? parseInt(preselectedUsers) : 250,
+    preselectedUsers ? parseInt(preselectedUsers) : 500,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -755,21 +752,42 @@ function SignUpForm() {
                         </div>
                       )}
 
-                      <div className="bg-[#F4F7FE] rounded-lg p-4 space-y-2">
-                        <p className="text-sm font-semibold text-[#2B3674] mb-3">
-                          What&apos;s included:
+                      <div className="bg-[#F4F7FE] rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="text-[#4318FF]">
+                            {TIER_ICONS[currentTier.id]}
+                          </div>
+                          <p className="text-sm font-semibold text-[#2B3674]">
+                            {currentTier.name} Plan &mdash; ${currentTier.basePrice}/mo
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="flex items-start gap-3 text-sm">
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-[#4363C7]">{currentTier.included.paidUsers.toLocaleString()} paid users</span>
+                          </div>
+                          <div className="flex items-start gap-3 text-sm">
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-[#4363C7]">{currentTier.included.sessionReplays.toLocaleString()} session replays</span>
+                          </div>
+                          <div className="flex items-start gap-3 text-sm">
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-[#4363C7]">{currentTier.included.automatedEmails.toLocaleString()} automated emails</span>
+                          </div>
+                          <div className="flex items-start gap-3 text-sm">
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-[#4363C7]">{currentTier.included.aiGenerations} AI generations</span>
+                          </div>
+                          <div className="flex items-start gap-3 text-sm">
+                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+                            <span className="text-[#4363C7]">{currentTier.included.teamMembers === 0 ? "Unlimited" : currentTier.included.teamMembers} team members</span>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-[#4363C7] mt-3 pt-3 border-t border-[#E0E5F2]">
+                          Soft limits &mdash; go over anytime, overages billed automatically.
                         </p>
-                        {currentTier.features
-                          .slice(0, 5)
-                          .map((feature, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start gap-3 text-sm"
-                            >
-                              <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                              <span className="text-[#4363C7]">{feature}</span>
-                            </div>
-                          ))}
                       </div>
                     </div>
                   )}

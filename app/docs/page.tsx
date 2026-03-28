@@ -238,7 +238,11 @@ export default function DocsPage() {
             {/* 2. Quick Start */}
             <Section id="quick-start" title="Quick Start">
               <p className="text-gray-400">
-                Wrap your app with the provider. Only{" "}
+                Add{" "}
+                <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                  {"<Mentiq>"}
+                </code>{" "}
+                to your root layout — that&apos;s it. Only{" "}
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   apiKey
                 </code>{" "}
@@ -246,25 +250,20 @@ export default function DocsPage() {
                 <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   projectId
                 </code>{" "}
-                are required.
+                are required. Page views and errors are tracked automatically.
               </p>
               <CodeBlock
                 language="tsx"
                 title="app/layout.tsx"
-                code={`import { MentiqAnalyticsProvider } from "mentiq-sdk";
+                code={`import { Mentiq } from "mentiq-sdk";
 
 export default function RootLayout({ children }) {
   return (
     <html>
       <body>
-        <MentiqAnalyticsProvider
-          config={{
-            apiKey: "mentiq_live_your_api_key",
-            projectId: "your-project-id",
-          }}
-        >
+        <Mentiq apiKey="mentiq_live_your_api_key" projectId="your-project-id">
           {children}
-        </MentiqAnalyticsProvider>
+        </Mentiq>
       </body>
     </html>
   );
@@ -316,10 +315,10 @@ export default function RootLayout({ children }) {
               <CodeBlock
                 language="tsx"
                 title="after-login.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
+                code={`import { useMentiq } from "mentiq-sdk";
 
 function AfterLogin({ user }) {
-  const { identify } = useAnalytics();
+  const { identify } = useMentiq();
 
   // Call once after login
   identify(user.id, {
@@ -345,10 +344,10 @@ function AfterLogin({ user }) {
               <CodeBlock
                 language="tsx"
                 title="onboarding.tsx"
-                code={`import { useOnboardingTracker, useAnalytics } from "mentiq-sdk";
+                code={`import { useOnboardingTracker, useMentiq } from "mentiq-sdk";
 
 function OnboardingWizard() {
-  const { analytics } = useAnalytics();
+  const { analytics } = useMentiq();
 
   const tracker = useOnboardingTracker(analytics, {
     steps: [
@@ -410,10 +409,10 @@ const progress = tracker.getProgress();
               <CodeBlock
                 language="tsx"
                 title="Component.tsx"
-                code={`import { useAnalytics } from "mentiq-sdk";
+                code={`import { useMentiq } from "mentiq-sdk";
 
 function SignupButton() {
-  const { track } = useAnalytics();
+  const { track } = useMentiq();
 
   return (
     <button
@@ -442,25 +441,26 @@ function SignupButton() {
                 <code className="text-primary bg-primary/10 px-1 rounded">
                   projectId
                 </code>{" "}
-                are required. You can optionally pass:
+                are required. You can optionally enable more features:
               </p>
               <CodeBlock
                 language="tsx"
-                title="Optional config"
-                code={`<MentiqAnalyticsProvider
-  config={{
-    apiKey: "mentiq_live_abc123",
-    projectId: "my-project",
+                title="All available props"
+                code={`<Mentiq
+  apiKey="mentiq_live_abc123"
+  projectId="my-project"
 
-    // Optional
-    endpoint: "https://api.mentiq.io",
-    debug: false,
-    batchSize: 20,
-    flushInterval: 10000, // 10 seconds
-  }}
+  // Optional
+  endpoint="https://api.mentiq.io"
+  userId="user-123"          // Pre-identify a user
+  trackPageViews={true}      // Auto-track page views (default: true)
+  trackErrors={true}         // Auto-track JS errors (default: true)
+  trackPerformance={false}   // Track Core Web Vitals
+  trackHeatmaps={false}      // Track clicks, scrolls, hovers
+  trackSessions={false}      // Record sessions (requires rrweb)
 >
   <App />
-</MentiqAnalyticsProvider>`}
+</Mentiq>`}
               />
             </Section>
 

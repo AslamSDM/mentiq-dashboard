@@ -363,7 +363,7 @@ export default function ABTestingPage() {
                       <SelectValue placeholder="Select an experiment" />
                     </SelectTrigger>
                     <SelectContent>
-                      {experiments?.map((exp) => (
+                      {experiments?.filter((exp) => exp.id).map((exp) => (
                         <SelectItem key={exp.id} value={exp.id}>
                           <div className="flex items-center justify-between w-full">
                             <span className="truncate">{exp.name}</span>

@@ -8,6 +8,7 @@ import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { DashboardNavbar } from "@/components/dashboard/dashboard-navbar";
 import { OnboardingTaskBanner } from "@/components/onboarding-task-banner";
+import { OnboardingTour } from "@/components/onboarding-tour";
 import { Button } from "@/components/ui/button";
 import { X, Eye } from "lucide-react";
 
@@ -191,6 +192,7 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
+      <OnboardingTour />
     </div>
   );
 }

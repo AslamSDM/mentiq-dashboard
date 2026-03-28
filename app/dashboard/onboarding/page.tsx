@@ -350,78 +350,33 @@ export default function OnboardingPage() {
                   What you'll get with your project:
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm text-[#2B3674]">
-                    <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                      <svg
-                        className="h-3 w-3 text-[#05CD99]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
+                  {[
+                    "Analytics Dashboard",
+                    "Event Tracking",
+                    "Session Replays",
+                    "Automated Emails",
+                    "AI Email Generation",
+                    "API Keys",
+                  ].map((feature) => (
+                    <div key={feature} className="flex items-center gap-2 text-sm text-[#2B3674]">
+                      <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                        <svg
+                          className="h-3 w-3 text-[#05CD99]"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <span>{feature}</span>
                     </div>
-                    <span>API Keys</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#2B3674]">
-                    <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                      <svg
-                        className="h-3 w-3 text-[#05CD99]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Event Tracking</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#2B3674]">
-                    <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                      <svg
-                        className="h-3 w-3 text-[#05CD99]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Session Recording</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#2B3674]">
-                    <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                      <svg
-                        className="h-3 w-3 text-[#05CD99]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <span>Analytics Dashboard</span>
-                  </div>
+                  ))}
                 </div>
               </div>
 

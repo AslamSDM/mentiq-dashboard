@@ -223,6 +223,132 @@ class AdminService extends BaseHttpService {
       },
     );
   }
+
+  /**
+   * Get limits and usage for an account (admin only)
+   */
+  async getAccountLimits(accountId: string): Promise<AccountLimitsResponse> {
+    return this.request<AccountLimitsResponse>(
+      `/api/v1/admin/accounts/${accountId}/limits`,
+      { method: "GET" },
+    );
+  }
+
+  /**
+   * Update limit overrides for an account (admin only)
+   */
+  async updateAccountLimits(
+    accountId: string,
+    overrides: LimitOverrides,
+  ): Promise<AccountLimitsResponse> {
+    return this.request<AccountLimitsResponse>(
+      `/api/v1/admin/accounts/${accountId}/limits`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(overrides),
+      },
+    );
+  }
+
+  /**
+   * Reset a specific limit override back to plan default (admin only)
+   */
+  async resetAccountLimit(
+    accountId: string,
+    resource: string,
+  ): Promise<{ message: string; summary: UsageSummary }> {
+    return this.request<{ message: string; summary: UsageSummary }>(
+      `/api/v1/admin/accounts/${accountId}/limits/${resource}`,
+      { method: "DELETE" },
+    );
+  }
+
+  /**
+   * Get usage counters for an account (admin only)
+   */
+  async getAccountUsage(accountId: string): Promise<AccountUsage> {
+    return this.request<AccountUsage>(
+      `/api/v1/admin/accounts/${accountId}/usage`,
+      { method: "GET" },
+    );
+  }
+
+  /**
+   * Get all available tiers with limits and overage rates (admin only)
+   */
+  async getAllTiers(): Promise<{ tiers: TierInfo[] }> {
+    return this.request<{ tiers: TierInfo[] }>("/api/v1/admin/tiers", {
+      method: "GET",
+    });
+  }
+}
+
+// --- Types ---
+
+export interface UsageStatus {
+  resource: string;
+  current_usage: number;
+  limit: number;
+  is_override: boolean;
+  overage: number;
+  overage_cost: number; // cents
+}
+
+export interface UsageSummary {
+  account_id: string;
+  tier: string;
+  tier_name: string;
+  base_price: number; // cents
+  resources: UsageStatus[];
+  total_overage_cost: number; // cents
+  projected_bill: number; // cents
+}
+
+export interface LimitOverrides {
+  paid_users_override?: number | null;
+  session_replays_override?: number | null;
+  automated_emails_override?: number | null;
+  ai_generations_override?: number | null;
+}
+
+export interface AccountLimitsResponse {
+  summary: UsageSummary;
+  overrides: {
+    id: string;
+    account_id: string;
+    paid_users_override: number | null;
+    session_replays_override: number | null;
+    automated_emails_override: number | null;
+    ai_generations_override: number | null;
+  };
+  message?: string;
+}
+
+export interface AccountUsage {
+  id: string;
+  account_id: string;
+  billing_period_start: string;
+  billing_period_end: string;
+  paid_users_count: number;
+  session_replays_count: number;
+  automated_emails_count: number;
+  ai_generations_count: number;
+}
+
+export interface TierInfo {
+  id: string;
+  name: string;
+  base_price: number;
+  included_paid_users: number;
+  included_session_replays: number;
+  included_automated_emails: number;
+  included_ai_generations: number;
+  included_team_members: number;
+  overage_paid_users_per_100: number;
+  overage_replays_per_500: number;
+  overage_emails_per_10k: number;
+  overage_ai_generations_per_100: number;
 }
 
 export const adminService = new AdminService();

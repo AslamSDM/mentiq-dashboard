@@ -1,121 +1,98 @@
 // Pricing tiers configuration
 export const PRICING_TIERS = [
   {
-    id: "launch",
-    name: "Launch",
-    range: [1, 100],
-    basePrice: 49,
+    id: "starter",
+    name: "Starter",
+    basePrice: 59,
     trialDays: 3,
     description: "Perfect for startups getting started",
+    included: {
+      paidUsers: 500,
+      sessionReplays: 250,
+      automatedEmails: 10_000,
+      aiGenerations: 50,
+      teamMembers: 3,
+    },
+    overages: {
+      paidUsersPer100: 12_00, // $12 in cents
+      replaysPer500: 7_00,
+      emailsPer10k: 3_00,
+      aiGenerationsPer100: 5_00,
+    },
     features: [
-      "Up to 100 paid users",
-      "2 team members",
+      "500 paid users",
+      "250 session replays",
+      "10,000 automated emails",
+      "50 AI generations",
+      "3 team members",
       "Core analytics dashboard",
       "Session replay",
-      "Basic retention cohorts",
       "Email support",
-      "7-day data retention",
     ],
   },
   {
-    id: "traction",
-    name: "Traction",
-    range: [101, 500],
+    id: "growth",
+    name: "Growth",
     basePrice: 149,
     trialDays: 3,
     description: "For growing teams finding PMF",
+    included: {
+      paidUsers: 2_000,
+      sessionReplays: 700,
+      automatedEmails: 50_000,
+      aiGenerations: 200,
+      teamMembers: 10,
+    },
+    overages: {
+      paidUsersPer100: 10_00,
+      replaysPer500: 6_00,
+      emailsPer10k: 3_00,
+      aiGenerationsPer100: 4_00,
+    },
     features: [
-      "Up to 500 paid users",
-      "4 team members",
+      "2,000 paid users",
+      "700 session replays",
+      "50,000 automated emails",
+      "200 AI generations",
+      "10 team members",
       "Advanced analytics",
-      "Unlimited session replays",
       "Retention & churn analysis",
       "Feature adoption tracking",
       "Priority email support",
-      "30-day data retention",
-      "Custom events",
     ],
     popular: true,
   },
   {
-    id: "momentum",
-    name: "Momentum",
-    range: [501, 1000],
-    basePrice: 299,
-    trialDays: 3,
-    description: "Scaling fast with proven growth",
-    features: [
-      "Up to 1,000 paid users",
-      "Unlimited team members",
-      "Everything in Traction",
-      "A/B testing & experiments",
-      "Revenue analytics",
-      "Health score tracking",
-      "API access",
-      "90-day data retention",
-      "Slack integration",
-      "Custom dashboards",
-    ],
-  },
-  {
     id: "scale",
     name: "Scale",
-    range: [1001, 5000],
-    basePrice: 699,
+    basePrice: 399,
     trialDays: 14,
-    description: "Enterprise-ready for rapid expansion",
+    description: "No ceiling. Built for rapid expansion",
+    included: {
+      paidUsers: 7_500,
+      sessionReplays: 2_000,
+      automatedEmails: 200_000,
+      aiGenerations: 600,
+      teamMembers: 0, // unlimited
+    },
+    overages: {
+      paidUsersPer100: 8_00,
+      replaysPer500: 5_00,
+      emailsPer10k: 2_00,
+      aiGenerationsPer100: 3_00,
+    },
     features: [
-      "Up to 5,000 paid users",
+      "7,500 paid users",
+      "2,000 session replays",
+      "200,000 automated emails",
+      "600 AI generations",
       "Unlimited team members",
-      "Everything in Momentum",
+      "A/B testing & experiments",
+      "Revenue analytics",
       "Advanced segmentation",
       "Predictive churn modeling",
-      "Multi-project support",
       "Priority support (< 4hr response)",
-      "1-year data retention",
       "SSO authentication",
-      "Custom integrations",
-      "Dedicated account manager",
-    ],
-  },
-  {
-    id: "expansion",
-    name: "Expansion",
-    range: [5001, 10000],
-    basePrice: 1499,
-    trialDays: 14,
-    description: "Maximum scale with premium support",
-    features: [
-      "Up to 10,000 paid users",
-      "Unlimited team members",
-      "Everything in Scale",
-      "White-label options",
-      "Custom ML models",
-      "Unlimited projects",
-      "24/7 premium support",
-      "Unlimited data retention",
-      "On-premise deployment option",
-      "Custom SLA",
-      "Quarterly business reviews",
-    ],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    range: [10001, Infinity],
-    basePrice: null, // Custom pricing
-    trialDays: 30,
-    description: "Custom solutions for large-scale operations",
-    features: [
-      "Unlimited paid users",
-      "Unlimited team members",
-      "Custom deployment options",
-      "Dedicated infrastructure",
-      "24/7 premium support",
-      "Custom SLA & guarantees",
-      "Dedicated success team",
-      "White-label solutions",
-      "Custom feature development",
     ],
   },
 ] as const;
@@ -123,11 +100,14 @@ export const PRICING_TIERS = [
 export type PricingTier = (typeof PRICING_TIERS)[number];
 
 export const getTierByUserCount = (userCount: number): PricingTier | null => {
-  return (
-    PRICING_TIERS.find(
-      (tier) => userCount >= tier.range[0] && userCount <= tier.range[1]
-    ) || null
-  );
+  // Find the smallest tier that fits the user count
+  for (const tier of PRICING_TIERS) {
+    if (userCount <= tier.included.paidUsers) {
+      return tier;
+    }
+  }
+  // Over Scale tier — still use Scale (overages apply)
+  return PRICING_TIERS[PRICING_TIERS.length - 1];
 };
 
 export const getTierById = (id: string): PricingTier | null => {

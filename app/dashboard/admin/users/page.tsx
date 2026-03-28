@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                     <SelectContent>
-                      {selectedUser.projects.map((project) => (
+                      {selectedUser.projects.filter((project) => project.id).map((project) => (
                         <SelectItem key={project.id} value={project.id}>
                           {project.name} ({project.id})
                         </SelectItem>
