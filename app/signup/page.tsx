@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -122,10 +122,11 @@ function SignUpForm() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors, isValid },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       fullName: "",
       companyName: "",
@@ -343,7 +344,6 @@ function SignUpForm() {
                 className="object-contain"
               />
             </div>
-            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
           </Link>
 
           {/* Step Indicator */}
@@ -550,10 +550,17 @@ function SignUpForm() {
                 </div>
 
                 <div className="flex items-start gap-3 p-4 bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg">
-                  <Checkbox
-                    id="terms"
-                    {...register("acceptedTerms")}
-                    className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  <Controller
+                    name="acceptedTerms"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="terms"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                    )}
                   />
                   <label
                     htmlFor="terms"
@@ -758,35 +765,54 @@ function SignUpForm() {
                             {TIER_ICONS[currentTier.id]}
                           </div>
                           <p className="text-sm font-semibold text-[#2B3674]">
-                            {currentTier.name} Plan &mdash; ${currentTier.basePrice}/mo
+                            {currentTier.name} Plan &mdash; $
+                            {currentTier.basePrice}/mo
                           </p>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="flex items-start gap-3 text-sm">
                             <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">{currentTier.included.paidUsers.toLocaleString()} paid users</span>
+                            <span className="text-[#4363C7]">
+                              {currentTier.included.paidUsers.toLocaleString()}{" "}
+                              paid users
+                            </span>
                           </div>
                           <div className="flex items-start gap-3 text-sm">
                             <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">{currentTier.included.sessionReplays.toLocaleString()} session replays</span>
+                            <span className="text-[#4363C7]">
+                              {currentTier.included.sessionReplays.toLocaleString()}{" "}
+                              session replays
+                            </span>
                           </div>
                           <div className="flex items-start gap-3 text-sm">
                             <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">{currentTier.included.automatedEmails.toLocaleString()} automated emails</span>
+                            <span className="text-[#4363C7]">
+                              {currentTier.included.automatedEmails.toLocaleString()}{" "}
+                              automated emails
+                            </span>
                           </div>
                           <div className="flex items-start gap-3 text-sm">
                             <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">{currentTier.included.aiGenerations} AI generations</span>
+                            <span className="text-[#4363C7]">
+                              {currentTier.included.aiGenerations} AI
+                              generations
+                            </span>
                           </div>
                           <div className="flex items-start gap-3 text-sm">
                             <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">{currentTier.included.teamMembers === 0 ? "Unlimited" : currentTier.included.teamMembers} team members</span>
+                            <span className="text-[#4363C7]">
+                              {currentTier.included.teamMembers === 0
+                                ? "Unlimited"
+                                : currentTier.included.teamMembers}{" "}
+                              team members
+                            </span>
                           </div>
                         </div>
 
                         <p className="text-xs text-[#4363C7] mt-3 pt-3 border-t border-[#E0E5F2]">
-                          Soft limits &mdash; go over anytime, overages billed automatically.
+                          Soft limits &mdash; go over anytime, overages billed
+                          automatically.
                         </p>
                       </div>
                     </div>

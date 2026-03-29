@@ -195,13 +195,10 @@ class CentralizedDataService {
         this.getSessionAnalytics(projectId, dateRange.start, dateRange.end),
 
         // Basic analytics
-        this.getAnalytics(projectId, dateRange.start, dateRange.end),
         this.getEvents(projectId),
 
-        // Sessions & Users
+        // Sessions
         this.getSessions(projectId),
-        this.getUsers(projectId),
-        this.getSessionsOverview(projectId),
 
         // Experiments
         this.getExperiments(projectId),
@@ -314,6 +311,106 @@ class CentralizedDataService {
       CACHE_CONFIG.REVENUE,
       async () => {
         const response = await projectService.getCustomerAnalytics(projectId);
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  // ==================== DODO REVENUE APIS ====================
+
+  async getDodoRevenueMetrics(projectId: string): Promise<any> {
+    return this.getCachedOrFetch(
+      "dodoRevenueMetrics",
+      "revenueMetrics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getDodoRevenueMetrics(projectId);
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  async getDodoRevenueAnalytics(
+    projectId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> {
+    const cacheKey = `dodo_${startDate}_${endDate}`;
+    return this.getCachedOrFetch(
+      cacheKey,
+      "revenueAnalytics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getDodoRevenueAnalytics(
+          projectId,
+          startDate,
+          endDate
+        );
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  async getDodoCustomerAnalytics(projectId: string): Promise<any> {
+    return this.getCachedOrFetch(
+      "dodoCustomerAnalytics",
+      "customerAnalytics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getDodoCustomerAnalytics(projectId);
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  // ==================== POLAR REVENUE APIS ====================
+
+  async getPolarRevenueMetrics(projectId: string): Promise<any> {
+    return this.getCachedOrFetch(
+      "polarRevenueMetrics",
+      "revenueMetrics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getPolarRevenueMetrics(projectId);
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  async getPolarRevenueAnalytics(
+    projectId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<any> {
+    const cacheKey = `polar_${startDate}_${endDate}`;
+    return this.getCachedOrFetch(
+      cacheKey,
+      "revenueAnalytics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getPolarRevenueAnalytics(
+          projectId,
+          startDate,
+          endDate
+        );
+        return response.status === "success" ? response.data : null;
+      },
+      projectId
+    );
+  }
+
+  async getPolarCustomerAnalytics(projectId: string): Promise<any> {
+    return this.getCachedOrFetch(
+      "polarCustomerAnalytics",
+      "customerAnalytics",
+      CACHE_CONFIG.REVENUE,
+      async () => {
+        const response = await projectService.getPolarCustomerAnalytics(projectId);
         return response.status === "success" ? response.data : null;
       },
       projectId

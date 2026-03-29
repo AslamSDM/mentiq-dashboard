@@ -268,7 +268,6 @@ export default function SignInPage() {
                 className="object-contain"
               />
             </div>
-            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
           </Link>
 
           <div className="space-y-2">
