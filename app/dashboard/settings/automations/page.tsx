@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useEffectiveProjectId } from "@/hooks/use-effective-project";
-import { automationService, AutomationSettings } from "@/lib/services/automation";
+import { automationService, AutomationSettings, EmailProvider } from "@/lib/services/automation";
 import {
   AlertTriangle,
   Target,
@@ -39,6 +39,7 @@ import {
   Edit,
   TrendingUp,
   Sparkles,
+  Mail,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -102,6 +103,11 @@ export default function AutomationSettingsPage() {
   const [maxCampaignsPerUser, setMaxCampaignsPerUser] = useState(3);
   const [unusedFeaturesThreshold, setUnusedFeaturesThreshold] = useState(7);
   const [engagementThreshold, setEngagementThreshold] = useState(30);
+  const [emailProvider, setEmailProvider] = useState<EmailProvider>("resend");
+  const [providerApiKey, setProviderApiKey] = useState("");
+  const [fromEmail, setFromEmail] = useState("");
+  const [fromName, setFromName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
 
   useEffect(() => {
     if (!effectiveProjectId) return;
@@ -160,9 +166,22 @@ export default function AutomationSettingsPage() {
   };
 
   const buildConfig = () => {
+    const baseConfig: Record<string, any> = {
+      email_provider: emailProvider,
+      ...(fromEmail && { from_email: fromEmail }),
+      ...(fromName && { from_name: fromName }),
+      ...(replyTo && { reply_to: replyTo }),
+    };
+
+    // Add provider-specific config (API key for resend/sendgrid)
+    if (emailProvider !== "mailchimp" && providerApiKey) {
+      baseConfig.email_provider_config = { api_key: providerApiKey };
+    }
+
     switch (selectedType) {
       case "churn_prevention":
         return {
+          ...baseConfig,
           churn_prevention: {
             enabled: true,
             risk_threshold: riskThreshold,
@@ -173,6 +192,7 @@ export default function AutomationSettingsPage() {
         };
       case "feature_adoption":
         return {
+          ...baseConfig,
           feature_adoption: {
             enabled: true,
             unused_features_threshold: unusedFeaturesThreshold,
@@ -182,6 +202,7 @@ export default function AutomationSettingsPage() {
         };
       case "engagement":
         return {
+          ...baseConfig,
           engagement: {
             enabled: true,
             engagement_threshold: engagementThreshold,
@@ -190,7 +211,7 @@ export default function AutomationSettingsPage() {
           },
         };
       default:
-        return {};
+        return baseConfig;
     }
   };
 
@@ -204,6 +225,11 @@ export default function AutomationSettingsPage() {
     setMaxCampaignsPerUser(3);
     setUnusedFeaturesThreshold(7);
     setEngagementThreshold(30);
+    setEmailProvider("resend");
+    setProviderApiKey("");
+    setFromEmail("");
+    setFromName("");
+    setReplyTo("");
   };
 
   const handleToggleAutomation = async (automation: AutomationSettings) => {
@@ -374,6 +400,81 @@ export default function AutomationSettingsPage() {
                 <Label htmlFor="enabled">Enable automation immediately</Label>
               </div>
 
+              {/* Email Provider Settings */}
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email Provider
+                </h4>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  {([
+                    { value: "resend" as EmailProvider, label: "Resend", desc: "Modern email API" },
+                    { value: "sendgrid" as EmailProvider, label: "SendGrid", desc: "Twilio SendGrid" },
+                    { value: "mailchimp" as EmailProvider, label: "Mailchimp", desc: "Campaign-based delivery" },
+                  ]).map((p) => (
+                    <div
+                      key={p.value}
+                      className={`border rounded-lg p-3 cursor-pointer transition-colors ${
+                        emailProvider === p.value ? 'border-primary bg-primary/5' : 'hover:bg-muted'
+                      }`}
+                      onClick={() => setEmailProvider(p.value)}
+                    >
+                      <span className="font-medium text-sm">{p.label}</span>
+                      <p className="text-xs text-muted-foreground">{p.desc}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {emailProvider !== "mailchimp" && (
+                  <div>
+                    <Label htmlFor="providerApiKey">
+                      {emailProvider === "resend" ? "Resend" : "SendGrid"} API Key
+                    </Label>
+                    <Input
+                      id="providerApiKey"
+                      type="password"
+                      value={providerApiKey}
+                      onChange={(e) => setProviderApiKey(e.target.value)}
+                      placeholder={`Enter your ${emailProvider === "resend" ? "Resend" : "SendGrid"} API key (or use env var)`}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Leave blank to use the server&apos;s {emailProvider === "resend" ? "RESEND_API_KEY" : "SENDGRID_API_KEY"} environment variable
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <Label htmlFor="fromEmail">From Email</Label>
+                    <Input
+                      id="fromEmail"
+                      value={fromEmail}
+                      onChange={(e) => setFromEmail(e.target.value)}
+                      placeholder="noreply@yourcompany.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromName">From Name</Label>
+                    <Input
+                      id="fromName"
+                      value={fromName}
+                      onChange={(e) => setFromName(e.target.value)}
+                      placeholder="Customer Success Team"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="replyTo">Reply-To</Label>
+                    <Input
+                      id="replyTo"
+                      value={replyTo}
+                      onChange={(e) => setReplyTo(e.target.value)}
+                      placeholder="support@yourcompany.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Type-specific settings */}
               {selectedType === 'churn_prevention' && (
                 <div className="space-y-4 p-4 bg-red-50 rounded-lg">
@@ -510,6 +611,12 @@ export default function AutomationSettingsPage() {
                             {automation.is_enabled ? "Active" : "Paused"}
                           </Badge>
                           <Badge variant="outline">{typeConfig?.label}</Badge>
+                          {automation.config?.email_provider && (
+                            <Badge variant="outline" className="capitalize">
+                              <Mail className="h-3 w-3 mr-1" />
+                              {automation.config.email_provider}
+                            </Badge>
+                          )}
                         </div>
                         <CardTitle className="text-base">{automation.name}</CardTitle>
                         <CardDescription>{automation.description}</CardDescription>

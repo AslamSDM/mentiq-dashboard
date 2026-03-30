@@ -44,7 +44,6 @@ export default function ChurnByChannelPage() {
       const response = await centralizedData.getChurnByChannel(
         selectedProjectId
       );
-      console.log("response", response);
       // centralized-data already unwraps response.data, so response has { channels: [...] }
       if (response?.channels) {
         setChannelChurnData(response); // Store full response object, not just channels array

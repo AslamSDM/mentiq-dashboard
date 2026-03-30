@@ -3,14 +3,19 @@
 export interface ProjectIntegration {
   id: string;
   project_id: string;
-  provider: "mailchimp" | "sendgrid" | "customer_io";
+  provider: "mailchimp" | "sendgrid" | "resend" | "customer_io";
   is_active: boolean;
-  settings: MailchimpSettings | Record<string, unknown>;
+  settings: MailchimpSettings | APIKeyProviderSettings | Record<string, unknown>;
   last_sync_at?: string;
   sync_status: "idle" | "syncing" | "error";
   last_error?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface APIKeyProviderSettings {
+  from_email?: string;
+  from_name?: string;
 }
 
 export interface MailchimpSettings {
@@ -201,6 +206,165 @@ class IntegrationsService {
 
     if (!response.ok) {
       throw new Error("Failed to fetch sync logs");
+    }
+
+    return response.json();
+  }
+  // ==========================================
+  // RESEND
+  // ==========================================
+
+  async connectResend(
+    projectId: string,
+    data: { api_key: string; from_email?: string; from_name?: string }
+  ): Promise<ProjectIntegration> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/resend/connect`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to connect Resend");
+    }
+
+    return response.json();
+  }
+
+  async disconnectResend(projectId: string): Promise<void> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/resend`,
+      {
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to disconnect Resend");
+    }
+  }
+
+  async updateResendSettings(
+    projectId: string,
+    settings: { api_key?: string; from_email?: string; from_name?: string }
+  ): Promise<ProjectIntegration> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/resend/settings`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(settings),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update Resend settings");
+    }
+
+    return response.json();
+  }
+
+  async testResend(
+    projectId: string,
+    toEmail: string
+  ): Promise<{ message: string; message_id: string }> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/resend/test`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ to_email: toEmail }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to send test email");
+    }
+
+    return response.json();
+  }
+
+  // ==========================================
+  // SENDGRID
+  // ==========================================
+
+  async connectSendGrid(
+    projectId: string,
+    data: { api_key: string; from_email?: string; from_name?: string }
+  ): Promise<ProjectIntegration> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/sendgrid/connect`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to connect SendGrid");
+    }
+
+    return response.json();
+  }
+
+  async disconnectSendGrid(projectId: string): Promise<void> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/sendgrid`,
+      {
+        method: "DELETE",
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to disconnect SendGrid");
+    }
+  }
+
+  async updateSendGridSettings(
+    projectId: string,
+    settings: { api_key?: string; from_email?: string; from_name?: string }
+  ): Promise<ProjectIntegration> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/sendgrid/settings`,
+      {
+        method: "PUT",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(settings),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update SendGrid settings");
+    }
+
+    return response.json();
+  }
+
+  async testSendGrid(
+    projectId: string,
+    toEmail: string
+  ): Promise<{ message: string; message_id: string }> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/projects/${projectId}/integrations/sendgrid/test`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ to_email: toEmail }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to send test email");
     }
 
     return response.json();

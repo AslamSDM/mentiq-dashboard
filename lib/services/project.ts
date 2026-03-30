@@ -7,6 +7,8 @@ export interface Project {
   apiKey?: string;
   stripeApiKey?: string;
   hasStripeKey?: boolean;
+  hasDodoKey?: boolean;
+  hasPolarKey?: boolean;
   createdAt: string;
   updatedAt: string;
   accountId: string;
@@ -247,6 +249,113 @@ export class ProjectService extends BaseHttpService {
     projectId: string
   ): Promise<{ status: string; data: CustomerAnalytics }> {
     return this.request(`/api/v1/projects/${projectId}/stripe/customers`);
+  }
+
+  // DodoPayments Revenue Analytics methods
+
+  /**
+   * Updates the DodoPayments API key for a project
+   * @param projectId - The project ID
+   * @param apiKey - DodoPayments API key
+   */
+  async updateDodoApiKey(projectId: string, apiKey: string) {
+    return this.request(`/api/v1/projects/${projectId}/dodo-key`, {
+      method: "PUT",
+      body: JSON.stringify({ api_key: apiKey }),
+    });
+  }
+
+  async syncDodoData(projectId: string) {
+    return this.request(`/api/v1/projects/${projectId}/dodo/sync`, {
+      method: "POST",
+    });
+  }
+
+  async getDodoRevenueMetrics(
+    projectId: string,
+    date?: string
+  ): Promise<{ status: string; data: RevenueMetrics }> {
+    const params = date ? `?date=${date}` : "";
+    return this.request(
+      `/api/v1/projects/${projectId}/dodo/metrics${params}`
+    );
+  }
+
+  async getDodoRevenueAnalytics(
+    projectId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{ status: string; data: RevenueAnalytics }> {
+    const searchParams = new URLSearchParams();
+    if (startDate) searchParams.set("start_date", startDate);
+    if (endDate) searchParams.set("end_date", endDate);
+
+    const query = searchParams.toString();
+    return this.request(
+      `/api/v1/projects/${projectId}/dodo/analytics${
+        query ? `?${query}` : ""
+      }`
+    );
+  }
+
+  async getDodoCustomerAnalytics(
+    projectId: string
+  ): Promise<{ status: string; data: CustomerAnalytics }> {
+    return this.request(`/api/v1/projects/${projectId}/dodo/customers`);
+  }
+
+  // Polar Revenue Analytics methods
+
+  /**
+   * Updates the Polar Organization Access Token for a project
+   * @param projectId - The project ID
+   * @param apiKey - Polar OAT (starts with polar_oat_)
+   * @security Only use OATs with read-only scopes for orders, subscriptions, customers, and metrics
+   */
+  async updatePolarApiKey(projectId: string, apiKey: string) {
+    return this.request(`/api/v1/projects/${projectId}/polar-key`, {
+      method: "PUT",
+      body: JSON.stringify({ api_key: apiKey }),
+    });
+  }
+
+  async syncPolarData(projectId: string) {
+    return this.request(`/api/v1/projects/${projectId}/polar/sync`, {
+      method: "POST",
+    });
+  }
+
+  async getPolarRevenueMetrics(
+    projectId: string,
+    date?: string
+  ): Promise<{ status: string; data: RevenueMetrics }> {
+    const params = date ? `?date=${date}` : "";
+    return this.request(
+      `/api/v1/projects/${projectId}/polar/metrics${params}`
+    );
+  }
+
+  async getPolarRevenueAnalytics(
+    projectId: string,
+    startDate?: string,
+    endDate?: string
+  ): Promise<{ status: string; data: RevenueAnalytics }> {
+    const searchParams = new URLSearchParams();
+    if (startDate) searchParams.set("start_date", startDate);
+    if (endDate) searchParams.set("end_date", endDate);
+
+    const query = searchParams.toString();
+    return this.request(
+      `/api/v1/projects/${projectId}/polar/analytics${
+        query ? `?${query}` : ""
+      }`
+    );
+  }
+
+  async getPolarCustomerAnalytics(
+    projectId: string
+  ): Promise<{ status: string; data: CustomerAnalytics }> {
+    return this.request(`/api/v1/projects/${projectId}/polar/customers`);
   }
 }
 

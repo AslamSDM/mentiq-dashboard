@@ -43,9 +43,32 @@ import {
   TrendingUp,
   TrendingDown,
   Activity,
+  MoreVertical,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronUp, Key } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { StripeLogo, DodoLogo, PolarLogo } from "@/components/brand-icons";
 
 export default function RevenuePage() {
   const { getEffectiveProjectId, projects, fetchProjects } = useStore();
@@ -53,9 +76,16 @@ export default function RevenuePage() {
   const { toast } = useToast();
 
   const [stripeApiKey, setStripeApiKey] = useState("");
+  const [dodoApiKey, setDodoApiKey] = useState("");
+  const [polarApiKey, setPolarApiKey] = useState("");
   const [isUpdatingKey, setIsUpdatingKey] = useState(false);
+  const [isUpdatingDodoKey, setIsUpdatingDodoKey] = useState(false);
+  const [isUpdatingPolarKey, setIsUpdatingPolarKey] = useState(false);
   const [isStripeConfigExpanded, setIsStripeConfigExpanded] = useState(false);
+  const [isDodoConfigExpanded, setIsDodoConfigExpanded] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isDodoSyncing, setIsDodoSyncing] = useState(false);
+  const [isPolarSyncing, setIsPolarSyncing] = useState(false);
   const [revenueMetrics, setRevenueMetrics] = useState<RevenueMetrics | null>(
     null,
   );
@@ -64,10 +94,15 @@ export default function RevenuePage() {
   const [customerAnalytics, setCustomerAnalytics] =
     useState<CustomerAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<"stripe" | "dodo" | "polar">("stripe");
+  const [replaceKeyModal, setReplaceKeyModal] = useState<"stripe" | "dodo" | "polar" | null>(null);
+  const [replaceKeyValue, setReplaceKeyValue] = useState("");
 
-  // Check if Stripe key is already configured
+  // Check if keys are already configured
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
   const hasStripeKeyConfigured = !!selectedProject?.hasStripeKey;
+  const hasDodoKeyConfigured = !!(selectedProject as any)?.hasDodoKey;
+  const hasPolarKeyConfigured = !!(selectedProject as any)?.hasPolarKey;
 
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -124,6 +159,120 @@ export default function RevenuePage() {
     }
   };
 
+  const handleUpdateDodoKey = async () => {
+    if (!selectedProjectId || !dodoApiKey.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid DodoPayments API key",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingDodoKey(true);
+    try {
+      await projectService.updateDodoApiKey(selectedProjectId, dodoApiKey);
+      toast({
+        title: "Success",
+        description: "DodoPayments API key updated successfully",
+      });
+      setDodoApiKey("");
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchProjects();
+      await fetchAllData();
+    } catch (error) {
+      toast({
+        title: "Configuration Failed",
+        description:
+          "Failed to save DodoPayments API key. Check that it's a valid API key.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingDodoKey(false);
+    }
+  };
+
+  const handleSyncDodoData = async () => {
+    if (!selectedProjectId) return;
+
+    setIsDodoSyncing(true);
+    try {
+      await projectService.syncDodoData(selectedProjectId);
+      toast({
+        title: "Success",
+        description: "DodoPayments data synced successfully",
+      });
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchAllData();
+    } catch (error) {
+      toast({
+        title: "Sync Failed",
+        description:
+          "Failed to sync DodoPayments data. Verify your API key has the required permissions.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDodoSyncing(false);
+    }
+  };
+
+  const handleUpdatePolarKey = async () => {
+    if (!selectedProjectId || !polarApiKey.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid Polar Organization Access Token",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingPolarKey(true);
+    try {
+      await projectService.updatePolarApiKey(selectedProjectId, polarApiKey);
+      toast({
+        title: "Success",
+        description: "Polar API key updated successfully",
+      });
+      setPolarApiKey("");
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchProjects();
+      await fetchAllData();
+    } catch (error) {
+      toast({
+        title: "Configuration Failed",
+        description:
+          "Failed to save Polar API key. Check that it's a valid Organization Access Token.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingPolarKey(false);
+    }
+  };
+
+  const handleSyncPolarData = async () => {
+    if (!selectedProjectId) return;
+
+    setIsPolarSyncing(true);
+    try {
+      await projectService.syncPolarData(selectedProjectId);
+      toast({
+        title: "Success",
+        description: "Polar data synced successfully",
+      });
+      centralizedData.invalidateRevenueCache(selectedProjectId);
+      await fetchAllData();
+    } catch (error) {
+      toast({
+        title: "Sync Failed",
+        description:
+          "Failed to sync Polar data. Verify your OAT has the required scopes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPolarSyncing(false);
+    }
+  };
+
   const handleSyncStripeData = async () => {
     if (!selectedProjectId) return;
 
@@ -154,24 +303,62 @@ export default function RevenuePage() {
 
     setIsLoading(true);
     try {
-      // Use centralized data service - returns cached data if available
-      const [metrics, analytics, customers] = await Promise.all([
-        centralizedData.getRevenueMetrics(selectedProjectId).catch(() => null),
-        centralizedData
-          .getRevenueAnalytics(
-            selectedProjectId,
-            dateRange.start,
-            dateRange.end,
-          )
-          .catch(() => null),
-        centralizedData
-          .getCustomerAnalytics(selectedProjectId)
-          .catch(() => null),
-      ]);
+      if (activeProvider === "polar") {
+        const [metrics, analytics, customers] = await Promise.all([
+          centralizedData.getPolarRevenueMetrics(selectedProjectId).catch(() => null),
+          centralizedData
+            .getPolarRevenueAnalytics(
+              selectedProjectId,
+              dateRange.start,
+              dateRange.end,
+            )
+            .catch(() => null),
+          centralizedData
+            .getPolarCustomerAnalytics(selectedProjectId)
+            .catch(() => null),
+        ]);
 
-      setRevenueMetrics(metrics);
-      setRevenueAnalytics(analytics);
-      setCustomerAnalytics(customers);
+        setRevenueMetrics(metrics);
+        setRevenueAnalytics(analytics);
+        setCustomerAnalytics(customers);
+      } else if (activeProvider === "dodo") {
+        const [metrics, analytics, customers] = await Promise.all([
+          centralizedData.getDodoRevenueMetrics(selectedProjectId).catch(() => null),
+          centralizedData
+            .getDodoRevenueAnalytics(
+              selectedProjectId,
+              dateRange.start,
+              dateRange.end,
+            )
+            .catch(() => null),
+          centralizedData
+            .getDodoCustomerAnalytics(selectedProjectId)
+            .catch(() => null),
+        ]);
+
+        setRevenueMetrics(metrics);
+        setRevenueAnalytics(analytics);
+        setCustomerAnalytics(customers);
+      } else {
+        // Stripe (default)
+        const [metrics, analytics, customers] = await Promise.all([
+          centralizedData.getRevenueMetrics(selectedProjectId).catch(() => null),
+          centralizedData
+            .getRevenueAnalytics(
+              selectedProjectId,
+              dateRange.start,
+              dateRange.end,
+            )
+            .catch(() => null),
+          centralizedData
+            .getCustomerAnalytics(selectedProjectId)
+            .catch(() => null),
+        ]);
+
+        setRevenueMetrics(metrics);
+        setRevenueAnalytics(analytics);
+        setCustomerAnalytics(customers);
+      }
     } catch {
       // Silent fail for non-critical data
     } finally {
@@ -181,14 +368,22 @@ export default function RevenuePage() {
 
   useEffect(() => {
     fetchAllData();
-  }, [selectedProjectId, dateRange]);
+  }, [selectedProjectId, dateRange, activeProvider]);
 
-  // Auto-expand stripe config if no key is configured
+  // Auto-detect which provider to use and auto-expand config if needed
   useEffect(() => {
-    if (!hasStripeKeyConfigured) {
+    if (hasPolarKeyConfigured && !hasStripeKeyConfigured && !hasDodoKeyConfigured) {
+      setActiveProvider("polar");
+    } else if (hasDodoKeyConfigured && !hasStripeKeyConfigured) {
+      setActiveProvider("dodo");
+    } else if (hasStripeKeyConfigured) {
+      setActiveProvider("stripe");
+    }
+
+    if (!hasStripeKeyConfigured && !hasDodoKeyConfigured && !hasPolarKeyConfigured) {
       setIsStripeConfigExpanded(true);
     }
-  }, [hasStripeKeyConfigured]);
+  }, [hasStripeKeyConfigured, hasDodoKeyConfigured, hasPolarKeyConfigured]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -206,7 +401,7 @@ export default function RevenuePage() {
       <div className="flex flex-col h-full">
         <DashboardHeader
           title="Revenue Analytics"
-          description="Track revenue, subscriptions, and customer metrics from Stripe"
+          description="Track revenue, subscriptions, and customer metrics"
         />
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">
@@ -221,20 +416,22 @@ export default function RevenuePage() {
     <div className="flex flex-col h-full">
       <DashboardHeader
         title="Revenue Analytics"
-        description="Track revenue, subscriptions, and customer metrics from Stripe"
+        description="Track revenue, subscriptions, and customer metrics"
       />
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Stripe Configuration */}
+        {/* Payment Provider Configuration */}
         <Card>
           <CardHeader className="cursor-pointer" onClick={() => setIsStripeConfigExpanded(!isStripeConfigExpanded)}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CardTitle>Stripe Configuration</CardTitle>
-                {hasStripeKeyConfigured && (
+                <CardTitle>Payment Provider</CardTitle>
+                {(hasStripeKeyConfigured || hasDodoKeyConfigured || hasPolarKeyConfigured) && (
                   <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
-                    <Key className="h-3 w-3 mr-1" />
-                    Configured
+                    {activeProvider === "stripe" && <StripeLogo size={14} className="mr-1.5" />}
+                    {activeProvider === "dodo" && <DodoLogo size={14} className="mr-1.5" />}
+                    {activeProvider === "polar" && <PolarLogo size={14} className="mr-1.5" />}
+                    {activeProvider === "stripe" ? "Stripe" : activeProvider === "dodo" ? "Dodo Payments" : "Polar"} Connected
                   </Badge>
                 )}
               </div>
@@ -247,82 +444,359 @@ export default function RevenuePage() {
               </Button>
             </div>
             <CardDescription>
-              {hasStripeKeyConfigured
-                ? "Your Stripe key is configured. Click to update or sync data."
-                : "Configure your Stripe restricted API key to start tracking revenue metrics."}
+              Select your payment provider and enter your API key to track revenue metrics.
             </CardDescription>
           </CardHeader>
           {isStripeConfigExpanded && (
             <CardContent className="space-y-4">
+              {/* Provider Selection Dropdown */}
               <div className="space-y-2">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-sm text-blue-800 font-medium">
-                    🔒 Security Best Practice
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    Create a <strong>restricted API key</strong> in your Stripe
-                    dashboard with read-only access to: Customers, Subscriptions,
-                    Invoices, and Charges. Never use your secret key here.
-                  </p>
-                  <div className="mt-2">
-                    <a
-                      href="https://dashboard.stripe.com/apikeys"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-700 underline hover:text-blue-800"
-                    >
-                      → Create Restricted Key in Stripe Dashboard
-                    </a>
-                  </div>
-                </div>
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                  <p className="text-sm text-gray-800 font-medium">
-                    📋 Required Permissions (Read Only)
-                  </p>
-                  <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-600">
-                    <div>• Customers</div>
-                    <div>• Invoices</div>
-                    <div>• Subscriptions</div>
-                    <div>• Charges</div>
-                  </div>
-                </div>
+                <Label>Payment Provider</Label>
+                <Select value={activeProvider} onValueChange={(v) => setActiveProvider(v as "stripe" | "dodo" | "polar")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="stripe">
+                      <div className="flex items-center gap-3">
+                        <StripeLogo size={20} />
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Stripe</span>
+                          <span className="text-xs text-muted-foreground">Subscriptions, invoices & charges</span>
+                          {hasStripeKeyConfigured && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0">
+                              Connected
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="dodo">
+                      <div className="flex items-center gap-3">
+                        <DodoLogo size={20} />
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Dodo Payments</span>
+                          <span className="text-xs text-muted-foreground">Payments, subscriptions & billing</span>
+                          {hasDodoKeyConfigured && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0">
+                              Connected
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="polar">
+                      <div className="flex items-center gap-3">
+                        <PolarLogo size={20} />
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Polar</span>
+                          <span className="text-xs text-muted-foreground">Orders, subscriptions & products</span>
+                          {hasPolarKeyConfigured && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0">
+                              Connected
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
-                <div className="flex-1">
-                  <Label htmlFor="stripe-key">Stripe Restricted API Key</Label>
-                  <Input
-                    id="stripe-key"
-                    type="password"
-                    placeholder="rk_live_... or rk_test_..."
-                    value={stripeApiKey}
-                    onChange={(e) => setStripeApiKey(e.target.value)}
-                  />
-                </div>
-                <Button onClick={handleUpdateStripeKey} disabled={isUpdatingKey}>
-                  {isUpdatingKey && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+
+              {/* Stripe-specific config */}
+              {activeProvider === "stripe" && (
+                <div className="space-y-4 pt-2 border-t">
+                  {hasStripeKeyConfigured ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center gap-3">
+                        <StripeLogo size={24} />
+                        <div>
+                          <p className="text-sm font-medium text-green-800">Stripe Connected</p>
+                          <p className="text-xs text-green-600">API key is configured and active</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={handleSyncStripeData}
+                          disabled={isSyncing}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Sync Data
+                        </Button>
+                        <Button
+                          onClick={fetchAllData}
+                          disabled={isLoading}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Refresh
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setReplaceKeyModal("stripe"); setReplaceKeyValue(""); }}>
+                              <Key className="h-4 w-4 mr-2" />
+                              Replace API Key
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-sm text-blue-800 font-medium">
+                            Security Best Practice
+                          </p>
+                          <p className="text-xs text-blue-600 mt-1">
+                            Create a <strong>restricted API key</strong> in your Stripe
+                            dashboard with read-only access to: Customers, Subscriptions,
+                            Invoices, and Charges. Never use your secret key here.
+                          </p>
+                          <div className="mt-2">
+                            <a
+                              href="https://dashboard.stripe.com/apikeys"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-700 underline hover:text-blue-800"
+                            >
+                              Create Restricted Key in Stripe Dashboard
+                            </a>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                          <p className="text-sm text-gray-800 font-medium">
+                            Required Permissions (Read Only)
+                          </p>
+                          <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-600">
+                            <div>Customers</div>
+                            <div>Invoices</div>
+                            <div>Subscriptions</div>
+                            <div>Charges</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+                        <div className="flex-1">
+                          <Label htmlFor="stripe-key">Stripe Restricted API Key</Label>
+                          <Input
+                            id="stripe-key"
+                            type="password"
+                            placeholder="rk_live_... or rk_test_..."
+                            value={stripeApiKey}
+                            onChange={(e) => setStripeApiKey(e.target.value)}
+                          />
+                        </div>
+                        <Button onClick={handleUpdateStripeKey} disabled={isUpdatingKey}>
+                          {isUpdatingKey && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Connect Stripe
+                        </Button>
+                      </div>
+                    </>
                   )}
-                  {hasStripeKeyConfigured ? "Update Key" : "Configure Key"}
-                </Button>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  onClick={handleSyncStripeData}
-                  disabled={isSyncing}
-                  variant="outline"
-                >
-                  {isSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sync Stripe Data
-                </Button>
-                <Button
-                  onClick={fetchAllData}
-                  disabled={isLoading}
-                  variant="outline"
-                >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Refresh Data
-                </Button>
-              </div>
+                </div>
+              )}
+
+              {/* Dodo Payments-specific config */}
+              {activeProvider === "dodo" && (
+                <div className="space-y-4 pt-2 border-t">
+                  {hasDodoKeyConfigured ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center gap-3">
+                        <DodoLogo size={24} />
+                        <div>
+                          <p className="text-sm font-medium text-green-800">Dodo Payments Connected</p>
+                          <p className="text-xs text-green-600">API key is configured and active</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={handleSyncDodoData}
+                          disabled={isDodoSyncing}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isDodoSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Sync Data
+                        </Button>
+                        <Button
+                          onClick={fetchAllData}
+                          disabled={isLoading}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Refresh
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setReplaceKeyModal("dodo"); setReplaceKeyValue(""); }}>
+                              <Key className="h-4 w-4 mr-2" />
+                              Replace API Key
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-800 font-medium">
+                          Getting Your API Key
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          Get your API key from the Dodo Payments dashboard. Use a key
+                          with read access to Payments, Subscriptions, Customers, and Refunds.
+                        </p>
+                        <div className="mt-2">
+                          <a
+                            href="https://app.dodopayments.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-green-700 underline hover:text-green-800"
+                          >
+                            Open Dodo Payments Dashboard
+                          </a>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+                        <div className="flex-1">
+                          <Label htmlFor="dodo-key">Dodo Payments API Key</Label>
+                          <Input
+                            id="dodo-key"
+                            type="password"
+                            placeholder="Your Dodo Payments API key"
+                            value={dodoApiKey}
+                            onChange={(e) => setDodoApiKey(e.target.value)}
+                          />
+                        </div>
+                        <Button onClick={handleUpdateDodoKey} disabled={isUpdatingDodoKey}>
+                          {isUpdatingDodoKey && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Connect Dodo Payments
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Polar-specific config */}
+              {activeProvider === "polar" && (
+                <div className="space-y-4 pt-2 border-t">
+                  {hasPolarKeyConfigured ? (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center gap-3">
+                        <PolarLogo size={24} />
+                        <div>
+                          <p className="text-sm font-medium text-green-800">Polar Connected</p>
+                          <p className="text-xs text-green-600">Organization Access Token is configured</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={handleSyncPolarData}
+                          disabled={isPolarSyncing}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isPolarSyncing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Sync Data
+                        </Button>
+                        <Button
+                          onClick={fetchAllData}
+                          disabled={isLoading}
+                          variant="outline"
+                          size="sm"
+                        >
+                          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Refresh
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => { setReplaceKeyModal("polar"); setReplaceKeyValue(""); }}>
+                              <Key className="h-4 w-4 mr-2" />
+                              Replace API Key
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="p-3 bg-purple-50 border border-purple-200 rounded-md">
+                        <p className="text-sm text-purple-800 font-medium">
+                          Organization Access Token
+                        </p>
+                        <p className="text-xs text-purple-600 mt-1">
+                          Create an Organization Access Token (OAT) in your Polar dashboard
+                          with read access to: Orders, Subscriptions, Customers, and Metrics.
+                        </p>
+                        <div className="mt-2">
+                          <a
+                            href="https://polar.sh/dashboard"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-purple-700 underline hover:text-purple-800"
+                          >
+                            Open Polar Dashboard
+                          </a>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                        <p className="text-sm text-gray-800 font-medium">
+                          Required Scopes (Read Only)
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-gray-600">
+                          <div>orders:read</div>
+                          <div>subscriptions:read</div>
+                          <div>customers:read</div>
+                          <div>metrics:read</div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
+                        <div className="flex-1">
+                          <Label htmlFor="polar-key">Polar Organization Access Token</Label>
+                          <Input
+                            id="polar-key"
+                            type="password"
+                            placeholder="polar_oat_..."
+                            value={polarApiKey}
+                            onChange={(e) => setPolarApiKey(e.target.value)}
+                          />
+                        </div>
+                        <Button onClick={handleUpdatePolarKey} disabled={isUpdatingPolarKey}>
+                          {isUpdatingPolarKey && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          )}
+                          Connect Polar
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </CardContent>
           )}
         </Card>
@@ -337,7 +811,7 @@ export default function RevenuePage() {
           </Card>
         )}
 
-        {/* Empty State - No Stripe key or failed to fetch */}
+        {/* Empty State */}
         {!isLoading && !revenueMetrics && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center h-40">
@@ -348,17 +822,19 @@ export default function RevenuePage() {
                 <div>
                   <h3 className="text-lg font-semibold">No Revenue Data</h3>
                   <p className="text-muted-foreground">
-                    {hasStripeKeyConfigured
-                      ? "Click Sync to pull the latest data from Stripe."
-                      : "Configure your Stripe API key to start tracking revenue metrics."}
+                    {activeProvider === "polar"
+                      ? hasPolarKeyConfigured
+                        ? "Click Sync to pull the latest data from Polar."
+                        : "Select Polar above and enter your OAT to get started."
+                      : activeProvider === "dodo"
+                        ? hasDodoKeyConfigured
+                          ? "Click Sync to pull the latest data from Dodo Payments."
+                          : "Select Dodo Payments above and enter your API key to get started."
+                        : hasStripeKeyConfigured
+                          ? "Click Sync to pull the latest data from Stripe."
+                          : "Select Stripe above and enter your API key to get started."}
                   </p>
                 </div>
-                <Button onClick={hasStripeKeyConfigured ? handleSyncStripeData : undefined} disabled={isSyncing || !hasStripeKeyConfigured}>
-                  {isSyncing && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {hasStripeKeyConfigured ? "Sync Stripe Data" : "Configure Key Above"}
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -1152,6 +1628,103 @@ export default function RevenuePage() {
             </TabsContent>
           </Tabs>
         )}
+
+        {/* Replace API Key Modal */}
+        <Dialog open={replaceKeyModal !== null} onOpenChange={(open) => !open && setReplaceKeyModal(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {replaceKeyModal === "stripe" && <StripeLogo size={20} />}
+                {replaceKeyModal === "dodo" && <DodoLogo size={20} />}
+                {replaceKeyModal === "polar" && <PolarLogo size={20} />}
+                Replace {replaceKeyModal === "stripe" ? "Stripe" : replaceKeyModal === "dodo" ? "Dodo Payments" : "Polar"} API Key
+              </DialogTitle>
+              <DialogDescription>
+                Enter a new API key to replace the existing one. This will immediately take effect.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="replace-key">New API Key</Label>
+                <Input
+                  id="replace-key"
+                  type="password"
+                  placeholder={
+                    replaceKeyModal === "stripe" ? "rk_live_... or rk_test_..." :
+                    replaceKeyModal === "polar" ? "polar_oat_..." :
+                    "Your API key"
+                  }
+                  value={replaceKeyValue}
+                  onChange={(e) => setReplaceKeyValue(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setReplaceKeyModal(null)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={!replaceKeyValue.trim() || isUpdatingKey || isUpdatingDodoKey || isUpdatingPolarKey}
+                onClick={async () => {
+                  if (replaceKeyModal === "stripe") {
+                    setStripeApiKey(replaceKeyValue);
+                    // Trigger the update handler directly
+                    setIsUpdatingKey(true);
+                    try {
+                      await projectService.updateStripeApiKey(selectedProjectId!, replaceKeyValue);
+                      toast({ title: "Success", description: "Stripe API key replaced successfully" });
+                      setReplaceKeyValue("");
+                      setReplaceKeyModal(null);
+                      centralizedData.invalidateRevenueCache(selectedProjectId!);
+                      await fetchProjects();
+                      await fetchAllData();
+                    } catch {
+                      toast({ title: "Error", description: "Failed to update Stripe API key", variant: "destructive" });
+                    } finally {
+                      setIsUpdatingKey(false);
+                      setStripeApiKey("");
+                    }
+                  } else if (replaceKeyModal === "dodo") {
+                    setIsUpdatingDodoKey(true);
+                    try {
+                      await projectService.updateDodoApiKey(selectedProjectId!, replaceKeyValue);
+                      toast({ title: "Success", description: "Dodo Payments API key replaced successfully" });
+                      setReplaceKeyValue("");
+                      setReplaceKeyModal(null);
+                      centralizedData.invalidateRevenueCache(selectedProjectId!);
+                      await fetchProjects();
+                      await fetchAllData();
+                    } catch {
+                      toast({ title: "Error", description: "Failed to update Dodo API key", variant: "destructive" });
+                    } finally {
+                      setIsUpdatingDodoKey(false);
+                    }
+                  } else if (replaceKeyModal === "polar") {
+                    setIsUpdatingPolarKey(true);
+                    try {
+                      await projectService.updatePolarApiKey(selectedProjectId!, replaceKeyValue);
+                      toast({ title: "Success", description: "Polar API key replaced successfully" });
+                      setReplaceKeyValue("");
+                      setReplaceKeyModal(null);
+                      centralizedData.invalidateRevenueCache(selectedProjectId!);
+                      await fetchProjects();
+                      await fetchAllData();
+                    } catch {
+                      toast({ title: "Error", description: "Failed to update Polar API key", variant: "destructive" });
+                    } finally {
+                      setIsUpdatingPolarKey(false);
+                    }
+                  }
+                }}
+              >
+                {(isUpdatingKey || isUpdatingDodoKey || isUpdatingPolarKey) && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Replace Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -68,6 +68,12 @@ export interface AutomationExecution {
   automation?: AutomationSettings;
 }
 
+export type EmailProvider = "mailchimp" | "resend" | "sendgrid";
+
+export interface EmailProviderConfig {
+  api_key?: string;
+}
+
 export interface CreateAutomationRequest {
   name: string;
   description?: string;
