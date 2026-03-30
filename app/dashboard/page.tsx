@@ -1216,7 +1216,7 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
-              {events.length === 0 && (
+              {(!events || events.length === 0) && (
                 <p className="text-sm text-[#78716C] text-center py-4">
                   No recent events found. Start tracking events to see data
                   here.

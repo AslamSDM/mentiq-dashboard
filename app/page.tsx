@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 // ─── Inline animation hook ───────────────────────────────────────────────────
 function useInView(threshold = 0.15) {
@@ -192,6 +199,7 @@ export default function LandingPage() {
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(false);
+  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setHeroVisible(true), 80);
@@ -220,6 +228,7 @@ export default function LandingPage() {
 
       if (data.success) {
         setSubmitted(true);
+        setIsWaitlistModalOpen(false);
         toast({
           title: "You're on the waitlist",
           description: "We'll reach out when Mentiq opens early access.",
@@ -247,6 +256,35 @@ export default function LandingPage() {
       className="bg-[#FAFAF8] text-slate-900"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
+      <Dialog open={isWaitlistModalOpen} onOpenChange={setIsWaitlistModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Join the waitlist</DialogTitle>
+            <DialogDescription>
+              Enter your work email to get early access to Mentiq.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleWaitlist} className="space-y-4 mt-2">
+            <div>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="w-full text-sm text-slate-900 border border-slate-200 rounded-lg px-4 py-3 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#3B5BDB] text-white font-medium text-sm rounded-lg px-4 py-3 hover:bg-[#3451C7] transition-colors"
+            >
+              {loading ? "Joining..." : "Request early access"}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-[#FAFAF8]/90 backdrop-blur-md border-b border-slate-100">
         <nav
@@ -312,7 +350,8 @@ export default function LandingPage() {
             </Link>
             <a
               href="#waitlist"
-              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2 rounded-lg hover:bg-[#3451C7] transition-colors"
+              onClick={(e) => { e.preventDefault(); setIsWaitlistModalOpen(true); }}
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
             >
               Join waitlist
             </a>
@@ -391,8 +430,8 @@ export default function LandingPage() {
             </Link>
             <a
               href="#waitlist"
-              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2.5 rounded-lg text-center"
-              onClick={() => setMenuOpen(false)}
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2.5 rounded-lg text-center cursor-pointer"
+              onClick={(e) => { e.preventDefault(); setMenuOpen(false); setIsWaitlistModalOpen(true); }}
             >
               Join waitlist
             </a>
@@ -445,7 +484,8 @@ export default function LandingPage() {
             >
               <a
                 href="#waitlist"
-                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors"
+                onClick={(e) => { e.preventDefault(); setIsWaitlistModalOpen(true); }}
+                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
                 aria-label="Request early access to Mentiq"
               >
                 Request early access
