@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -254,28 +254,27 @@ export default function RetentionPage() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Retention Analysis"
-          description="Track user retention across cohorts and time periods"
-        />
+      <PageShell
+        title="Retention Analysis"
+        description="Track user retention across cohorts and time periods"
+        breadcrumb="Pages / Retention"
+      >
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">
             Please select a project to view retention analytics.
           </p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Retention Analysis"
-        description="Track user retention across cohorts and time periods"
-      />
-
-      <div className="flex-1 p-6 space-y-6">
+    <PageShell
+      title="Retention Analysis"
+      description="Track user retention across cohorts and time periods"
+      breadcrumb="Pages / Retention"
+    >
+      <div className="space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -823,6 +822,6 @@ export default function RetentionPage() {
           </>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

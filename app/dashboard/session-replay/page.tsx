@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -209,11 +209,12 @@ export default function SessionReplayPage() {
   }, [selectedSession]);
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <DashboardHeader
-        title="Session Analysis"
-        description="Analyze user sessions and interaction heatmaps"
-      />
+    <PageShell
+      title="Session Analysis"
+      description="Analyze user sessions and interaction heatmaps"
+      breadcrumb="Pages / Sessions"
+    >
+      <div className="space-y-4">
 
       <Tabs defaultValue="replay" className="space-y-4">
         <TabsList>
@@ -435,6 +436,7 @@ export default function SessionReplayPage() {
           <HeatmapsView />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PageShell>
   );
 }

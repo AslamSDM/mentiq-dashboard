@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -301,28 +301,27 @@ export default function ChurnAnalysisPage() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Churn Analysis"
-          description="Identify at-risk users and prevent churn"
-        />
+      <PageShell
+        title="Churn Analysis"
+        description="Identify at-risk users and prevent churn"
+        breadcrumb="Pages / Churn"
+      >
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">
             Please select a project to view churn analysis.
           </p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Churn Analysis"
-        description="Identify at-risk users and prevent churn"
-      />
-
-      <div className="flex-1 p-6 space-y-6">
+    <PageShell
+      title="Churn Analysis"
+      description="Identify at-risk users and prevent churn"
+      breadcrumb="Pages / Churn"
+    >
+      <div className="space-y-6">
         {/* Overview Cards */}
         {churnMetrics && (
           <div className="grid gap-4 md:grid-cols-4">
@@ -941,6 +940,6 @@ export default function ChurnAnalysisPage() {
           </Button>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

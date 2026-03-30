@@ -7,15 +7,16 @@ import { useSession, signOut } from "next-auth/react";
 import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback } from "react";
+import { ProjectSelector } from "@/components/project-selector";
 import {
   LayoutDashboard,
   Settings,
   LogOut,
   Mail,
   User,
-  Bell,
   Activity,
-  FolderKanban,
+  FolderOpen,
+  UserCircle,
   Brain,
   Repeat,
   LifeBuoy,
@@ -30,113 +31,72 @@ import {
   Clock,
   Gauge,
   Send,
+  HelpCircle,
+  BarChart2,
+  Users,
+  TrendingDown,
+  Zap,
+  Play,
 } from "lucide-react";
+import Image from "next/image";
 
-const navigation = [
+const NAV_GROUPS = [
   {
-    name: "Overview",
-    href: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
+    items: [
+      { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+      {
+        name: "Revenue Analytics",
+        href: "/dashboard/revenue",
+        icon: DollarSign,
+      },
+      { name: "Retention Cohorts", href: "/dashboard/retention", icon: Users },
+      {
+        name: "Churn Awareness",
+        href: "/dashboard/churn-awareness",
+        icon: TrendingDown,
+      }, // Note: may need redirect mapped
+      { name: "Feature Tracking", href: "/dashboard/features", icon: Zap },
+      { name: "Session Replay", href: "/dashboard/session-replay", icon: Play },
+      {
+        name: "Churn by Channel",
+        href: "/dashboard/churn-by-channel",
+        icon: BarChart2,
+      },
+      { name: "Email Automations", href: "/dashboard/playbooks", icon: Mail },
+      { name: "Sent Emails", href: "/dashboard/emails", icon: Send },
+    ],
   },
   {
-    name: "Revenue Analytics",
-    href: "/dashboard/revenue",
-    icon: <DollarSign className="h-5 w-5" />,
-  },
-  {
-    name: "Retention Cohorts",
-    href: "/dashboard/retention",
-    icon: <Repeat className="h-5 w-5" />,
-  },
-  {
-    name: "Churn Awareness",
-    href: "/dashboard/churn",
-    icon: <Bell className="h-5 w-5" />,
-  },
-  {
-    name: "Feature Tracking",
-    href: "/dashboard/features",
-    icon: <Activity className="h-5 w-5" />,
-  },
-  {
-    name: "Session Replay",
-    href: "/dashboard/session-replay",
-    icon: <Repeat className="h-5 w-5" />,
-  },
-  {
-    name: "Churn by Channel",
-    href: "/dashboard/churn-by-channel",
-    icon: <Brain className="h-5 w-5" />,
-  },
-  {
-    name: "Email Automations",
-    href: "/dashboard/playbooks",
-    icon: <Mail className="h-5 w-5" />,
-  },
-  {
-    name: "Sent Emails",
-    href: "/dashboard/emails",
-    icon: <Send className="h-5 w-5" />,
-  },
-  {
-    name: "Projects",
-    href: "/dashboard/projects",
-    icon: <FolderKanban className="h-5 w-5" />,
-  },
-  {
-    name: "Team",
-    href: "/dashboard/team",
-    icon: <User className="h-5 w-5" />,
-  },
-  {
-    name: "Settings",
-    href: "/dashboard/settings",
-    icon: <Settings className="h-5 w-5" />,
-  },
-  {
-    name: "Integrations",
-    href: "/dashboard/settings/integrations",
-    icon: <Plug className="h-5 w-5" />,
-  },
-  {
-    name: "Support",
-    href: "/dashboard/support",
-    icon: <LifeBuoy className="h-5 w-5" />,
+    label: "Workspace",
+    items: [
+      { name: "Projects", href: "/dashboard/projects", icon: FolderOpen },
+      { name: "Team", href: "/dashboard/team", icon: UserCircle },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings },
+      {
+        name: "Integrations",
+        href: "/dashboard/settings/integrations",
+        icon: Plug,
+      },
+      { name: "Support", href: "/dashboard/support", icon: HelpCircle },
+    ],
   },
 ];
 
-const adminNavigation = [
-  {
-    name: "Admin Users",
-    href: "/dashboard/admin/users",
-    icon: <Shield className="h-5 w-5" />,
-  },
-  {
-    name: "Add Users",
-    href: "/dashboard/admin/test-users",
-    icon: <User className="h-5 w-5" />,
-  },
-  {
-    name: "Waitlist",
-    href: "/dashboard/admin/waitlist",
-    icon: <Clock className="h-5 w-5" />,
-  },
-  {
-    name: "Admin Projects",
-    href: "/dashboard/admin/projects",
-    icon: <FolderKanban className="h-5 w-5" />,
-  },
-  {
-    name: "Admin Tickets",
-    href: "/dashboard/admin/tickets",
-    icon: <Ticket className="h-5 w-5" />,
-  },
-  {
-    name: "Usage Limits",
-    href: "/dashboard/admin/limits",
-    icon: <Gauge className="h-5 w-5" />,
-  },
-];
+const ADMIN_GROUP = {
+  label: "Admin",
+  items: [
+    { name: "Admin Users", href: "/dashboard/admin/users", icon: Shield },
+    { name: "Add Users", href: "/dashboard/admin/test-users", icon: User },
+    { name: "Waitlist", href: "/dashboard/admin/waitlist", icon: Clock },
+    {
+      name: "Admin Projects",
+      href: "/dashboard/admin/projects",
+      icon: FolderOpen,
+    },
+    { name: "Admin Tickets", href: "/dashboard/admin/tickets", icon: Ticket },
+    { name: "Usage Limits", href: "/dashboard/admin/limits", icon: Gauge },
+  ],
+};
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -156,219 +116,274 @@ export function DashboardSidebar() {
     await signOut({ callbackUrl: "/signin" });
   }, [logout]);
 
+  // Merge admin group if needed
+  const groupsToRender = session?.isAdmin
+    ? [...NAV_GROUPS, ADMIN_GROUP]
+    : NAV_GROUPS;
+
   return (
     <>
-      {/* Mobile Toggle Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden fixed top-4 left-4 z-40 text-[#2B3674] bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm"
+        className="md:hidden fixed top-4 right-4 z-40 text-slate-800 bg-white/80 backdrop-blur-sm border shadow-sm"
         onClick={() => setIsMobileOpen(true)}
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-[#2B3674]/20 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-slate-900/20 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar Container */}
-      <div
+      <aside
         className={cn(
-          "flex h-full flex-col bg-white transition-all duration-300 shadow-[0_18px_40px_rgba(112,144,176,0.12)]", // Light theme background and soft shadow
-          isCollapsed ? "w-20" : "w-72",
-          "fixed inset-y-0 left-0 z-50 md:relative",
+          "flex flex-col shrink-0 border-r transition-all duration-300 z-50 fixed inset-y-0 left-0 md:relative",
+          isCollapsed ? "w-[56px]" : "w-[220px]",
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderColor: "#E7E5E4",
+        }}
       >
-        {/* Sidebar Header */}
-        <div className="flex h-20 items-center justify-between px-2 border-b border-gray-100">
-          <div
-            className={cn(
-              "flex items-center gap-3 overflow-hidden transition-all duration-300",
-              isCollapsed && "w-0 opacity-0",
-            )}
-          >
-            <div className="relative h-30 w-30">
-              <img
-                src="/logo.png"
-                alt="Mentiq Logo"
-                className={
-                  "object-contain transition-all duration-300" + "h-30 w-30"
-                }
-              />
-            </div>
-          </div>
-
-          {/* Collapse Toggle (Desktop only) */}
+        <div
+          className="flex items-center justify-between h-[56px] px-4 border-b shrink-0 bg-white"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          {!isCollapsed ? (
+            <Link href="/" onClick={() => setIsMobileOpen(false)}>
+              <div className="relative h-30 w-36">
+                <Image
+                  src="/logo.png"
+                  alt="Mentiq"
+                  fill
+                  className="object-contain -ml-8"
+                  priority
+                />
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/"
+              className="mx-auto"
+              onClick={() => setIsMobileOpen(false)}
+            >
+              <span
+                className="text-[1rem] font-bold"
+                style={{ color: "#2563EB" }}
+              >
+                M
+              </span>
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="icon"
-            className={cn(
-              "hidden md:flex h-8 w-8 text-[#4363C7] hover:text-[#2B3674] shrink-0",
-              isCollapsed && "mx-auto",
-            )}
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-5 w-5" />
-            ) : (
-              <ChevronLeft className="h-5 w-5" />
-            )}
-          </Button>
-
-          {/* Close Button (Mobile only) */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden h-8 w-8 text-[#4363C7] hover:text-[#2B3674]"
+            className="md:hidden h-8 w-8 text-slate-600 hover:text-slate-900"
             onClick={() => setIsMobileOpen(false)}
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-4 overflow-y-auto scrollbar-hide">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsMobileOpen(false)}
-                data-tour-id={item.name}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group my-1",
-                  isActive
-                    ? "text-[#2B3674] font-bold bg-[#F4F7FE]" // Active state: Dark text on light blue bg
-                    : "text-[#4363C7] hover:text-[#2B3674]", // Inactive state: Muted text
-                  isCollapsed && "justify-center px-2",
-                )}
-                title={isCollapsed ? item.name : undefined}
-              >
-                {/* Active Indicator Line */}
-                {isActive && (
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-l-lg bg-[#4318FF]" />
-                )}
+        {/* Project Selector embedded at the top */}
+        {!isCollapsed && (
+          <div className="px-3 py-3 border-b border-gray-100 flex items-center justify-center">
+            <ProjectSelector />
+          </div>
+        )}
 
-                <div
-                  className={cn(
-                    "transition-colors",
-                    isActive
-                      ? "text-[#4318FF]"
-                      : "text-[#4363C7] group-hover:text-[#2B3674]",
-                  )}
-                >
-                  {item.icon}
-                </div>
-                {!isCollapsed && <span>{item.name}</span>}
-              </Link>
-            );
-          })}
-
-          {/* Admin Section */}
-          {session?.isAdmin && (
-            <>
-              {!isCollapsed && (
-                <div className="px-4 py-2 text-xs font-bold text-[#4363C7] uppercase tracking-wider mt-4">
-                  Admin
-                </div>
-              )}
-              {isCollapsed && <div className="h-px w-full bg-gray-100 my-2" />}
-
-              {adminNavigation.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 relative group my-1",
-                      isActive
-                        ? "text-[#2B3674] font-bold bg-[#F4F7FE]"
-                        : "text-[#4363C7] hover:text-[#2B3674]",
-                      isCollapsed && "justify-center px-2",
-                    )}
-                    title={isCollapsed ? item.name : undefined}
+        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4 scrollbar-hide">
+          {groupsToRender.map((group, gi) => (
+            <div key={gi}>
+              {group.label && !isCollapsed && (
+                <>
+                  <p
+                    className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] px-2 mb-1"
+                    style={{ color: "#A8A29E" }}
                   >
-                    {isActive && (
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-l-lg bg-[#4318FF]" />
-                    )}
-                    <div
-                      className={cn(
-                        "transition-colors",
-                        isActive
-                          ? "text-[#4318FF]"
-                          : "text-[#4363C7] group-hover:text-[#2B3674]",
-                      )}
+                    {group.label}
+                  </p>
+                  <div
+                    className="h-px mb-2 mx-2"
+                    style={{ backgroundColor: "#F3F2F1" }}
+                  />
+                </>
+              )}
+              {group.label && isCollapsed && (
+                <div
+                  className="h-px mb-2 mx-2 mt-4"
+                  style={{ backgroundColor: "#F3F2F1" }}
+                />
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(item.href + "/");
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
+                      className="group block"
                     >
-                      {item.icon}
-                    </div>
-                    {!isCollapsed && <span>{item.name}</span>}
-                  </Link>
-                );
-              })}
-            </>
-          )}
+                      <div
+                        className={cn(
+                          "flex items-center gap-2.5 px-2 py-1.5 rounded-md transition-colors duration-100 cursor-pointer",
+                          isCollapsed && "justify-center",
+                        )}
+                        style={{
+                          backgroundColor: isActive
+                            ? "rgba(37,99,235,0.08)"
+                            : "transparent",
+                          color: isActive ? "#2563EB" : "#78716C",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            (
+                              e.currentTarget as HTMLDivElement
+                            ).style.backgroundColor = "#F8F7F4";
+                            (e.currentTarget as HTMLDivElement).style.color =
+                              "#1C1917";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive) {
+                            (
+                              e.currentTarget as HTMLDivElement
+                            ).style.backgroundColor = "transparent";
+                            (e.currentTarget as HTMLDivElement).style.color =
+                              "#78716C";
+                          }
+                        }}
+                        title={isCollapsed ? item.name : undefined}
+                      >
+                        <item.icon
+                          className="shrink-0"
+                          style={{ width: "14px", height: "14px" }}
+                          strokeWidth={isActive ? 2 : 1.75}
+                        />
+                        {!isCollapsed && (
+                          <span className="text-[0.8125rem] font-medium truncate">
+                            {item.name}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* User Profile / Logout Section */}
-        <div className="p-4 mx-2 mb-2">
-          {!isCollapsed ? (
-            <div className="rounded-2xl bg-gradient-to-br from-[#868CFF] to-[#4318FF] p-4 text-white shadow-lg relative overflow-hidden">
-              <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl"></div>
-
-              <div className="flex items-center gap-3 mb-3 relative z-10">
-                <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white border-2 border-white/30">
-                  {session?.user?.image ? (
-                    <img
-                      src={session.user.image}
-                      alt="User"
-                      className="rounded-full h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="font-bold">
-                      {session?.user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-sm truncate">
-                    {session?.user?.name}
-                  </p>
-                  <p className="text-xs text-white/80 truncate">Pro Plan</p>
-                </div>
-              </div>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm justify-start"
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-full h-12 text-[#4363C7] hover:text-[#E31A1A] hover:bg-red-50"
-              onClick={handleSignOut}
-              title="Sign Out"
+        <div
+          className="border-t px-2 py-3 space-y-1"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          <div
+            className={cn(
+              "flex items-center gap-2.5 px-2 py-1.5 rounded-md",
+              isCollapsed && "justify-center",
+            )}
+            style={{ color: "#78716C" }}
+          >
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[0.65rem] font-semibold shrink-0"
+              style={{
+                backgroundColor: "rgba(37,99,235,0.1)",
+                color: "#2563EB",
+              }}
             >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          )}
+              {session?.user?.name?.charAt(0).toUpperCase() || "A"}
+            </div>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <p
+                  className="text-[0.75rem] font-medium truncate"
+                  style={{ color: "#1C1917" }}
+                >
+                  {session?.user?.name || "Anonymous User"}
+                </p>
+                <p
+                  className="text-[0.65rem] truncate"
+                  style={{ color: "#A8A29E" }}
+                >
+                  Pro Plan
+                </p>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleSignOut}
+            className={cn(
+              "flex items-center gap-2.5 w-full px-2 py-1.5 rounded-md transition-colors duration-100",
+              isCollapsed && "justify-center",
+            )}
+            style={{ color: "#A8A29E" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#DC2626";
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "rgba(220,38,38,0.05)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#A8A29E";
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "transparent";
+            }}
+            title={isCollapsed ? "Sign out" : undefined}
+          >
+            <LogOut
+              style={{ width: "14px", height: "14px" }}
+              strokeWidth={1.75}
+              className="shrink-0"
+            />
+            {!isCollapsed && (
+              <span className="text-[0.8125rem] font-medium">Sign out</span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className={cn(
+              "hidden md:flex items-center gap-2.5 w-full px-2 py-1.5 rounded-md transition-colors duration-100",
+              isCollapsed && "justify-center",
+            )}
+            style={{ color: "#A8A29E" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "#F8F7F4";
+              (e.currentTarget as HTMLButtonElement).style.color = "#78716C";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                "transparent";
+              (e.currentTarget as HTMLButtonElement).style.color = "#A8A29E";
+            }}
+          >
+            {isCollapsed ? (
+              <ChevronRight
+                style={{ width: "14px", height: "14px" }}
+                strokeWidth={1.75}
+              />
+            ) : (
+              <>
+                <ChevronLeft
+                  style={{ width: "14px", height: "14px" }}
+                  strokeWidth={1.75}
+                />
+                <span className="text-[0.8125rem] font-medium">Collapse</span>
+              </>
+            )}
+          </button>
         </div>
-      </div>
+      </aside>
     </>
   );
 }

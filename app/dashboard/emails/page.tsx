@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -226,11 +226,12 @@ export default function EmailsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <DashboardHeader
-        title="Automation Emails"
-        description="View all sent automation emails, preview content, and customize AI prompts"
-      />
+    <PageShell
+      title="Automation Emails"
+      description="View all sent automation emails, preview content, and customize AI prompts"
+      breadcrumb="Pages / Sent Emails"
+    >
+      <div className="space-y-6">
 
       {/* Stats row */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -672,6 +673,7 @@ export default function EmailsPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PageShell>
   );
 }

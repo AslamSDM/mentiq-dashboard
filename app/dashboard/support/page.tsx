@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { PageShell } from "@/components/page-shell";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -184,31 +185,18 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F7FE] p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto space-y-8"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-[#2B3674] flex items-center gap-3">
-              <LifeBuoy className="h-8 w-8 text-[#4318FF]" />
-              Support
-            </h1>
-            <p className="text-[#4363C7] mt-1">
-              Get help from our team. View your tickets and create new ones.
-            </p>
-          </div>
-
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">
-                <Plus className="h-4 w-4 mr-2" />
-                New Ticket
-              </Button>
-            </DialogTrigger>
+    <PageShell
+      title="Support"
+      description="Get help from our team. View your tickets and create new ones."
+      breadcrumb="Pages / Support"
+      action={
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">
+              <Plus className="h-4 w-4 mr-2" />
+              New Ticket
+            </Button>
+          </DialogTrigger>
             <DialogContent className="bg-white border-[#E0E5F2] max-w-lg rounded-2xl">
               <DialogHeader>
                 <DialogTitle className="text-[#2B3674]">Create Support Ticket</DialogTitle>
@@ -315,7 +303,9 @@ export default function SupportPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+        }
+      >
+        <div className="space-y-4">
 
         {/* Tickets List */}
         <div className="bg-white rounded-3xl border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] overflow-hidden">
@@ -495,7 +485,7 @@ export default function SupportPage() {
             )}
           </DialogContent>
         </Dialog>
-      </motion.div>
-    </div>
+      </div>
+    </PageShell>
   );
 }

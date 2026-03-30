@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -100,8 +100,11 @@ export default function ChurnByChannelPage() {
   const maxChurnRate = Math.max(...channelData?.map((c) => c.churnRate));
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
- 
+    <PageShell
+      title="Churn by Channel"
+      breadcrumb="Pages / Churn"
+    >
+      <div className="space-y-4">
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -443,6 +446,7 @@ export default function ChurnByChannelPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </PageShell>
   );
 }

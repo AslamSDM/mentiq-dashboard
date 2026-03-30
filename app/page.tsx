@@ -1,371 +1,217 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import useEmblaCarousel from "embla-carousel-react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Check,
-  ChevronRight,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  TrendingUp,
-  Stars,
-  Globe,
-  Users,
-  User,
-  Mail,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
-type Testimonial = {
+// ─── Inline animation hook ───────────────────────────────────────────────────
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+// ─── Stat counter ─────────────────────────────────────────────────────────────
+function CountUp({
+  end,
+  suffix = "",
+  duration = 1800,
+}: {
+  end: number;
+  suffix?: string;
+  duration?: number;
+}) {
+  const [count, setCount] = useState(0);
+  const { ref, visible } = useInView();
+  useEffect(() => {
+    if (!visible) return;
+    let start = 0;
+    const step = end / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= end) {
+        setCount(end);
+        clearInterval(timer);
+      } else setCount(Math.floor(start));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [visible, end, duration]);
+  return (
+    <span ref={ref}>
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
+// ─── Feature card ─────────────────────────────────────────────────────────────
+function FeatureCard({
+  icon,
+  title,
+  description,
+  image,
+  imageAlt,
+  delay = 0,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  image?: string;
+  imageAlt?: string;
+  delay?: number;
+}) {
+  const { ref, visible } = useInView();
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`group bg-white rounded-2xl border border-slate-100 overflow-hidden transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+    >
+      <div className="p-8">
+        <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] flex items-center justify-center mb-5 text-[#3B5BDB]">
+          {icon}
+        </div>
+        <h3 className="text-[1.125rem] font-semibold text-slate-900 mb-2 leading-snug">
+          {title}
+        </h3>
+        <p className="text-[0.9375rem] text-slate-500 leading-relaxed">
+          {description}
+        </p>
+      </div>
+      {image && (
+        <div className="mx-6 mb-6 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+          <img
+            src={image}
+            alt={imageAlt || title}
+            className="w-full h-48 object-cover object-top transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Testimonial card ─────────────────────────────────────────────────────────
+function TestimonialCard({
+  quote,
+  name,
+  role,
+  company,
+  delay = 0,
+}: {
+  quote: string;
   name: string;
   role: string;
   company: string;
-  quote: string;
-  metric: string;
-  tag: string;
-};
-
-type ResultMetric = {
-  label: string;
-  value: string;
-  detail: string;
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 14, filter: "blur(6px)" },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.55, delay: 0.05 + i * 0.06 },
-  }),
-};
-
-function StatPill({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      className="flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1.5"
-      data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`}
-    >
-      <span
-        className="text-xs text-black/55"
-        data-testid={`text-stat-label-${label.toLowerCase().replace(/\s+/g, "-")}`}
-      >
-        {label}
-      </span>
-      <span
-        className="text-sm font-semibold text-black"
-        data-testid={`text-stat-value-${label.toLowerCase().replace(/\s+/g, "-")}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function ResultCard({
-  metric,
-  index,
-}: {
-  metric: ResultMetric;
-  index: number;
+  delay?: number;
 }) {
+  const { ref, visible } = useInView();
   return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      custom={index}
-      className="h-full"
+    <figure
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`bg-white rounded-2xl border border-slate-100 p-8 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
     >
-      <Card
-        className="relative h-full overflow-hidden rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
-        data-testid={`card-result-${index}`}
+      <blockquote className="text-[0.9375rem] text-slate-600 leading-relaxed mb-6">
+        "{quote}"
+      </blockquote>
+      <figcaption className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-[#EEF2FF] flex items-center justify-center text-[#3B5BDB] text-sm font-semibold">
+          {name.charAt(0)}
+        </div>
+        <div>
+          <div className="text-sm font-semibold text-slate-900">{name}</div>
+          <div className="text-xs text-slate-400">
+            {role}, {company}
+          </div>
+        </div>
+      </figcaption>
+    </figure>
+  );
+}
+
+// ─── FAQ item ─────────────────────────────────────────────────────────────────
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-slate-100 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between py-5 text-left gap-4 group"
       >
-        <div className="absolute -top-12 -right-10 h-32 w-32 rounded-full bg-gradient-to-br from-fuchsia-300/25 to-sky-300/20 blur-2xl" />
-        <div className="absolute -bottom-14 -left-12 h-36 w-36 rounded-full bg-gradient-to-br from-sky-200/18 to-amber-200/20 blur-2xl" />
-
-        <div className="relative flex items-start justify-between gap-3">
-          <div>
-            <div
-              className="text-xs font-medium text-black/55"
-              data-testid={`text-result-label-${index}`}
-            >
-              {metric.label}
-            </div>
-            <div
-              className="mt-2 font-sans text-3xl tracking-tight text-black"
-              data-testid={`text-result-value-${index}`}
-            >
-              {metric.value}
-            </div>
-          </div>
-          <div
-            className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-            aria-hidden="true"
-          >
-            <TrendingUp className="h-5 w-5 text-black/70" strokeWidth={1.75} />
-          </div>
-        </div>
-
-        <p
-          className="relative mt-3 text-sm leading-relaxed text-black/65"
-          data-testid={`text-result-detail-${index}`}
-        >
-          {metric.detail}
-        </p>
-      </Card>
-    </motion.div>
-  );
-}
-
-function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
-  return (
-    <motion.div
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      custom={index}
-      className="h-full"
-    >
-      <Card
-        className="group relative h-full overflow-hidden rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
-        data-testid={`card-testimonial-${index}`}
-      >
-        <div className="absolute -top-16 right-6 h-44 w-44 rounded-full bg-gradient-to-br from-fuchsia-300/16 to-sky-300/14 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
-        <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-sky-200/12 to-amber-200/14 blur-2xl" />
-
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
-            <div
-              className="flex items-center gap-2"
-              data-testid={`row-testimonial-meta-${index}`}
-            >
-              <div
-                className="text-sm font-semibold text-black"
-                data-testid={`text-testimonial-name-${index}`}
-              >
-                {t.name}
-              </div>
-              <Badge
-                className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
-                data-testid={`badge-testimonial-tag-${index}`}
-              >
-                {t.tag}
-              </Badge>
-            </div>
-            <div
-              className="mt-1 text-xs text-black/55"
-              data-testid={`text-testimonial-role-${index}`}
-            >
-              {t.role} · {t.company}
-            </div>
-          </div>
-
-          <div
-            className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-            aria-hidden="true"
-          >
-            <Stars className="h-5 w-5 text-black/70" strokeWidth={1.75} />
-          </div>
-        </div>
-
-        <p
-          className="relative mt-5 text-sm leading-relaxed text-black/70"
-          data-testid={`text-testimonial-quote-${index}`}
-        >
-          &ldquo;{t.quote}&rdquo;
-        </p>
-
-        <div
-          className="relative mt-5 rounded-xl border border-black/10 bg-black/[0.03] px-4 py-3"
-          data-testid={`box-testimonial-metric-${index}`}
-        >
-          <div
-            className="text-xs text-black/55"
-            data-testid={`text-testimonial-metric-label-${index}`}
-          >
-            Reported result
-          </div>
-          <div
-            className="mt-1 font-sans text-lg tracking-tight text-black"
-            data-testid={`text-testimonial-metric-${index}`}
-          >
-            {t.metric}
-          </div>
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
-
-const testimonialSlides = [
-  {
-    src: "/testimonials/subscriber-churn.png",
-    alt: "Subscriber churn rate dropping from 20% to 5.52%",
-  },
-  {
-    src: "/testimonials/subscriber-ltv.png",
-    alt: "Subscriber lifetime value rising to $322.64",
-  },
-];
-
-function TestimonialCarousel() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    emblaApi.on("select", onSelect);
-    onSelect();
-
-    const interval = setInterval(() => {
-      emblaApi.scrollNext();
-    }, 4000);
-
-    return () => {
-      clearInterval(interval);
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi, onSelect]);
-
-  return (
-    <div className="relative flex flex-col items-center justify-center border-t border-black/10 bg-black/[0.02] p-6 md:border-l md:border-t-0 md:p-8">
-      <div className="w-full overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-          {testimonialSlides.map((slide, i) => (
-            <div key={i} className="min-w-0 flex-[0_0_100%]">
-              <div className="flex items-center justify-center px-2">
-                <Image
-                  src={slide.src}
-                  alt={slide.alt}
-                  width={380}
-                  height={380}
-                  className="rounded-xl shadow-sm"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-4 flex gap-2">
-        {testimonialSlides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => emblaApi?.scrollTo(i)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === selectedIndex
-                ? "w-6 bg-black/40"
-                : "w-2 bg-black/15 hover:bg-black/25"
-            }`}
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FieldRow({
-  icon,
-  label,
-  children,
-  testId,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
-  testId: string;
-}) {
-  return (
-    <div className="grid gap-2" data-testid={testId}>
-      <div className="flex items-center gap-2 text-xs font-medium text-black/60">
-        <span
-          className="inline-flex h-7 w-7 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03]"
-          aria-hidden="true"
-        >
-          {icon}
+        <span className="text-[0.9375rem] font-medium text-slate-900 group-hover:text-[#3B5BDB] transition-colors">
+          {question}
         </span>
-        <span data-testid={`${testId}-label`}>{label}</span>
+        <span
+          className={`flex-shrink-0 w-5 h-5 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 transition-transform duration-200 ${open ? "rotate-45" : ""}`}
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path
+              d="M5 1v8M1 5h8"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ${open ? "max-h-96 pb-5" : "max-h-0"}`}
+      >
+        <p className="text-[0.9375rem] text-slate-500 leading-relaxed">
+          {answer}
+        </p>
       </div>
-      {children}
     </div>
   );
 }
 
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function LandingPage() {
   const { toast } = useToast();
-
-  const [fullName, setFullName] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
   const [email, setEmail] = useState("");
-  const [paidUsers, setPaidUsers] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(false);
 
-  function normalizeUrl(raw: string) {
-    const t = raw.trim();
-    if (!t) return "";
-    if (t.startsWith("http://") || t.startsWith("https://")) return t;
-    return `https://${t}`;
-  }
+  useEffect(() => {
+    const t = setTimeout(() => setHeroVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
 
-  async function submitWaitlist(e: React.FormEvent) {
+  async function handleWaitlist(e: React.FormEvent) {
     e.preventDefault();
-    const n = fullName.trim();
-    const w = normalizeUrl(companyWebsite);
-    const em = email.trim();
-    const p = paidUsers.trim();
+    if (!email) return;
 
-    if (!n) {
-      toast({
-        title: "Add your full name",
-        description: "This helps us personalize your invite.",
-      });
-      return;
-    }
-    if (!em || !em.includes("@")) {
-      toast({
-        title: "Add a valid email",
-        description: "We'll use it only to invite you.",
-      });
-      return;
-    }
-    const paid = Number(p.replace(/,/g, ""));
-    if (!p || Number.isNaN(paid) || paid < 0) {
-      toast({
-        title: "Add paid users",
-        description: "Enter a number (you can estimate).",
-      });
-      return;
-    }
-
+    setLoading(true);
     try {
       const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          full_name: n,
-          email: em,
-          company: w,
-          user_count: paid,
+          full_name: "", // Only collecting email in this streamlined form
+          email: email.trim(),
+          company: "",
+          user_count: 0,
           source: "landing_page",
         }),
       });
@@ -382,962 +228,1015 @@ export default function LandingPage() {
         toast({
           title: "Error",
           description: data.error || "Failed to join waitlist",
+          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   }
 
-  const results: ResultMetric[] = useMemo(
-    () => [
-      {
-        label: "Churn awareness",
-        value: "Know what changed",
-        detail:
-          "See churn risk, the drivers behind it, and what shifted week-to-week in plain language.",
-      },
-      {
-        label: "Retention cohorts",
-        value: "Spot drops early",
-        detail:
-          "Cohorts make adoption changes obvious so you can intervene before renewal pressure hits.",
-      },
-      {
-        label: "Churn by channel",
-        value: "See where it leaks",
-        detail:
-          "Break churn down by acquisition channel to understand which sources retain (and which don't).",
-      },
-      {
-        label: "Growth playbooks",
-        value: "Repeatable actions",
-        detail:
-          "Turn insights into simple playbooks your team can run — no guesswork.",
-      },
-    ],
-    [],
-  );
-
-  const testimonials: Testimonial[] = useMemo(
-    () => [
-      {
-        name: "Ava R.",
-        role: "Head of CS",
-        company: "B2B SaaS",
-        quote:
-          "Retention Cohorts made it obvious where onboarding was breaking. We fixed the drop and the churn story finally made sense.",
-        metric: "Cohort drop identified in 1 day",
-        tag: "Cohorts",
-      },
-      {
-        name: "Jordan K.",
-        role: "Revenue Ops",
-        company: "PLG SaaS",
-        quote:
-          "Churn by Channel helped us stop arguing about acquisition quality. The data made the decision for us.",
-        metric: "Channel mix adjusted in 1 week",
-        tag: "Channels",
-      },
-      {
-        name: "Maya S.",
-        role: "Customer Success Manager",
-        company: "Startup",
-        quote:
-          "Growth Playbooks gave us a repeatable way to respond — we didn't need a custom dashboard or analyst time.",
-        metric: "Playbook adopted by CS team",
-        tag: "Playbooks",
-      },
-      {
-        name: "Chris T.",
-        role: "VP Growth",
-        company: "Mid-market SaaS",
-        quote:
-          "We used Feature Tracking + Session Replay to connect 'what users did' with churn risk. That link was missing before.",
-        metric: "Top friction path documented",
-        tag: "Replay",
-      },
-      {
-        name: "Noah L.",
-        role: "Founder",
-        company: "Subscription SaaS",
-        quote:
-          "Churn Awareness gave me a calm weekly view: what changed, who's at risk, and what to try next.",
-        metric: "Weekly review in 10 minutes",
-        tag: "Awareness",
-      },
-      {
-        name: "Sofia P.",
-        role: "CS Ops",
-        company: "Enterprise SaaS",
-        quote:
-          "Revenue Analytics helped us separate churn impact from noise. Leadership finally aligned on the same numbers.",
-        metric: "One source of truth",
-        tag: "Revenue",
-      },
-    ],
-    [],
-  );
-
-  const slogan = "SaaS Churn Murderer";
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-grid opacity-55" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-white/70 to-white" />
-        <div className="absolute inset-0 noise" />
-        <div className="absolute -top-32 left-1/2 h-[520px] w-[860px] -translate-x-1/2 rounded-full bg-gradient-to-r from-fuchsia-300/30 via-sky-300/25 to-amber-200/30 blur-3xl" />
-      </div>
-
-      <header className="sticky top-0 z-50 border-b border-black/10 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-10 w-32">
+    <div
+      className="bg-[#FAFAF8] text-slate-900"
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
+      {/* ── NAV ─────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 bg-[#FAFAF8]/90 backdrop-blur-md border-b border-slate-100">
+        <nav
+          className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between"
+          aria-label="Main navigation"
+        >
+          <Link
+            href="/"
+            className="group block transition-transform hover:scale-105"
+            aria-label="Mentiq home"
+          >
+            <div className="relative h-30 w-36">
               <Image
                 src="/logo.png"
                 alt="Mentiq"
                 fill
-                className="object-cover h-30 w-40"
+                className="object-contain"
                 priority
               />
             </div>
           </Link>
 
-          <nav
-            className="hidden items-center gap-6 md:flex"
-            data-testid="nav-top"
-          >
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-8">
             <a
-              href="#results"
-              className="text-sm text-black/60 transition-colors hover:text-black"
-              data-testid="link-results"
+              href="#features"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
             >
-              Results
+              Features
             </a>
-            {/* <a
-              href="#testimonials"
-              className="text-sm text-black/60 transition-colors hover:text-black"
-              data-testid="link-testimonials"
-            >
-              Testimonials
-            </a> */}
             <a
-              href="#how"
-              className="text-sm text-black/60 transition-colors hover:text-black"
-              data-testid="link-how"
+              href="#how-it-works"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
             >
               How it works
             </a>
-          </nav>
+            <a
+              href="#testimonials"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              Customers
+            </a>
+            <a
+              href="#faq"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              FAQ
+            </a>
+            <Link
+              href="/pricing"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+            >
+              Pricing
+            </Link>
+          </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/signin" className="hidden md:inline-flex">
-              <Button
-                variant="secondary"
-                className="rounded-full border border-black/10 bg-black/[0.03] text-black/80 hover:bg-black/[0.06]"
-                data-testid="button-sign-in"
-              >
-                Sign in
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/signin"
+              className="text-sm text-slate-500 hover:text-slate-900 transition-colors px-4 py-2"
+            >
+              Sign in
             </Link>
             <a
               href="#waitlist"
-              className="inline-flex"
-              data-testid="link-join-waitlist"
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2 rounded-lg hover:bg-[#3451C7] transition-colors"
             >
-              <Button
-                className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-                data-testid="button-join-waitlist"
-              >
-                Join waitlist
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              Join waitlist
             </a>
           </div>
-        </div>
+
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden p-2 text-slate-500"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              {menuOpen ? (
+                <path
+                  d="M4 4l12 12M16 4L4 16"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              ) : (
+                <>
+                  <path
+                    d="M3 5h14M3 10h14M3 15h14"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </>
+              )}
+            </svg>
+          </button>
+        </nav>
+
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-slate-100 bg-[#FAFAF8] px-6 py-4 flex flex-col gap-4">
+            <a
+              href="#features"
+              className="text-sm text-slate-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-sm text-slate-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              How it works
+            </a>
+            <a
+              href="#testimonials"
+              className="text-sm text-slate-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              Customers
+            </a>
+            <Link
+              href="/pricing"
+              className="text-sm text-slate-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              Pricing
+            </Link>
+            <a
+              href="#faq"
+              className="text-sm text-slate-600"
+              onClick={() => setMenuOpen(false)}
+            >
+              FAQ
+            </a>
+            <hr className="border-slate-100" />
+            <Link href="/signin" className="text-sm text-slate-600">
+              Sign in
+            </Link>
+            <a
+              href="#waitlist"
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2.5 rounded-lg text-center"
+              onClick={() => setMenuOpen(false)}
+            >
+              Join waitlist
+            </a>
+          </div>
+        )}
       </header>
 
-      <main id="top">
-        <section className="mx-auto max-w-6xl px-6 pt-10 md:pt-16">
-          <div className="grid items-start gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ duration: 0.7 }}
-              >
-                <Badge
-                  className="rounded-full border-black/10 bg-black/[0.03] px-3 py-1 text-black/70"
-                  data-testid="badge-waitlist"
-                >
-                  Waitlist is open — early access invites
-                </Badge>
-
-                <h1
-                  className="mt-5 font-sans text-4xl leading-[1.06] tracking-tight text-black sm:text-5xl"
-                  data-testid="text-hero-title"
-                >
-                  <span className="text-gradient-animated">{slogan}</span>.
-                  <br />
-                  Clear Results in Minutes.
-                </h1>
-
-                <p
-                  className="mt-5 max-w-xl text-base leading-relaxed text-black/70"
-                  data-testid="text-hero-subtitle"
-                >
-                  Complete customer retention software for SaaS with customer
-                  health scores, product usage analytics, and user analytics to
-                  prevent churn before it happens.
-                </p>
-
-                <div
-                  className="mt-7 flex flex-wrap gap-2"
-                  data-testid="row-hero-stats"
-                >
-                  <StatPill label="Built-in" value="Cohorts + Replay" />
-                  <StatPill label="See" value="Channel churn" />
-                  <StatPill label="Run" value="Playbooks" />
-                </div>
-              </motion.div>
-
-              <div className="mt-8" id="waitlist">
-                <Card
-                  className="relative overflow-hidden rounded-2xl border-black/10 bg-white/70 p-5 shadow-soft"
-                  data-testid="card-waitlist"
-                >
-                  <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-gradient-to-br from-fuchsia-300/35 to-sky-300/25 blur-3xl" />
-                  <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full bg-gradient-to-br from-sky-200/20 to-amber-200/25 blur-3xl" />
-
-                  <div className="relative">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div
-                          className="flex items-center gap-2 text-sm font-medium text-black"
-                          data-testid="text-waitlist-title"
-                        >
-                          <Sparkles
-                            className="h-4 w-4 text-black/70"
-                            strokeWidth={1.75}
-                          />
-                          Join the Mentiq waitlist
-                        </div>
-                        <p
-                          className="mt-1 text-sm leading-relaxed text-black/65"
-                          data-testid="text-waitlist-subtitle"
-                        >
-                          Quick form. We use this to prioritize early access and
-                          tailor onboarding (especially for founders).
-                        </p>
-                      </div>
-                      <div
-                        className="hidden gap-2 sm:flex"
-                        data-testid="row-waitlist-trust"
-                      >
-                        <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs text-black/60">
-                          <ShieldCheck className="h-4 w-4" strokeWidth={1.75} />
-                          Privacy-first
-                        </div>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-xs text-black/60">
-                          <Zap className="h-4 w-4" strokeWidth={1.75} />
-                          Fast onboarding
-                        </div>
-                      </div>
-                    </div>
-
-                    <form onSubmit={submitWaitlist} className="mt-5">
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FieldRow
-                          icon={
-                            <User
-                              className="h-4 w-4 text-black/70"
-                              strokeWidth={1.75}
-                            />
-                          }
-                          label="Full name"
-                          testId="field-full-name"
-                        >
-                          <Input
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            placeholder="Alex Morgan"
-                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
-                            data-testid="input-full-name"
-                            autoComplete="name"
-                          />
-                        </FieldRow>
-
-                        <FieldRow
-                          icon={
-                            <Mail
-                              className="h-4 w-4 text-black/70"
-                              strokeWidth={1.75}
-                            />
-                          }
-                          label="Work email"
-                          testId="field-email"
-                        >
-                          <Input
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="alex@company.com"
-                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
-                            data-testid="input-waitlist-email"
-                            type="email"
-                            inputMode="email"
-                            autoComplete="email"
-                          />
-                        </FieldRow>
-
-                        <FieldRow
-                          icon={
-                            <Globe
-                              className="h-4 w-4 text-black/70"
-                              strokeWidth={1.75}
-                            />
-                          }
-                          label="Company website"
-                          testId="field-company-website"
-                        >
-                          <Input
-                            value={companyWebsite}
-                            onChange={(e) => setCompanyWebsite(e.target.value)}
-                            placeholder="yourcompany.com"
-                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
-                            data-testid="input-company-website"
-                            autoComplete="url"
-                          />
-                        </FieldRow>
-
-                        <FieldRow
-                          icon={
-                            <Users
-                              className="h-4 w-4 text-black/70"
-                              strokeWidth={1.75}
-                            />
-                          }
-                          label="Paid users"
-                          testId="field-paid-users"
-                        >
-                          <Input
-                            value={paidUsers}
-                            onChange={(e) => setPaidUsers(e.target.value)}
-                            placeholder="e.g. 1200"
-                            className="h-12 rounded-xl border-black/10 bg-white text-black placeholder:text-black/35"
-                            data-testid="input-paid-users"
-                            inputMode="numeric"
-                          />
-                        </FieldRow>
-                      </div>
-
-                      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <Button
-                          type="submit"
-                          className="h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
-                          data-testid="button-waitlist-submit"
-                        >
-                          {submitted ? "Added" : "Request invite"}
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-
-                        <div className="flex flex-col gap-2 text-xs text-black/55 sm:items-end">
-                          <div data-testid="text-waitlist-note">
-                            We only use this to prioritize access — not for
-                            marketing.
-                          </div>
-                          <div
-                            className="inline-flex items-center gap-2"
-                            data-testid="row-waitlist-proof"
-                          >
-                            <Check
-                              className="h-4 w-4 text-black/60"
-                              strokeWidth={1.75}
-                            />
-                            <span data-testid="text-waitlist-proof">
-                              4,200+ SaaS operators on the list
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </Card>
-              </div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative"
-            >
-              <Card
-                className="relative overflow-hidden rounded-3xl border-black/10 bg-white/70 p-6 shadow-soft"
-                data-testid="card-hero-panel"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-transparent" />
-                <div className="relative">
-                  <div
-                    className="flex items-center justify-between"
-                    data-testid="row-hero-panel-header"
-                  >
-                    <div>
-                      <div
-                        className="text-xs font-medium text-black/55"
-                        data-testid="text-panel-kicker"
-                      >
-                        Your data, simplified
-                      </div>
-                      <div
-                        className="mt-1 font-sans text-2xl tracking-tight text-black"
-                        data-testid="text-panel-title"
-                      >
-                        What&apos;s happening — and what to do next
-                      </div>
-                    </div>
-                    <div
-                      className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-                      aria-hidden="true"
-                    >
-                      <Zap
-                        className="h-5 w-5 text-black/70"
-                        strokeWidth={1.75}
-                      />
-                    </div>
-                  </div>
-
-                  <Separator className="my-5 bg-black/10" />
-
-                  <div className="grid gap-3" data-testid="grid-panel-metrics">
-                    <div
-                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                      data-testid="card-panel-metric-0"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          className="text-xs text-black/55"
-                          data-testid="text-panel-metric-label-0"
-                        >
-                          At-risk accounts
-                        </div>
-                        <div
-                          className="text-xs text-emerald-700"
-                          data-testid="text-panel-metric-delta-0"
-                        >
-                          42
-                        </div>
-                      </div>
-                      <div
-                        className="mt-2 text-sm text-black/70"
-                        data-testid="text-panel-metric-desc-0"
-                      >
-                        Usage drop + billing friction pattern.
-                      </div>
-                    </div>
-
-                    <div
-                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                      data-testid="card-panel-metric-1"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          className="text-xs text-black/55"
-                          data-testid="text-panel-metric-label-1"
-                        >
-                          Save priority
-                        </div>
-                        <div
-                          className="text-xs text-emerald-700"
-                          data-testid="text-panel-metric-delta-1"
-                        >
-                          High
-                        </div>
-                      </div>
-                      <div
-                        className="mt-2 text-sm text-black/70"
-                        data-testid="text-panel-metric-desc-1"
-                      >
-                        Segment: 10–50 seats · expansion likely.
-                      </div>
-                    </div>
-
-                    <div
-                      className="rounded-2xl border border-black/10 bg-black/[0.02] p-4"
-                      data-testid="card-panel-metric-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          className="text-xs text-black/55"
-                          data-testid="text-panel-metric-label-2"
-                        >
-                          Next best action
-                        </div>
-                        <div
-                          className="text-xs text-emerald-700"
-                          data-testid="text-panel-metric-delta-2"
-                        >
-                          Playbook
-                        </div>
-                      </div>
-                      <div
-                        className="mt-2 text-sm text-black/70"
-                        data-testid="text-panel-metric-desc-2"
-                      >
-                        Trigger outreach before renewal window.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="mt-5 rounded-2xl border border-black/10 bg-gradient-to-r from-black/[0.03] to-black/[0.02] p-4"
-                    data-testid="card-panel-insight"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="mt-0.5 rounded-xl border border-black/10 bg-black/[0.03] p-2"
-                        aria-hidden="true"
-                      >
-                        <Sparkles
-                          className="h-5 w-5 text-black/70"
-                          strokeWidth={1.75}
-                        />
-                      </div>
-                      <div>
-                        <div
-                          className="text-xs font-medium text-black/60"
-                          data-testid="text-panel-insight-title"
-                        >
-                          Plain-English takeaway
-                        </div>
-                        <div
-                          className="mt-1 text-sm leading-relaxed text-black/70"
-                          data-testid="text-panel-insight-body"
-                        >
-                          One page shows: who&apos;s slipping, what changed, and
-                          the next best playbook.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className="mt-5 flex items-center justify-between"
-                    data-testid="row-panel-footer"
-                  >
-                    <div
-                      className="text-xs text-black/45"
-                      data-testid="text-panel-footer-left"
-                    >
-                      Updated Sunday · 7-day snapshot
-                    </div>
-                    <div
-                      className="inline-flex items-center gap-1 text-xs text-black/55"
-                      data-testid="text-panel-footer-right"
-                    >
-                      View full report
-                      <ChevronRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <div
-                className="pointer-events-none absolute -z-10 -bottom-10 left-8 right-8 h-20 rounded-full bg-gradient-to-r from-fuchsia-300/25 via-sky-300/20 to-amber-200/25 blur-2xl"
-                aria-hidden="true"
-              />
-            </motion.div>
-          </div>
-        </section>
-
-        <section id="results" className="mx-auto max-w-6xl px-6 pt-16 md:pt-24">
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            custom={0}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div
-                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
-                  data-testid="text-results-kicker"
-                >
-                  Results
-                </div>
-                <h2
-                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
-                  data-testid="text-results-title"
-                >
-                  Understand your churn at a glance.
-                </h2>
-                <p
-                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
-                  data-testid="text-results-subtitle"
-                >
-                  Everything below maps directly to what&apos;s in the product
-                  today: cohorts, churn views, playbooks, and revenue context.
-                </p>
-              </div>
-              <div
-                className="flex items-center gap-2"
-                data-testid="row-results-badges"
-              >
-                <Badge
-                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
-                  data-testid="badge-results-1"
-                >
-                  Plain-English insights
-                </Badge>
-                <Badge
-                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
-                  data-testid="badge-results-2"
-                >
-                  Actionable playbooks
-                </Badge>
-              </div>
-            </div>
-          </motion.div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {results.map((m, i) => (
-              <ResultCard key={i} metric={m} index={i} />
-            ))}
-          </div>
-        </section>
-
-        <section
-          id="testimonials"
-          className="mx-auto max-w-6xl px-6 pt-16 md:pt-24"
+      {/* ── HERO ────────────────────────────────────────────────────────── */}
+      <section
+        className="relative max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28"
+        aria-labelledby="hero-heading"
+      >
+        {/* Eyebrow */}
+        <div
+          className={`inline-flex items-center gap-2 text-xs font-medium text-[#3B5BDB] bg-[#EEF2FF] border border-[#C5D0FF] px-3 py-1.5 rounded-full mb-8 transition-all duration-700 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
         >
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            custom={0}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div
-                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
-                  data-testid="text-testimonials-kicker"
-                >
-                  Testimonials
-                </div>
-                <h2
-                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
-                  data-testid="text-testimonials-title"
-                >
-                  Built for teams — and founders.
-                </h2>
-                <p
-                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
-                  data-testid="text-testimonials-subtitle"
-                >
-                  Less churn, faster saves, and a clearer story you can share
-                  with anyone.
-                </p>
-              </div>
-              <div
-                className="flex items-center gap-2"
-                data-testid="row-testimonials-badges"
-              >
-                <Badge
-                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
-                  data-testid="badge-testimonials-1"
-                >
-                  Easy to adopt
-                </Badge>
-                <Badge
-                  className="rounded-full border-black/10 bg-black/[0.03] text-black/70"
-                  data-testid="badge-testimonials-2"
-                >
-                  Clear outcomes
-                </Badge>
-              </div>
-            </div>
-          </motion.div>
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] animate-pulse"
+            aria-hidden="true"
+          />
+          Waitlist open — early access invites
+        </div>
 
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            custom={1}
-            className="mt-8"
-          >
-            <Card
-              className="group relative overflow-hidden rounded-2xl border-black/10 bg-white/70 shadow-soft"
-              data-testid="card-testimonial-featured"
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+          {/* Left: copy */}
+          <div>
+            <h1
+              id="hero-heading"
+              className={`transition-all duration-700 delay-100 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+              style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              <div className="absolute -top-16 right-6 h-44 w-44 rounded-full bg-gradient-to-br from-fuchsia-300/16 to-sky-300/14 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
-              <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-sky-200/12 to-amber-200/14 blur-2xl" />
+              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-slate-900">
+                Stop churn
+              </span>
+              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-[#3B5BDB]">
+                before it starts.
+              </span>
+            </h1>
 
-              <div className="relative grid md:grid-cols-2">
-                <div className="flex flex-col justify-center p-8 md:p-10">
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src="/testimonials/caktuslogo1.png"
-                      alt="Caktus logo"
-                      width={40}
-                      height={40}
-                      className="rounded-lg"
-                    />
-                    <div>
-                      <div
-                        className="text-sm font-semibold text-black"
-                        data-testid="text-testimonial-name-featured"
-                      >
-                        Harrison
-                      </div>
-                      <div className="text-xs text-black/55">
-                        Founder · Caktus
-                      </div>
-                    </div>
-                  </div>
+            <p
+              className={`mt-6 text-[1.0625rem] text-slate-500 leading-relaxed max-w-md transition-all duration-700 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
+              Mentiq gives SaaS teams clear visibility into churn risk, cohort
+              health, and the exact playbooks to act on it — before renewal
+              pressure hits.
+            </p>
 
-                  <p
-                    className="mt-6 text-lg leading-relaxed text-black/80 md:text-xl"
-                    data-testid="text-testimonial-quote-featured"
-                  >
-                    &ldquo;Mentiq helped me identify where my users were
-                    leaking, and automatically saved multiple users from
-                    churning. Saved me tens of thousands of dollars, while
-                    barely lifting a finger.&rdquo;
-                  </p>
-
-                </div>
-
-                <TestimonialCarousel />
-              </div>
-            </Card>
-          </motion.div>
-        </section>
-
-        <section
-          id="how"
-          className="mx-auto max-w-6xl px-6 pt-16 pb-16 md:pt-24 md:pb-24"
-        >
-          <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            custom={0}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div
-                  className="text-xs font-medium uppercase tracking-[0.22em] text-black/45"
-                  data-testid="text-how-kicker"
-                >
-                  How it works
-                </div>
-                <h2
-                  className="mt-3 font-sans text-3xl tracking-tight text-black md:text-4xl"
-                  data-testid="text-how-title"
-                >
-                  Understand. Decide. Act.
-                </h2>
-                <p
-                  className="mt-3 max-w-2xl text-sm leading-relaxed text-black/65"
-                  data-testid="text-how-subtitle"
-                >
-                  A clean workflow that turns messy product + billing signals
-                  into clear next steps your whole team can execute.
-                </p>
-              </div>
+            <div
+              className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
               <a
                 href="#waitlist"
-                className="text-sm text-black/60 hover:text-black"
-                data-testid="link-how-cta"
+                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors"
+                aria-label="Request early access to Mentiq"
               >
-                Join waitlist <ChevronRight className="inline h-4 w-4" />
+                Request early access
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 7h10M8 3l4 4-4 4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
+              >
+                See how it works
               </a>
             </div>
-          </motion.div>
 
-          <div
-            className="mt-8 grid gap-4 md:grid-cols-3"
-            data-testid="grid-how"
-          >
-            <Card
-              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
-              data-testid="card-how-0"
+            <p
+              className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
             >
-              <div
-                className="flex items-start justify-between gap-3"
-                data-testid="row-how-0"
-              >
-                <div>
-                  <div
-                    className="text-sm font-semibold text-black"
-                    data-testid="text-how-title-0"
-                  >
-                    Detect churn signals
-                  </div>
-                  <p
-                    className="mt-2 text-sm leading-relaxed text-black/65"
-                    data-testid="text-how-body-0"
-                  >
-                    Behavior-based risk signals that your team can explain — not
-                    a black box score.
-                  </p>
-                </div>
-                <div
-                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-                  aria-hidden="true"
-                >
-                  <TrendingUp
-                    className="h-5 w-5 text-black/70"
-                    strokeWidth={1.75}
-                  />
-                </div>
-              </div>
-            </Card>
+              4,200+ SaaS operators on the waitlist
+            </p>
 
-            <Card
-              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
-              data-testid="card-how-1"
+            {/* Social proof logos */}
+            <div
+              className={`mt-8 transition-all duration-700 delay-500 ${heroVisible ? "opacity-100" : "opacity-0"}`}
             >
-              <div
-                className="flex items-start justify-between gap-3"
-                data-testid="row-how-1"
-              >
-                <div>
-                  <div
-                    className="text-sm font-semibold text-black"
-                    data-testid="text-how-title-1"
-                  >
-                    Prioritize the right accounts
-                  </div>
-                  <p
-                    className="mt-2 text-sm leading-relaxed text-black/65"
-                    data-testid="text-how-body-1"
-                  >
-                    Segment by renewal window, seats, expansion likelihood, and
-                    change-of-behavior patterns.
-                  </p>
-                </div>
-                <div
-                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-                  aria-hidden="true"
-                >
-                  <Users className="h-5 w-5 text-black/70" strokeWidth={1.75} />
-                </div>
+              <p className="text-xs text-slate-400 mb-3 uppercase tracking-widest">
+                Integrates with
+              </p>
+              <div className="flex items-center gap-5">
+                {["Stripe", "Mailchimp", "SendGrid", "Customer.io"].map(
+                  (name) => (
+                    <span
+                      key={name}
+                      className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {name}
+                    </span>
+                  ),
+                )}
               </div>
-            </Card>
-
-            <Card
-              className="rounded-2xl border-black/10 bg-white/70 p-6 shadow-soft"
-              data-testid="card-how-2"
-            >
-              <div
-                className="flex items-start justify-between gap-3"
-                data-testid="row-how-2"
-              >
-                <div>
-                  <div
-                    className="text-sm font-semibold text-black"
-                    data-testid="text-how-title-2"
-                  >
-                    Execute save playbooks
-                  </div>
-                  <p
-                    className="mt-2 text-sm leading-relaxed text-black/65"
-                    data-testid="text-how-body-2"
-                  >
-                    Triggered workflows: onboarding rescue, adoption nudges,
-                    pricing friction, champion loss, and more.
-                  </p>
-                </div>
-                <div
-                  className="rounded-xl border border-black/10 bg-black/[0.03] p-2"
-                  aria-hidden="true"
-                >
-                  <ShieldCheck
-                    className="h-5 w-5 text-black/70"
-                    strokeWidth={1.75}
-                  />
-                </div>
-              </div>
-            </Card>
+            </div>
           </div>
 
+          {/* Right: hero image */}
           <div
-            className="mt-10 rounded-3xl border border-black/10 bg-white/70 p-7 shadow-soft"
-            data-testid="card-bottom-cta"
+            className={`relative transition-all duration-1000 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/80 border border-slate-100">
+              <img
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-hero-enhanced_edebc2a9.png"
+                alt="Mentiq analytics dashboard showing MRR, churn rate, at-risk users, and monthly retention trend chart"
+                className="w-full"
+                width="800"
+                height="450"
+                fetchPriority="high"
+              />
+            </div>
+            {/* Floating stat card */}
+            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg border border-slate-100 px-4 py-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 10 L5 7 L8 9 L12 4"
+                    stroke="#16a34a"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
               <div>
-                <div
-                  className="font-sans text-2xl tracking-tight text-black"
-                  data-testid="text-bottom-cta-title"
-                >
-                  Get invited to Mentiq
+                <div className="text-xs text-slate-400">
+                  Avg. churn reduction
                 </div>
-                <p
-                  className="mt-2 max-w-xl text-sm leading-relaxed text-black/65"
-                  data-testid="text-bottom-cta-subtitle"
-                >
-                  Join the waitlist and tell us your paid users count —
-                  we&apos;ll prioritize teams with urgent retention needs.
-                </p>
+                <div className="text-sm font-semibold text-slate-900">
+                  47% in 90 days
+                </div>
               </div>
-              <a href="#waitlist" data-testid="link-bottom-cta">
-                <Button
-                  className="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90"
-                  data-testid="button-bottom-cta"
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── STATS BAND ──────────────────────────────────────────────────── */}
+      <section
+        className="border-y border-slate-100 bg-white"
+        aria-label="Key metrics"
+      >
+        <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: 47, suffix: "%", label: "Average churn reduction" },
+            { value: 4200, suffix: "+", label: "SaaS teams on waitlist" },
+            { value: 90, suffix: " days", label: "Time to measurable results" },
+            { value: 3, suffix: "x", label: "Faster than manual CS review" },
+          ].map(({ value, suffix, label }) => (
+            <div key={label} className="text-center">
+              <div
+                className="text-[2.25rem] font-semibold text-slate-900 tracking-tight"
+                style={{ fontFamily: "'Instrument Serif', serif" }}
+              >
+                <CountUp end={value} suffix={suffix} />
+              </div>
+              <div className="mt-1 text-sm text-slate-400">{label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── PROBLEM STATEMENT ───────────────────────────────────────────── */}
+      <section
+        className="max-w-6xl mx-auto px-6 py-24"
+        aria-labelledby="problem-heading"
+      >
+        <div className="max-w-2xl">
+          <p className="text-xs font-medium text-[#3B5BDB] uppercase tracking-widest mb-4">
+            The problem
+          </p>
+          <h2
+            id="problem-heading"
+            className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-slate-900 mb-6"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            You find out about churn <em>after</em> it happens.
+          </h2>
+          <p className="text-[1.0625rem] text-slate-500 leading-relaxed mb-8">
+            Most SaaS teams discover a user has churned when they see the
+            cancellation email. By then, the engagement drop, the feature
+            abandonment, the unanswered support ticket — all the signals were
+            there. They just weren't visible.
+          </p>
+          <p className="text-[1.0625rem] text-slate-500 leading-relaxed">
+            Mentiq surfaces those signals in real time, scores each user's risk,
+            and gives you the exact playbook to intervene — before the
+            cancellation decision is made.
+          </p>
+        </div>
+
+        {/* Before / After comparison */}
+        <div className="mt-16 grid md:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-red-100 bg-red-50/50 p-8">
+            <div className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-5">
+              Without Mentiq
+            </div>
+            <ul className="space-y-3" role="list">
+              {[
+                "Churn discovered after cancellation",
+                "No visibility into which users are at risk",
+                "Manual, reactive customer success calls",
+                "Cohort health tracked in spreadsheets",
+                "No way to measure playbook effectiveness",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-3 text-sm text-slate-600"
                 >
-                  Join waitlist
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                  <svg
+                    className="mt-0.5 flex-shrink-0 text-red-300"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 3l8 8M11 3L3 11"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-2xl border border-green-100 bg-green-50/50 p-8">
+            <div className="text-xs font-semibold text-green-500 uppercase tracking-widest mb-5">
+              With Mentiq
+            </div>
+            <ul className="space-y-3" role="list">
+              {[
+                "At-risk users flagged 14–30 days before churn",
+                "Real-time risk scores for every user",
+                "Automated retention emails triggered by behavior",
+                "Cohort heatmaps updated daily",
+                "Full attribution for every saved account",
+              ].map((item) => (
+                <li
+                  key={item}
+                  className="flex items-start gap-3 text-sm text-slate-600"
+                >
+                  <svg
+                    className="mt-0.5 flex-shrink-0 text-green-500"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M2 7l3.5 3.5L12 3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ────────────────────────────────────────────────────── */}
+      <section
+        id="features"
+        className="bg-white border-y border-slate-100 py-24"
+        aria-labelledby="features-heading"
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-16">
+            <p className="text-xs font-medium text-[#3B5BDB] uppercase tracking-widest mb-4">
+              Features
+            </p>
+            <h2
+              id="features-heading"
+              className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-slate-900"
+              style={{ fontFamily: "'Instrument Serif', serif" }}
+            >
+              Everything you need to retain more users.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FeatureCard
+              delay={0}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M2 13 L5 9 L8 11 L13 5 L16 7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="13"
+                    cy="5"
+                    r="2"
+                    fill="currentColor"
+                    opacity="0.2"
+                  />
+                </svg>
+              }
+              title="Churn Risk Scoring"
+              description="Every user gets a real-time risk score based on behavioral signals: login frequency, feature usage, engagement drops, and billing events."
+              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-churn-enhanced_987b6243.png"
+              imageAlt="At-risk users table showing risk scores, last active dates, and MRR for each user"
+            />
+            <FeatureCard
+              delay={80}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <rect
+                    x="2"
+                    y="2"
+                    width="6"
+                    height="6"
+                    rx="1.5"
+                    fill="currentColor"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="10"
+                    y="2"
+                    width="6"
+                    height="6"
+                    rx="1.5"
+                    fill="currentColor"
+                    opacity="0.6"
+                  />
+                  <rect
+                    x="2"
+                    y="10"
+                    width="6"
+                    height="6"
+                    rx="1.5"
+                    fill="currentColor"
+                    opacity="0.6"
+                  />
+                  <rect
+                    x="10"
+                    y="10"
+                    width="6"
+                    height="6"
+                    rx="1.5"
+                    fill="currentColor"
+                  />
+                </svg>
+              }
+              title="Cohort Retention Analysis"
+              description="Visualize how each cohort of users retains over time with a heatmap that makes drop-off patterns impossible to miss."
+              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-retention-enhanced_a736fa33.png"
+              imageAlt="Cohort retention heatmap showing weekly retention percentages by cohort month"
+            />
+            <FeatureCard
+              delay={160}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M3 9h12M9 3l6 6-6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              }
+              title="Retention Playbooks"
+              description="Automated email sequences triggered by risk score thresholds. Configure discount offers, cooldown periods, and targeting rules — no code required."
+              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-playbooks-enhanced_312d8548.png"
+              imageAlt="Churn prevention playbook builder showing automation flow and configuration sliders"
+            />
+            <FeatureCard
+              delay={0}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <circle
+                    cx="9"
+                    cy="9"
+                    r="7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  />
+                  <path
+                    d="M9 5v4l3 3"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              }
+              title="Revenue Analytics"
+              description="Track MRR, expansion revenue, downgrade MRR, and net revenue churn — all pulled directly from your Stripe account with no manual exports."
+            />
+            <FeatureCard
+              delay={80}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M4 14 L4 9 M8 14 L8 6 M12 14 L12 3 M16 14 L16 7"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              }
+              title="Feature Adoption Tracking"
+              description="See which features drive retention and which are being ignored. Identify the 'aha moment' that predicts long-term subscription health."
+            />
+            <FeatureCard
+              delay={160}
+              icon={
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M3 5h12M3 9h8M3 13h10"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              }
+              title="Session Replay"
+              description="Watch exactly how at-risk users interact with your product. Understand friction points before they become cancellation reasons."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ────────────────────────────────────────────────── */}
+      <section
+        id="how-it-works"
+        className="bg-[#0F1117] py-24 text-white"
+        aria-labelledby="how-heading"
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-16">
+            <p className="text-xs font-medium text-[#748FFC] uppercase tracking-widest mb-4">
+              How it works
+            </p>
+            <h2
+              id="how-heading"
+              className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-white"
+              style={{ fontFamily: "'Instrument Serif', serif" }}
+            >
+              Up and running in under 15 minutes.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Install the SDK",
+                description:
+                  "Add 3 lines of JavaScript to your app. Mentiq starts capturing behavioral events immediately — no data warehouse required.",
+                detail: "npm install @mentiq/js",
+              },
+              {
+                step: "02",
+                title: "Connect your tools",
+                description:
+                  "Link Stripe for revenue data, Mailchimp or SendGrid for email delivery. Mentiq pulls everything together into a single view.",
+                detail: "Stripe · Mailchimp · SendGrid · Customer.io",
+              },
+              {
+                step: "03",
+                title: "Set your thresholds",
+                description:
+                  "Configure when to flag a user as at-risk, which playbook to trigger, and what discount to offer. Mentiq handles the rest automatically.",
+                detail: "Risk threshold: 70% · Discount: 20% · Cooldown: 30d",
+              },
+            ].map(({ step, title, description, detail }, i) => {
+              const { ref, visible } = useInView();
+              return (
+                <div
+                  key={step}
+                  ref={ref}
+                  style={{ transitionDelay: `${i * 100}ms` }}
+                  className={`transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
+                >
+                  <div className="text-[0.6875rem] font-mono text-slate-500 mb-4">
+                    {step}
+                  </div>
+                  <h3 className="text-[1.125rem] font-semibold text-white mb-3">
+                    {title}
+                  </h3>
+                  <p className="text-[0.9375rem] text-slate-400 leading-relaxed mb-4">
+                    {description}
+                  </p>
+                  <div className="text-xs font-mono text-[#748FFC] bg-[#1A1D2E] rounded-lg px-4 py-3 border border-[#2A2D3E]">
+                    {detail}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ────────────────────────────────────────────────── */}
+      <section
+        id="testimonials"
+        className="bg-white border-y border-slate-100 py-24"
+        aria-labelledby="testimonials-heading"
+      >
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-16">
+            <p className="text-xs font-medium text-[#3B5BDB] uppercase tracking-widest mb-4">
+              Customers
+            </p>
+            <h2
+              id="testimonials-heading"
+              className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-slate-900"
+              style={{ fontFamily: "'Instrument Serif', serif" }}
+            >
+              Trusted by SaaS teams who take retention seriously.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <TestimonialCard
+              delay={0}
+              quote="We went from discovering churn after the fact to catching 80% of at-risk users before they cancelled. Mentiq paid for itself in the first week."
+              name="Jordan Mack"
+              role="Founder"
+              company="Stackline HQ"
+            />
+            <TestimonialCard
+              delay={80}
+              quote="The cohort heatmap alone changed how we think about our onboarding. We found a drop-off at day 7 that we never would have caught otherwise."
+              name="Priya Nair"
+              role="Head of Growth"
+              company="Formbase"
+            />
+            <TestimonialCard
+              delay={160}
+              quote="Setup took 12 minutes. Within 24 hours we had a list of 14 users who were about to churn. We saved 9 of them with a single email sequence."
+              name="Alex Torres"
+              role="CEO"
+              company="Draftly"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ─────────────────────────────────────────────────────────── */}
+      <section
+        id="faq"
+        className="max-w-6xl mx-auto px-6 py-24"
+        aria-labelledby="faq-heading"
+      >
+        <div className="grid md:grid-cols-2 gap-16">
+          <div>
+            <p className="text-xs font-medium text-[#3B5BDB] uppercase tracking-widest mb-4">
+              FAQ
+            </p>
+            <h2
+              id="faq-heading"
+              className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-slate-900"
+              style={{ fontFamily: "'Instrument Serif', serif" }}
+            >
+              Questions worth asking.
+            </h2>
+            <p className="mt-4 text-[0.9375rem] text-slate-500 leading-relaxed">
+              If you don't see your question here, email us at{" "}
+              <a
+                href="mailto:hello@trymentiq.com"
+                className="text-[#3B5BDB] hover:underline"
+              >
+                hello@trymentiq.com
               </a>
+            </p>
+          </div>
+
+          <div>
+            <FaqItem
+              question="How does Mentiq predict churn?"
+              answer="Mentiq analyzes behavioral signals including feature usage patterns, session frequency, engagement drops, and billing events to assign each user a real-time risk score. Users above your configured threshold are flagged for intervention."
+            />
+            <FaqItem
+              question="How long does it take to see results?"
+              answer="Most teams see their first at-risk users identified within 24 hours of installing the SDK. Measurable churn reduction typically appears within 30–60 days of activating retention playbooks."
+            />
+            <FaqItem
+              question="Does Mentiq integrate with Stripe?"
+              answer="Yes. Mentiq connects directly to Stripe to pull MRR, subscription status, and billing events. It also integrates with Mailchimp, SendGrid, and Customer.io for automated email delivery."
+            />
+            <FaqItem
+              question="What size SaaS companies use Mentiq?"
+              answer="Mentiq is built for SaaS teams from early-stage ($5k MRR) through growth-stage ($500k MRR). It's particularly effective for teams that don't yet have a dedicated customer success function."
+            />
+            <FaqItem
+              question="Is there a free trial?"
+              answer="We're currently in early access. Waitlist members get 60 days free when they're invited. No credit card required to join the waitlist."
+            />
+            <FaqItem
+              question="How is Mentiq different from Mixpanel or Amplitude?"
+              answer="Mixpanel and Amplitude are general-purpose analytics tools. Mentiq is purpose-built for churn prevention — every feature, from risk scoring to playbooks, is designed specifically to help you retain paying subscribers."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── WAITLIST CTA ────────────────────────────────────────────────── */}
+      <section
+        id="waitlist"
+        className="bg-[#0F1117] py-24"
+        aria-labelledby="waitlist-heading"
+      >
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <p className="text-xs font-medium text-[#748FFC] uppercase tracking-widest mb-4">
+            Early access
+          </p>
+          <h2
+            id="waitlist-heading"
+            className="text-[2.25rem] md:text-[3rem] leading-[1.1] tracking-tight text-white mb-4"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            Join 4,200+ SaaS teams already on the waitlist.
+          </h2>
+          <p className="text-[1rem] text-slate-400 mb-10 leading-relaxed">
+            Early access members get 60 days free, priority onboarding, and
+            direct access to the founding team.
+          </p>
+
+          {submitted ? (
+            <div className="inline-flex items-center gap-3 bg-[#1A1D2E] border border-[#2A2D3E] rounded-xl px-6 py-4 text-white">
+              <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 6l2.5 2.5L10 3"
+                    stroke="#22c55e"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm">
+                You're on the list — we'll be in touch soon.
+              </span>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleWaitlist}
+              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+              aria-label="Join the Mentiq waitlist"
+            >
+              <label htmlFor="waitlist-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="waitlist-email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="flex-1 bg-[#1A1D2E] border border-[#2A2D3E] text-white placeholder-slate-500 text-sm px-4 py-3 rounded-lg focus:outline-none focus:border-[#748FFC] transition-colors"
+                aria-required="true"
+                disabled={loading}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-[#3B5BDB] disabled:opacity-50 text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors whitespace-nowrap"
+              >
+                {loading ? "Joining..." : "Join waitlist"}
+              </button>
+            </form>
+          )}
+
+          <p className="mt-4 text-xs text-slate-500">
+            No spam. No credit card. Unsubscribe anytime.
+          </p>
+        </div>
+      </section>
+
+      {/* ── FOOTER ──────────────────────────────────────────────────────── */}
+      <footer
+        className="border-t border-slate-100 bg-[#FAFAF8]"
+        role="contentinfo"
+      >
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
+            <div>
+              <Link href="/" className="block mb-4" aria-label="Mentiq home">
+                <div className="relative h-30 w-36">
+                  <Image
+                    src="/logo.png"
+                    alt="Mentiq"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </Link>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                SaaS churn analytics and retention automation for growing
+                subscription businesses.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest mb-4">
+                Product
+              </h3>
+              <ul className="space-y-2.5" role="list">
+                {[
+                  ["Features", "#features"],
+                  ["How it works", "#how-it-works"],
+                  ["Integrations", "#features"],
+                  ["Pricing", "/pricing"],
+                ].map(([label, href]) => (
+                  <li key={label}>
+                    <Link
+                      href={href}
+                      className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest mb-4">
+                Company
+              </h3>
+              <ul className="space-y-2.5" role="list">
+                {[
+                  ["About", "#"],
+                  ["Blog", "#"],
+                  ["Careers", "#"],
+                  ["Contact", "mailto:hello@trymentiq.com"],
+                ].map(([label, href]) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest mb-4">
+                Legal
+              </h3>
+              <ul className="space-y-2.5" role="list">
+                {[
+                  ["Privacy Policy", "#"],
+                  ["Terms of Service", "#"],
+                  ["Cookie Policy", "#"],
+                ].map(([label, href]) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          <footer
-            className="mt-14 border-t border-black/10 pt-8"
-            data-testid="footer"
-          >
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div
-                className="text-sm text-black/60"
-                data-testid="text-footer-brand"
+          <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-slate-400">
+              © {new Date().getFullYear()} Mentiq. All rights reserved.
+            </p>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://twitter.com/trymentiq"
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Mentiq on Twitter"
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                © {new Date().getFullYear()} Mentiq
-              </div>
-              <div
-                className="flex items-center gap-4 text-sm"
-                data-testid="row-footer-links"
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
+                </svg>
+              </a>
+              <a
+                href="https://linkedin.com/company/mentiq"
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Mentiq on LinkedIn"
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                <Link
-                  href="/docs/Privacy Policy MENTIQ.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-black/60 hover:text-black"
-                  data-testid="button-footer-privacy"
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
                 >
-                  Privacy
-                </Link>
-                <a
-                  href="mailto:info@trymentiq.com"
-                  className="text-black/60 hover:text-black"
-                  data-testid="button-footer-contact"
-                >
-                  Contact
-                </a>
-              </div>
+                  <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z" />
+                </svg>
+              </a>
             </div>
-          </footer>
-        </section>
-      </main>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { useToast } from "@/hooks/use-toast";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -376,7 +377,12 @@ export default function EmailAutomationsPage() {
   }
 
   return (
-    <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
+    <PageShell
+      title="Email Automations"
+      description="Create and manage automated email campaigns"
+      breadcrumb="Pages / Automations"
+    >
+      <div className="space-y-6">
       {/* Mailchimp Connection Banner */}
       {!mailchimp?.is_active ? (
         <Card className="border-0 bg-gradient-to-r from-[#4318FF] to-[#868CFF] text-white">
@@ -1069,6 +1075,7 @@ export default function EmailAutomationsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </PageShell>
   );
 }

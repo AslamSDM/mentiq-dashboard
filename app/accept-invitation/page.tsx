@@ -5,23 +5,18 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { teamService } from "@/lib/api";
-import { CheckCircle2, AlertCircle, Loader2, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { CheckCircle2, Loader2, ArrowRight } from "lucide-react";
 
 function AcceptInvitationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [token, setToken] = useState("");
 
-  // Form state
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // UI state
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -31,31 +26,18 @@ function AcceptInvitationContent() {
     if (tokenParam) {
       setToken(tokenParam);
     } else {
-      setError("No invitation token provided");
+      setError("No invitation token provided.");
     }
   }, [searchParams]);
-
-  const validateForm = () => {
-    if (!fullName.trim()) {
-      setError("Please enter your full name");
-      return false;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return false;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return false;
-    }
-    return true;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!validateForm()) {
+    if (!fullName.trim() || password.length < 8 || password !== confirmPassword) {
+      if (!fullName.trim()) setError("Please enter your full name.");
+      else if (password.length < 8) setError("Password must be at least 8 characters.");
+      else setError("Passwords do not match.");
       return;
     }
 
@@ -63,27 +45,17 @@ function AcceptInvitationContent() {
 
     try {
       const response = await teamService.acceptInvitation(token, fullName, password);
-
       setSuccess(true);
-
-      // Auto-login with the new credentials
       setTimeout(async () => {
-        const result = await signIn("credentials", {
+         await signIn("credentials", {
           email: response.user.email,
           password: password,
           redirect: false,
         });
-
-        if (result?.ok) {
-          router.push("/dashboard");
-        } else {
-          // If auto-login fails, redirect to login page
-          router.push("/signin?message=Account created. Please sign in.");
-        }
+        router.push("/dashboard");
       }, 2000);
     } catch (err: any) {
-      // Silent fail - error handled via UI
-      setError(err.response?.data?.error || err.message || "Failed to accept invitation");
+      setError(err.response?.data?.error || err.message || "Failed to accept invitation.");
     } finally {
       setLoading(false);
     }
@@ -91,215 +63,161 @@ function AcceptInvitationContent() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex bg-white text-[#2B3674]">
-        <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
-          <div className="w-full max-w-md text-center space-y-6">
-            <AlertCircle className="h-16 w-16 text-red-500 mx-auto" />
-            <h2 className="text-3xl font-bold">Invalid Invitation</h2>
-            <p className="text-[#4363C7]">
-              No invitation token was provided in the URL or the token is invalid.
-            </p>
-            <Link href="/signin">
-              <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-white">
-                Go to Sign In
-              </Button>
-            </Link>
+       <div className="py-4 text-center">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center border border-red-100">
+             <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
         </div>
+        <h1 className="text-[2rem] tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Invalid invitation
+        </h1>
+        <p className="text-[0.9375rem] text-slate-500 mb-8">
+          The link is missing a token or is expired.
+        </p>
+        <Link href="/signin" className="flex items-center justify-center w-full h-11 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-all">
+          Go to Sign In
+        </Link>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="min-h-screen flex bg-white text-[#2B3674]">
-        <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
-          <div className="w-full max-w-md text-center space-y-6">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
-            <h2 className="text-3xl font-bold">Welcome to the Team!</h2>
-            <p className="text-[#4363C7]">
-              Your account has been created successfully.
-            </p>
-            <div className="flex items-center justify-center gap-2 text-primary">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Redirecting to dashboard...</span>
-            </div>
+       <div className="py-4 text-center">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center border border-green-100">
+             <CheckCircle2 className="w-8 h-8 text-green-600" />
           </div>
+        </div>
+        <h1 className="text-[2rem] tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Welcome aboard!
+        </h1>
+        <p className="text-[0.9375rem] text-slate-500 mb-8">
+          Your account has been created.
+        </p>
+        <div className="flex items-center justify-center gap-2 text-slate-400 text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Redirecting...
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-white text-[#2B3674]">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
+    <>
+      <h1 className="text-[2rem] text-center tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+        Join the team
+      </h1>
+      <p className="text-center text-[0.9375rem] text-slate-500 mb-8">
+        Set up your account to start collaborating.
+      </p>
 
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full text-white">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-30 w-30">
-              <Image
-                src="/logo.png"
-                alt="Mentiq Logo"
-                fill
-                className="object-contain brightness-0 invert"
-              />
-            </div>
-            <span className="text-2xl font-bold">Mentiq</span>
-          </Link>
-
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold leading-tight">
-              Join the
-              <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-white">
-                Winning Team
-              </span>
-            </h1>
-            <p className="text-xl text-blue-100 max-w-md">
-              Accept your invitation to collaborate, analyze, and drive growth with Mentiq.
-            </p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="text-[0.875rem] text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl mb-6 flex items-start gap-2">
+            <svg className="w-4 h-4 mt-0.5 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/><path d="M7 4h2v5H7V4zm1 8a1 1 0 110-2 1 1 0 010 2z"/></svg>
+            {error}
           </div>
+        )}
 
-          <div className="flex items-center gap-8 text-sm text-blue-200">
-            <span>© 2025 Mentiq</span>
-            <Link href="#" className="hover:text-white transition-colors">
-              Privacy
-            </Link>
-            <Link href="#" className="hover:text-white transition-colors">
-              Terms
-            </Link>
-          </div>
+        <div className="space-y-1.5">
+          <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">Full name</label>
+          <input
+            id="fullName"
+            type="text"
+            placeholder="Jane Doe"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            disabled={loading}
+            required
+            className="w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all border-slate-200"
+          />
         </div>
-      </div>
 
-      {/* Right Side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 bg-white">
-        <div className="w-full max-w-md space-y-8">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="relative h-30 w-30">
-              <Image
-                src="/logo.png"
-                alt="Mentiq Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-            <span className="text-xl font-bold text-[#2B3674]">Mentiq</span>
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-[#2B3674]">Accept Invitation</h2>
-            <p className="text-[#4363C7]">
-              Set up your account to join the team
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg flex items-start gap-2">
-                <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="fullName" className="text-sm font-medium text-[#2B3674]">
-                Full Name
-              </Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={loading}
-                  required
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-[#2B3674]">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Min. 8 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  required
-                  minLength={8}
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-medium text-[#2B3674]">
-                Confirm Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Re-enter password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={loading}
-                  required
-                  minLength={8}
-                  className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                <>
-                  Accept Invitation
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </>
-              )}
-            </Button>
-            
-            <p className="text-xs text-center text-[#4363C7] mt-4">
-              By accepting, you agree to our Terms of Service and Privacy Policy
-            </p>
-          </form>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="Min. 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            required
+            minLength={8}
+            className="w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all border-slate-200"
+          />
         </div>
-      </div>
-    </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">Confirm password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            placeholder="Re-enter password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
+            required
+            minLength={8}
+            className="w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all border-slate-200"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full h-11 mt-2 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+          disabled={loading}
+        >
+          {loading ? (
+             <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              Accept invite
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </button>
+        <p className="text-xs text-center text-slate-400 mt-4 leading-relaxed px-4">
+          By accepting, you agree to our <Link href="#" className="underline">Terms</Link> and <Link href="#" className="underline">Privacy Policy</Link>.
+        </p>
+      </form>
+    </>
   );
 }
 
 export default function AcceptInvitationPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6 text-slate-900" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="w-full max-w-md">
+        
+        <div className="flex justify-center mb-10">
+          <Link href="/" className="group block transition-transform hover:scale-105">
+            <div className="relative h-20 w-64">
+              <Image src="/logo.png" alt="Mentiq Logo" fill className="object-contain" priority />
+            </div>
+          </Link>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#EEF2FF] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#F8F9FA] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-60"></div>
+          
+          <div className="relative z-10 w-full">
+            <Suspense fallback={
+              <div className="py-12 flex justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+              </div>
+            }>
+              <AcceptInvitationContent />
+            </Suspense>
+          </div>
+        </div>
+
       </div>
-    }>
-      <AcceptInvitationContent />
-    </Suspense>
+    </div>
   );
 }

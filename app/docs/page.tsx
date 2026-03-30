@@ -150,7 +150,7 @@ export default function DocsPage() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-8 w-8">
+              <div className="relative h-12 w-12">
                 <Image
                   src="/logo.png"
                   alt="Mentiq Logo"
@@ -221,8 +221,8 @@ export default function DocsPage() {
                 Mentiq SDK
               </h1>
               <p className="text-xl text-gray-400">
-                Track user onboarding, identify users, and send custom events
-                in your React &amp; Next.js app — in minutes.
+                Track user onboarding, identify users, and send custom events in
+                your React &amp; Next.js app — in minutes.
               </p>
             </div>
 
@@ -392,8 +392,8 @@ const progress = tracker.getProgress();
 
               <Callout type="tip">
                 When all required steps are completed, an{" "}
-                <code className="text-primary">onboarding_completed</code>{" "}
-                event fires automatically — no extra code needed.
+                <code className="text-primary">onboarding_completed</code> event
+                fires automatically — no extra code needed.
               </Callout>
             </Section>
 
@@ -466,9 +466,7 @@ function SignupButton() {
 
             {/* Need Help */}
             <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/5 to-transparent border border-primary/20">
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Need Help?
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Need Help?</h3>
               <p className="text-gray-400 mb-6">
                 Check out the SDK source on GitHub or reach out to support.
               </p>

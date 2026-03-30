@@ -6,9 +6,6 @@ import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
-import { DashboardNavbar } from "@/components/dashboard/dashboard-navbar";
-import { OnboardingTaskBanner } from "@/components/onboarding-task-banner";
-import { OnboardingTour } from "@/components/onboarding-tour";
 import { Button } from "@/components/ui/button";
 import { X, Eye } from "lucide-react";
 
@@ -154,7 +151,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden flex-col bg-[#F4F7FE]">
+    <div className="flex h-screen overflow-hidden flex-col bg-[#F8F7F4]">
       {/* Admin Impersonation Banner - Only shown for admin users */}
       {session?.isAdmin && impersonatedProjectId && (
         <div className="bg-amber-500 text-amber-950 px-4 py-2 flex items-center justify-between z-50">
@@ -182,17 +179,12 @@ export default function DashboardLayout({
       )}
       <div className="flex flex-1 overflow-hidden">
         <DashboardSidebar />
-        <main className="flex-1 overflow-y-auto bg-[#F4F7FE]">
-          {/* Top Navbar */}
-          <DashboardNavbar title={getPageTitle(pathname)} />
-          
-          <div className="mx-auto max-w-7xl p-4 md:p-6 pb-20">
-             <OnboardingTaskBanner />
+        <main className="flex-1 overflow-y-auto bg-[#F8F7F4]">
+          <div className="mx-auto w-full pb-20">
              {children}
           </div>
         </main>
       </div>
-      <OnboardingTour />
     </div>
   );
 }

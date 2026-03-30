@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// Removed DashboardHeader as it's now in the Navbar
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -497,34 +497,37 @@ export default function DashboardPage() {
 
   if (!effectiveProjectId) {
     return (
-      <div className="flex flex-col h-full bg-[#F4F7FE]">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg">
-              <Loader2 className="h-12 w-12 text-[#4318FF] animate-spin" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[#2B3674]">
-                Select a Project
-              </h3>
-              <p className="text-[#4363C7]">
-                Please select a project to view the dashboard
-              </p>
+      <PageShell title="Dashboard" breadcrumb="Pages / Dashboard">
+        <div className="flex flex-col h-full bg-transparent">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg">
+                <Loader2 className="h-12 w-12 text-[#2563EB] animate-spin" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#1C1917]">
+                  Select a Project
+                </h3>
+                <p className="text-[#78716C]">
+                  Please select a project to view the dashboard
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      {/* Date Range & Controls */}
-      <div className="flex items-center justify-end">
-        <div className="flex items-center space-x-2 bg-white p-1 rounded-xl shadow-sm">
-          <Calendar className="h-4 w-4 text-[#4363C7] ml-2" />
+    <PageShell
+      title="Dashboard"
+      breadcrumb="Pages / Dashboard"
+      action={
+        <div className="flex items-center space-x-2 bg-white py-1.5 px-3 rounded-lg border shadow-sm border-[#E7E5E4]">
+          <Calendar className="h-4 w-4 text-[#78716C]" />
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-full sm:w-[140px] border-none shadow-none focus:ring-0 text-[#2B3674] font-medium">
+            <SelectTrigger className="w-[120px] text-xs border-none shadow-none focus:ring-0 text-[#1C1917] font-medium h-6 pt-0 pb-0 px-1">
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
@@ -535,19 +538,20 @@ export default function DashboardPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      {/* 1. Revenue Analytics (Top) */}
-      <div className="space-y-4">
+      }
+    >
+      <div className="flex flex-col space-y-7">
+        {/* 1. Revenue Analytics (Top) */}
+        <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
+          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
             Revenue Analytics
           </h2>
           <Link href="/dashboard/revenue">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+              className="text-[#2563EB] hover:bg-transparent"
             >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
@@ -565,18 +569,18 @@ export default function DashboardPage() {
           </div>
         ) : revenueMetrics ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-[#F4F7FE] rounded-full">
-                    <DollarSign className="h-6 w-6 text-[#4318FF]" />
+                  <div className="p-3 bg-transparent rounded-full">
+                    <DollarSign className="h-6 w-6 text-[#2563EB]" />
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                  <div className="text-sm font-medium text-[#78716C] mb-1">
                     MRR
                   </div>
-                  <div className="text-2xl font-bold text-[#2B3674]">
+                  <div className="text-2xl font-bold text-[#1C1917]">
                     {formatCurrency(revenueMetrics.mrr)}
                   </div>
                   <div className="flex items-center gap-1 mt-1">
@@ -590,7 +594,7 @@ export default function DashboardPage() {
                       {revenueMetrics.growth_rate > 0 ? "+" : ""}
                       {formatPercentage(revenueMetrics.growth_rate)}
                     </span>
-                    <span className="text-xs text-[#4363C7]">
+                    <span className="text-xs text-[#78716C]">
                       since last month
                     </span>
                   </div>
@@ -598,28 +602,28 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-[#F4F7FE] rounded-full">
-                    <Users className="h-6 w-6 text-[#4318FF]" />
+                  <div className="p-3 bg-transparent rounded-full">
+                    <Users className="h-6 w-6 text-[#2563EB]" />
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                  <div className="text-sm font-medium text-[#78716C] mb-1">
                     Active Subs
                   </div>
-                  <div className="text-2xl font-bold text-[#2B3674]">
+                  <div className="text-2xl font-bold text-[#1C1917]">
                     {revenueMetrics.active_subscriptions}
                   </div>
-                  <p className="text-xs text-[#4363C7] mt-1">
+                  <p className="text-xs text-[#78716C] mt-1">
                     {revenueMetrics.new_subscriptions} new this month
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-[#FFF9E5] rounded-full">
@@ -627,34 +631,34 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                  <div className="text-sm font-medium text-[#78716C] mb-1">
                     Churn Rate
                   </div>
-                  <div className="text-2xl font-bold text-[#2B3674]">
+                  <div className="text-2xl font-bold text-[#1C1917]">
                     {formatPercentage(revenueMetrics.churn_rate)}
                   </div>
-                  <p className="text-xs text-[#4363C7] mt-1">
+                  <p className="text-xs text-[#78716C] mt-1">
                     {revenueMetrics.churned_subscriptions} churned
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-[#F4F7FE] rounded-full">
-                    <CreditCard className="h-6 w-6 text-[#4318FF]" />
+                  <div className="p-3 bg-transparent rounded-full">
+                    <CreditCard className="h-6 w-6 text-[#2563EB]" />
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#4363C7] mb-1">
+                  <div className="text-sm font-medium text-[#78716C] mb-1">
                     ARPU
                   </div>
-                  <div className="text-2xl font-bold text-[#2B3674]">
+                  <div className="text-2xl font-bold text-[#1C1917]">
                     {formatCurrency(revenueMetrics.arpu)}
                   </div>
-                  <p className="text-xs text-[#4363C7] mt-1">
+                  <p className="text-xs text-[#78716C] mt-1">
                     Avg. Revenue Per User
                   </p>
                 </div>
@@ -664,11 +668,11 @@ export default function DashboardPage() {
         ) : (
           <Card className="bg-white border-dashed border-2 border-[#E0E5F2] shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-8">
-              <p className="text-[#4363C7] mb-4">
+              <p className="text-[#78716C] mb-4">
                 No revenue data available. Configure Stripe to see metrics.
               </p>
               <Link href="/dashboard/revenue">
-                <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">
+                <Button className="bg-[#2563EB] hover:bg-[#3311CC] text-white rounded-xl">
                   Configure Stripe
                 </Button>
               </Link>
@@ -681,12 +685,12 @@ export default function DashboardPage() {
           revenueAnalytics.time_series.length > 0) ||
           (revenueMetrics?.time_series &&
             revenueMetrics.time_series.length > 0)) && (
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden min-w-0">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] overflow-hidden min-w-0">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">
+              <CardTitle className="text-[#1C1917] font-bold">
                 Revenue Trend
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 Daily revenue from Stripe charges over the last 30 days
               </CardDescription>
             </CardHeader>
@@ -735,7 +739,7 @@ export default function DashboardPage() {
                     />
                     <XAxis
                       dataKey="date"
-                      className="text-xs text-[#4363C7]"
+                      className="text-xs text-[#78716C]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
@@ -748,7 +752,7 @@ export default function DashboardPage() {
                       }
                     />
                     <YAxis
-                      className="text-xs text-[#4363C7]"
+                      className="text-xs text-[#78716C]"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
@@ -782,14 +786,14 @@ export default function DashboardPage() {
       {/* 2. General Analytics (DAU, MAU, WAU) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
+          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
             User Engagement
           </h2>
           <Link href="/dashboard/analytics">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+              className="text-[#2563EB] hover:bg-transparent"
             >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
@@ -797,14 +801,14 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#4363C7]">
+                  <p className="text-sm font-medium text-[#78716C]">
                     Total Events
                   </p>
-                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
                     {totalEvents.toLocaleString()}
                   </h3>
                 </div>
@@ -815,37 +819,37 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#4363C7]">
+                  <p className="text-sm font-medium text-[#78716C]">
                     Page Views
                   </p>
-                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
                     {pageViews.toLocaleString()}
                   </h3>
                 </div>
-                <div className="p-3 rounded-full bg-[#F4F7FE]">
-                  <Monitor className="h-6 w-6 text-[#4318FF]" />
+                <div className="p-3 rounded-full bg-transparent">
+                  <Monitor className="h-6 w-6 text-[#2563EB]" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-[#4363C7]">
+                  <p className="text-sm font-medium text-[#78716C]">
                     Unique Users
                   </p>
-                  <h3 className="text-2xl font-bold text-[#2B3674] mt-1">
+                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
                     {uniqueUsers.toLocaleString()}
                   </h3>
                 </div>
                 <div className="p-3 rounded-full bg-[#E9E3FF]">
-                  <Users className="h-6 w-6 text-[#4363C7]" />{" "}
+                  <Users className="h-6 w-6 text-[#78716C]" />{" "}
                   {/* Usually a distinct color if needed */}
                 </div>
               </div>
@@ -855,26 +859,26 @@ export default function DashboardPage() {
 
         {/* Retention & Bounce Rate Metrics */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">
+              <CardTitle className="text-[#1C1917] font-bold">
                 User Retention
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 Percentage of users returning over time
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingEnhanced ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#4318FF]" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
                 </div>
               ) : retentionData?.cohorts && retentionData.cohorts.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="text-3xl font-bold text-[#2B3674]">
+                  <div className="text-3xl font-bold text-[#1C1917]">
                     {getOverallRetentionRate().toFixed(1)}%
                   </div>
-                  <p className="text-sm text-[#4363C7]">
+                  <p className="text-sm text-[#78716C]">
                     Day 1 Retention (Avg across {retentionData.cohorts.length}{" "}
                     cohorts)
                   </p>
@@ -882,48 +886,48 @@ export default function DashboardPage() {
                     {getRetentionMetrics().map((metric, idx) => (
                       <div key={idx} className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-[#4363C7]">
+                          <span className="text-[#78716C]">
                             {metric.period}
                           </span>
-                          <span className="font-bold text-[#2B3674]">
+                          <span className="font-bold text-[#1C1917]">
                             {metric.rate.toFixed(1)}%
                           </span>
                         </div>
                         <Progress
                           value={metric.rate}
-                          className="h-2 bg-[#F4F7FE]"
-                          indicatorClassName="bg-[#4318FF]"
+                          className="h-2 bg-transparent"
+                          indicatorClassName="bg-[#2563EB]"
                         />
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-[#4363C7]">
+                <div className="text-center py-8 text-[#78716C]">
                   No retention data available
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">
+              <CardTitle className="text-[#1C1917] font-bold">
                 Bounce Rate
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 Single-page sessions (lower is better)
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingAnalytics ? (
                 <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#4318FF]" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
                 </div>
               ) : (
                 <div className="space-y-6">
                   <div className="flex items-baseline gap-2">
-                    <div className="text-3xl font-bold text-[#2B3674]">
+                    <div className="text-3xl font-bold text-[#1C1917]">
                       {bounceRate.toFixed(1)}%
                     </div>
                     {bounceRate < 40 ? (
@@ -931,13 +935,13 @@ export default function DashboardPage() {
                         Excellent
                       </Badge>
                     ) : bounceRate < 55 ? (
-                      <Badge className="bg-[#4318FF] text-white hover:bg-[#4318FF]/80 border-none">
+                      <Badge className="bg-[#2563EB] text-white hover:bg-[#2563EB]/80 border-none">
                         Good
                       </Badge>
                     ) : bounceRate < 70 ? (
                       <Badge
                         variant="outline"
-                        className="text-[#2B3674] border-[#E0E5F2]"
+                        className="text-[#1C1917] border-[#E0E5F2]"
                       >
                         Average
                       </Badge>
@@ -945,7 +949,7 @@ export default function DashboardPage() {
                       <Badge variant="destructive">Needs Attention</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-[#4363C7]">
+                  <p className="text-sm text-[#78716C]">
                     {bounceRate < 40
                       ? "Users are highly engaged"
                       : bounceRate < 55
@@ -957,10 +961,10 @@ export default function DashboardPage() {
                   <div className="pt-2">
                     <Progress
                       value={100 - bounceRate}
-                      className="h-3 bg-[#F4F7FE]"
-                      indicatorClassName="bg-[#4318FF]"
+                      className="h-3 bg-transparent"
+                      indicatorClassName="bg-[#2563EB]"
                     />
-                    <p className="text-xs text-[#4363C7] mt-2">
+                    <p className="text-xs text-[#78716C] mt-2">
                       {(100 - bounceRate).toFixed(1)}% engaged sessions
                     </p>
                   </div>
@@ -970,14 +974,14 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl min-w-0">
+        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] min-w-0">
           <CardHeader>
             <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div>
-                <CardTitle className="text-[#2B3674] font-bold">
+                <CardTitle className="text-[#1C1917] font-bold">
                   Active Users
                 </CardTitle>
-                <CardDescription className="text-[#4363C7]">
+                <CardDescription className="text-[#78716C]">
                   User engagement over time
                 </CardDescription>
               </div>
@@ -986,22 +990,22 @@ export default function DashboardPage() {
                 onValueChange={setEngagementTab}
                 className="w-full sm:w-[300px]"
               >
-                <TabsList className="grid w-full grid-cols-3 bg-[#F4F7FE] p-1 rounded-xl">
+                <TabsList className="grid w-full grid-cols-3 bg-transparent p-1 rounded-xl">
                   <TabsTrigger
                     value="dau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
                   >
                     DAU
                   </TabsTrigger>
                   <TabsTrigger
                     value="wau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
                   >
                     WAU
                   </TabsTrigger>
                   <TabsTrigger
                     value="mau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#2B3674] data-[state=active]:shadow-sm text-[#4363C7]"
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
                   >
                     MAU
                   </TabsTrigger>
@@ -1011,10 +1015,10 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <div className="text-3xl font-bold text-[#2B3674]">
+              <div className="text-3xl font-bold text-[#1C1917]">
                 {getEngagementValue().toLocaleString()}
               </div>
-              <p className="text-sm text-[#4363C7]">
+              <p className="text-sm text-[#78716C]">
                 {engagementTab === "dau"
                   ? "Daily Active Users"
                   : engagementTab === "wau"
@@ -1025,7 +1029,7 @@ export default function DashboardPage() {
             <div className="h-[350px] w-full px-2">
               {loadingAnalytics ? (
                 <div className="h-full w-full flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#4318FF]" />
+                  <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
                 </div>
               ) : getEngagementData().length > 0 ? (
                 <ChartContainer
@@ -1046,7 +1050,7 @@ export default function DashboardPage() {
                       />
                       <XAxis
                         dataKey="date"
-                        className="text-xs text-[#4363C7]"
+                        className="text-xs text-[#78716C]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
@@ -1059,7 +1063,7 @@ export default function DashboardPage() {
                         }
                       />
                       <YAxis
-                        className="text-xs text-[#4363C7]"
+                        className="text-xs text-[#78716C]"
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
@@ -1089,7 +1093,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
               ) : (
-                <div className="h-full w-full flex items-center justify-center text-[#4363C7]">
+                <div className="h-full w-full flex items-center justify-center text-[#78716C]">
                   No data available for this period
                 </div>
               )}
@@ -1100,12 +1104,12 @@ export default function DashboardPage() {
 
       {/* Top Events & Recent Events */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">
+            <CardTitle className="text-[#1C1917] font-bold">
               Top Events
             </CardTitle>
-            <CardDescription className="text-[#4363C7]">
+            <CardDescription className="text-[#78716C]">
               Most frequently triggered events in the selected period
             </CardDescription>
           </CardHeader>
@@ -1114,12 +1118,12 @@ export default function DashboardPage() {
               {topEvents.slice(0, 5)?.map((event: any, i: number) => (
                 <div key={i} className="flex items-center">
                   <div className="flex-1 space-y-1">
-                    <p className="text-sm font-bold text-[#2B3674] leading-none">
+                    <p className="text-sm font-bold text-[#1C1917] leading-none">
                       {sanitizeText(event.name || `Event ${i + 1}`)}
                     </p>
-                    <div className="w-full bg-[#F4F7FE] rounded-full h-2 mt-2">
+                    <div className="w-full bg-transparent rounded-full h-2 mt-2">
                       <div
-                        className="bg-[#4318FF] h-2 rounded-full"
+                        className="bg-[#2563EB] h-2 rounded-full"
                         style={{
                           width: `${totalEvents > 0 ? (event.count / totalEvents) * 100 : 0}%`,
                         }}
@@ -1127,10 +1131,10 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div className="text-right pl-4">
-                    <div className="text-sm font-bold text-[#2B3674]">
+                    <div className="text-sm font-bold text-[#1C1917]">
                       {event.count?.toLocaleString() || 0}
                     </div>
-                    <div className="text-xs font-medium text-[#4363C7]">
+                    <div className="text-xs font-medium text-[#78716C]">
                       {totalEvents > 0
                         ? ((event.count / totalEvents) * 100)?.toFixed(1)
                         : "0"}
@@ -1140,7 +1144,7 @@ export default function DashboardPage() {
                 </div>
               ))}
               {topEvents.length === 0 && (
-                <p className="text-sm text-[#4363C7] text-center py-4">
+                <p className="text-sm text-[#78716C] text-center py-4">
                   No events data available
                 </p>
               )}
@@ -1149,12 +1153,12 @@ export default function DashboardPage() {
         </Card>
 
         {/* Recent Events */}
-        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">
+            <CardTitle className="text-[#1C1917] font-bold">
               Recent Events
             </CardTitle>
-            <CardDescription className="text-[#4363C7]">
+            <CardDescription className="text-[#78716C]">
               Latest events from your users
             </CardDescription>
           </CardHeader>
@@ -1182,13 +1186,13 @@ export default function DashboardPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm">{countryFlag}</span>
-                          <p className="text-sm font-bold text-[#2B3674]">
+                          <p className="text-sm font-bold text-[#1C1917]">
                             {sanitizeText(sanitizedEvent.Event || sanitizedEvent.event || "Unknown Event")}
                           </p>
                         </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-[#4363C7]">
+                        <div className="flex flex-wrap gap-2 text-xs text-[#78716C]">
                           {sanitizedEvent.UserId && (
-                            <span className="bg-[#F4F7FE] px-2 py-0.5 rounded text-[#2B3674]">
+                            <span className="bg-transparent px-2 py-0.5 rounded text-[#1C1917]">
                               User: {sanitizeText(sanitizedEvent.UserId).substring(0, 8)}...
                             </span>
                           )}
@@ -1200,7 +1204,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-[#4363C7] whitespace-nowrap">
+                        <p className="text-xs text-[#78716C] whitespace-nowrap">
                           {new Date(
                             sanitizedEvent.Timestamp || sanitizedEvent.timestamp || Date.now(),
                           ).toLocaleTimeString([], {
@@ -1213,7 +1217,7 @@ export default function DashboardPage() {
                   );
                 })}
               {events.length === 0 && (
-                <p className="text-sm text-[#4363C7] text-center py-4">
+                <p className="text-sm text-[#78716C] text-center py-4">
                   No recent events found. Start tracking events to see data
                   here.
                 </p>
@@ -1226,14 +1230,14 @@ export default function DashboardPage() {
       {/* 3. Location Analytics */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
+          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
             Location Analytics
           </h2>
           <Link href="/dashboard/location">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+              className="text-[#2563EB] hover:bg-transparent"
             >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
@@ -1241,36 +1245,36 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          <Card className="md:col-span-2 border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="md:col-span-2 rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">
+              <CardTitle className="text-[#1C1917] font-bold">
                 Global Distribution
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 User activity by country
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[300px] md:h-[400px] relative overflow-hidden">
               {loadingEnhanced ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="animate-spin text-[#4318FF] h-8 w-8" />
+                  <Loader2 className="animate-spin text-[#2563EB] h-8 w-8" />
                 </div>
               ) : getGeoData().length > 0 ? (
                 <WorldMap geoData={getGeoData()} />
               ) : (
-                <div className="flex items-center justify-center h-full text-[#4363C7]">
+                <div className="flex items-center justify-center h-full text-[#78716C]">
                   No location data available
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
+          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
             <CardHeader>
-              <CardTitle className="text-[#2B3674] font-bold">
+              <CardTitle className="text-[#1C1917] font-bold">
                 Top Countries
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 By user count
               </CardDescription>
             </CardHeader>
@@ -1281,20 +1285,20 @@ export default function DashboardPage() {
                   .map((geo: any, i: number) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-[#F4F7FE] flex items-center justify-center text-xs font-bold text-[#2B3674]">
+                        <div className="h-8 w-8 rounded-full bg-transparent flex items-center justify-center text-xs font-bold text-[#1C1917]">
                           {i + 1}
                         </div>
-                        <span className="text-sm font-medium text-[#2B3674]">
+                        <span className="text-sm font-medium text-[#1C1917]">
                           {geo.country}
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-[#2B3674]">
+                      <span className="text-sm font-bold text-[#1C1917]">
                         {geo.users.toLocaleString()}
                       </span>
                     </div>
                   ))}
                 {getGeoData().length === 0 && (
-                  <div className="text-center text-[#4363C7] py-8">No data</div>
+                  <div className="text-center text-[#78716C] py-8">No data</div>
                 )}
               </div>
             </CardContent>
@@ -1305,49 +1309,49 @@ export default function DashboardPage() {
       {/* 4. Device Analytics (Table) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#2B3674]">
+          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
             Platform Analytics
           </h2>
           <Link href="/dashboard/devices">
             <Button
               variant="ghost"
               size="sm"
-              className="text-[#4318FF] hover:bg-[#F4F7FE]"
+              className="text-[#2563EB] hover:bg-transparent"
             >
               View Details <ArrowUpRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
-        <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl overflow-hidden">
+        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">
+            <CardTitle className="text-[#1C1917] font-bold">
               Operating System Distribution
             </CardTitle>
-            <CardDescription className="text-[#4363C7]">
+            <CardDescription className="text-[#78716C]">
               Breakdown by operating system
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loadingEnhanced ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="animate-spin text-[#4318FF]" />
+                <Loader2 className="animate-spin text-[#2563EB]" />
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                 <TableHeader>
                   <TableRow className="border-[#F4F7FE] hover:bg-transparent">
-                    <TableHead className="text-[#4363C7] pl-6">
+                    <TableHead className="text-[#78716C] pl-6">
                       Operating System
                     </TableHead>
-                    <TableHead className="text-right text-[#4363C7]">
+                    <TableHead className="text-right text-[#78716C]">
                       Users
                     </TableHead>
-                    <TableHead className="text-right text-[#4363C7]">
+                    <TableHead className="text-right text-[#78716C]">
                       Sessions
                     </TableHead>
-                    <TableHead className="text-right text-[#4363C7] pr-6">
+                    <TableHead className="text-right text-[#78716C] pr-6">
                       Share
                     </TableHead>
                   </TableRow>
@@ -1363,12 +1367,12 @@ export default function DashboardPage() {
                       return data.map((device: any, i: number) => (
                         <TableRow
                           key={i}
-                          className="border-[#F4F7FE] hover:bg-[#F4F7FE]/50"
+                          className="border-[#F4F7FE] hover:bg-transparent/50"
                         >
-                          <TableCell className="font-bold text-[#2B3674] flex items-center gap-2 pl-6">
+                          <TableCell className="font-bold text-[#1C1917] flex items-center gap-2 pl-6">
                             {device.device?.toLowerCase().includes("mac") ||
                             device.device?.toLowerCase().includes("ios") ? (
-                              <Monitor className="h-4 w-4 text-[#4318FF]" />
+                              <Monitor className="h-4 w-4 text-[#2563EB]" />
                             ) : device.device
                                 ?.toLowerCase()
                                 .includes("windows") ? (
@@ -1382,17 +1386,17 @@ export default function DashboardPage() {
                                 .includes("linux") ? (
                               <Monitor className="h-4 w-4 text-[#FCC624]" />
                             ) : (
-                              <Monitor className="h-4 w-4 text-[#4318FF]" />
+                              <Monitor className="h-4 w-4 text-[#2563EB]" />
                             )}
                             {device.device}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-[#2B3674]">
+                          <TableCell className="text-right font-medium text-[#1C1917]">
                             {device.users.toLocaleString()}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-[#2B3674]">
+                          <TableCell className="text-right font-medium text-[#1C1917]">
                             {device.sessions.toLocaleString()}
                           </TableCell>
-                          <TableCell className="text-right font-medium text-[#2B3674] pr-6">
+                          <TableCell className="text-right font-medium text-[#1C1917] pr-6">
                             {totalSessions > 0
                               ? (
                                   (device.sessions / totalSessions) *
@@ -1408,7 +1412,7 @@ export default function DashboardPage() {
                     <TableRow>
                       <TableCell
                         colSpan={4}
-                        className="text-center py-8 text-[#4363C7]"
+                        className="text-center py-8 text-[#78716C]"
                       >
                         No platform data available
                       </TableCell>
@@ -1420,7 +1424,8 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -280,18 +280,18 @@ export default function TeamPage() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Team Members"
-          description="Manage your team and invite new members"
-        />
+      <PageShell
+        title="Team Members"
+        description="Manage your team and invite new members"
+        breadcrumb="Workspace / Team"
+      >
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading team...</p>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -299,13 +299,12 @@ export default function TeamPage() {
   const isAtLimit = teamInfo.limit > 0 && totalUsers >= teamInfo.limit;
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Team Members"
-        description="Manage your team and invite new members"
-      />
-
-      <div className="flex-1 p-6 space-y-6">
+    <PageShell
+      title="Team Members"
+      description="Manage your team and invite new members"
+      breadcrumb="Workspace / Team"
+    >
+      <div className="space-y-6">
         {/* Team Size Overview */}
         <Card>
           <CardHeader>
@@ -679,6 +678,6 @@ export default function TeamPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageShell>
   );
 }

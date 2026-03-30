@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -264,12 +264,12 @@ export default function ProjectsPage() {
   // Empty state when no projects exist
   if (!projects || projects.length === 0) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Projects"
-          description="Manage your projects and API keys"
-        />
-        <div className="flex-1 flex items-center justify-center p-6">
+      <PageShell
+        title="Projects"
+        description="Manage your projects and API keys"
+        breadcrumb="Workspace / Projects"
+      >
+        <div className="flex-1 flex items-center justify-center py-12">
           <Card className="max-w-2xl w-full">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center text-center space-y-6">
@@ -473,21 +473,21 @@ export default function ProjectsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Projects"
-        description="Manage your projects and API keys"
-      />
-      <div className="flex-1 p-6 space-y-6">
+    <PageShell
+      title="Projects"
+      description="Manage your projects and API keys"
+      breadcrumb="Workspace / Projects"
+    >
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">Your Projects</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-[0.9375rem] font-semibold" style={{ color: "#1C1917" }}>Your Projects</h2>
+            <p className="text-[0.75rem]" style={{ color: "#A8A29E" }}>
               Create and manage projects to track analytics
             </p>
           </div>
@@ -1068,6 +1068,6 @@ function LoginHandler() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </PageShell>
   );
 }

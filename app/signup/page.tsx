@@ -1,55 +1,29 @@
 "use client";
 
 import * as React from "react";
-
 import { useState, Suspense, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { UserCountSlider, TIER_COLORS } from "@/components/user-count-slider";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { UserCountSlider } from "@/components/user-count-slider";
+import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
+import { sanitizeText, sanitizeEmail, sanitizePassword } from "@/lib/sanitization";
 import {
   ArrowRight,
-  Mail,
-  Lock,
-  User,
-  Building,
+  Loader2,
+  MailOpen,
   Check,
   Zap,
   TrendingUp,
-  Rocket,
   Building2,
-  Crown,
-  Loader2,
-  MailOpen,
+  Eye,
+  EyeOff
 } from "lucide-react";
-import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
-import {
-  sanitizeText,
-  sanitizeEmail,
-  sanitizePassword,
-  sanitizeSearchQuery,
-} from "@/lib/sanitization";
 
-// Generic error message for security
-const GENERIC_ERROR = "An error occurred. Please try again.";
-
-// Zod validation schema for account details
 const signUpSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   companyName: z.string().min(2, "Company name must be at least 2 characters"),
@@ -61,59 +35,30 @@ const signUpSchema = z.object({
     .regex(/^(?=.*[0-9])/, "Password must contain at least one number")
     .regex(
       /^(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/,
-      "Password must contain at least one special character",
+      "Password must contain at least one special character"
     ),
   acceptedTerms: z.boolean().refine((val) => val === true, {
-    message: "You must accept the Terms and Conditions",
+    message: "You must accept the terms",
   }),
 });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
-// Google icon component
-const GoogleIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24">
-    <path
-      fill="currentColor"
-      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-    />
-    <path
-      fill="currentColor"
-      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-    />
-    <path
-      fill="currentColor"
-      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-    />
-    <path
-      fill="currentColor"
-      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-    />
-  </svg>
-);
-
 const TIER_ICONS: Record<string, React.ReactNode> = {
-  starter: <Zap className="h-5 w-5" />,
-  growth: <TrendingUp className="h-5 w-5" />,
-  scale: <Building2 className="h-5 w-5" />,
+  starter: <Zap className="w-5 h-5" />,
+  growth: <TrendingUp className="w-5 h-5" />,
+  scale: <Building2 className="w-5 h-5" />,
 };
 
-function SignUpForm() {
+function SignUpContent() {
   const searchParams = useSearchParams();
-
-  const preselectedPlanId = searchParams.get("plan");
   const preselectedUsers = searchParams.get("users");
-
-  const [step, setStep] = useState<"details" | "plan" | "verification">(
-    "details",
-  );
-  const [userCount, setUserCount] = useState(
-    preselectedUsers ? parseInt(preselectedUsers) : 500,
-  );
+  
+  const [step, setStep] = useState<"details" | "plan" | "verification">("details");
+  const [userCount, setUserCount] = useState(preselectedUsers ? parseInt(preselectedUsers) : 250);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isRegistered, setIsRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [userId, setUserId] = useState("");
 
   const currentTier = getTierByUserCount(userCount);
@@ -127,18 +72,9 @@ function SignUpForm() {
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
-    defaultValues: {
-      fullName: "",
-      companyName: "",
-      email: "",
-      password: "",
-      acceptedTerms: false,
-    },
+    defaultValues: { fullName: "", companyName: "", email: "", password: "", acceptedTerms: false },
   });
 
-  const acceptedTerms = watch("acceptedTerms");
-
-  // Check if user canceled payment
   React.useEffect(() => {
     const canceled = searchParams.get("canceled");
     if (canceled === "true") {
@@ -147,27 +83,16 @@ function SignUpForm() {
     }
   }, [searchParams]);
 
-  const calculatePrice = (tier: (typeof PRICING_TIERS)[number]) => {
-    return tier.basePrice;
-  };
-
   const handleRegisterUser = async (data: SignUpFormData) => {
     setIsLoading(true);
     setError("");
 
-    // Sanitize all inputs
     const sanitizedFullName = sanitizeText(data.fullName);
     const sanitizedCompanyName = sanitizeText(data.companyName);
     const sanitizedEmail = sanitizeEmail(data.email);
     const sanitizedPassword = sanitizePassword(data.password);
 
-    // Validate sanitized data
-    if (
-      !sanitizedFullName ||
-      !sanitizedCompanyName ||
-      !sanitizedEmail ||
-      !sanitizedPassword
-    ) {
+    if (!sanitizedFullName || !sanitizedCompanyName || !sanitizedEmail || !sanitizedPassword) {
       setError("Please fill in all fields correctly.");
       setIsLoading(false);
       return;
@@ -176,9 +101,7 @@ function SignUpForm() {
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: sanitizedFullName,
           email: sanitizedEmail,
@@ -194,15 +117,12 @@ function SignUpForm() {
         return;
       }
 
-      // Check if email verification is required
       if (responseData.requiresVerification) {
-        setIsRegistered(true);
         setUserId(sanitizeText(responseData.account?.id) || sanitizedEmail);
         setStep("verification");
         return;
       }
 
-      // If no verification required (e.g., Google OAuth users), sign in and go to plan
       const result = await signIn("credentials", {
         email: sanitizedEmail,
         password: sanitizedPassword,
@@ -210,30 +130,15 @@ function SignUpForm() {
       });
 
       if (result?.ok) {
-        setIsRegistered(true);
         setUserId(responseData.id || data.email);
         setStep("plan");
       } else {
-        setError(
-          "Account created but failed to sign in. Please try signing in manually.",
-        );
+        setError("Account created but failed to sign in. Please try signing in manually.");
       }
-    } catch (error) {
+    } catch (err) {
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleGoogleSignUp = async () => {
-    setIsGoogleLoading(true);
-    setError("");
-    try {
-      await signIn("google", { callbackUrl: "/signup?step=plan" });
-    } catch (error: any) {
-      // Silent fail - error handled via UI
-      setError("Failed to sign up with Google. Please try again.");
-      setIsGoogleLoading(false);
     }
   };
 
@@ -249,13 +154,8 @@ function SignUpForm() {
     try {
       const response = await fetch("/api/stripe/signup-checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          tierId: currentTier.id,
-          userCount,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tierId: currentTier.id, userCount }),
       });
 
       const data = await response.json();
@@ -265,11 +165,10 @@ function SignUpForm() {
         return;
       }
 
-      // Redirect to Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       }
-    } catch (error) {
+    } catch (err) {
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -277,591 +176,254 @@ function SignUpForm() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white text-[#2B3674]">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
-
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full text-white">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-30 w-30">
-              <Image
-                src="/logo.png"
-                alt="Mentiq Logo"
-                fill
-                className="object-contain brightness-0 invert"
-              />
+    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6 text-slate-900 pt-16 pb-16" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className={`w-full ${step === 'plan' ? 'max-w-4xl' : 'max-w-md'}`}>
+        
+        <div className="flex justify-center mb-10">
+          <Link href="/" className="group block transition-transform hover:scale-105">
+            <div className="relative h-20 w-64">
+              <Image src="/logo.png" alt="Mentiq Logo" fill className="object-contain" priority />
             </div>
           </Link>
-
-          <div className="space-y-6">
-            <h1 className="text-5xl font-bold leading-tight">
-              Start killing churn
-              <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-200 to-white">
-                in minutes
-              </span>
-            </h1>
-            <p className="text-xl text-blue-100 max-w-md">
-              Join thousands of SaaS founders who&apos;ve turned retention into
-              their competitive advantage.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-8 text-sm text-blue-200">
-            <span>© 2025 Mentiq</span>
-            <Link
-              href="/docs/Privacy Policy MENTIQ.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/docs/Terms of Service MENTIQ.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              Terms
-            </Link>
-          </div>
         </div>
-      </div>
 
-      {/* Right Side - Sign Up Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12 overflow-y-auto bg-white">
-        <div className="w-full max-w-2xl space-y-8">
-          {/* Mobile Logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="relative  h-30 w-30">
-              <Image
-                src="/logo.png"
-                alt="Mentiq Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
-          </Link>
+        <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-10 shadow-sm relative overflow-hidden">
+          {/* Subtle atmospheric gradients */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#EEF2FF] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#F8F9FA] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-60"></div>
+          
+          <div className="relative">
 
-          {/* Step Indicator */}
-          <div className="flex items-center gap-4 mb-8">
-            <div
-              className={`flex items-center gap-2 ${
-                step === "details" ? "text-primary" : "text-[#4363C7]"
-              }`}
-            >
-              <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
-                  step === "details"
-                    ? "border-primary bg-primary/10"
-                    : "border-[#E0E5F2] bg-[#F4F7FE]"
-                }`}
-              >
-                1
+            {/* Step Indicators */}
+            <div className={`flex items-center justify-center gap-3 md:gap-6 mb-10 text-xs font-medium tracking-wide ${step === 'plan' ? 'max-w-md mx-auto' : ''}`}>
+              <div className={`flex items-center gap-2 ${step === 'details' ? 'text-[#3B5BDB]' : 'text-slate-400'}`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step === 'details' ? 'bg-[#EEF2FF]' : 'bg-slate-100'}`}>1</div>
+                <span>Details</span>
               </div>
-              <span className="font-medium">Account Details</span>
-            </div>
-            <div className="flex-1 h-px bg-[#E0E5F2]"></div>
-            <div
-              className={`flex items-center gap-2 ${
-                step === "plan" ? "text-primary" : "text-[#4363C7]"
-              }`}
-            >
-              <div
-                className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${
-                  step === "plan"
-                    ? "border-primary bg-primary/10"
-                    : "border-[#E0E5F2] bg-[#F4F7FE]"
-                }`}
-              >
-                2
+              <div className="w-8 h-px bg-slate-200"></div>
+              <div className={`flex items-center gap-2 ${step === 'plan' ? 'text-[#3B5BDB]' : 'text-slate-400'}`}>
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step === 'plan' ? 'bg-[#EEF2FF]' : 'bg-slate-100'}`}>2</div>
+                <span>Plan</span>
               </div>
-              <span className="font-medium">Choose Plan</span>
             </div>
-          </div>
 
-          {/* Step 1: Account Details */}
-          {step === "details" && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">
-                  Create your account
-                </h2>
-                <p className="text-[#4363C7]">
-                  Fill in your details to get started
+            {error && (
+              <div className="text-[0.875rem] text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl mb-6 flex items-start gap-2 max-w-lg mx-auto">
+                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/><path d="M7 4h2v5H7V4zm1 8a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                {error}
+              </div>
+            )}
+
+            {step === "details" && (
+              <>
+                <h1 className="text-[2rem] text-center tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Create an account
+                </h1>
+                <p className="text-center text-[0.9375rem] text-slate-500 mb-8">
+                  Get started with Mentiq to stop churn.
                 </p>
-              </div>
 
-              {/* Google Sign Up Button */}
-              {/* <Button
-                variant="outline"
-                onClick={handleGoogleSignUp}
-                disabled={isGoogleLoading}
-                className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
-              >
-                {isGoogleLoading ? (
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                ) : (
-                  <GoogleIcon className="mr-2 h-5 w-5" />
-                )}
-                Continue with Google
-              </Button> */}
-
-              {/* Divider */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#E0E5F2]"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-[#4363C7]">
-                    or create account with email
-                  </span>
-                </div>
-              </div>
-
-              {error && (
-                <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
-                  {error}
-                </div>
-              )}
-
-              <form
-                onSubmit={handleSubmit(handleRegisterUser)}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="fullName"
-                      className="text-sm font-medium text-[#2B3674]"
-                    >
-                      Full name
-                    </Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                      <Input
+                <form onSubmit={handleSubmit(handleRegisterUser)} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     <div className="space-y-1.5">
+                      <label htmlFor="fullName" className="block text-sm font-medium text-slate-700">Full name</label>
+                      <input
                         id="fullName"
                         type="text"
-                        placeholder="John Doe"
+                        placeholder="Alex Morgan"
                         {...register("fullName")}
-                        className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                          errors.fullName
-                            ? "border-red-500 ring-1 ring-red-500"
-                            : ""
-                        }`}
+                        className={`w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all ${errors.fullName ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" : "border-slate-200"}`}
                       />
+                      {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName.message}</p>}
                     </div>
-                    {errors.fullName && (
-                      <p className="text-sm text-red-500">
-                        {errors.fullName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="companyName"
-                      className="text-sm font-medium text-[#2B3674]"
-                    >
-                      Company name
-                    </Label>
-                    <div className="relative">
-                      <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                      <Input
+                    <div className="space-y-1.5">
+                      <label htmlFor="companyName" className="block text-sm font-medium text-slate-700">Company name</label>
+                      <input
                         id="companyName"
                         type="text"
-                        placeholder="Your Company"
+                        placeholder="Acme Corp"
                         {...register("companyName")}
-                        className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                          errors.companyName
-                            ? "border-red-500 ring-1 ring-red-500"
-                            : ""
-                        }`}
+                        className={`w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all ${errors.companyName ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" : "border-slate-200"}`}
                       />
+                      {errors.companyName && <p className="text-xs text-red-500 mt-1">{errors.companyName.message}</p>}
                     </div>
-                    {errors.companyName && (
-                      <p className="text-sm text-red-500">
-                        {errors.companyName.message}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="email" className="block text-sm font-medium text-slate-700">Work email</label>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="alex@company.com"
+                      autoComplete="email"
+                      {...register("email")}
+                      className={`w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all ${errors.email ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" : "border-slate-200"}`}
+                    />
+                    {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        {...register("password")}
+                        className={`w-full h-11 pl-4 pr-10 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all ${errors.password ? "border-red-300 focus:border-red-500 focus:ring-red-500/20" : "border-slate-200"}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {errors.password ? (
+                      <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+                    ) : (
+                      <p className="text-xs text-slate-500 mt-1">
+                        At least 8 chars, 1 uppercase, 1 number, 1 special char
                       </p>
                     )}
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="email"
-                    className="text-sm font-medium text-[#2B3674]"
-                  >
-                    Work email
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@company.com"
-                      {...register("email")}
-                      className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                        errors.email ? "border-red-500 ring-1 ring-red-500" : ""
-                      }`}
+                  <div className="flex items-start gap-3 mt-4">
+                    <Controller
+                      name="acceptedTerms"
+                      control={control}
+                      render={({ field }) => (
+                         <input
+                          id="terms"
+                          type="checkbox"
+                          checked={field.value}
+                          onChange={field.onChange}
+                          className="mt-1 w-4 h-4 rounded border-slate-300 text-[#3B5BDB] focus:ring-[#3B5BDB]"
+                        />
+                      )}
                     />
+                    <label htmlFor="terms" className="text-xs text-slate-500 leading-relaxed cursor-pointer select-none">
+                      I agree to the <Link href="/#" className="text-[#3B5BDB] hover:underline">Terms of Service</Link>, <Link href="/#" className="text-[#3B5BDB] hover:underline">Privacy Policy</Link>, and <Link href="/#" className="text-[#3B5BDB] hover:underline">DPA</Link>.
+                    </label>
                   </div>
-                  {errors.email && (
-                    <p className="text-sm text-red-500">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
+                  {errors.acceptedTerms && <p className="text-xs text-red-500 -mt-2">{errors.acceptedTerms.message}</p>}
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm font-medium text-[#2B3674]"
+                  <button
+                    type="submit"
+                    disabled={!isValid || isLoading}
+                    className="w-full h-11 mt-4 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-all disabled:opacity-70 flex items-center justify-center"
                   >
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="At least 8 characters"
-                      {...register("password")}
-                      className={`pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary ${
-                        errors.password
-                          ? "border-red-500 ring-1 ring-red-500"
-                          : ""
-                      }`}
-                    />
+                    {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                    {isLoading ? "Creating account..." : "Continue to plan"}
+                  </button>
+                </form>
+                <p className="mt-8 text-center text-[0.9375rem] text-slate-500 text-sm">
+                  Already have an account? <Link href="/signin" className="font-medium text-[#3B5BDB] hover:text-[#3451C7] transition-colors">Sign in</Link>
+                </p>
+              </>
+            )}
+
+            {step === "verification" && (
+              <div className="text-center py-6 px-4">
+                <div className="flex justify-center mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-[#EEF2FF] flex items-center justify-center">
+                    <MailOpen className="w-8 h-8 text-[#3B5BDB]" />
                   </div>
-                  {errors.password ? (
-                    <p className="text-sm text-red-500">
-                      {errors.password.message}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-[#4363C7]">
-                      Must be at least 8 characters with 1 capital letter, 1
-                      number, and 1 special character
-                    </p>
-                  )}
                 </div>
-
-                <div className="flex items-start gap-3 p-4 bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg">
-                  <Controller
-                    name="acceptedTerms"
-                    control={control}
-                    render={({ field }) => (
-                      <Checkbox
-                        id="terms"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="mt-1 border-[#4363C7] data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      />
-                    )}
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-xs text-[#2B3674] leading-relaxed cursor-pointer"
-                  >
-                    By creating an account, I agree to the{" "}
-                    <Link
-                      href="/docs/Terms of Service MENTIQ.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Terms of Service
-                    </Link>{" "}
-                    and acknowledge the{" "}
-                    <Link
-                      href="/docs/Privacy Policy MENTIQ.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Privacy Policy
-                    </Link>
-                    ,{" "}
-                    <Link
-                      href="/docs/COOKIES MENTIQ.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Cookie Policy
-                    </Link>
-                    , and{" "}
-                    <Link
-                      href="/docs/DPA MENTIQ.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Data Processing Addendum
-                    </Link>
-                    .
-                  </label>
-                </div>
-                {errors.acceptedTerms && (
-                  <p className="text-sm text-red-500 -mt-2">
-                    {errors.acceptedTerms.message}
-                  </p>
-                )}
-
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
-                  disabled={!isValid || isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Creating account...
-                    </>
-                  ) : (
-                    <>
-                      Continue to plan selection
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#E0E5F2]"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-[#4363C7]">
-                    Already have an account?
-                  </span>
-                </div>
-              </div>
-
-              <Link href="/signin">
-                <Button
-                  variant="outline"
-                  className="w-full h-12 text-base border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
-                >
-                  Sign in instead
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Email Verification Pending Step */}
-          {step === "verification" && (
-            <div className="space-y-6 text-center">
-              <div className="flex justify-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MailOpen className="h-10 w-10 text-primary" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">
-                  Check your email
-                </h2>
-                <p className="text-[#4363C7]">
-                  We&apos;ve sent a verification link to{" "}
-                  <strong className="text-[#2B3674]">{watch("email")}</strong>
+                <h1 className="text-[2rem] tracking-tight mb-3 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Check your inbox
+                </h1>
+                <p className="text-[0.9375rem] text-slate-500 mb-8 max-w-sm mx-auto">
+                  We sent a verification link to <strong className="font-medium text-slate-900">{watch("email")}</strong>. Please verify your email to continue.
                 </p>
-              </div>
-
-              <div className="bg-[#F4F7FE] border border-[#E0E5F2] rounded-lg p-4 space-y-3">
-                <p className="text-sm text-[#4363C7]">
-                  Click the link in your email to verify your account. Once
-                  verified, you can sign in and complete your subscription
-                  setup.
-                </p>
-                <p className="text-xs text-[#4363C7]">
-                  Didn&apos;t receive the email? Check your spam folder or{" "}
+                <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                   <Link href="/signin" className="w-full h-11 bg-slate-900 text-white rounded-xl text-[0.9375rem] font-medium hover:bg-slate-800 transition-colors flex items-center justify-center">
+                    Go to Sign In
+                  </Link>
                   <button
                     onClick={async () => {
                       try {
-                        const response = await fetch(
-                          `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/resend-verification`,
-                          {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: watch("email") }),
-                          },
-                        );
-                        if (response.ok) {
-                          alert("Verification email resent!");
-                        }
-                      } catch (error) {
-                        // Silent fail - user can retry manually
-                      }
+                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || ""}/resend-verification`, {
+                          method: "POST", headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email: watch("email") }),
+                        });
+                        if (res.ok) alert("Verification email resent!");
+                      } catch (err) {}
                     }}
-                    className="text-primary hover:underline"
+                    className="text-xs font-medium text-[#3B5BDB] hover:text-[#3451C7] py-2"
                   >
-                    resend verification email
+                    Resend email
                   </button>
-                </p>
-              </div>
-
-              <Link href="/signin">
-                <Button className="w-full h-12 text-base bg-primary hover:bg-primary/90">
-                  Go to Sign In
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {/* Step 2: Plan Selection */}
-          {step === "plan" && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold text-[#2B3674]">
-                  Choose your plan
-                </h2>
-                <p className="text-[#4363C7]">
-                  Select the number of paid users you have
-                </p>
-              </div>
-
-              {error && (
-                <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
-                  {error}
                 </div>
-              )}
+              </div>
+            )}
 
-              <Card className="bg-white border-[#E0E5F2] shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-[#2B3674]">
-                    How many paid users do you have?
-                  </CardTitle>
-                  <CardDescription className="text-[#4363C7]">
-                    Slide to select your current or expected user count
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <UserCountSlider
-                    userCount={userCount}
-                    onUserCountChange={setUserCount}
-                    showPrice={true}
-                  />
+            {step === "plan" && (
+              <div className="max-w-3xl mx-auto">
+                <h1 className="text-[2rem] text-center tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Choose your plan
+                </h1>
+                <p className="text-center text-[0.9375rem] text-slate-500 mb-8">
+                  Select your expected user volume to continue setup.
+                </p>
 
-                  {currentTier && userCount <= 10000 && (
-                    <div className="space-y-4">
-                      {currentTier.trialDays && (
-                        <div className="text-center">
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-50 text-green-700 border-green-200"
-                          >
-                            {currentTier.trialDays}-day free trial included
-                          </Badge>
+                <div className="mb-10 bg-slate-50 rounded-xl border border-slate-100 p-6 md:p-8">
+                  <h3 className="text-[1rem] font-medium text-slate-900 mb-2 text-center">How many paid users do you have?</h3>
+                  <div className="mt-6"><UserCountSlider userCount={userCount} onUserCountChange={setUserCount} showPrice={true} /></div>
+                </div>
+
+                {currentTier && userCount <= 10000 ? (
+                  <div className="rounded-2xl border border-slate-200 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center bg-white shadow-sm">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-[#EEF2FF] flex items-center justify-center text-[#3B5BDB]">
+                          {TIER_ICONS[currentTier.id]}
                         </div>
-                      )}
-
-                      <div className="bg-[#F4F7FE] rounded-lg p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="text-[#4318FF]">
-                            {TIER_ICONS[currentTier.id]}
-                          </div>
-                          <p className="text-sm font-semibold text-[#2B3674]">
-                            {currentTier.name} Plan &mdash; $
-                            {currentTier.basePrice}/mo
-                          </p>
+                        <div>
+                          <h3 className="text-[1.25rem] font-semibold text-slate-900">{currentTier.name} Plan</h3>
+                          <div className="text-sm text-slate-500">Up to {currentTier.included.paidUsers.toLocaleString()} paid users</div>
                         </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <div className="flex items-start gap-3 text-sm">
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">
-                              {currentTier.included.paidUsers.toLocaleString()}{" "}
-                              paid users
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-3 text-sm">
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">
-                              {currentTier.included.sessionReplays.toLocaleString()}{" "}
-                              session replays
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-3 text-sm">
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">
-                              {currentTier.included.automatedEmails.toLocaleString()}{" "}
-                              automated emails
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-3 text-sm">
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">
-                              {currentTier.included.aiGenerations} AI
-                              generations
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-3 text-sm">
-                            <Check className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
-                            <span className="text-[#4363C7]">
-                              {currentTier.included.teamMembers === 0
-                                ? "Unlimited"
-                                : currentTier.included.teamMembers}{" "}
-                              team members
-                            </span>
-                          </div>
+                      </div>
+                      <div className="space-y-3 mt-6">
+                        <div className="flex items-start gap-3 text-sm text-slate-600">
+                           <Check className="w-4 h-4 mt-0.5 text-[#3B5BDB]" /> Includes {currentTier.included.sessionReplays.toLocaleString()} session replays
                         </div>
-
-                        <p className="text-xs text-[#4363C7] mt-3 pt-3 border-t border-[#E0E5F2]">
-                          Soft limits &mdash; go over anytime, overages billed
-                          automatically.
-                        </p>
+                        <div className="flex items-start gap-3 text-sm text-slate-600">
+                           <Check className="w-4 h-4 mt-0.5 text-[#3B5BDB]" /> Includes {currentTier.included.automatedEmails.toLocaleString()} automated emails
+                        </div>
                       </div>
                     </div>
-                  )}
-
-                  {userCount > 10000 && (
-                    <div className="text-center space-y-4">
-                      <p className="text-[#2B3674]">
-                        For 10,000+ users, please contact our sales team for
-                        custom pricing.
-                      </p>
-                      <Link href="/pricing">
-                        <Button
-                          variant="outline"
-                          className="border-[#E0E5F2] bg-white hover:bg-[#F4F7FE] text-[#2B3674]"
-                        >
-                          View Enterprise Options
-                        </Button>
-                      </Link>
+                    
+                    <div className="w-full md:w-auto min-w-[200px] flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-slate-100 pt-6 md:pt-0 md:pl-8">
+                      <div className="flex items-baseline gap-1 mb-4">
+                        <span className="text-[2.5rem] font-semibold tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>${currentTier.basePrice}</span>
+                        <span className="text-sm text-slate-500">/mo</span>
+                      </div>
+                      <button
+                        onClick={handleCheckout}
+                        disabled={isLoading}
+                        className="w-full h-11 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-all disabled:opacity-70 flex items-center justify-center px-6"
+                      >
+                        {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                        {isLoading ? "Processing..." : "Complete Setup"}
+                      </button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Button
-                onClick={handleCheckout}
-                className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
-                disabled={!currentTier || userCount > 10000 || isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Processing...
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    Continue to Payment
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </>
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 md:p-8 text-center text-amber-900">
+                    <h3 className="text-lg font-semibold mb-2">Enterprise Plan Required</h3>
+                    <p className="text-sm text-amber-800 mb-6 max-w-md mx-auto">For over 10,000 users, please contact our team to discuss custom pricing, SLA options, and dedicated infrastructure.</p>
+                     <Link href="/pricing" className="inline-flex h-11 items-center justify-center px-6 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors">
+                      View Enterprise Options
+                    </Link>
+                  </div>
                 )}
-              </Button>
+              </div>
+            )}
 
-              <p className="text-xs text-center text-[#4363C7]">
-                You&apos;ll be redirected to Stripe for secure payment
-                processing. After payment, you&apos;ll be able to create your
-                first project.
-              </p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
@@ -870,17 +432,8 @@ function SignUpForm() {
 
 export default function SignUpPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-white text-[#2B3674]">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-            <p className="mt-4 text-[#4363C7]">Loading...</p>
-          </div>
-        </div>
-      }
-    >
-      <SignUpForm />
+    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center text-sm text-slate-500">Loading...</div>}>
+      <SignUpContent />
     </Suspense>
   );
 }

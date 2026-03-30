@@ -16,12 +16,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { User, Lock, Mail, Loader2, Check, Camera } from "lucide-react";
 import { motion } from "framer-motion";
+import { PageShell } from "@/components/page-shell";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"profile" | "security">("profile");
   
   // Profile state
   const [profile, setProfile] = useState({
@@ -190,233 +192,202 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-4xl py-8 px-4">
+    <PageShell title="Account Settings" description="Manage your account settings and preferences" breadcrumb="Workspace / Settings">
+      <div className="max-w-4xl py-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">Account Settings</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your account settings and preferences
-            </p>
+          {/* Tabs */}
+          <div className="flex gap-1 mb-6 p-1 rounded-lg w-fit" style={{ backgroundColor: "#F3F2F1" }}>
+            {(["profile", "security"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-md text-[0.8125rem] font-medium transition-all duration-150 capitalize"
+                style={{
+                  backgroundColor: activeTab === tab ? "#FFFFFF" : "transparent",
+                  color: activeTab === tab ? "#1C1917" : "#78716C",
+                  boxShadow: activeTab === tab ? "0 1px 3px rgba(28,25,23,0.08)" : "none",
+                }}
+              >
+                {tab === "profile" ? <User className="w-3.5 h-3.5" strokeWidth={1.75} /> : <Lock className="w-3.5 h-3.5" strokeWidth={1.75} />}
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
           </div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 max-w-md">
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="security" className="flex items-center gap-2">
-                <Lock className="h-4 w-4" />
-                Security
-              </TabsTrigger>
-            </TabsList>
+          {activeTab === "profile" && (
+            <div className="max-w-lg">
+              <div className="rounded-xl border bg-white p-6" style={{ borderColor: "#E7E5E4" }}>
+                <h3 className="text-[0.875rem] font-semibold mb-1" style={{ color: "#1C1917" }}>Profile Information</h3>
+                <p className="text-[0.75rem] mb-6" style={{ color: "#A8A29E" }}>Update your account profile and avatar</p>
 
-            {/* Profile Tab */}
-            <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>
-                    Update your account profile and avatar
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {profileLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (
-                    <form onSubmit={handleProfileUpdate} className="space-y-6">
-                      {/* Avatar Section */}
-                      <div className="flex items-center gap-6">
-                        <div className="relative">
-                          <div className="h-20 w-20 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
-                            {profile.avatar_url ? (
-                              <img
-                                src={profile.avatar_url}
-                                alt="Avatar"
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <User className="h-8 w-8 text-primary" />
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
-                            onClick={() => {
-                              // TODO: Implement avatar upload
-                              toast({
-                                title: "Coming soon",
-                                description: "Avatar upload will be available soon.",
-                              });
-                            }}
-                          >
-                            <Camera className="h-4 w-4" />
-                          </button>
+                {profileLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <form onSubmit={handleProfileUpdate} className="space-y-6">
+                    {/* Avatar Section */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="relative">
+                        <div
+                          className="w-14 h-14 rounded-full flex items-center justify-center text-[1.1rem] font-semibold overflow-hidden"
+                          style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB" }}
+                        >
+                          {profile.avatar_url ? (
+                            <img
+                              src={profile.avatar_url}
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            profile.name?.charAt(0).toUpperCase() || "A"
+                          )}
                         </div>
-                        <div>
-                          <h3 className="font-medium">Profile Picture</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Click the camera icon to update your avatar
-                          </p>
-                        </div>
+                        <button
+                          type="button"
+                          className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 flex items-center justify-center hover:bg-slate-50 transition-colors"
+                          style={{ backgroundColor: "#FFFFFF", borderColor: "#E7E5E4" }}
+                          onClick={() => {
+                            toast({
+                              title: "Coming soon",
+                              description: "Avatar upload will be available soon.",
+                            });
+                          }}
+                        >
+                          <Camera className="w-2.5 h-2.5" style={{ color: "#78716C" }} />
+                        </button>
                       </div>
+                      <div>
+                        <p className="text-[0.8125rem] font-medium" style={{ color: "#1C1917" }}>{profile.name || "Anonymous User"}</p>
+                        <p className="text-[0.75rem]" style={{ color: "#A8A29E" }}>Pro Plan</p>
+                      </div>
+                    </div>
 
-                      {/* Name Field */}
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                          id="name"
-                          placeholder="Your name"
+                    {/* Fields */}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>Name</label>
+                        <input
+                          type="text"
                           value={profile.name}
-                          onChange={(e) =>
-                            setProfile({ ...profile, name: e.target.value })
-                          }
+                          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg border text-[0.8125rem] outline-none transition-colors"
+                          style={{ borderColor: "#E7E5E4", color: "#1C1917", backgroundColor: "#FAFAF9" }}
+                          onFocus={(e) => (e.target.style.borderColor = "#2563EB")}
+                          onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
                         />
                       </div>
-
-                      {/* Email Field (read-only) */}
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <div className="relative">
-                          <Input
-                            id="email"
-                            type="email"
-                            value={profile.email}
-                            disabled
-                            className="pr-10 bg-muted"
-                          />
-                          <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          Email cannot be changed
-                        </p>
+                      <div>
+                        <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>Email</label>
+                        <input
+                          type="email"
+                          value={profile.email}
+                          disabled
+                          className="w-full px-3 py-2 rounded-lg border text-[0.8125rem]"
+                          style={{ borderColor: "#E7E5E4", color: "#A8A29E", backgroundColor: "#F8F7F4", cursor: "not-allowed" }}
+                        />
+                        <p className="text-[0.7rem] mt-1" style={{ color: "#A8A29E" }}>Email cannot be changed</p>
                       </div>
-
-                      {/* Avatar URL Field */}
-                      <div className="space-y-2">
-                        <Label htmlFor="avatar_url">Avatar URL</Label>
-                        <Input
-                          id="avatar_url"
+                      <div>
+                        <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>Avatar URL</label>
+                        <input
+                          type="url"
                           placeholder="https://example.com/avatar.jpg"
                           value={profile.avatar_url}
-                          onChange={(e) =>
-                            setProfile({ ...profile, avatar_url: e.target.value })
-                          }
+                          onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg border text-[0.8125rem] outline-none transition-colors"
+                          style={{ borderColor: "#E7E5E4", color: "#1C1917", backgroundColor: "#FAFAF9" }}
+                          onFocus={(e) => (e.target.style.borderColor = "#2563EB")}
+                          onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          Paste a URL to use as your profile picture
-                        </p>
                       </div>
-
-                      <Button type="submit" disabled={loading}>
-                        {loading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Check className="mr-2 h-4 w-4" />
-                            Save Changes
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Security Tab */}
-            <TabsContent value="security">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Change Password</CardTitle>
-                  <CardDescription>
-                    Update your password to keep your account secure
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handlePasswordChange} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="current_password">Current Password</Label>
-                      <Input
-                        id="current_password"
-                        type="password"
-                        placeholder="Enter current password"
-                        value={passwords.current_password}
-                        onChange={(e) =>
-                          setPasswords({
-                            ...passwords,
-                            current_password: e.target.value,
-                          })
-                        }
-                        required
-                      />
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="px-4 py-2 flex items-center gap-2 rounded-lg text-[0.8125rem] font-medium transition-opacity disabled:opacity-50"
+                        style={{ backgroundColor: "#2563EB", color: "#FFFFFF" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.opacity = !loading ? "0.9" : "0.5")}
+                        onMouseLeave={(e) => (e.currentTarget.style.opacity = !loading ? "1" : "0.5")}
+                      >
+                        {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        Save Changes
+                      </button>
                     </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="new_password">New Password</Label>
-                      <Input
-                        id="new_password"
-                        type="password"
-                        placeholder="Enter new password (min 8 characters)"
-                        value={passwords.new_password}
-                        onChange={(e) =>
-                          setPasswords({
-                            ...passwords,
-                            new_password: e.target.value,
-                          })
-                        }
-                        required
-                        minLength={8}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm_password">Confirm New Password</Label>
-                      <Input
-                        id="confirm_password"
-                        type="password"
-                        placeholder="Confirm new password"
-                        value={passwords.confirm_password}
-                        onChange={(e) =>
-                          setPasswords({
-                            ...passwords,
-                            confirm_password: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-
-                    <Button type="submit" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Updating...
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="mr-2 h-4 w-4" />
-                          Change Password
-                        </>
-                      )}
-                    </Button>
                   </form>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "security" && (
+            <div className="max-w-lg">
+              <div className="rounded-xl border bg-white p-6" style={{ borderColor: "#E7E5E4" }}>
+                <h3 className="text-[0.875rem] font-semibold mb-1" style={{ color: "#1C1917" }}>Change Password</h3>
+                <p className="text-[0.75rem] mb-6" style={{ color: "#A8A29E" }}>Update your account password</p>
+                
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div>
+                    <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>Current password</label>
+                    <input
+                      type="password"
+                      value={passwords.current_password}
+                      onChange={(e) => setPasswords({ ...passwords, current_password: e.target.value })}
+                      required
+                      className="w-full px-3 py-2 rounded-lg border text-[0.8125rem] outline-none transition-colors"
+                      style={{ borderColor: "#E7E5E4", color: "#1C1917", backgroundColor: "#FAFAF9" }}
+                      onFocus={(e) => (e.target.style.borderColor = "#2563EB")}
+                      onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>New password</label>
+                    <input
+                      type="password"
+                      placeholder="min 8 characters"
+                      value={passwords.new_password}
+                      onChange={(e) => setPasswords({ ...passwords, new_password: e.target.value })}
+                      required
+                      minLength={8}
+                      className="w-full px-3 py-2 rounded-lg border text-[0.8125rem] outline-none transition-colors"
+                      style={{ borderColor: "#E7E5E4", color: "#1C1917", backgroundColor: "#FAFAF9" }}
+                      onFocus={(e) => (e.target.style.borderColor = "#2563EB")}
+                      onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[0.75rem] font-medium mb-1.5" style={{ color: "#1C1917" }}>Confirm new password</label>
+                    <input
+                      type="password"
+                      value={passwords.confirm_password}
+                      onChange={(e) => setPasswords({ ...passwords, confirm_password: e.target.value })}
+                      required
+                      className="w-full px-3 py-2 rounded-lg border text-[0.8125rem] outline-none transition-colors"
+                      style={{ borderColor: "#E7E5E4", color: "#1C1917", backgroundColor: "#FAFAF9" }}
+                      onFocus={(e) => (e.target.style.borderColor = "#2563EB")}
+                      onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-4 py-2 mt-2 flex items-center gap-2 rounded-lg text-[0.8125rem] font-medium transition-opacity disabled:opacity-50"
+                    style={{ backgroundColor: "#2563EB", color: "#FFFFFF" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = !loading ? "0.9" : "0.5")}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = !loading ? "1" : "0.5")}
+                  >
+                    {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                    Update Password
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Lock, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -26,12 +24,10 @@ function ResetPasswordForm() {
       setError("Password must be at least 8 characters long.");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
     if (!token) {
       setError("Invalid reset link. Please request a new password reset.");
       return;
@@ -56,8 +52,7 @@ function ResetPasswordForm() {
       } else {
         setError(data.error || "Failed to reset password. Please try again.");
       }
-    } catch (error) {
-      // Silent fail - error handled via UI
+    } catch (err) {
       setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -66,122 +61,102 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
-          <AlertCircle className="h-8 w-8 text-red-500" />
+      <div className="text-center py-4">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center">
+            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-[#2B3674]">Invalid reset link</h2>
-        <p className="text-[#4363C7]">
-          This password reset link is invalid or has expired. Please request a
-          new one.
+        <h2 className="text-[2rem] tracking-tight mb-3 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Invalid link
+        </h2>
+        <p className="text-[0.9375rem] text-slate-500 mb-8 max-w-sm mx-auto">
+          This password reset link is invalid or has expired. Please request a new one.
         </p>
-        <div className="pt-4">
-          <Link href="/forgot-password">
-            <Button className="bg-primary hover:bg-primary/90">
-              Request new reset link
-            </Button>
-          </Link>
-        </div>
+        <Link href="/forgot-password" className="inline-flex items-center justify-center w-full h-11 bg-slate-900 text-white rounded-xl text-[0.9375rem] font-medium hover:bg-slate-800 transition-colors">
+          Request new reset link
+        </Link>
       </div>
     );
   }
 
   if (isSuccess) {
     return (
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-          <CheckCircle className="h-8 w-8 text-green-500" />
+      <div className="text-center py-4">
+        <div className="flex justify-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center">
+            <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-[#2B3674]">Password reset successful!</h2>
-        <p className="text-[#4363C7]">
-          Your password has been reset. You can now sign in with your new
-          password.
+        <h2 className="text-[2rem] tracking-tight mb-3 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Password reset!
+        </h2>
+        <p className="text-[0.9375rem] text-slate-500 mb-8 max-w-sm mx-auto">
+          Your password has been successfully reset. You can now sign in with your new password.
         </p>
-        <div className="pt-4">
-          <Link href="/signin">
-            <Button className="bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)]">
-              Sign in
-            </Button>
-          </Link>
-        </div>
+        <Link href="/signin" className="inline-flex items-center justify-center w-full h-11 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-colors">
+          Sign in
+        </Link>
       </div>
     );
   }
 
   return (
     <>
-      <h2 className="text-2xl font-bold mb-2 text-[#2B3674]">Reset your password</h2>
-      <p className="text-[#4363C7] mb-8">
-        Enter your new password below.
+      <h1 className="text-[2rem] text-center tracking-tight mb-2 text-slate-900" style={{ fontFamily: "'Instrument Serif', serif" }}>
+        New password
+      </h1>
+      <p className="text-center text-[0.9375rem] text-slate-500 mb-8">
+        Create a new, secure password.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="text-sm text-red-500 bg-red-50 border border-red-100 p-3 rounded-lg">
-            {error}
-          </div>
-        )}
+      {error && (
+        <div className="text-[0.875rem] text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl mb-6 flex items-start gap-2">
+          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 118 1a7 7 0 010 14zm0 1A8 8 0 108 0a8 8 0 000 16z"/><path d="M7 4h2v5H7V4zm1 8a1 1 0 110-2 1 1 0 010 2z"/></svg>
+          {error}
+        </div>
+      )}
 
-        <div className="space-y-2">
-          <Label
-            htmlFor="password"
-            className="text-sm font-medium text-[#2B3674]"
-          >
-            New password
-          </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
-          <p className="text-xs text-[#4363C7]">
-            Must be at least 8 characters long
-          </p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700">New Password</label>
+          <input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+            className="w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all border-slate-200"
+          />
+          <p className="text-xs text-slate-500 mt-1">Must be at least 8 characters long</p>
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">Confirm Password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            className="w-full h-11 px-4 bg-slate-50 border rounded-xl text-[0.9375rem] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all border-slate-200"
+          />
         </div>
 
-        <div className="space-y-2">
-          <Label
-            htmlFor="confirmPassword"
-            className="text-sm font-medium text-[#2B3674]"
-          >
-            Confirm new password
-          </Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[#4363C7]" />
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="pl-10 h-12 bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-[#4363C7] focus:bg-white focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
-        </div>
-
-        <Button
+        <button
           type="submit"
-          className="w-full h-12 text-base bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_var(--primary)] transition-all duration-300"
           disabled={isLoading}
+          className="w-full h-11 mt-2 bg-[#3B5BDB] text-white rounded-xl text-[0.9375rem] font-medium hover:bg-[#3451C7] transition-all disabled:opacity-70 flex items-center justify-center"
         >
-          {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              Resetting...
-            </div>
-          ) : (
-            "Reset password"
-          )}
-        </Button>
+          {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          {isLoading ? "Resetting..." : "Reset password"}
+        </button>
       </form>
     </>
   );
@@ -189,71 +164,28 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex bg-white text-[#2B3674]">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2B3674]">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-[#2B3674]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px] opacity-10"></div>
-
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-40 right-20 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-
-        <div className="relative z-10 flex flex-col justify-center px-12 text-white">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center shadow-lg shadow-black/10 border border-white/10">
-                <span className="text-white font-bold text-lg">M</span>
-              </div>
-              <span className="text-2xl font-bold">Mentiq</span>
+    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-6 text-slate-900" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <div className="w-full max-w-md">
+        
+        <div className="flex justify-center mb-10">
+          <Link href="/" className="group block transition-transform hover:scale-105">
+            <div className="relative h-20 w-64">
+              <Image src="/logo.png" alt="Mentiq Logo" fill className="object-contain" priority />
             </div>
-
-            <h1 className="text-4xl font-bold leading-tight">
-              Create a new
-              <br />
-              <span className="bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent">
-                secure password
-              </span>
-            </h1>
-
-            <p className="text-blue-100 text-lg max-w-md">
-              Choose a strong password to keep your account safe and secure.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          <Link
-            href="/signin"
-            className="inline-flex items-center gap-2 text-sm text-[#4363C7] hover:text-[#2B3674] transition-colors mb-8"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to sign in
           </Link>
-
-          {/* Mobile Logo */}
-          <div className="lg:hidden mb-8">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
-              </div>
-              <span className="text-2xl font-bold text-[#2B3674]">Mentiq</span>
-            </div>
-          </div>
-
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center">
-                <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            }
-          >
-            <ResetPasswordForm />
-          </Suspense>
         </div>
+
+        <div className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-10 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#EEF2FF] rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#F8F9FA] rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-60"></div>
+          
+          <div className="relative">
+             <Suspense fallback={<div className="flex items-center justify-center h-40"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>}>
+              <ResetPasswordForm />
+            </Suspense>
+          </div>
+        </div>
+
       </div>
     </div>
   );

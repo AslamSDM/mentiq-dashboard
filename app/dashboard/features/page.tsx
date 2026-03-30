@@ -25,6 +25,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { PageShell } from "@/components/page-shell";
 import { useStore } from "@/lib/store";
 import { getAuthToken } from "@/lib/services/base";
 import {
@@ -166,22 +167,20 @@ export default function FeatureTrackingDashboard() {
 
   if (!selectedProjectId) {
     return (
-      <div className="p-8 text-center text-muted-foreground">
-        Please select a project to view feature tracking
-      </div>
+      <PageShell title="Feature Tracking" breadcrumb="Pages / Features">
+        <div className="p-8 text-center text-muted-foreground">
+          Please select a project to view feature tracking
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Feature Tracking</h1>
-          <p className="text-muted-foreground">
-            Monitor feature adoption and onboarding progress
-          </p>
-        </div>
-
+    <PageShell
+      title="Feature Tracking"
+      description="Monitor feature adoption and onboarding progress"
+      breadcrumb="Pages / Features"
+      action={
         <select
           value={dateRange}
           onChange={(e) => setDateRange(e.target.value)}
@@ -191,8 +190,8 @@ export default function FeatureTrackingDashboard() {
           <option value="30">Last 30 days</option>
           <option value="90">Last 90 days</option>
         </select>
-      </div>
-
+      }
+    >
       <Tabs defaultValue="features" className="space-y-6">
         <TabsList>
           <TabsTrigger value="features">Feature Usage</TabsTrigger>
@@ -784,6 +783,6 @@ export default function FeatureTrackingDashboard() {
           )}
         </TabsContent>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }

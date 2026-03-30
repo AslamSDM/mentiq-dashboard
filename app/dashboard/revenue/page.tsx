@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { PageShell } from "@/components/page-shell";
 import {
   Card,
   CardContent,
@@ -398,28 +398,27 @@ export default function RevenuePage() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex flex-col h-full">
-        <DashboardHeader
-          title="Revenue Analytics"
-          description="Track revenue, subscriptions, and customer metrics"
-        />
+      <PageShell
+        title="Revenue Analytics"
+        description="Track revenue, subscriptions, and customer metrics"
+        breadcrumb="Pages / Revenue"
+      >
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">
             Please select a project to view revenue analytics.
           </p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <DashboardHeader
-        title="Revenue Analytics"
-        description="Track revenue, subscriptions, and customer metrics"
-      />
-
-      <div className="flex-1 p-6 space-y-6">
+    <PageShell
+      title="Revenue Analytics"
+      description="Track revenue, subscriptions, and customer metrics"
+      breadcrumb="Pages / Revenue"
+    >
+      <div className="space-y-6">
         {/* Payment Provider Configuration */}
         <Card>
           <CardHeader className="cursor-pointer" onClick={() => setIsStripeConfigExpanded(!isStripeConfigExpanded)}>
@@ -1726,6 +1725,6 @@ export default function RevenuePage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </PageShell>
   );
 }

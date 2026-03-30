@@ -1,0 +1,109 @@
+
+> my-v0-project@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/aslam/pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /Users/aslam/tempy/mentiq/mentiq-dashboard-fe/pnpm-lock.yaml
+
+   ▲ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 3.8s
+   Running TypeScript ...
+   Collecting page data using 11 workers ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 11 workers (0/59) ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Generating static pages using 11 workers (14/59) 
+   Generating static pages using 11 workers (29/59) 
+   Generating static pages using 11 workers (44/59) 
+ ✓ Generating static pages using 11 workers (59/59) in 475.0ms
+   Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /accept-invitation
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/signup
+├ ƒ /api/health-score/llm-context
+├ ƒ /api/onboarding/status
+├ ƒ /api/onboarding/tasks
+├ ƒ /api/stripe/create-checkout-session
+├ ƒ /api/stripe/signup-checkout
+├ ƒ /api/stripe/webhook
+├ ƒ /api/waitlist
+├ ○ /auth/mailchimp/callback
+├ ○ /dashboard
+├ ○ /dashboard/ab-testing
+├ ○ /dashboard/admin/limits
+├ ○ /dashboard/admin/test-users
+├ ○ /dashboard/admin/tickets
+├ ○ /dashboard/admin/users
+├ ○ /dashboard/admin/waitlist
+├ ○ /dashboard/adoption
+├ ○ /dashboard/analytics
+├ ○ /dashboard/churn
+├ ○ /dashboard/churn-by-channel
+├ ○ /dashboard/churn-risk
+├ ○ /dashboard/conversion
+├ ○ /dashboard/devices
+├ ○ /dashboard/emails
+├ ○ /dashboard/events
+├ ○ /dashboard/features
+├ ○ /dashboard/health-score
+├ ○ /dashboard/heatmaps
+├ ○ /dashboard/integrations/mailchimp/callback
+├ ○ /dashboard/location
+├ ○ /dashboard/onboarding
+├ ○ /dashboard/playbooks
+├ ƒ /dashboard/playbooks/[id]
+├ ○ /dashboard/projects
+├ ○ /dashboard/retention
+├ ○ /dashboard/revenue
+├ ○ /dashboard/revenue-leakage
+├ ○ /dashboard/session-replay
+├ ○ /dashboard/settings
+├ ○ /dashboard/settings/automations
+├ ○ /dashboard/settings/integrations
+├ ○ /dashboard/settings/integrations/mailchimp
+├ ○ /dashboard/support
+├ ○ /dashboard/team
+├ ○ /docs
+├ ○ /forgot-password
+├ ○ /pricing
+├ ○ /reset-password
+├ ○ /robots.txt
+├ ○ /signin
+├ ○ /signup
+├ ○ /sitemap.xml
+├ ○ /unsubscribe
+├ ○ /verify-email
+└ ○ /verify-pending
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
