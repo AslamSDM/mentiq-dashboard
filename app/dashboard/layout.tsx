@@ -62,6 +62,7 @@ export default function DashboardLayout({
   useEffect(() => {
     if (
       projectsLoaded &&
+      projects &&
       projects.length > 0 &&
       !selectedProjectId &&
       !hasSetProject.current
