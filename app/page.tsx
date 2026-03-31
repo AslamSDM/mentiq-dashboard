@@ -72,15 +72,11 @@ function FeatureCard({
   icon,
   title,
   description,
-  image,
-  imageAlt,
   delay = 0,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  image?: string;
-  imageAlt?: string;
   delay?: number;
 }) {
   const { ref, visible } = useInView();
@@ -101,16 +97,6 @@ function FeatureCard({
           {description}
         </p>
       </div>
-      {image && (
-        <div className="mx-6 mb-6 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-          <img
-            src={image}
-            alt={imageAlt || title}
-            className="w-full h-48 object-cover object-top transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-        </div>
-      )}
     </div>
   );
 }
@@ -455,133 +441,86 @@ export default function LandingPage() {
           Waitlist open — early access invites
         </div>
 
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Left: copy */}
-          <div>
-            <h1
-              id="hero-heading"
-              className={`transition-all duration-700 delay-100 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-              style={{ fontFamily: "'Instrument Serif', serif" }}
-            >
-              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-slate-900">
-                Stop churn
-              </span>
-              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-[#3B5BDB]">
-                before it starts.
-              </span>
-            </h1>
+        <div className="max-w-2xl">
+          <h1
+            id="hero-heading"
+            className={`transition-all duration-700 delay-100 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-slate-900">
+              Stop churn
+            </span>
+            <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-[#3B5BDB]">
+              before it starts.
+            </span>
+          </h1>
 
-            <p
-              className={`mt-6 text-[1.0625rem] text-slate-500 leading-relaxed max-w-md transition-all duration-700 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-            >
-              Mentiq gives SaaS teams clear visibility into churn risk, cohort
-              health, and the exact playbooks to act on it — before renewal
-              pressure hits.
-            </p>
+          <p
+            className={`mt-6 text-[1.0625rem] text-slate-500 leading-relaxed max-w-md transition-all duration-700 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          >
+            Mentiq gives SaaS teams clear visibility into churn risk, cohort
+            health, and the exact playbooks to act on it — before renewal
+            pressure hits.
+          </p>
 
-            <div
-              className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          <div
+            className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          >
+            <a
+              href="#waitlist"
+              onClick={(e) => { e.preventDefault(); setIsWaitlistModalOpen(true); }}
+              className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
+              aria-label="Request early access to Mentiq"
             >
-              <a
-                href="#waitlist"
-                onClick={(e) => { e.preventDefault(); setIsWaitlistModalOpen(true); }}
-                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
-                aria-label="Request early access to Mentiq"
+              Request early access
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                fill="none"
+                aria-hidden="true"
               >
-                Request early access
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M2 7h10M8 3l4 4-4 4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </a>
-              <a
-                href="#how-it-works"
-                className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
-              >
-                See how it works
-              </a>
-            </div>
-
-            <p
-              className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
+                <path
+                  d="M2 7h10M8 3l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </a>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
             >
-              4,200+ SaaS operators on the waitlist
-            </p>
-
-            {/* Social proof logos */}
-            <div
-              className={`mt-8 transition-all duration-700 delay-500 ${heroVisible ? "opacity-100" : "opacity-0"}`}
-            >
-              <p className="text-xs text-slate-400 mb-3 uppercase tracking-widest">
-                Integrates with
-              </p>
-              <div className="flex items-center gap-5">
-                {["Stripe", "Mailchimp", "SendGrid", "Customer.io"].map(
-                  (name) => (
-                    <span
-                      key={name}
-                      className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {name}
-                    </span>
-                  ),
-                )}
-              </div>
-            </div>
+              See how it works
+            </a>
           </div>
 
-          {/* Right: hero image */}
-          <div
-            className={`relative transition-all duration-1000 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+          <p
+            className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
           >
-            <div className="rounded-2xl overflow-hidden shadow-2xl shadow-slate-200/80 border border-slate-100">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-hero-enhanced_edebc2a9.png"
-                alt="Mentiq analytics dashboard showing MRR, churn rate, at-risk users, and monthly retention trend chart"
-                className="w-full"
-                width="800"
-                height="450"
-                fetchPriority="high"
-              />
-            </div>
-            {/* Floating stat card */}
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg border border-slate-100 px-4 py-3 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M2 10 L5 7 L8 9 L12 4"
-                    stroke="#16a34a"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400">
-                  Avg. churn reduction
-                </div>
-                <div className="text-sm font-semibold text-slate-900">
-                  47% in 90 days
-                </div>
-              </div>
+            4,200+ SaaS operators on the waitlist
+          </p>
+
+          {/* Social proof logos */}
+          <div
+            className={`mt-8 transition-all duration-700 delay-500 ${heroVisible ? "opacity-100" : "opacity-0"}`}
+          >
+            <p className="text-xs text-slate-400 mb-3 uppercase tracking-widest">
+              Integrates with
+            </p>
+            <div className="flex items-center gap-5">
+              {["Stripe", "Mailchimp", "SendGrid", "Customer.io"].map(
+                (name) => (
+                  <span
+                    key={name}
+                    className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {name}
+                  </span>
+                ),
+              )}
             </div>
           </div>
         </div>
@@ -762,8 +701,7 @@ export default function LandingPage() {
               }
               title="Churn Risk Scoring"
               description="Every user gets a real-time risk score based on behavioral signals: login frequency, feature usage, engagement drops, and billing events."
-              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-churn-enhanced_987b6243.png"
-              imageAlt="At-risk users table showing risk scores, last active dates, and MRR for each user"
+
             />
             <FeatureCard
               delay={80}
@@ -808,8 +746,7 @@ export default function LandingPage() {
               }
               title="Cohort Retention Analysis"
               description="Visualize how each cohort of users retains over time with a heatmap that makes drop-off patterns impossible to miss."
-              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-retention-enhanced_a736fa33.png"
-              imageAlt="Cohort retention heatmap showing weekly retention percentages by cohort month"
+
             />
             <FeatureCard
               delay={160}
@@ -826,8 +763,7 @@ export default function LandingPage() {
               }
               title="Retention Playbooks"
               description="Automated email sequences triggered by risk score thresholds. Configure discount offers, cooldown periods, and targeting rules — no code required."
-              image="https://d2xsxph8kpxj0f.cloudfront.net/310519663253216479/dBdSxdmzr9RDHY7Tzp3P3j/final-playbooks-enhanced_312d8548.png"
-              imageAlt="Churn prevention playbook builder showing automation flow and configuration sliders"
+
             />
             <FeatureCard
               delay={0}
