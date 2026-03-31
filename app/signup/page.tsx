@@ -40,6 +40,9 @@ const signUpSchema = z.object({
   acceptedTerms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms",
   }),
+}).refine((data) => data.password.toLowerCase() !== data.email.toLowerCase(), {
+  message: "Password cannot be the same as your email address",
+  path: ["password"],
 });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;

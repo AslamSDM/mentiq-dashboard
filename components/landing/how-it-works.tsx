@@ -20,10 +20,10 @@ export function HowItWorksSection() {
             1
           </div>
           <div>
-            <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
+            <h3 className="text-2xl font-bold mb-2 text-[#1C1917]">
               We map your product
             </h3>
-            <p className="text-[#4363C7] text-lg">
+            <p className="text-[#78716C] text-lg">
               We automatically identify every feature, button, and page
               in your app.
             </p>
@@ -37,10 +37,10 @@ export function HowItWorksSection() {
             2
           </div>
           <div>
-            <h3 className="text-2xl font-bold mb-2 text-[#2B3674]">
+            <h3 className="text-2xl font-bold mb-2 text-[#1C1917]">
               We track user journeys
             </h3>
-            <p className="text-[#4363C7] text-lg">
+            <p className="text-[#78716C] text-lg">
               We monitor how every single user interacts with your
               features in real-time.
             </p>
@@ -54,20 +54,20 @@ export function HowItWorksSection() {
             3
           </div>
           <div>
-            <h3 className="text-2xl font-bold mb-4 text-[#2B3674]">
+            <h3 className="text-2xl font-bold mb-4 text-[#1C1917]">
               Then we reveal:
             </h3>
-            <ul className="space-y-4 text-[#4363C7]">
+            <ul className="space-y-4 text-[#78716C]">
               {revealItems.map((item, i) => (
                 <motion.li
                   key={i}
                   initial={{ opacity: 0, x: -10 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 + i * 0.1 }}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white border border-[#E0E5F2] hover:border-primary/30 transition-colors shadow-sm"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white border border-[#E7E5E4] hover:border-primary/30 transition-colors shadow-sm"
                 >
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                  <span className="font-medium text-[#2B3674]">
+                  <span className="font-medium text-[#1C1917]">
                     {item}
                   </span>
                 </motion.li>

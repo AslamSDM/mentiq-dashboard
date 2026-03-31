@@ -314,7 +314,7 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
               ))}
-              {topEvents.length === 0 && (
+              {(!topEvents || topEvents.length === 0) && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   No events data available
                 </p>
@@ -331,7 +331,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {events.slice(0, 10)?.map((event: any, index: number) => {
+              {(events || []).slice(0, 10)?.map((event: any, index: number) => {
                 // Sanitize event data before display
                 const sanitizedEvent = sanitizeObject(event);
                 // Extract country from user_agent_details or use fallback
@@ -381,7 +381,7 @@ export default function AnalyticsPage() {
                   </div>
                 );
               })}
-              {events.length === 0 && (
+              {(!events || events.length === 0) && (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   No recent events found. Start tracking events to see data
                   here.

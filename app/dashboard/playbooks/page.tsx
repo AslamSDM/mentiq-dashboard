@@ -383,82 +383,140 @@ export default function EmailAutomationsPage() {
       breadcrumb="Pages / Automations"
     >
       <div className="space-y-6">
-      {/* Mailchimp Connection Banner */}
-      {!mailchimp?.is_active ? (
-        <Card className="border-0 bg-gradient-to-r from-[#4318FF] to-[#868CFF] text-white">
-          <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-6">
-            <div className="flex items-center gap-4">
-              <Mail className="h-10 w-10 shrink-0" />
+      {/* Email Provider Connections */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* Mailchimp */}
+        {!mailchimp?.is_active ? (
+          <Card className="border border-[#E7E5E4] bg-white">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#FFE01B]/15 flex items-center justify-center shrink-0">
+                  <Mail className="h-5 w-5 text-[#FFE01B]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>Mailchimp</h3>
+                  <p className="text-xs" style={{ color: "#78716C" }}>Email marketing & audience sync</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs"
+                onClick={handleConnectMailchimp}
+                disabled={connecting}
+              >
+                {connecting ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Mail className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Connect
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-green-200 bg-green-50/50">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-green-900 truncate">
+                    Mailchimp Connected
+                    {mcSettings?.account_name && (
+                      <span className="text-green-700 font-normal"> — {mcSettings.account_name}</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-green-700 truncate">
+                    {mcSettings?.audience_name && `Audience: ${mcSettings.audience_name}`}
+                    {mailchimp.last_sync_at && (
+                      <span>
+                        {mcSettings?.audience_name ? " · " : ""}
+                        Last sync: {new Date(mailchimp.last_sync_at).toLocaleString()}
+                      </span>
+                    )}
+                    {mailchimp.sync_status === "syncing" && " · Syncing..."}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 text-xs" asChild>
+                  <a href="/dashboard/settings/integrations">
+                    <Settings className="h-3.5 w-3.5 mr-1" />
+                    Settings
+                  </a>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={handleSyncMailchimp}
+                  disabled={syncing}
+                >
+                  {syncing ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                  )}
+                  Sync
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Resend */}
+        <Card className="border border-[#E7E5E4] bg-white">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-[#1C1917]/8 flex items-center justify-center shrink-0">
+                <Send className="h-5 w-5 text-[#1C1917]" />
+              </div>
               <div>
-                <h3 className="text-lg font-semibold">Connect Mailchimp</h3>
-                <p className="text-sm text-white/80">
-                  Link your Mailchimp account to enable email automations and audience syncing.
-                </p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>Resend</h3>
+                  <span className="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full bg-[#F3F2F1] text-[#78716C]">Coming soon</span>
+                </div>
+                <p className="text-xs" style={{ color: "#78716C" }}>Transactional email API</p>
               </div>
             </div>
             <Button
-              variant="secondary"
-              className="shrink-0"
-              onClick={handleConnectMailchimp}
-              disabled={connecting}
+              size="sm"
+              variant="outline"
+              className="w-full text-xs border-[#E7E5E4]"
+              disabled
             >
-              {connecting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4 mr-2" />
-              )}
-              Connect Mailchimp
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              Connect
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="border-green-200 bg-green-50/50">
-          <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+
+        {/* SendGrid */}
+        <Card className="border border-[#E7E5E4] bg-white">
+          <CardContent className="p-5 space-y-4">
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-6 w-6 text-green-600 shrink-0" />
+              <div className="h-10 w-10 rounded-xl bg-[#2563EB]/10 flex items-center justify-center shrink-0">
+                <Mail className="h-5 w-5 text-[#2563EB]" />
+              </div>
               <div>
-                <p className="font-medium text-green-900">
-                  Mailchimp Connected
-                  {mcSettings?.account_name && (
-                    <span className="text-green-700 font-normal"> &mdash; {mcSettings.account_name}</span>
-                  )}
-                </p>
-                <p className="text-xs text-green-700">
-                  {mcSettings?.audience_name && `Audience: ${mcSettings.audience_name}`}
-                  {mailchimp.last_sync_at && (
-                    <span>
-                      {mcSettings?.audience_name ? " | " : ""}
-                      Last sync: {new Date(mailchimp.last_sync_at).toLocaleString()}
-                    </span>
-                  )}
-                  {mailchimp.sync_status === "syncing" && " | Syncing..."}
-                </p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>SendGrid</h3>
+                  <span className="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full bg-[#F3F2F1] text-[#78716C]">Coming soon</span>
+                </div>
+                <p className="text-xs" style={{ color: "#78716C" }}>Scalable email delivery</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <a href="/dashboard/settings/integrations">
-                  <Settings className="h-4 w-4 mr-1" />
-                  Manage Settings
-                </a>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSyncMailchimp}
-                disabled={syncing}
-              >
-                {syncing ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                )}
-                Sync Now
-              </Button>
-            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full text-xs border-[#E7E5E4]"
+              disabled
+            >
+              <Mail className="h-3.5 w-3.5 mr-1.5" />
+              Connect
+            </Button>
           </CardContent>
         </Card>
-      )}
+      </div>
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-4">

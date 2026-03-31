@@ -3,56 +3,23 @@
 import { useEffect, useState } from "react";
 import { PageShell } from "@/components/page-shell";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
-  Line,
-  LineChart,
   ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
-  Pie,
-  PieChart,
-  Cell,
   Tooltip,
 } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { useEffectiveProjectId } from "@/hooks/use-effective-project";
 import { WorldMap } from "@/components/world-map";
 import {
-  getMetricValue,
   getDAUValue,
   getWAUValue,
   getMAUValue,
   getPageViewsValue,
-  getTotalSessionsValue,
   getTotalEventsValue,
   getUniqueUsersValue,
   getTopEventsValue,
@@ -64,13 +31,10 @@ import {
   DollarSign,
   Users,
   TrendingDown,
-  CreditCard,
-  Smartphone,
   Monitor,
-  Tablet,
   ArrowUpRight,
-  ArrowDownRight,
   Calendar,
+  Globe,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -81,6 +45,96 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { sanitizeText, sanitizeObject } from "@/lib/sanitization";
+
+// ─── Custom Tooltip ──────────────────────────────────────────────────────────
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className="rounded-lg border px-3 py-2 text-[0.75rem]"
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderColor: "#E7E5E4",
+          color: "#1C1917",
+          boxShadow: "0 4px 12px rgba(28,25,23,0.08)",
+        }}
+      >
+        <p style={{ color: "#A8A29E" }}>{label}</p>
+        <p className="font-semibold">{payload[0].value}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// ─── Metric Card ─────────────────────────────────────────────────────────────
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  sub,
+  href,
+  iconColor = "#2563EB",
+  iconBg = "rgba(37,99,235,0.07)",
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  sub: string;
+  href?: string;
+  iconColor?: string;
+  iconBg?: string;
+}) {
+  return (
+    <div
+      className="rounded-xl border p-5 bg-white transition-shadow duration-150"
+      style={{ borderColor: "#E7E5E4" }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.boxShadow =
+          "0 4px 12px rgba(28,25,23,0.06)")
+      }
+      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center"
+          style={{ backgroundColor: iconBg }}
+        >
+          <Icon
+            className="w-4 h-4"
+            strokeWidth={1.75}
+            style={{ color: iconColor }}
+          />
+        </div>
+        {href && (
+          <Link href={href}>
+            <ArrowUpRight
+              className="w-3.5 h-3.5"
+              style={{ color: "#A8A29E" }}
+            />
+          </Link>
+        )}
+      </div>
+      <p
+        className="text-[0.75rem] font-medium mb-1"
+        style={{ color: "#78716C" }}
+      >
+        {label}
+      </p>
+      <p
+        className="text-[1.6rem] font-semibold tabular-nums tracking-tight"
+        style={{ color: "#1C1917", lineHeight: 1.1 }}
+      >
+        {value}
+      </p>
+      <p className="text-[0.75rem] mt-1" style={{ color: "#A8A29E" }}>
+        {sub}
+      </p>
+    </div>
+  );
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const {
@@ -93,7 +147,6 @@ export default function DashboardPage() {
   const effectiveProjectId = useEffectiveProjectId();
   const { toast } = useToast();
 
-  // State for all analytics data
   const [revenueMetrics, setRevenueMetrics] = useState<any>(null);
   const [revenueAnalytics, setRevenueAnalytics] = useState<any>(null);
   const [locationData, setLocationData] = useState<any>(null);
@@ -101,7 +154,9 @@ export default function DashboardPage() {
   const [retentionData, setRetentionData] = useState<any>(null);
   const [bounceRate, setBounceRate] = useState<number>(0);
   const [loadingEnhanced, setLoadingEnhanced] = useState(false);
-  const [engagementTab, setEngagementTab] = useState("dau");
+  const [engagementTab, setEngagementTab] = useState<"dau" | "wau" | "mau">(
+    "dau"
+  );
   const [dateRange, setDateRange] = useState<string>("30d");
 
   // Fetch analytics data
@@ -134,21 +189,18 @@ export default function DashboardPage() {
           endDate: endDateStr,
           groupBy: "day",
         },
-        true,
-      ); // Force refresh when project changes
+        true
+      );
 
-      fetchEvents(true); // Force refresh when project changes
-
-      // Fetch enhanced analytics
+      fetchEvents(true);
       fetchAllData(startDateStr, endDateStr);
     }
   }, [effectiveProjectId, fetchAnalytics, fetchEvents, dateRange]);
 
-  // Update bounce rate when analytics data changes
   useEffect(() => {
     if (analyticsData?.results) {
       const bounceRateMetric = analyticsData.results.find(
-        (r: any) => r.metric === "bounce_rate",
+        (r: any) => r.metric === "bounce_rate"
       );
       if (bounceRateMetric?.value) {
         const valueStr = String(bounceRateMetric.value);
@@ -163,7 +215,6 @@ export default function DashboardPage() {
 
     setLoadingEnhanced(true);
     try {
-      // Use centralized data service - it will use cache if available
       const [
         revenueMetricsRes,
         revenueAnalyticsRes,
@@ -188,7 +239,7 @@ export default function DashboardPage() {
               ? { cohorts: res.data.cohorts }
               : res?.cohorts
                 ? { cohorts: res.cohorts }
-                : res?.data || res,
+                : res?.data || res
           )
           .catch(() => null),
       ]);
@@ -197,11 +248,8 @@ export default function DashboardPage() {
       if (revenueAnalyticsRes) setRevenueAnalytics(revenueAnalyticsRes);
       if (locationRes) setLocationData(locationRes);
       if (deviceRes) setDeviceData(deviceRes);
-      if (retentionRes) {
-        setRetentionData(retentionRes);
-      }
+      if (retentionRes) setRetentionData(retentionRes);
     } catch (error) {
-      // Silent fail - error shown via toast
       toast({
         title: "Error",
         description: "Failed to load some dashboard data",
@@ -212,61 +260,40 @@ export default function DashboardPage() {
     }
   };
 
-  // Derived values from analytics
   const uniqueUsers = analyticsData ? getUniqueUsersValue(analyticsData) : 0;
 
-  // Helper functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(amount);
-  };
 
   const formatPercentage = (value: number) => `${value?.toFixed(1)}%`;
 
-  // Process Device Data for Table - show OS classification, fallback to events
+  // Process Device Data for Table
   const getDeviceTableData = () => {
-    // First try the by_os data from API (preferred for OS classification)
     if (deviceData?.by_os && deviceData.by_os.length > 0) {
       return deviceData.by_os.map((d: any) => ({
         device: d.os || "Unknown",
         sessions: d.sessions || 0,
         users: d.users || 0,
-        bounce_rate:
-          typeof d.conversion_rate === "string"
-            ? parseFloat(d.conversion_rate.replace("%", ""))
-            : 0,
-        avg_session_time: "N/A",
       }));
     }
-
-    // Fallback to by_device if by_os not available
     if (deviceData?.by_device && deviceData.by_device.length > 0) {
       return deviceData.by_device.map((d: any) => ({
         device: d.device || d.os || "Unknown",
         sessions: d.sessions || 0,
         users: d.users || 0,
-        bounce_rate:
-          typeof d.bounce_rate === "string"
-            ? parseFloat(d.bounce_rate.replace("%", ""))
-            : 0,
-        avg_session_time: d.avg_session_time || "0s",
       }));
     }
-
-    // Fallback: aggregate OS data from events if available
     if (Array.isArray(events) && events.length > 0) {
       const osMap = new Map<
         string,
         { os: string; sessions: number; users: Set<string> }
       >();
-
       events.forEach((event: any) => {
-        // Handle both camelCase and PascalCase field names from backend
         const os = event.Os || event.os || event.Properties?.os || "Unknown";
         if (!os || os === "Unknown") return;
-
         const existing = osMap.get(os) || {
           os,
           sessions: 0,
@@ -274,32 +301,23 @@ export default function DashboardPage() {
         };
         existing.sessions++;
         const userId =
-          event.UserId ||
-          event.user_id ||
-          event.SessionId ||
-          event.session_id ||
-          "";
+          event.UserId || event.user_id || event.SessionId || event.session_id || "";
         if (userId) existing.users.add(userId);
         osMap.set(os, existing);
       });
-
       return Array.from(osMap.values())
         .map((item) => ({
           device: item.os,
           sessions: item.sessions,
           users: item.users.size || item.sessions,
-          bounce_rate: 0,
-          avg_session_time: "N/A",
         }))
         .sort((a, b) => b.sessions - a.sessions);
     }
-
     return [];
   };
 
-  // Process Location Data for Map - fallback to events if API data unavailable
+  // Process Location Data
   const getGeoData = () => {
-    // First try by_country from location API
     if (locationData?.by_country && locationData.by_country.length > 0) {
       return locationData.by_country
         .map((location: any) => ({
@@ -310,8 +328,6 @@ export default function DashboardPage() {
         }))
         .sort((a: any, b: any) => b.users - a.users);
     }
-
-    // Fallback: try legacy locations field
     if (locationData?.locations && locationData.locations.length > 0) {
       return locationData.locations
         .map((location: any) => ({
@@ -322,20 +338,15 @@ export default function DashboardPage() {
         }))
         .sort((a: any, b: any) => b.users - a.users);
     }
-
-    // Fallback: aggregate from events if available
     if (Array.isArray(events) && events.length > 0) {
       const countryMap = new Map<
         string,
         { country: string; users: number; sessions: number }
       >();
-
       events.forEach((event: any) => {
-        // Handle both camelCase and snake_case field names from backend
         const country =
           event.Country || event.country || event.Properties?.country || null;
         if (!country || country === "Unknown" || country === "Local") return;
-
         const existing = countryMap.get(country) || {
           country,
           users: 0,
@@ -345,7 +356,6 @@ export default function DashboardPage() {
         existing.sessions++;
         countryMap.set(country, existing);
       });
-
       return Array.from(countryMap.values())
         .map((item) => ({
           country: item.country,
@@ -355,56 +365,7 @@ export default function DashboardPage() {
         }))
         .sort((a, b) => b.users - a.users);
     }
-
     return [];
-  };
-
-  // Process Retention Data
-  const getRetentionMetrics = () => {
-    if (!retentionData?.cohorts || !Array.isArray(retentionData.cohorts)) {
-      return [];
-    }
-
-    // Calculate average retention for Day 1, Day 3, Day 7
-    const days = [1, 3, 7];
-    const metrics = days.map((d) => {
-      let totalRate = 0;
-      let count = 0;
-
-      retentionData.cohorts.forEach((c: any) => {
-        // Check if retention exists and has the day key
-        if (c.retention && typeof c.retention[`day_${d}`] === "number") {
-          totalRate += c.retention[`day_${d}`];
-          count++;
-        }
-      });
-
-      return {
-        period: `Day ${d}`,
-        rate: count > 0 ? totalRate / count : 0,
-      };
-    });
-
-    return metrics;
-  };
-
-  // Get overall retention rate (average day_1_retention from all cohorts)
-  const getOverallRetentionRate = () => {
-    if (!retentionData?.cohorts || !Array.isArray(retentionData.cohorts)) {
-      return 0;
-    }
-
-    let totalRate = 0;
-    let count = 0;
-
-    retentionData.cohorts.forEach((c: any) => {
-      if (typeof c.day_1_retention === "number") {
-        totalRate += c.day_1_retention;
-        count++;
-      }
-    });
-
-    return count > 0 ? totalRate / count : 0;
   };
 
   function getCountryCode(country: string): string {
@@ -434,7 +395,6 @@ export default function DashboardPage() {
     return countryMap[country] || country.slice(0, 2).toUpperCase();
   }
 
-  // Helper function to get country flag emoji
   const getCountryFlag = (countryName: string): string => {
     const countryFlags: { [key: string]: string } = {
       "United States": "🇺🇸",
@@ -458,24 +418,19 @@ export default function DashboardPage() {
       Mexico: "🇲🇽",
       Argentina: "🇦🇷",
     };
-
     return countryFlags[countryName] || "🌍";
   };
 
   const getEngagementData = () => {
-    if (!analyticsData?.results) {
-      return [];
-    }
+    if (!analyticsData?.results) return [];
     const result = analyticsData.results.find(
-      (r) => r.metric === engagementTab,
+      (r: any) => r.metric === engagementTab
     );
     return result?.time_series || [];
   };
 
   const getEngagementValue = () => {
-    if (!analyticsData) {
-      return 0;
-    }
+    if (!analyticsData) return 0;
     switch (engagementTab) {
       case "dau":
         return getDAUValue(analyticsData);
@@ -491,24 +446,24 @@ export default function DashboardPage() {
   const pageViews = analyticsData ? getPageViewsValue(analyticsData) : 0;
   const totalEvents = analyticsData ? getTotalEventsValue(analyticsData) : 0;
   const topEvents = analyticsData ? getTopEventsValue(analyticsData) : [];
-  const totalSessions = analyticsData
-    ? getTotalSessionsValue(analyticsData)
-    : 0;
 
   if (!effectiveProjectId) {
     return (
       <PageShell title="Dashboard" breadcrumb="Pages / Dashboard">
         <div className="flex flex-col h-full bg-transparent">
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center py-20">
             <div className="text-center space-y-4">
               <div className="w-24 h-24 mx-auto bg-white rounded-full flex items-center justify-center shadow-lg">
                 <Loader2 className="h-12 w-12 text-[#2563EB] animate-spin" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#1C1917]">
+                <h3
+                  className="text-lg font-semibold"
+                  style={{ color: "#1C1917" }}
+                >
                   Select a Project
                 </h3>
-                <p className="text-[#78716C]">
+                <p style={{ color: "#78716C" }}>
                   Please select a project to view the dashboard
                 </p>
               </div>
@@ -524,10 +479,13 @@ export default function DashboardPage() {
       title="Dashboard"
       breadcrumb="Pages / Dashboard"
       action={
-        <div className="flex items-center space-x-2 bg-white py-1.5 px-3 rounded-lg border shadow-sm border-[#E7E5E4]">
-          <Calendar className="h-4 w-4 text-[#78716C]" />
+        <div
+          className="flex items-center space-x-2 bg-white py-1.5 px-3 rounded-lg border shadow-sm"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          <Calendar className="h-4 w-4" style={{ color: "#78716C" }} />
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[120px] text-xs border-none shadow-none focus:ring-0 text-[#1C1917] font-medium h-6 pt-0 pb-0 px-1">
+            <SelectTrigger className="w-[120px] text-xs border-none shadow-none focus:ring-0 font-medium h-6 pt-0 pb-0 px-1" style={{ color: "#1C1917" }}>
               <SelectValue placeholder="Select date range" />
             </SelectTrigger>
             <SelectContent>
@@ -540,416 +498,387 @@ export default function DashboardPage() {
         </div>
       }
     >
-      <div className="flex flex-col space-y-7">
-        {/* 1. Revenue Analytics (Top) */}
-        <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
+      {/* ── Revenue Analytics ────────────────────────────────────────────── */}
+      <div className="mb-7">
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className="text-[0.9375rem] font-semibold"
+            style={{ color: "#1C1917" }}
+          >
             Revenue Analytics
           </h2>
           <Link href="/dashboard/revenue">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[#2563EB] hover:bg-transparent"
+            <span
+              className="text-[0.75rem] flex items-center gap-1"
+              style={{ color: "#2563EB" }}
             >
-              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
+              View Details <ArrowUpRight className="w-3 h-3" />
+            </span>
           </Link>
         </div>
 
         {loadingEnhanced ? (
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-32 bg-white/50 animate-pulse rounded-2xl"
+                className="h-32 bg-white/50 animate-pulse rounded-xl"
               />
             ))}
           </div>
         ) : revenueMetrics ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-transparent rounded-full">
-                    <DollarSign className="h-6 w-6 text-[#2563EB]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-[#78716C] mb-1">
-                    MRR
-                  </div>
-                  <div className="text-2xl font-bold text-[#1C1917]">
-                    {formatCurrency(revenueMetrics.mrr)}
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <span
-                      className={
-                        revenueMetrics.growth_rate >= 0
-                          ? "text-[#05CD99] font-bold text-xs"
-                          : "text-red-500 font-bold text-xs"
-                      }
-                    >
-                      {revenueMetrics.growth_rate > 0 ? "+" : ""}
-                      {formatPercentage(revenueMetrics.growth_rate)}
-                    </span>
-                    <span className="text-xs text-[#78716C]">
-                      since last month
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-transparent rounded-full">
-                    <Users className="h-6 w-6 text-[#2563EB]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-[#78716C] mb-1">
-                    Active Subs
-                  </div>
-                  <div className="text-2xl font-bold text-[#1C1917]">
-                    {revenueMetrics.active_subscriptions}
-                  </div>
-                  <p className="text-xs text-[#78716C] mt-1">
-                    {revenueMetrics.new_subscriptions} new this month
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-[#FFF9E5] rounded-full">
-                    <TrendingDown className="h-6 w-6 text-[#FFCE20]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-[#78716C] mb-1">
-                    Churn Rate
-                  </div>
-                  <div className="text-2xl font-bold text-[#1C1917]">
-                    {formatPercentage(revenueMetrics.churn_rate)}
-                  </div>
-                  <p className="text-xs text-[#78716C] mt-1">
-                    {revenueMetrics.churned_subscriptions} churned
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-transparent rounded-full">
-                    <CreditCard className="h-6 w-6 text-[#2563EB]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-[#78716C] mb-1">
-                    ARPU
-                  </div>
-                  <div className="text-2xl font-bold text-[#1C1917]">
-                    {formatCurrency(revenueMetrics.arpu)}
-                  </div>
-                  <p className="text-xs text-[#78716C] mt-1">
-                    Avg. Revenue Per User
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+            <MetricCard
+              icon={DollarSign}
+              label="MRR"
+              value={formatCurrency(revenueMetrics.mrr)}
+              sub={`${revenueMetrics.growth_rate > 0 ? "+" : ""}${formatPercentage(revenueMetrics.growth_rate)} since last month`}
+              href="/dashboard/revenue"
+            />
+            <MetricCard
+              icon={Users}
+              label="Active Subs"
+              value={String(revenueMetrics.active_subscriptions)}
+              sub={`${revenueMetrics.new_subscriptions} new this month`}
+              href="/dashboard/revenue"
+            />
+            <MetricCard
+              icon={TrendingDown}
+              label="Churn Rate"
+              value={formatPercentage(revenueMetrics.churn_rate)}
+              sub={`${revenueMetrics.churned_subscriptions} churned`}
+              href="/dashboard/churn-awareness"
+            />
+            <MetricCard
+              icon={DollarSign}
+              label="ARPU"
+              value={formatCurrency(revenueMetrics.arpu)}
+              sub="Avg. Revenue Per User"
+              href="/dashboard/revenue"
+            />
           </div>
         ) : (
-          <Card className="bg-white border-dashed border-2 border-[#E0E5F2] shadow-none">
-            <CardContent className="flex flex-col items-center justify-center py-8">
-              <p className="text-[#78716C] mb-4">
-                No revenue data available. Configure Stripe to see metrics.
-              </p>
-              <Link href="/dashboard/revenue">
-                <Button className="bg-[#2563EB] hover:bg-[#3311CC] text-white rounded-xl">
-                  Configure Stripe
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+          <div
+            className="rounded-xl border-2 border-dashed p-8 text-center mb-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p className="text-[0.875rem] mb-4" style={{ color: "#78716C" }}>
+              No revenue data available. Configure Stripe to see metrics.
+            </p>
+            <Link href="/dashboard/revenue">
+              <button
+                className="px-4 py-2 text-sm font-medium rounded-lg text-white"
+                style={{ backgroundColor: "#2563EB" }}
+              >
+                Configure Stripe
+              </button>
+            </Link>
+          </div>
         )}
 
-        {/* Revenue Chart */}
+        {/* Revenue trend chart */}
         {((revenueAnalytics?.time_series &&
           revenueAnalytics.time_series.length > 0) ||
           (revenueMetrics?.time_series &&
             revenueMetrics.time_series.length > 0)) && (
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] overflow-hidden min-w-0">
-            <CardHeader>
-              <CardTitle className="text-[#1C1917] font-bold">
-                Revenue Trend
-              </CardTitle>
-              <CardDescription className="text-[#78716C]">
-                Daily revenue from Stripe charges over the last 30 days
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-2">
-              <ChartContainer
-                config={{
-                  revenue: {
-                    label: "Revenue",
-                    color: "#4318FF",
-                  },
-                }}
-                className="h-[300px] w-full"
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
+              Revenue Trend
+            </p>
+            <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
+              Daily revenue from Stripe charges over the last 30 days
+            </p>
+            <ResponsiveContainer width="100%" height={160}>
+              <AreaChart
+                data={
+                  revenueAnalytics?.time_series ||
+                  revenueMetrics?.time_series ||
+                  []
+                }
+                margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={
-                      revenueAnalytics?.time_series ||
-                      revenueMetrics?.time_series ||
-                      []
-                    }
+                <defs>
+                  <linearGradient
+                    id="revGrad"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
                   >
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#4318FF"
-                          stopOpacity={0.2}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#4318FF"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      className="stroke-[#E0E5F2]"
-                      vertical={false}
+                    <stop
+                      offset="0%"
+                      stopColor="#2563EB"
+                      stopOpacity={0.12}
                     />
-                    <XAxis
-                      dataKey="date"
-                      className="text-xs text-[#78716C]"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      minTickGap={30}
-                      tickFormatter={(value) =>
-                        new Date(value).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
+                    <stop
+                      offset="100%"
+                      stopColor="#2563EB"
+                      stopOpacity={0}
                     />
-                    <YAxis
-                      className="text-xs text-[#78716C]"
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={10}
-                      tickFormatter={(value) => `$${value.toLocaleString()}`}
-                      width={45}
-                    />
-                    <Tooltip
-                      cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#4318FF"
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="#F3F2F1" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10, fill: "#A8A29E" }}
+                  tickLine={false}
+                  axisLine={false}
+                  minTickGap={30}
+                  tickFormatter={(value) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <YAxis
+                  tick={{ fontSize: 10, fill: "#A8A29E" }}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `$${v}`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#2563EB"
+                  strokeWidth={1.5}
+                  fill="url(#revGrad)"
+                  dot={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
-      {/* 2. General Analytics (DAU, MAU, WAU) */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
+      {/* ── User Engagement ──────────────────────────────────────────────── */}
+      <div className="mb-7">
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className="text-[0.9375rem] font-semibold"
+            style={{ color: "#1C1917" }}
+          >
             User Engagement
           </h2>
-          <Link href="/dashboard/analytics">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[#2563EB] hover:bg-transparent"
+          <Link href="/dashboard/features">
+            <span
+              className="text-[0.75rem] flex items-center gap-1"
+              style={{ color: "#2563EB" }}
             >
-              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
+              View Details <ArrowUpRight className="w-3 h-3" />
+            </span>
           </Link>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[#78716C]">
-                    Total Events
-                  </p>
-                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
-                    {totalEvents.toLocaleString()}
-                  </h3>
-                </div>
-                <div className="p-3 rounded-full bg-[#E6F7FF]">
-                  <ArrowUpRight className="h-6 w-6 text-[#00A3FF]" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[#78716C]">
-                    Page Views
-                  </p>
-                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
-                    {pageViews.toLocaleString()}
-                  </h3>
-                </div>
-                <div className="p-3 rounded-full bg-transparent">
-                  <Monitor className="h-6 w-6 text-[#2563EB]" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-[#78716C]">
-                    Unique Users
-                  </p>
-                  <h3 className="text-2xl font-bold text-[#1C1917] mt-1">
-                    {uniqueUsers.toLocaleString()}
-                  </h3>
-                </div>
-                <div className="p-3 rounded-full bg-[#E9E3FF]">
-                  <Users className="h-6 w-6 text-[#78716C]" />{" "}
-                  {/* Usually a distinct color if needed */}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+          {[
+            { label: "Total Events", value: totalEvents.toLocaleString() },
+            { label: "Page Views", value: pageViews.toLocaleString() },
+            { label: "Unique Users", value: uniqueUsers.toLocaleString() },
+            { label: "Bounce Rate", value: `${bounceRate.toFixed(1)}%` },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border bg-white p-5"
+              style={{ borderColor: "#E7E5E4" }}
+            >
+              <p
+                className="text-[0.75rem] font-medium mb-1"
+                style={{ color: "#78716C" }}
+              >
+                {m.label}
+              </p>
+              <p
+                className="text-[1.6rem] font-semibold tabular-nums tracking-tight"
+                style={{ color: "#1C1917", lineHeight: 1.1 }}
+              >
+                {m.value}
+              </p>
+            </div>
+          ))}
         </div>
 
-        {/* Retention & Bounce Rate Metrics */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardHeader>
-              <CardTitle className="text-[#1C1917] font-bold">
-                User Retention
-              </CardTitle>
-              <CardDescription className="text-[#78716C]">
-                Percentage of users returning over time
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingEnhanced ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
-                </div>
-              ) : retentionData?.cohorts && retentionData.cohorts.length > 0 ? (
-                <div className="space-y-4">
-                  <div className="text-3xl font-bold text-[#1C1917]">
-                    {getOverallRetentionRate().toFixed(1)}%
-                  </div>
-                  <p className="text-sm text-[#78716C]">
-                    Day 1 Retention (Avg across {retentionData.cohorts.length}{" "}
-                    cohorts)
-                  </p>
-                  <div className="space-y-4 mt-6">
-                    {getRetentionMetrics().map((metric, idx) => (
-                      <div key={idx} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-[#78716C]">
-                            {metric.period}
-                          </span>
-                          <span className="font-bold text-[#1C1917]">
-                            {metric.rate.toFixed(1)}%
-                          </span>
-                        </div>
-                        <Progress
-                          value={metric.rate}
-                          className="h-2 bg-transparent"
-                          indicatorClassName="bg-[#2563EB]"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-[#78716C]">
-                  No retention data available
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <div className="grid lg:grid-cols-2 gap-5">
+          {/* Active Users with DAU/WAU/MAU tabs */}
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <p
+                  className="text-[0.875rem] font-semibold"
+                  style={{ color: "#1C1917" }}
+                >
+                  Active Users
+                </p>
+                <p className="text-[0.75rem]" style={{ color: "#A8A29E" }}>
+                  User engagement over time
+                </p>
+              </div>
+              <div
+                className="flex items-center gap-1 rounded-lg p-0.5"
+                style={{ backgroundColor: "#F3F2F1" }}
+              >
+                {(["dau", "wau", "mau"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setEngagementTab(t)}
+                    className="px-3 py-1 text-[0.7rem] font-semibold rounded-md uppercase tracking-wide transition-colors"
+                    style={
+                      engagementTab === t
+                        ? {
+                            backgroundColor: "#FFFFFF",
+                            color: "#1C1917",
+                            boxShadow: "0 1px 3px rgba(28,25,23,0.08)",
+                          }
+                        : { color: "#A8A29E" }
+                    }
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="text-[0.75rem] mb-2" style={{ color: "#A8A29E" }}>
+              {getEngagementValue().toLocaleString()}{" "}
+              {engagementTab === "dau"
+                ? "Daily Active Users"
+                : engagementTab === "wau"
+                  ? "Weekly Active Users"
+                  : "Monthly Active Users"}
+            </div>
+            {loadingAnalytics ? (
+              <div className="h-[140px] flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin" style={{ color: "#2563EB" }} />
+              </div>
+            ) : getEngagementData().length > 0 ? (
+              <ResponsiveContainer width="100%" height={140}>
+                <AreaChart
+                  data={getEngagementData()}
+                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id="dauGrad"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#2563EB"
+                        stopOpacity={0.1}
+                      />
+                      <stop
+                        offset="100%"
+                        stopColor="#2563EB"
+                        stopOpacity={0}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="#F3F2F1" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: "#A8A29E" }}
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={30}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    }
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "#A8A29E" }}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#2563EB"
+                    strokeWidth={1.5}
+                    fill="url(#dauGrad)"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div
+                className="h-[140px] flex items-center justify-center text-[0.8125rem]"
+                style={{ color: "#A8A29E" }}
+              >
+                No data available for this period
+              </div>
+            )}
+          </div>
 
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardHeader>
-              <CardTitle className="text-[#1C1917] font-bold">
+          {/* Bounce Rate */}
+          <div
+            className="rounded-xl border bg-white p-5 flex flex-col justify-between"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <div>
+              <p
+                className="text-[0.875rem] font-semibold mb-0.5"
+                style={{ color: "#1C1917" }}
+              >
                 Bounce Rate
-              </CardTitle>
-              <CardDescription className="text-[#78716C]">
+              </p>
+              <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
                 Single-page sessions (lower is better)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingAnalytics ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#2563EB]" />
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-baseline gap-2">
-                    <div className="text-3xl font-bold text-[#1C1917]">
-                      {bounceRate.toFixed(1)}%
-                    </div>
-                    {bounceRate < 40 ? (
-                      <Badge className="bg-[#05CD99] text-white hover:bg-[#05CD99]/80 border-none">
-                        Excellent
-                      </Badge>
-                    ) : bounceRate < 55 ? (
-                      <Badge className="bg-[#2563EB] text-white hover:bg-[#2563EB]/80 border-none">
-                        Good
-                      </Badge>
-                    ) : bounceRate < 70 ? (
-                      <Badge
-                        variant="outline"
-                        className="text-[#1C1917] border-[#E0E5F2]"
-                      >
-                        Average
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive">Needs Attention</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-[#78716C]">
+              </p>
+            </div>
+            {loadingAnalytics ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin" style={{ color: "#2563EB" }} />
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col items-center justify-center flex-1 py-4">
+                  <p
+                    className="text-[2.5rem] font-semibold tabular-nums"
+                    style={{ color: "#1C1917" }}
+                  >
+                    {bounceRate.toFixed(1)}%
+                  </p>
+                  <span
+                    className="mt-2 px-3 py-1 rounded-full text-[0.75rem] font-semibold"
+                    style={
+                      bounceRate < 40
+                        ? { backgroundColor: "#DCFCE7", color: "#15803D" }
+                        : bounceRate < 55
+                          ? { backgroundColor: "#EFF6FF", color: "#1D4ED8" }
+                          : bounceRate < 70
+                            ? { backgroundColor: "#FEF9C3", color: "#854D0E" }
+                            : { backgroundColor: "#FEE2E2", color: "#991B1B" }
+                    }
+                  >
+                    {bounceRate < 40
+                      ? "Excellent"
+                      : bounceRate < 55
+                        ? "Good"
+                        : bounceRate < 70
+                          ? "Average"
+                          : "Needs Attention"}
+                  </span>
+                  <p
+                    className="text-[0.8125rem] mt-2"
+                    style={{ color: "#78716C" }}
+                  >
                     {bounceRate < 40
                       ? "Users are highly engaged"
                       : bounceRate < 55
@@ -958,472 +887,457 @@ export default function DashboardPage() {
                           ? "Room for improvement"
                           : "Consider improving content"}
                   </p>
-                  <div className="pt-2">
-                    <Progress
-                      value={100 - bounceRate}
-                      className="h-3 bg-transparent"
-                      indicatorClassName="bg-[#2563EB]"
-                    />
-                    <p className="text-xs text-[#78716C] mt-2">
+                </div>
+                <div
+                  className="pt-4 border-t"
+                  style={{ borderColor: "#F3F2F1" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-[0.75rem]"
+                      style={{ color: "#A8A29E" }}
+                    >
                       {(100 - bounceRate).toFixed(1)}% engaged sessions
-                    </p>
+                    </span>
+                    <div
+                      className="w-32 h-1.5 rounded-full overflow-hidden"
+                      style={{ backgroundColor: "#F3F2F1" }}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${100 - bounceRate}%`,
+                          backgroundColor: "#16A34A",
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </>
+            )}
+          </div>
         </div>
 
-        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] min-w-0">
-          <CardHeader>
-            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-              <div>
-                <CardTitle className="text-[#1C1917] font-bold">
-                  Active Users
-                </CardTitle>
-                <CardDescription className="text-[#78716C]">
-                  User engagement over time
-                </CardDescription>
-              </div>
-              <Tabs
-                value={engagementTab}
-                onValueChange={setEngagementTab}
-                className="w-full sm:w-[300px]"
-              >
-                <TabsList className="grid w-full grid-cols-3 bg-transparent p-1 rounded-xl">
-                  <TabsTrigger
-                    value="dau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
-                  >
-                    DAU
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="wau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
-                  >
-                    WAU
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="mau"
-                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-[#1C1917] data-[state=active]:shadow-sm text-[#78716C]"
-                  >
-                    MAU
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-6">
-              <div className="text-3xl font-bold text-[#1C1917]">
-                {getEngagementValue().toLocaleString()}
-              </div>
-              <p className="text-sm text-[#78716C]">
-                {engagementTab === "dau"
-                  ? "Daily Active Users"
-                  : engagementTab === "wau"
-                    ? "Weekly Active Users"
-                    : "Monthly Active Users"}
-              </p>
-            </div>
-            <div className="h-[350px] w-full px-2">
-              {loadingAnalytics ? (
-                <div className="h-full w-full flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
-                </div>
-              ) : getEngagementData().length > 0 ? (
-                <ChartContainer
-                  config={{
-                    value: {
-                      label: "Users",
-                      color: "#4318FF",
-                    },
-                  }}
-                  className="h-full w-full"
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={getEngagementData()}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-[#E0E5F2]"
-                        vertical={false}
-                      />
-                      <XAxis
-                        dataKey="date"
-                        className="text-xs text-[#78716C]"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        minTickGap={30}
-                        tickFormatter={(value) =>
-                          new Date(value).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })
-                        }
-                      />
-                      <YAxis
-                        className="text-xs text-[#78716C]"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={10}
-                        width={35}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "none",
-                          boxShadow: "0px 10px 20px rgba(0,0,0,0.1)",
-                        }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#4318FF"
-                        strokeWidth={4}
-                        dot={false}
-                        activeDot={{
-                          r: 6,
-                          fill: "#4318FF",
-                          stroke: "#fff",
-                          strokeWidth: 2,
-                        }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-[#78716C]">
-                  No data available for this period
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top Events & Recent Events */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-          <CardHeader>
-            <CardTitle className="text-[#1C1917] font-bold">
+        {/* Top Events + Recent Events */}
+        <div className="grid lg:grid-cols-2 gap-5 mt-5">
+          {/* Top Events */}
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
               Top Events
-            </CardTitle>
-            <CardDescription className="text-[#78716C]">
+            </p>
+            <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
               Most frequently triggered events in the selected period
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {topEvents.slice(0, 5)?.map((event: any, i: number) => (
-                <div key={i} className="flex items-center">
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-bold text-[#1C1917] leading-none">
-                      {sanitizeText(event.name || `Event ${i + 1}`)}
-                    </p>
-                    <div className="w-full bg-transparent rounded-full h-2 mt-2">
-                      <div
-                        className="bg-[#2563EB] h-2 rounded-full"
-                        style={{
-                          width: `${totalEvents > 0 ? (event.count / totalEvents) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="text-right pl-4">
-                    <div className="text-sm font-bold text-[#1C1917]">
-                      {event.count?.toLocaleString() || 0}
-                    </div>
-                    <div className="text-xs font-medium text-[#78716C]">
+            </p>
+            <div className="space-y-3">
+              {(topEvents || []).slice(0, 5)?.map((ev: any, i: number) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className="text-[0.8125rem] font-mono"
+                      style={{ color: "#1C1917" }}
+                    >
+                      {sanitizeText(ev.name || `Event ${i + 1}`)}
+                    </span>
+                    <span
+                      className="text-[0.75rem] tabular-nums"
+                      style={{ color: "#78716C" }}
+                    >
+                      {ev.count?.toLocaleString() || 0} ·{" "}
                       {totalEvents > 0
-                        ? ((event.count / totalEvents) * 100)?.toFixed(1)
+                        ? ((ev.count / totalEvents) * 100).toFixed(1)
                         : "0"}
                       %
-                    </div>
+                    </span>
+                  </div>
+                  <div
+                    className="h-1.5 rounded-full"
+                    style={{ backgroundColor: "#F3F2F1" }}
+                  >
+                    <div
+                      className="h-1.5 rounded-full"
+                      style={{
+                        width: `${totalEvents > 0 ? (ev.count / totalEvents) * 100 : 0}%`,
+                        backgroundColor: "#2563EB",
+                        opacity: 0.75,
+                      }}
+                    />
                   </div>
                 </div>
               ))}
-              {topEvents.length === 0 && (
-                <p className="text-sm text-[#78716C] text-center py-4">
+              {(!topEvents || topEvents.length === 0) && (
+                <p
+                  className="text-[0.8125rem] text-center py-4"
+                  style={{ color: "#A8A29E" }}
+                >
                   No events data available
                 </p>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Recent Events */}
-        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-          <CardHeader>
-            <CardTitle className="text-[#1C1917] font-bold">
+          {/* Recent Events */}
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
               Recent Events
-            </CardTitle>
-            <CardDescription className="text-[#78716C]">
+            </p>
+            <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
               Latest events from your users
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+            </p>
+            <div className="space-y-2">
               {Array.isArray(events) &&
-                events.slice(0, 10)?.map((event: any, index: number) => {
-                  // Sanitize event data before display
+                events.slice(0, 8)?.map((event: any, index: number) => {
                   const sanitizedEvent = sanitizeObject(event);
-                  // Extract country from user_agent_details or use fallback
                   const country =
                     sanitizedEvent.UserAgentDetails?.country ||
                     sanitizedEvent.Country ||
                     "Unknown";
-                  const city =
-                    sanitizedEvent.UserAgentDetails?.city || sanitizedEvent.City || "Unknown";
                   const countryFlag =
                     country !== "Unknown" ? getCountryFlag(country) : "🌍";
 
                   return (
                     <div
                       key={sanitizedEvent.ID || index}
-                      className="flex items-center justify-between border-b border-[#F4F7FE] pb-3 last:border-b-0"
+                      className="flex items-center gap-3 py-2 border-b last:border-0"
+                      style={{ borderColor: "#F3F2F1" }}
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm">{countryFlag}</span>
-                          <p className="text-sm font-bold text-[#1C1917]">
-                            {sanitizeText(sanitizedEvent.Event || sanitizedEvent.event || "Unknown Event")}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2 text-xs text-[#78716C]">
-                          {sanitizedEvent.UserId && (
-                            <span className="bg-transparent px-2 py-0.5 rounded text-[#1C1917]">
-                              User: {sanitizeText(sanitizedEvent.UserId).substring(0, 8)}...
-                            </span>
-                          )}
-                          {city !== "Unknown" && country !== "Unknown" && (
-                            <span>
-                              {sanitizeText(city)}, {sanitizeText(country)}
-                            </span>
-                          )}
-                        </div>
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-[0.7rem]"
+                        style={{ backgroundColor: "#F3F2F1" }}
+                      >
+                        {countryFlag}
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-[#78716C] whitespace-nowrap">
-                          {new Date(
-                            sanitizedEvent.Timestamp || sanitizedEvent.timestamp || Date.now(),
-                          ).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                      <div className="flex-1">
+                        <p
+                          className="text-[0.8125rem] font-medium"
+                          style={{ color: "#1C1917" }}
+                        >
+                          {sanitizeText(
+                            sanitizedEvent.Event ||
+                              sanitizedEvent.event ||
+                              "Unknown Event"
+                          )}
                         </p>
                       </div>
+                      <span
+                        className="text-[0.75rem]"
+                        style={{ color: "#A8A29E" }}
+                      >
+                        {new Date(
+                          sanitizedEvent.Timestamp ||
+                            sanitizedEvent.timestamp ||
+                            Date.now()
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                   );
                 })}
               {(!events || events.length === 0) && (
-                <p className="text-sm text-[#78716C] text-center py-4">
+                <p
+                  className="text-[0.8125rem] text-center py-4"
+                  style={{ color: "#A8A29E" }}
+                >
                   No recent events found. Start tracking events to see data
                   here.
                 </p>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      {/* 3. Location Analytics */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
+      {/* ── Location Analytics ───────────────────────────────────────────── */}
+      <div className="mb-7">
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className="text-[0.9375rem] font-semibold"
+            style={{ color: "#1C1917" }}
+          >
             Location Analytics
           </h2>
-          <Link href="/dashboard/location">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[#2563EB] hover:bg-transparent"
-            >
-              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <span
+            className="text-[0.75rem] flex items-center gap-1"
+            style={{ color: "#A8A29E" }}
+          >
+            View Details <ArrowUpRight className="w-3 h-3" />
+          </span>
         </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card className="md:col-span-2 rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardHeader>
-              <CardTitle className="text-[#1C1917] font-bold">
-                Global Distribution
-              </CardTitle>
-              <CardDescription className="text-[#78716C]">
-                User activity by country
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px] md:h-[400px] relative overflow-hidden">
-              {loadingEnhanced ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="animate-spin text-[#2563EB] h-8 w-8" />
-                </div>
-              ) : getGeoData().length > 0 ? (
+        <div className="grid lg:grid-cols-2 gap-5">
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
+              Global Distribution
+            </p>
+            <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
+              User activity by country
+            </p>
+            {loadingEnhanced ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2
+                  className="h-8 w-8 animate-spin"
+                  style={{ color: "#2563EB" }}
+                />
+              </div>
+            ) : getGeoData().length > 0 ? (
+              <div className="h-[300px] relative overflow-hidden">
                 <WorldMap geoData={getGeoData()} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-[#78716C]">
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 gap-3">
+                <Globe
+                  className="w-10 h-10"
+                  style={{ color: "#D6D3D1" }}
+                  strokeWidth={1}
+                />
+                <p
+                  className="text-[0.8125rem]"
+                  style={{ color: "#A8A29E" }}
+                >
                   No location data available
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4]">
-            <CardHeader>
-              <CardTitle className="text-[#1C1917] font-bold">
-                Top Countries
-              </CardTitle>
-              <CardDescription className="text-[#78716C]">
-                By user count
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+                </p>
+              </div>
+            )}
+          </div>
+          <div
+            className="rounded-xl border bg-white p-5"
+            style={{ borderColor: "#E7E5E4" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
+              Top Countries
+            </p>
+            <p className="text-[0.75rem] mb-5" style={{ color: "#A8A29E" }}>
+              By user count
+            </p>
+            {getGeoData().length > 0 ? (
+              <div className="space-y-3">
                 {getGeoData()
                   .slice(0, 6)
                   .map((geo: any, i: number) => (
-                    <div key={i} className="flex items-center justify-between">
+                    <div
+                      key={i}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-transparent flex items-center justify-center text-xs font-bold text-[#1C1917]">
+                        <div
+                          className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold"
+                          style={{
+                            backgroundColor: "#F3F2F1",
+                            color: "#1C1917",
+                          }}
+                        >
                           {i + 1}
                         </div>
-                        <span className="text-sm font-medium text-[#1C1917]">
+                        <span
+                          className="text-[0.8125rem] font-medium"
+                          style={{ color: "#1C1917" }}
+                        >
                           {geo.country}
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-[#1C1917]">
+                      <span
+                        className="text-[0.8125rem] font-semibold tabular-nums"
+                        style={{ color: "#1C1917" }}
+                      >
                         {geo.users.toLocaleString()}
                       </span>
                     </div>
                   ))}
-                {getGeoData().length === 0 && (
-                  <div className="text-center text-[#78716C] py-8">No data</div>
-                )}
               </div>
-            </CardContent>
-          </Card>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <p
+                  className="text-[0.8125rem]"
+                  style={{ color: "#A8A29E" }}
+                >
+                  No data
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 4. Device Analytics (Table) */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold tracking-tight text-[#1C1917]">
+      {/* ── Platform Analytics ───────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className="text-[0.9375rem] font-semibold"
+            style={{ color: "#1C1917" }}
+          >
             Platform Analytics
           </h2>
-          <Link href="/dashboard/devices">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[#2563EB] hover:bg-transparent"
-            >
-              View Details <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <span
+            className="text-[0.75rem] flex items-center gap-1"
+            style={{ color: "#A8A29E" }}
+          >
+            View Details <ArrowUpRight className="w-3 h-3" />
+          </span>
         </div>
-
-        <Card className="rounded-xl border bg-white shadow-sm border-[#E7E5E4] overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-[#1C1917] font-bold">
+        <div
+          className="rounded-xl border bg-white overflow-hidden"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          <div
+            className="p-5 border-b"
+            style={{ borderColor: "#F3F2F1" }}
+          >
+            <p
+              className="text-[0.875rem] font-semibold mb-0.5"
+              style={{ color: "#1C1917" }}
+            >
               Operating System Distribution
-            </CardTitle>
-            <CardDescription className="text-[#78716C]">
+            </p>
+            <p className="text-[0.75rem]" style={{ color: "#A8A29E" }}>
               Breakdown by operating system
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {loadingEnhanced ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="animate-spin text-[#2563EB]" />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                <TableHeader>
-                  <TableRow className="border-[#F4F7FE] hover:bg-transparent">
-                    <TableHead className="text-[#78716C] pl-6">
+            </p>
+          </div>
+          {loadingEnhanced ? (
+            <div className="flex justify-center py-8">
+              <Loader2
+                className="animate-spin"
+                style={{ color: "#2563EB" }}
+              />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ backgroundColor: "#FAFAF9" }}>
+                    <th
+                      className="text-left text-[0.75rem] font-medium px-5 py-3"
+                      style={{ color: "#78716C" }}
+                    >
                       Operating System
-                    </TableHead>
-                    <TableHead className="text-right text-[#78716C]">
+                    </th>
+                    <th
+                      className="text-right text-[0.75rem] font-medium px-5 py-3"
+                      style={{ color: "#78716C" }}
+                    >
                       Users
-                    </TableHead>
-                    <TableHead className="text-right text-[#78716C]">
+                    </th>
+                    <th
+                      className="text-right text-[0.75rem] font-medium px-5 py-3"
+                      style={{ color: "#78716C" }}
+                    >
                       Sessions
-                    </TableHead>
-                    <TableHead className="text-right text-[#78716C] pr-6">
+                    </th>
+                    <th
+                      className="text-right text-[0.75rem] font-medium px-5 py-3"
+                      style={{ color: "#78716C" }}
+                    >
                       Share
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
                   {getDeviceTableData().length > 0 ? (
                     (() => {
                       const data = getDeviceTableData();
-                      const totalSessions = data.reduce(
+                      const totalSessionsCalc = data.reduce(
                         (sum: number, d: any) => sum + d.sessions,
-                        0,
+                        0
                       );
-                      return data.map((device: any, i: number) => (
-                        <TableRow
-                          key={i}
-                          className="border-[#F4F7FE] hover:bg-transparent/50"
-                        >
-                          <TableCell className="font-bold text-[#1C1917] flex items-center gap-2 pl-6">
-                            {device.device?.toLowerCase().includes("mac") ||
-                            device.device?.toLowerCase().includes("ios") ? (
-                              <Monitor className="h-4 w-4 text-[#2563EB]" />
-                            ) : device.device
-                                ?.toLowerCase()
-                                .includes("windows") ? (
-                              <Monitor className="h-4 w-4 text-[#00A3FF]" />
-                            ) : device.device
-                                ?.toLowerCase()
-                                .includes("android") ? (
-                              <Smartphone className="h-4 w-4 text-[#3DDC84]" />
-                            ) : device.device
-                                ?.toLowerCase()
-                                .includes("linux") ? (
-                              <Monitor className="h-4 w-4 text-[#FCC624]" />
-                            ) : (
-                              <Monitor className="h-4 w-4 text-[#2563EB]" />
-                            )}
-                            {device.device}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-[#1C1917]">
-                            {device.users.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-[#1C1917]">
-                            {device.sessions.toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-right font-medium text-[#1C1917] pr-6">
-                            {totalSessions > 0
-                              ? (
-                                  (device.sessions / totalSessions) *
-                                  100
-                                ).toFixed(1)
-                              : 0}
-                            %
-                          </TableCell>
-                        </TableRow>
-                      ));
+                      return data.map((row: any, i: number) => {
+                        const share =
+                          totalSessionsCalc > 0
+                            ? (row.sessions / totalSessionsCalc) * 100
+                            : 0;
+                        return (
+                          <tr
+                            key={i}
+                            className="border-t"
+                            style={{ borderColor: "#F3F2F1" }}
+                          >
+                            <td className="px-5 py-3">
+                              <div className="flex items-center gap-2">
+                                <Monitor
+                                  className="w-3.5 h-3.5"
+                                  style={{ color: "#A8A29E" }}
+                                />
+                                <span
+                                  className="text-[0.8125rem] font-medium"
+                                  style={{ color: "#1C1917" }}
+                                >
+                                  {row.device}
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              className="px-5 py-3 text-right text-[0.8125rem] tabular-nums"
+                              style={{ color: "#44403C" }}
+                            >
+                              {row.users}
+                            </td>
+                            <td
+                              className="px-5 py-3 text-right text-[0.8125rem] tabular-nums"
+                              style={{ color: "#44403C" }}
+                            >
+                              {row.sessions}
+                            </td>
+                            <td className="px-5 py-3 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <div
+                                  className="w-20 h-1.5 rounded-full overflow-hidden"
+                                  style={{ backgroundColor: "#F3F2F1" }}
+                                >
+                                  <div
+                                    className="h-full rounded-full"
+                                    style={{
+                                      width: `${share}%`,
+                                      backgroundColor: "#2563EB",
+                                      opacity: 0.75,
+                                    }}
+                                  />
+                                </div>
+                                <span
+                                  className="text-[0.8125rem] tabular-nums font-medium w-10 text-right"
+                                  style={{ color: "#44403C" }}
+                                >
+                                  {share.toFixed(1)}%
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      });
                     })()
                   ) : (
-                    <TableRow>
-                      <TableCell
+                    <tr>
+                      <td
                         colSpan={4}
-                        className="text-center py-8 text-[#78716C]"
+                        className="text-center py-8 text-[0.8125rem]"
+                        style={{ color: "#A8A29E" }}
                       >
                         No platform data available
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   )}
-                </TableBody>
-              </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </PageShell>

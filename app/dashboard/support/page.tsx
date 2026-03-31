@@ -192,20 +192,20 @@ export default function SupportPage() {
       action={
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl">
+            <Button className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl">
               <Plus className="h-4 w-4 mr-2" />
               New Ticket
             </Button>
           </DialogTrigger>
-            <DialogContent className="bg-white border-[#E0E5F2] max-w-lg rounded-2xl">
+            <DialogContent className="bg-white border-[#E7E5E4] max-w-lg rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="text-[#2B3674]">Create Support Ticket</DialogTitle>
+                <DialogTitle className="text-[#1C1917]">Create Support Ticket</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleCreateTicket} className="space-y-4 mt-4">
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-sm text-[#4363C7]">Subject</label>
-                    <span className={`text-xs ${subject.length < SUBJECT_MIN || subject.length > SUBJECT_MAX ? 'text-red-500' : 'text-[#4363C7]'}`}>
+                    <label className="text-sm text-[#78716C]">Subject</label>
+                    <span className={`text-xs ${subject.length < SUBJECT_MIN || subject.length > SUBJECT_MAX ? 'text-red-500' : 'text-[#78716C]'}`}>
                       {subject.length}/{SUBJECT_MAX}
                     </span>
                   </div>
@@ -213,7 +213,7 @@ export default function SupportPage() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value.slice(0, SUBJECT_MAX))}
                     placeholder="Brief description of your issue (min 3 chars)"
-                    className={`bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] ${subject.length > 0 && subject.length < SUBJECT_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] placeholder:text-[#78716C] ${subject.length > 0 && subject.length < SUBJECT_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
                     required
                     minLength={SUBJECT_MIN}
                     maxLength={SUBJECT_MAX}
@@ -224,12 +224,12 @@ export default function SupportPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm text-[#4363C7] mb-1.5 block">Priority</label>
+                    <label className="text-sm text-[#78716C] mb-1.5 block">Priority</label>
                     <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
+                      <SelectTrigger className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E0E5F2]">
+                      <SelectContent className="bg-white border-[#E7E5E4]">
                         <SelectItem value="low">Low</SelectItem>
                         <SelectItem value="medium">Medium</SelectItem>
                         <SelectItem value="high">High</SelectItem>
@@ -238,12 +238,12 @@ export default function SupportPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm text-[#4363C7] mb-1.5 block">Category</label>
+                    <label className="text-sm text-[#78716C] mb-1.5 block">Category</label>
                     <Select value={category} onValueChange={setCategory}>
-                      <SelectTrigger className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
+                      <SelectTrigger className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-white border-[#E0E5F2]">
+                      <SelectContent className="bg-white border-[#E7E5E4]">
                         <SelectItem value="general">General</SelectItem>
                         <SelectItem value="bug">Bug Report</SelectItem>
                         <SelectItem value="feature_request">Feature Request</SelectItem>
@@ -255,8 +255,8 @@ export default function SupportPage() {
                 </div>
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-sm text-[#4363C7]">Description</label>
-                    <span className={`text-xs ${description.length < DESCRIPTION_MIN || description.length > DESCRIPTION_MAX ? 'text-red-500' : 'text-[#4363C7]'}`}>
+                    <label className="text-sm text-[#78716C]">Description</label>
+                    <span className={`text-xs ${description.length < DESCRIPTION_MIN || description.length > DESCRIPTION_MAX ? 'text-red-500' : 'text-[#78716C]'}`}>
                       {description.length}/{DESCRIPTION_MAX}
                     </span>
                   </div>
@@ -264,7 +264,7 @@ export default function SupportPage() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value.slice(0, DESCRIPTION_MAX))}
                     placeholder="Describe your issue in detail... (min 10 chars)"
-                    className={`bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[120px] ${description.length > 0 && description.length < DESCRIPTION_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
+                    className={`bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] placeholder:text-[#78716C] min-h-[120px] ${description.length > 0 && description.length < DESCRIPTION_MIN ? 'border-red-300 focus:border-red-500' : ''}`}
                     required
                     minLength={DESCRIPTION_MIN}
                     maxLength={DESCRIPTION_MAX}
@@ -281,13 +281,13 @@ export default function SupportPage() {
                     type="button"
                     variant="ghost"
                     onClick={() => setIsCreateDialogOpen(false)}
-                    className="text-[#4363C7] hover:text-[#2B3674]"
+                    className="text-[#78716C] hover:text-[#1C1917]"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl disabled:opacity-50"
+                    className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl disabled:opacity-50"
                     disabled={isSubmitting || !isFormValid}
                   >
                     {isSubmitting ? (
@@ -311,46 +311,46 @@ export default function SupportPage() {
         <div className="bg-white rounded-3xl border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] overflow-hidden">
           {isLoading ? (
             <div className="p-12 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#4318FF] mx-auto" />
-              <p className="text-[#4363C7] mt-2">Loading tickets...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mx-auto" />
+              <p className="text-[#78716C] mt-2">Loading tickets...</p>
             </div>
           ) : tickets.length === 0 ? (
             <div className="p-12 text-center">
-              <LifeBuoy className="h-12 w-12 text-[#4363C7] mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-[#2B3674] mb-2">No tickets yet</h3>
-              <p className="text-[#4363C7] mb-4">
+              <LifeBuoy className="h-12 w-12 text-[#78716C] mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-[#1C1917] mb-2">No tickets yet</h3>
+              <p className="text-[#78716C] mb-4">
                 Create a support ticket to get help from our team.
               </p>
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl"
+                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create First Ticket
               </Button>
             </div>
           ) : (
-            <div className="divide-y divide-[#F4F7FE]">
+            <div className="divide-y divide-[#F8F7F4]">
               {tickets.map((ticket) => {
                 const StatusIcon = statusIcons[ticket.status] || AlertCircle;
                 return (
                   <div
                     key={ticket.id}
                     onClick={() => handleViewTicket(ticket.id)}
-                    className="p-4 hover:bg-[#F4F7FE] cursor-pointer transition-colors"
+                    className="p-4 hover:bg-[#F8F7F4] cursor-pointer transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <StatusIcon className="h-4 w-4 text-[#4318FF] flex-shrink-0" />
-                          <h3 className="text-[#2B3674] font-medium truncate">
+                          <StatusIcon className="h-4 w-4 text-[#2563EB] flex-shrink-0" />
+                          <h3 className="text-[#1C1917] font-medium truncate">
                             {ticket.subject}
                           </h3>
                         </div>
-                        <p className="text-[#4363C7] text-sm line-clamp-1">
+                        <p className="text-[#78716C] text-sm line-clamp-1">
                           {ticket.description}
                         </p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-[#4363C7]">
+                        <div className="flex items-center gap-3 mt-2 text-xs text-[#78716C]">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {formatDate(ticket.created_at)}
@@ -384,7 +384,7 @@ export default function SupportPage() {
 
         {/* Ticket Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="bg-white border-[#E0E5F2] max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl">
+          <DialogContent className="bg-white border-[#E7E5E4] max-w-2xl max-h-[80vh] overflow-y-auto rounded-2xl">
             {selectedTicket && (
               <>
                 <DialogHeader>
@@ -404,18 +404,18 @@ export default function SupportPage() {
                       {selectedTicket.priority}
                     </span>
                   </div>
-                  <DialogTitle className="text-[#2B3674] text-xl mt-2">
+                  <DialogTitle className="text-[#1C1917] text-xl mt-2">
                     {selectedTicket.subject}
                   </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 mt-4">
                   {/* Ticket description */}
-                  <div className="bg-[#F4F7FE] rounded-xl p-4">
-                    <p className="text-[#2B3674] whitespace-pre-wrap">
+                  <div className="bg-[#F8F7F4] rounded-xl p-4">
+                    <p className="text-[#1C1917] whitespace-pre-wrap">
                       {selectedTicket.description}
                     </p>
-                    <div className="flex items-center gap-4 mt-4 text-sm text-[#4363C7]">
+                    <div className="flex items-center gap-4 mt-4 text-sm text-[#78716C]">
                       <span>Created: {formatDate(selectedTicket.created_at)}</span>
                       <span>•</span>
                       <span>{categoryLabels[selectedTicket.category] || selectedTicket.category}</span>
@@ -424,8 +424,8 @@ export default function SupportPage() {
 
                   {/* Comments */}
                   <div>
-                    <h4 className="text-[#2B3674] font-medium mb-4 flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-[#4318FF]" />
+                    <h4 className="text-[#1C1917] font-medium mb-4 flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-[#2563EB]" />
                       Comments ({selectedTicket.comments?.length || 0})
                     </h4>
                     
@@ -433,25 +433,25 @@ export default function SupportPage() {
                       {selectedTicket.comments?.map((comment) => (
                         <div
                           key={comment.id}
-                          className={`bg-[#F4F7FE] rounded-xl p-3 ${
+                          className={`bg-[#F8F7F4] rounded-xl p-3 ${
                             comment.is_internal ? "border-l-2 border-yellow-500" : ""
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-[#2B3674]">
+                            <span className="text-sm font-medium text-[#1C1917]">
                               {comment.user?.name || comment.user?.email || "Support"}
                             </span>
-                            <span className="text-xs text-[#4363C7]">
+                            <span className="text-xs text-[#78716C]">
                               {formatDate(comment.created_at)}
                             </span>
                           </div>
-                          <p className="text-[#2B3674] text-sm whitespace-pre-wrap">
+                          <p className="text-[#1C1917] text-sm whitespace-pre-wrap">
                             {comment.content}
                           </p>
                         </div>
                       ))}
                       {(!selectedTicket.comments || selectedTicket.comments.length === 0) && (
-                        <p className="text-[#4363C7] text-sm text-center py-4">
+                        <p className="text-[#78716C] text-sm text-center py-4">
                           No comments yet
                         </p>
                       )}
@@ -464,12 +464,12 @@ export default function SupportPage() {
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
                           placeholder="Type your message..."
-                          className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7] min-h-[60px] flex-1"
+                          className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] placeholder:text-[#78716C] min-h-[60px] flex-1"
                         />
                         <Button
                           onClick={handleAddComment}
                           disabled={isAddingComment || !newComment.trim()}
-                          className="bg-[#4318FF] hover:bg-[#3311CC] text-white self-end rounded-xl"
+                          className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white self-end rounded-xl"
                         >
                           {isAddingComment ? (
                             <Loader2 className="h-4 w-4 animate-spin" />

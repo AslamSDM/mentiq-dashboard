@@ -65,22 +65,22 @@ export function TransactionsTable() {
   return (
     <Card className="border-none shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xl font-bold text-[#2B3674]">Recent Transactions</CardTitle>
+        <CardTitle className="text-xl font-bold text-[#1C1917]">Recent Transactions</CardTitle>
         <div className="flex gap-2">
             <div className="relative">
                  <input 
                     type="text" 
                     placeholder="Search" 
-                    className="pl-8 pr-4 py-2 rounded-full bg-[#F4F7FE] text-sm text-[#2B3674] placeholder-[#4363C7] focus:outline-none focus:ring-2 focus:ring-[#4318FF]"
+                    className="pl-8 pr-4 py-2 rounded-full bg-[#F8F7F4] text-sm text-[#1C1917] placeholder-[#78716C] focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                  />
-                 <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4363C7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78716C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                  </svg>
             </div>
-            <Button variant="outline" size="sm" className="rounded-full text-[#4363C7] border-none bg-[#F4F7FE]">
+            <Button variant="outline" size="sm" className="rounded-full text-[#78716C] border-none bg-[#F8F7F4]">
                 <Filter className="h-4 w-4 mr-2" /> Filter
             </Button>
-            <Button variant="outline" size="sm" className="rounded-full text-[#4363C7] border-none bg-[#F4F7FE]">
+            <Button variant="outline" size="sm" className="rounded-full text-[#78716C] border-none bg-[#F8F7F4]">
                 <Download className="h-4 w-4 mr-2" /> Export
             </Button>
         </div>
@@ -88,28 +88,28 @@ export function TransactionsTable() {
       <CardContent>
         <Table>
           <TableHeader>
-            <TableRow className="border-b border-[#E0E5F2] hover:bg-transparent">
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">ID</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Customer</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Product</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Amount</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Status</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Payment</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Date</TableHead>
-              <TableHead className="text-[#4363C7] font-medium text-xs uppercase tracking-wider">Action</TableHead>
+            <TableRow className="border-b border-[#E7E5E4] hover:bg-transparent">
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">ID</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Customer</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Product</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Amount</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Status</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Payment</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Date</TableHead>
+              <TableHead className="text-[#78716C] font-medium text-xs uppercase tracking-wider">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {mockTransactions.map((tx) => (
               <TableRow key={tx.id} className="border-b border-transparent hover:bg-gray-50/50">
-                <TableCell className="font-bold text-[#2B3674]">{tx.id}</TableCell>
-                <TableCell className="font-bold text-[#2B3674]">{tx.customer}</TableCell>
-                <TableCell className="font-bold text-[#2B3674]">{tx.product}</TableCell>
-                <TableCell className="font-bold text-[#2B3674]">{tx.amount}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.id}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.customer}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.product}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.amount}</TableCell>
                 <TableCell>
                   <Badge 
                     className={
-                        tx.status === "Completed" ? "bg-[#05CD99] text-white hover:bg-[#05CD99]/90" : 
+                        tx.status === "Completed" ? "bg-[#16A34A] text-white hover:bg-[#16A34A]/90" : 
                         tx.status === "Failed" ? "bg-[#EE5D50] text-white hover:bg-[#EE5D50]/90" : 
                         "bg-[#FFCE20] text-white hover:bg-[#FFCE20]/90"
                     }
@@ -117,10 +117,10 @@ export function TransactionsTable() {
                     {tx.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="font-bold text-[#2B3674]">{tx.payment}</TableCell>
-                <TableCell className="font-bold text-[#2B3674]">{tx.date}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.payment}</TableCell>
+                <TableCell className="font-bold text-[#1C1917]">{tx.date}</TableCell>
                 <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#4363C7]">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-[#78716C]">
                         <MoreHorizontal className="h-4 w-4" />
                     </Button>
                 </TableCell>

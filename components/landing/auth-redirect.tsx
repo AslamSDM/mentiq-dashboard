@@ -11,7 +11,7 @@ export function AuthLoadingCheck({ children }: { children: React.ReactNode }) {
   // Show loading only briefly - middleware handles authenticated redirects
   if (status === "loading") {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F4F7FE]">
+      <div className="flex h-screen items-center justify-center bg-[#F8F7F4]">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
       </div>
     );
@@ -21,10 +21,10 @@ export function AuthLoadingCheck({ children }: { children: React.ReactNode }) {
   // (middleware should redirect before this is seen, but just in case)
   if (status === "authenticated") {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#F4F7FE]">
+      <div className="flex h-screen items-center justify-center bg-[#F8F7F4]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-[#4363C7]">Redirecting to dashboard...</p>
+          <p className="text-[#78716C]">Redirecting to dashboard...</p>
         </div>
       </div>
     );

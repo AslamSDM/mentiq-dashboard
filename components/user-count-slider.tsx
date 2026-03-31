@@ -101,7 +101,7 @@ export function UserCountSlider({
           >
             {currentTier.name}
           </Badge>
-          <span className="text-lg font-bold text-[#2B3674]">
+          <span className="text-lg font-bold text-[#1C1917]">
             ${currentTier.basePrice}/month
           </span>
         </div>

@@ -124,23 +124,23 @@ function ResultCard({ metric, index }: { metric: ResultMetric; index: number }) 
       custom={index}
       className="h-full"
     >
-      <Card className="relative h-full overflow-hidden rounded-2xl border-[#E0E5F2] bg-white/80 p-6 shadow-lg">
+      <Card className="relative h-full overflow-hidden rounded-2xl border-[#E7E5E4] bg-white/80 p-6 shadow-lg">
         <div className="absolute -top-12 -right-10 h-32 w-32 rounded-full bg-gradient-to-br from-primary/25 to-purple-500/20 blur-2xl" />
         <div className="absolute -bottom-14 -left-12 h-36 w-36 rounded-full bg-gradient-to-br from-blue-200/18 to-amber-200/20 blur-2xl" />
 
         <div className="relative flex items-start justify-between gap-3">
           <div>
-            <div className="text-xs font-medium text-[#4363C7]">{metric.label}</div>
-            <div className="mt-2 font-sans text-2xl tracking-tight text-[#2B3674]">
+            <div className="text-xs font-medium text-[#78716C]">{metric.label}</div>
+            <div className="mt-2 font-sans text-2xl tracking-tight text-[#1C1917]">
               {metric.value}
             </div>
           </div>
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-2">
-            <TrendingUp className="h-5 w-5 text-[#4363C7]" strokeWidth={1.75} />
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-2">
+            <TrendingUp className="h-5 w-5 text-[#78716C]" strokeWidth={1.75} />
           </div>
         </div>
 
-        <p className="relative mt-3 text-sm leading-relaxed text-[#4363C7]">
+        <p className="relative mt-3 text-sm leading-relaxed text-[#78716C]">
           {metric.detail}
         </p>
       </Card>
@@ -158,38 +158,38 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
       custom={index}
       className="h-full"
     >
-      <Card className="group relative h-full overflow-hidden rounded-2xl border-[#E0E5F2] bg-white/80 p-6 shadow-lg">
+      <Card className="group relative h-full overflow-hidden rounded-2xl border-[#E7E5E4] bg-white/80 p-6 shadow-lg">
         <div className="absolute -top-16 right-6 h-44 w-44 rounded-full bg-gradient-to-br from-primary/16 to-purple-500/14 blur-2xl transition-opacity duration-300 group-hover:opacity-80" />
         <div className="absolute -bottom-20 -left-10 h-44 w-44 rounded-full bg-gradient-to-br from-blue-200/12 to-amber-200/14 blur-2xl" />
 
         <div className="relative flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <div className="text-sm font-semibold text-[#2B3674]">{t.name}</div>
+              <div className="text-sm font-semibold text-[#1C1917]">{t.name}</div>
               <Badge
                 variant="secondary"
-                className="rounded-full border-[#E0E5F2] bg-[#F4F7FE] text-[#4363C7]"
+                className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] text-[#78716C]"
               >
                 {t.tag}
               </Badge>
             </div>
-            <div className="mt-1 text-xs text-[#4363C7]">
+            <div className="mt-1 text-xs text-[#78716C]">
               {t.role} · {t.company}
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-2">
-            <Stars className="h-5 w-5 text-[#4363C7]" strokeWidth={1.75} />
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-2">
+            <Stars className="h-5 w-5 text-[#78716C]" strokeWidth={1.75} />
           </div>
         </div>
 
-        <p className="relative mt-5 text-sm leading-relaxed text-[#2B3674]">
+        <p className="relative mt-5 text-sm leading-relaxed text-[#1C1917]">
           &ldquo;{t.quote}&rdquo;
         </p>
 
-        <div className="relative mt-5 rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] px-4 py-3">
-          <div className="text-xs text-[#4363C7]">Reported result</div>
-          <div className="mt-1 font-sans text-base tracking-tight text-[#2B3674]">
+        <div className="relative mt-5 rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] px-4 py-3">
+          <div className="text-xs text-[#78716C]">Reported result</div>
+          <div className="mt-1 font-sans text-base tracking-tight text-[#1C1917]">
             {t.metric}
           </div>
         </div>
@@ -210,21 +210,21 @@ export function ResultsSection() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#4363C7]">
+            <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#78716C]">
               Results
             </div>
-            <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#2B3674] md:text-4xl">
+            <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#1C1917] md:text-4xl">
               Understand your churn at a glance.
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#4363C7]">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#78716C]">
               Everything below maps directly to what&apos;s in the product today: cohorts, churn views, playbooks, and revenue context.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="rounded-full border-[#E0E5F2] bg-[#F4F7FE] text-[#4363C7]">
+            <Badge variant="secondary" className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] text-[#78716C]">
               Plain-English insights
             </Badge>
-            <Badge variant="secondary" className="rounded-full border-[#E0E5F2] bg-[#F4F7FE] text-[#4363C7]">
+            <Badge variant="secondary" className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] text-[#78716C]">
               Actionable playbooks
             </Badge>
           </div>
@@ -252,21 +252,21 @@ export function TestimonialsSection() {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#4363C7]">
+            <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#78716C]">
               Testimonials
             </div>
-            <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#2B3674] md:text-4xl">
+            <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#1C1917] md:text-4xl">
               Built for teams — and founders.
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#4363C7]">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#78716C]">
               Less churn, faster saves, and a clearer story you can share with anyone.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="rounded-full border-[#E0E5F2] bg-[#F4F7FE] text-[#4363C7]">
+            <Badge variant="secondary" className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] text-[#78716C]">
               Easy to adopt
             </Badge>
-            <Badge variant="secondary" className="rounded-full border-[#E0E5F2] bg-[#F4F7FE] text-[#4363C7]">
+            <Badge variant="secondary" className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] text-[#78716C]">
               Clear outcomes
             </Badge>
           </div>
@@ -293,17 +293,17 @@ export function HowItWorksHeader() {
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#4363C7]">
+          <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#78716C]">
             How it works
           </div>
-          <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#2B3674] md:text-4xl">
+          <h2 className="mt-3 font-sans text-3xl tracking-tight text-[#1C1917] md:text-4xl">
             Understand. Decide. Act.
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#4363C7]">
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#78716C]">
             A clean workflow that turns messy product + billing signals into clear next steps your whole team can execute.
           </p>
         </div>
-        <a href="#waitlist" className="text-sm text-[#4363C7] hover:text-[#2B3674] inline-flex items-center gap-1">
+        <a href="#waitlist" className="text-sm text-[#78716C] hover:text-[#1C1917] inline-flex items-center gap-1">
           Join waitlist 
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -185,7 +185,7 @@ export default function AdminTicketsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F4F7FE] p-6">
+    <div className="min-h-screen bg-[#F8F7F4] p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -193,11 +193,11 @@ export default function AdminTicketsPage() {
       >
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-[#2B3674] flex items-center gap-3">
-            <Ticket className="h-8 w-8 text-[#4318FF]" />
+          <h1 className="text-3xl font-bold text-[#1C1917] flex items-center gap-3">
+            <Ticket className="h-8 w-8 text-[#2563EB]" />
             Support Tickets
           </h1>
-          <p className="text-[#4363C7] mt-1">
+          <p className="text-[#78716C] mt-1">
             Manage and respond to customer support requests.
           </p>
         </div>
@@ -205,9 +205,9 @@ export default function AdminTicketsPage() {
         {/* Stats */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            <div className="bg-white rounded-2xl border border-[#E0E5F2] p-4 shadow-sm">
-              <p className="text-[#4363C7] text-sm">Total</p>
-              <p className="text-2xl font-bold text-[#2B3674]">{stats.total}</p>
+            <div className="bg-white rounded-2xl border border-[#E7E5E4] p-4 shadow-sm">
+              <p className="text-[#78716C] text-sm">Total</p>
+              <p className="text-2xl font-bold text-[#1C1917]">{stats.total}</p>
             </div>
             <div className="bg-green-50 rounded-2xl border border-green-200 p-4">
               <p className="text-green-600 text-sm">Open</p>
@@ -239,24 +239,24 @@ export default function AdminTicketsPage() {
         )}
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl border border-[#E0E5F2] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E7E5E4] p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#4363C7]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#78716C]" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search tickets..."
-                className="pl-10 bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]"
+                className="pl-10 bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]"
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-[#4363C7]" />
+              <Filter className="h-4 w-4 text-[#78716C]" />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px] bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
+                <SelectTrigger className="w-[140px] bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-[#E0E5F2]">
+                <SelectContent className="bg-white border-[#E7E5E4]">
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="in_progress">In Progress</SelectItem>
@@ -265,10 +265,10 @@ export default function AdminTicketsPage() {
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-[140px] bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
+                <SelectTrigger className="w-[140px] bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]">
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-[#E0E5F2]">
+                <SelectContent className="bg-white border-[#E7E5E4]">
                   <SelectItem value="all">All Priority</SelectItem>
                   <SelectItem value="urgent">Urgent</SelectItem>
                   <SelectItem value="high">High</SelectItem>
@@ -277,10 +277,10 @@ export default function AdminTicketsPage() {
                 </SelectContent>
               </Select>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[160px] bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674]">
+                <SelectTrigger className="w-[160px] bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917]">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-[#E0E5F2]">
+                <SelectContent className="bg-white border-[#E7E5E4]">
                   <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="general">General</SelectItem>
                   <SelectItem value="bug">Bug Report</SelectItem>
@@ -294,17 +294,17 @@ export default function AdminTicketsPage() {
         </div>
 
         {/* Tickets Table */}
-        <div className="bg-white rounded-2xl border border-[#E0E5F2] overflow-hidden shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E7E5E4] overflow-hidden shadow-sm">
           {isLoading ? (
             <div className="p-12 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#4318FF] mx-auto" />
-              <p className="text-[#4363C7] mt-2">Loading tickets...</p>
+              <Loader2 className="h-8 w-8 animate-spin text-[#2563EB] mx-auto" />
+              <p className="text-[#78716C] mt-2">Loading tickets...</p>
             </div>
           ) : filteredTickets.length === 0 ? (
             <div className="p-12 text-center">
-              <Ticket className="h-12 w-12 text-[#4363C7] mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium text-[#2B3674] mb-2">No tickets found</h3>
-              <p className="text-[#4363C7]">
+              <Ticket className="h-12 w-12 text-[#78716C] mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-[#1C1917] mb-2">No tickets found</h3>
+              <p className="text-[#78716C]">
                 {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
                   ? "Try adjusting your filters"
                   : "No support tickets have been created yet"}
@@ -314,37 +314,37 @@ export default function AdminTicketsPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#E0E5F2] bg-[#F4F7FE]">
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Ticket</th>
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Customer</th>
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Category</th>
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Priority</th>
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Status</th>
-                    <th className="text-left py-3 px-4 text-[#4363C7] font-semibold text-sm">Created</th>
+                  <tr className="border-b border-[#E7E5E4] bg-[#F8F7F4]">
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Ticket</th>
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Customer</th>
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Category</th>
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Priority</th>
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Status</th>
+                    <th className="text-left py-3 px-4 text-[#78716C] font-semibold text-sm">Created</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E0E5F2]">
+                <tbody className="divide-y divide-[#E7E5E4]">
                   {filteredTickets.map((ticket) => {
                     const StatusIcon = statusIcons[ticket.status] || AlertCircle;
                     return (
                       <tr
                         key={ticket.id}
                         onClick={() => handleViewTicket(ticket.id)}
-                        className="hover:bg-[#F4F7FE] cursor-pointer transition-colors"
+                        className="hover:bg-[#F8F7F4] cursor-pointer transition-colors"
                       >
                         <td className="py-3 px-4">
                           <div className="max-w-xs">
-                            <p className="text-[#2B3674] font-medium truncate">{ticket.subject}</p>
-                            <p className="text-[#4363C7] text-sm truncate">{ticket.description}</p>
+                            <p className="text-[#1C1917] font-medium truncate">{ticket.subject}</p>
+                            <p className="text-[#78716C] text-sm truncate">{ticket.description}</p>
                           </div>
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-[#4363C7]" />
+                            <User className="h-4 w-4 text-[#78716C]" />
                             <div>
-                              <p className="text-[#2B3674] text-sm">{ticket.user?.email || "Unknown"}</p>
+                              <p className="text-[#1C1917] text-sm">{ticket.user?.email || "Unknown"}</p>
                               {ticket.account && (
-                                <p className="text-[#4363C7] text-xs flex items-center gap-1">
+                                <p className="text-[#78716C] text-xs flex items-center gap-1">
                                   <Building2 className="h-3 w-3" />
                                   {ticket.account.name}
                                 </p>
@@ -353,7 +353,7 @@ export default function AdminTicketsPage() {
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-[#4363C7] text-sm">
+                          <span className="text-[#78716C] text-sm">
                             {categoryLabels[ticket.category] || ticket.category}
                           </span>
                         </td>
@@ -377,7 +377,7 @@ export default function AdminTicketsPage() {
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className="text-[#4363C7] text-sm">
+                          <span className="text-[#78716C] text-sm">
                             {formatDate(ticket.created_at)}
                           </span>
                         </td>
@@ -392,7 +392,7 @@ export default function AdminTicketsPage() {
 
         {/* Ticket Detail Dialog */}
         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="bg-white border-[#E0E5F2] max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl">
+          <DialogContent className="bg-white border-[#E7E5E4] max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl">
             {selectedTicket && (
               <>
                 <DialogHeader>
@@ -407,7 +407,7 @@ export default function AdminTicketsPage() {
                         >
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-[#E0E5F2]">
+                        <SelectContent className="bg-white border-[#E7E5E4]">
                           <SelectItem value="open">Open</SelectItem>
                           <SelectItem value="in_progress">In Progress</SelectItem>
                           <SelectItem value="resolved">Resolved</SelectItem>
@@ -423,7 +423,7 @@ export default function AdminTicketsPage() {
                         >
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-[#E0E5F2]">
+                        <SelectContent className="bg-white border-[#E7E5E4]">
                           <SelectItem value="low">Low</SelectItem>
                           <SelectItem value="medium">Medium</SelectItem>
                           <SelectItem value="high">High</SelectItem>
@@ -432,7 +432,7 @@ export default function AdminTicketsPage() {
                       </Select>
                     </div>
                   </div>
-                  <DialogTitle className="text-[#2B3674] text-xl mt-4">
+                  <DialogTitle className="text-[#1C1917] text-xl mt-4">
                     {selectedTicket.subject}
                   </DialogTitle>
                 </DialogHeader>
@@ -440,32 +440,32 @@ export default function AdminTicketsPage() {
                 <div className="space-y-6 mt-4">
                   {/* Customer info */}
                   <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-2 text-[#4363C7]">
+                    <div className="flex items-center gap-2 text-[#78716C]">
                       <User className="h-4 w-4" />
                       <span>{selectedTicket.user?.email || "Unknown"}</span>
                     </div>
                     {selectedTicket.account && (
-                      <div className="flex items-center gap-2 text-[#4363C7]">
+                      <div className="flex items-center gap-2 text-[#78716C]">
                         <Building2 className="h-4 w-4" />
                         <span>{selectedTicket.account.name}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-[#4363C7]">
+                    <div className="flex items-center gap-2 text-[#78716C]">
                       <Clock className="h-4 w-4" />
                       <span>{formatDate(selectedTicket.created_at)}</span>
                     </div>
                   </div>
 
                   {/* Ticket description */}
-                  <div className="bg-[#F4F7FE] rounded-xl p-4 border border-[#E0E5F2]">
-                    <p className="text-[#2B3674] whitespace-pre-wrap">
+                  <div className="bg-[#F8F7F4] rounded-xl p-4 border border-[#E7E5E4]">
+                    <p className="text-[#1C1917] whitespace-pre-wrap">
                       {selectedTicket.description}
                     </p>
                   </div>
 
                   {/* Comments */}
                   <div>
-                    <h4 className="text-[#2B3674] font-semibold mb-4 flex items-center gap-2">
+                    <h4 className="text-[#1C1917] font-semibold mb-4 flex items-center gap-2">
                       <MessageSquare className="h-4 w-4" />
                       Comments ({selectedTicket.comments?.length || 0})
                     </h4>
@@ -477,12 +477,12 @@ export default function AdminTicketsPage() {
                           className={`rounded-xl p-4 border ${
                             comment.is_internal
                               ? "border-l-4 border-l-yellow-500 bg-yellow-50 border-yellow-200"
-                              : "bg-[#F4F7FE] border-[#E0E5F2]"
+                              : "bg-[#F8F7F4] border-[#E7E5E4]"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-[#2B3674]">
+                              <span className="text-sm font-medium text-[#1C1917]">
                                 {comment.user?.name || comment.user?.email || "Support"}
                               </span>
                               {comment.is_internal && (
@@ -491,17 +491,17 @@ export default function AdminTicketsPage() {
                                 </span>
                               )}
                             </div>
-                            <span className="text-xs text-[#4363C7]">
+                            <span className="text-xs text-[#78716C]">
                               {formatDate(comment.created_at)}
                             </span>
                           </div>
-                          <p className="text-[#2B3674] text-sm whitespace-pre-wrap">
+                          <p className="text-[#1C1917] text-sm whitespace-pre-wrap">
                             {comment.content}
                           </p>
                         </div>
                       ))}
                       {(!selectedTicket.comments || selectedTicket.comments.length === 0) && (
-                        <p className="text-[#4363C7] text-sm text-center py-4">
+                        <p className="text-[#78716C] text-sm text-center py-4">
                           No comments yet
                         </p>
                       )}
@@ -513,22 +513,22 @@ export default function AdminTicketsPage() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Type your response..."
-                        className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] min-h-[80px]"
+                        className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] min-h-[80px]"
                       />
                       <div className="flex items-center justify-between">
-                        <label className="flex items-center gap-2 text-sm text-[#4363C7] cursor-pointer">
+                        <label className="flex items-center gap-2 text-sm text-[#78716C] cursor-pointer">
                           <input
                             type="checkbox"
                             checked={isInternalComment}
                             onChange={(e) => setIsInternalComment(e.target.checked)}
-                            className="rounded border-[#E0E5F2]"
+                            className="rounded border-[#E7E5E4]"
                           />
                           Internal note (not visible to customer)
                         </label>
                         <Button
                           onClick={handleAddComment}
                           disabled={isAddingComment || !newComment.trim()}
-                          className="bg-[#4318FF] hover:bg-[#3311CC] text-white"
+                          className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white"
                         >
                           {isAddingComment ? (
                             <Loader2 className="h-4 w-4 animate-spin mr-2" />

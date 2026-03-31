@@ -276,13 +276,13 @@ export default function OnboardingPage() {
     // Show special message when waiting for payment subscription
     if (searchParams.get("success") === "true") {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
+        <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4]">
           <div className="flex flex-col items-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-[#4318FF]" />
-            <h2 className="text-2xl font-bold text-[#2B3674]">
+            <Loader2 className="h-12 w-12 animate-spin text-[#2563EB]" />
+            <h2 className="text-2xl font-bold text-[#1C1917]">
               Processing your payment...
             </h2>
-            <p className="text-[#4363C7]">
+            <p className="text-[#78716C]">
               Please wait while we activate your subscription
             </p>
           </div>
@@ -291,8 +291,8 @@ export default function OnboardingPage() {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#4318FF]" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
       </div>
     );
   }
@@ -300,20 +300,20 @@ export default function OnboardingPage() {
   return (
     <>
       {step === "createProject" && (
-        <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE] p-6">
+        <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4] p-6">
           <Card className="w-full max-w-2xl border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl bg-white">
             <CardHeader>
-              <CardTitle className="text-3xl text-[#2B3674]">
+              <CardTitle className="text-3xl text-[#1C1917]">
                 Create Your First Project
               </CardTitle>
-              <CardDescription className="text-[#4363C7]">
+              <CardDescription className="text-[#78716C]">
                 Let's start by creating a project to track your analytics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="project-name" className="text-[#2B3674]">
+                  <Label htmlFor="project-name" className="text-[#1C1917]">
                     Project Name *
                   </Label>
                   <Input
@@ -323,11 +323,11 @@ export default function OnboardingPage() {
                     onChange={(e) =>
                       setNewProject({ ...newProject, name: e.target.value })
                     }
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
+                    className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] placeholder:text-[#78716C]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="project-description" className="text-[#2B3674]">
+                  <Label htmlFor="project-description" className="text-[#1C1917]">
                     Description (Optional)
                   </Label>
                   <Input
@@ -340,13 +340,13 @@ export default function OnboardingPage() {
                         description: e.target.value,
                       })
                     }
-                    className="bg-[#F4F7FE] border-[#E0E5F2] text-[#2B3674] placeholder:text-[#4363C7]"
+                    className="bg-[#F8F7F4] border-[#E7E5E4] text-[#1C1917] placeholder:text-[#78716C]"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#E0E5F2]">
-                <p className="text-sm text-[#4363C7] mb-4">
+              <div className="pt-4 border-t border-[#E7E5E4]">
+                <p className="text-sm text-[#78716C] mb-4">
                   What you'll get with your project:
                 </p>
                 <div className="grid grid-cols-2 gap-3">
@@ -358,10 +358,10 @@ export default function OnboardingPage() {
                     "AI Email Generation",
                     "API Keys",
                   ].map((feature) => (
-                    <div key={feature} className="flex items-center gap-2 text-sm text-[#2B3674]">
-                      <div className="h-5 w-5 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
+                    <div key={feature} className="flex items-center gap-2 text-sm text-[#1C1917]">
+                      <div className="h-5 w-5 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
                         <svg
-                          className="h-3 w-3 text-[#05CD99]"
+                          className="h-3 w-3 text-[#16A34A]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -383,7 +383,7 @@ export default function OnboardingPage() {
               <Button
                 onClick={handleCreateProject}
                 disabled={!newProject.name || loading}
-                className="w-full bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl"
                 size="lg"
               >
                 {loading ? (
@@ -422,11 +422,11 @@ export default function OnboardingPage() {
         />
       )}
       {step === "complete" && (
-        <div className="min-h-screen flex items-center justify-center bg-[#F4F7FE]">
+        <div className="min-h-screen flex items-center justify-center bg-[#F8F7F4]">
           <div className="text-center space-y-4">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#05CD99]/10 border-2 border-[#05CD99]/20">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#16A34A]/10 border-2 border-[#16A34A]/20">
               <svg
-                className="h-10 w-10 text-[#05CD99]"
+                className="h-10 w-10 text-[#16A34A]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -439,8 +439,8 @@ export default function OnboardingPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-4xl font-bold text-[#2B3674]">All set!</h1>
-            <p className="text-lg text-[#4363C7]">
+            <h1 className="text-4xl font-bold text-[#1C1917]">All set!</h1>
+            <p className="text-lg text-[#78716C]">
               Redirecting to your dashboard...
             </p>
           </div>

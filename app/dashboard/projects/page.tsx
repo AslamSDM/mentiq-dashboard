@@ -50,8 +50,8 @@ function CodeBlock({
   isCopied: boolean;
 }) {
   return (
-    <div className="relative rounded-xl overflow-hidden border border-[#E0E5F2]">
-      <div className="flex items-center justify-between px-4 py-2 bg-[#2B3674] border-b border-[#3a4690]">
+    <div className="relative rounded-xl overflow-hidden border border-[#E7E5E4]">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#1C1917] border-b border-[#1C1917]">
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500/80" />
           <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
@@ -851,8 +851,8 @@ export default function ProjectsPage() {
 
         <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
           <CardHeader>
-            <CardTitle className="text-[#2B3674] font-bold">SDK Integration</CardTitle>
-            <CardDescription className="text-[#4363C7]">
+            <CardTitle className="text-[#1C1917] font-bold">SDK Integration</CardTitle>
+            <CardDescription className="text-[#78716C]">
               Use your API key to integrate the Mentiq Analytics SDK into your application
             </CardDescription>
           </CardHeader>
@@ -860,10 +860,10 @@ export default function ProjectsPage() {
             {/* Step 1: Installation */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#4318FF]">1</span>
+                <div className="h-6 w-6 rounded-full bg-[#2563EB]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#2563EB]">1</span>
                 </div>
-                <Label className="text-[#2B3674] font-semibold">Installation</Label>
+                <Label className="text-[#1C1917] font-semibold">Installation</Label>
               </div>
               <CodeBlock
                 code="npm install mentiq-sdk"
@@ -876,10 +876,10 @@ export default function ProjectsPage() {
             {/* Step 2: Add to Layout */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#4318FF]">2</span>
+                <div className="h-6 w-6 rounded-full bg-[#2563EB]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#2563EB]">2</span>
                 </div>
-                <Label className="text-[#2B3674] font-semibold">Add to your layout (app/layout.tsx)</Label>
+                <Label className="text-[#1C1917] font-semibold">Add to your layout (app/layout.tsx)</Label>
               </div>
               <CodeBlock
                 code={`import { Mentiq } from "mentiq-sdk";
@@ -924,10 +924,10 @@ export default function RootLayout({ children }) {
             {/* Step 3: Track Events */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#4318FF]">3</span>
+                <div className="h-6 w-6 rounded-full bg-[#2563EB]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#2563EB]">3</span>
                 </div>
-                <Label className="text-[#2B3674] font-semibold">Track Custom Events</Label>
+                <Label className="text-[#1C1917] font-semibold">Track Custom Events</Label>
               </div>
               <CodeBlock
                 code={`import { useMentiq } from "mentiq-sdk";
@@ -968,10 +968,10 @@ function SignupButton() {
             {/* Step 4: Identify Users */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-[#4318FF]/20 flex items-center justify-center">
-                  <span className="text-xs font-bold text-[#4318FF]">4</span>
+                <div className="h-6 w-6 rounded-full bg-[#2563EB]/20 flex items-center justify-center">
+                  <span className="text-xs font-bold text-[#2563EB]">4</span>
                 </div>
-                <Label className="text-[#2B3674] font-semibold">Identify Users</Label>
+                <Label className="text-[#1C1917] font-semibold">Identify Users</Label>
               </div>
               <CodeBlock
                 code={`import { useMentiq } from "mentiq-sdk";
@@ -1006,51 +1006,51 @@ function LoginHandler() {
             </div>
 
             {/* Features & Docs Link */}
-            <div className="bg-[#F4F7FE] rounded-xl p-4 mt-6">
-              <p className="font-semibold text-[#2B3674] mb-3">Available Features:</p>
-              <div className="grid grid-cols-2 gap-2 text-sm text-[#2B3674] mb-4">
+            <div className="bg-[#F8F7F4] rounded-xl p-4 mt-6">
+              <p className="font-semibold text-[#1C1917] mb-3">Available Features:</p>
+              <div className="grid grid-cols-2 gap-2 text-sm text-[#1C1917] mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>Event Tracking</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>Heatmap Tracking</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>Session Recording</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>User Identification</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>Page View Tracking</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded-full bg-[#05CD99]/20 flex items-center justify-center">
-                    <svg className="h-2.5 w-2.5 text-[#05CD99]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <div className="h-4 w-4 rounded-full bg-[#16A34A]/20 flex items-center justify-center">
+                    <svg className="h-2.5 w-2.5 text-[#16A34A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                   </div>
                   <span>Error Tracking</span>
                 </div>
               </div>
-              <p className="text-sm text-[#4363C7]">
+              <p className="text-sm text-[#78716C]">
                 📚 Full documentation:{" "}
                 <a
                   href="/docs"
-                  className="text-[#4318FF] hover:underline font-medium"
+                  className="text-[#2563EB] hover:underline font-medium"
                 >
                   View SDK Docs
                 </a>
@@ -1059,7 +1059,7 @@ function LoginHandler() {
                   href="https://github.com/AslamSDM/mentiq-sdk#readme"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#4318FF] hover:underline font-medium"
+                  className="text-[#2563EB] hover:underline font-medium"
                 >
                   GitHub README
                 </a>

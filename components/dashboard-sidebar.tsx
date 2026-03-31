@@ -52,7 +52,7 @@ const NAV_GROUPS = [
       { name: "Retention Cohorts", href: "/dashboard/retention", icon: Users },
       {
         name: "Churn Awareness",
-        href: "/dashboard/churn-awareness",
+        href: "/dashboard/churn",
         icon: TrendingDown,
       }, // Note: may need redirect mapped
       { name: "Feature Tracking", href: "/dashboard/features", icon: Zap },
@@ -88,11 +88,11 @@ const ADMIN_GROUP = {
     { name: "Admin Users", href: "/dashboard/admin/users", icon: Shield },
     { name: "Add Users", href: "/dashboard/admin/test-users", icon: User },
     { name: "Waitlist", href: "/dashboard/admin/waitlist", icon: Clock },
-    {
-      name: "Admin Projects",
-      href: "/dashboard/admin/projects",
-      icon: FolderOpen,
-    },
+    // {
+    //   name: "Usage Limits",
+    //   href: "/dashboard/admin/limits",
+    //   icon: FolderOpen,
+    // },
     { name: "Admin Tickets", href: "/dashboard/admin/tickets", icon: Ticket },
     { name: "Usage Limits", href: "/dashboard/admin/limits", icon: Gauge },
   ],
@@ -222,9 +222,7 @@ export function DashboardSidebar() {
               )}
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(item.href + "/");
+                  const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.name}

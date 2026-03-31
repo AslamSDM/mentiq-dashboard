@@ -90,7 +90,7 @@ export default function AdminTestUsersPage() {
   if (status === "loading") {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#4318FF]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
       </div>
     );
   }
@@ -111,11 +111,11 @@ export default function AdminTestUsersPage() {
 
       <Card className="border-none shadow-[0px_18px_40px_rgba(112,144,176,0.12)] rounded-3xl">
         <CardHeader>
-          <CardTitle className="text-[#2B3674] font-bold flex items-center gap-2">
-            <UserPlus className="h-6 w-6 text-[#4318FF]" />
+          <CardTitle className="text-[#1C1917] font-bold flex items-center gap-2">
+            <UserPlus className="h-6 w-6 text-[#2563EB]" />
             Create Test User
           </CardTitle>
-          <CardDescription className="text-[#4363C7]">
+          <CardDescription className="text-[#78716C]">
             Create a test user account that bypasses normal registration requirements
           </CardDescription>
         </CardHeader>
@@ -123,18 +123,18 @@ export default function AdminTestUsersPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-[#2B3674] font-medium">Name</Label>
+                <Label htmlFor="name" className="text-[#1C1917] font-medium">Name</Label>
                 <Input
                   id="name"
                   placeholder="John Doe"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="rounded-xl border-[#E0E5F2] focus:border-[#4318FF] focus:ring-[#4318FF]"
+                  className="rounded-xl border-[#E7E5E4] focus:border-[#2563EB] focus:ring-[#2563EB]"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[#2B3674] font-medium">Email</Label>
+                <Label htmlFor="email" className="text-[#1C1917] font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -142,13 +142,13 @@ export default function AdminTestUsersPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
-                  className="rounded-xl border-[#E0E5F2] focus:border-[#4318FF] focus:ring-[#4318FF]"
+                  className="rounded-xl border-[#E7E5E4] focus:border-[#2563EB] focus:ring-[#2563EB]"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-[#2B3674] font-medium">Password</Label>
+              <Label htmlFor="password" className="text-[#1C1917] font-medium">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -157,12 +157,12 @@ export default function AdminTestUsersPage() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={8}
-                className="rounded-xl border-[#E0E5F2] focus:border-[#4318FF] focus:ring-[#4318FF]"
+                className="rounded-xl border-[#E7E5E4] focus:border-[#2563EB] focus:ring-[#2563EB]"
               />
             </div>
 
-            <div className="space-y-4 p-4 bg-[#F4F7FE] rounded-2xl">
-              <h4 className="font-bold text-[#2B3674]">Options</h4>
+            <div className="space-y-4 p-4 bg-[#F8F7F4] rounded-2xl">
+              <h4 className="font-bold text-[#1C1917]">Options</h4>
               
               <div className="flex items-center space-x-3">
                 <Checkbox
@@ -171,9 +171,9 @@ export default function AdminTestUsersPage() {
                   onCheckedChange={(checked) =>
                     setFormData({ ...formData, skipEmailVerification: checked === true })
                   }
-                  className="border-[#4318FF] data-[state=checked]:bg-[#4318FF]"
+                  className="border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
                 />
-                <Label htmlFor="skipEmail" className="text-[#2B3674] cursor-pointer">
+                <Label htmlFor="skipEmail" className="text-[#1C1917] cursor-pointer">
                   Skip email verification (mark as verified)
                 </Label>
               </div>
@@ -185,9 +185,9 @@ export default function AdminTestUsersPage() {
                   onCheckedChange={(checked) =>
                     setFormData({ ...formData, skipPaywall: checked === true })
                   }
-                  className="border-[#4318FF] data-[state=checked]:bg-[#4318FF]"
+                  className="border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
                 />
-                <Label htmlFor="skipPaywall" className="text-[#2B3674] cursor-pointer">
+                <Label htmlFor="skipPaywall" className="text-[#1C1917] cursor-pointer">
                   Skip paywall (grant subscription access)
                 </Label>
               </div>
@@ -199,22 +199,22 @@ export default function AdminTestUsersPage() {
                   onCheckedChange={(checked) =>
                     setFormData({ ...formData, createProject: checked === true })
                   }
-                  className="border-[#4318FF] data-[state=checked]:bg-[#4318FF]"
+                  className="border-[#2563EB] data-[state=checked]:bg-[#2563EB]"
                 />
-                <Label htmlFor="createProject" className="text-[#2B3674] cursor-pointer">
+                <Label htmlFor="createProject" className="text-[#1C1917] cursor-pointer">
                   Auto-create a project
                 </Label>
               </div>
 
               {formData.createProject && (
                 <div className="ml-6 space-y-2">
-                  <Label htmlFor="projectName" className="text-[#2B3674] font-medium">Project Name</Label>
+                  <Label htmlFor="projectName" className="text-[#1C1917] font-medium">Project Name</Label>
                   <Input
                     id="projectName"
                     placeholder="My Test Project"
                     value={formData.projectName}
                     onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                    className="rounded-xl border-[#E0E5F2] focus:border-[#4318FF] focus:ring-[#4318FF]"
+                    className="rounded-xl border-[#E7E5E4] focus:border-[#2563EB] focus:ring-[#2563EB]"
                   />
                 </div>
               )}
@@ -223,7 +223,7 @@ export default function AdminTestUsersPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#4318FF] hover:bg-[#3311CC] text-white rounded-xl py-6 text-base font-bold"
+              className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl py-6 text-base font-bold"
             >
               {loading ? (
                 <>

@@ -156,7 +156,7 @@ export function OnboardingTour() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9998] bg-[#2B3674]/40 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[9998] bg-[#1C1917]/40 backdrop-blur-[2px]"
             onClick={handleSkip}
           />
 
@@ -168,7 +168,7 @@ export function OnboardingTour() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed z-[9999] rounded-xl border-2 border-[#4318FF] pointer-events-none"
+              className="fixed z-[9999] rounded-xl border-2 border-[#2563EB] pointer-events-none"
               style={{
                 top: highlightRect.top - 4,
                 left: highlightRect.left - 4,
@@ -192,7 +192,7 @@ export function OnboardingTour() {
                 left: highlightRect.right + 4,
                 width: 12,
                 height: 2,
-                background: "linear-gradient(90deg, #4318FF, #868CFF)",
+                background: "linear-gradient(90deg, #2563EB, #60A5FA)",
               }}
             />
           )}
@@ -209,7 +209,7 @@ export function OnboardingTour() {
           >
             <div className="bg-white rounded-2xl shadow-[0_20px_60px_rgba(67,24,255,0.15)] border border-gray-100 overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-[#4318FF] to-[#868CFF] px-5 py-4 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-[#2563EB] to-[#60A5FA] px-5 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-white/90" />
                   <span className="text-white/80 text-xs font-medium tracking-wide uppercase">
@@ -226,16 +226,16 @@ export function OnboardingTour() {
 
               {/* Body */}
               <div className="px-5 py-4">
-                <h3 className="text-[#2B3674] font-bold text-lg mb-2">
+                <h3 className="text-[#1C1917] font-bold text-lg mb-2">
                   {step.title}
                 </h3>
-                <p className="text-[#4363C7] text-sm leading-relaxed">
+                <p className="text-[#78716C] text-sm leading-relaxed">
                   {step.description}
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="px-5 py-3 bg-[#F4F7FE] flex items-center justify-between border-t border-gray-100">
+              <div className="px-5 py-3 bg-[#F8F7F4] flex items-center justify-between border-t border-gray-100">
                 {/* Step indicator */}
                 <div className="flex items-center gap-1.5">
                   {tourSteps.map((_, idx) => (
@@ -243,10 +243,10 @@ export function OnboardingTour() {
                       key={idx}
                       className={`h-1.5 rounded-full transition-all duration-300 ${
                         idx === currentStep
-                          ? "w-6 bg-[#4318FF]"
+                          ? "w-6 bg-[#2563EB]"
                           : idx < currentStep
-                          ? "w-1.5 bg-[#4318FF]/40"
-                          : "w-1.5 bg-[#4363C7]/20"
+                          ? "w-1.5 bg-[#2563EB]/40"
+                          : "w-1.5 bg-[#78716C]/20"
                       }`}
                     />
                   ))}
@@ -258,7 +258,7 @@ export function OnboardingTour() {
                     variant="ghost"
                     size="sm"
                     onClick={handleSkip}
-                    className="text-[#4363C7] hover:text-[#2B3674] text-xs h-8 px-3"
+                    className="text-[#78716C] hover:text-[#1C1917] text-xs h-8 px-3"
                   >
                     Skip
                   </Button>
@@ -268,7 +268,7 @@ export function OnboardingTour() {
                       variant="ghost"
                       size="sm"
                       onClick={handlePrev}
-                      className="text-[#4363C7] hover:text-[#2B3674] h-8 w-8 p-0"
+                      className="text-[#78716C] hover:text-[#1C1917] h-8 w-8 p-0"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -277,7 +277,7 @@ export function OnboardingTour() {
                   <Button
                     size="sm"
                     onClick={handleNext}
-                    className="bg-[#4318FF] hover:bg-[#3614CC] text-white text-xs h-8 px-4 rounded-lg"
+                    className="bg-[#2563EB] hover:bg-[#3614CC] text-white text-xs h-8 px-4 rounded-lg"
                   >
                     {isLastStep ? "Done" : "Next"}
                     {!isLastStep && <ChevronRight className="h-3.5 w-3.5 ml-1" />}

@@ -83,8 +83,8 @@ export function WaitlistForm({ source = "landing_page" }: { source?: string }) {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20 mb-4">
           <Check className="h-8 w-8 text-green-500" />
         </div>
-        <h3 className="text-2xl font-bold text-[#2B3674] mb-2">You're on the list!</h3>
-        <p className="text-[#4363C7]">We'll be in touch soon with early access.</p>
+        <h3 className="text-2xl font-bold text-[#1C1917] mb-2">You're on the list!</h3>
+        <p className="text-[#78716C]">We'll be in touch soon with early access.</p>
       </div>
     );
   }
@@ -93,49 +93,49 @@ export function WaitlistForm({ source = "landing_page" }: { source?: string }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="full_name" className="text-[#2B3674]">Full Name *</Label>
+          <Label htmlFor="full_name" className="text-[#1C1917]">Full Name *</Label>
           <Input
             id="full_name"
             placeholder="John Doe"
             value={formData.full_name}
             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
+            className="bg-[#F8F7F4] border-transparent text-[#1C1917] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
             required
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-[#2B3674]">Email *</Label>
+          <Label htmlFor="email" className="text-[#1C1917]">Email *</Label>
           <Input
             id="email"
             type="email"
             placeholder="john@company.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
+            className="bg-[#F8F7F4] border-transparent text-[#1C1917] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
             required
           />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="company" className="text-[#2B3674]">Company Name</Label>
+          <Label htmlFor="company" className="text-[#1C1917]">Company Name</Label>
           <Input
             id="company"
             placeholder="Your Company"
             value={formData.company}
             onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
+            className="bg-[#F8F7F4] border-transparent text-[#1C1917] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="user_count" className="text-[#2B3674]">Expected Users</Label>
+          <Label htmlFor="user_count" className="text-[#1C1917]">Expected Users</Label>
           <Input
             id="user_count"
             type="number"
             placeholder="e.g. 500"
             value={formData.user_count}
             onChange={(e) => setFormData({ ...formData, user_count: e.target.value })}
-            className="bg-[#F4F7FE] border-transparent text-[#2B3674] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
+            className="bg-[#F8F7F4] border-transparent text-[#1C1917] placeholder:text-gray-400 focus:bg-white focus:border-primary/20"
           />
         </div>
       </div>
@@ -149,7 +149,7 @@ export function WaitlistForm({ source = "landing_page" }: { source?: string }) {
           onChange={(e) => setPromoOptIn(e.target.checked)}
           className="mt-1 h-4 w-4 rounded border-gray-300 bg-white text-primary focus:ring-primary focus:ring-offset-0"
         />
-        <label htmlFor="promo_opt_in" className="text-sm text-[#4363C7] cursor-pointer">
+        <label htmlFor="promo_opt_in" className="text-sm text-[#78716C] cursor-pointer">
           I agree to receive promotional emails from Mentiq about product updates, tips, and special offers. You can unsubscribe anytime.
         </label>
       </div>

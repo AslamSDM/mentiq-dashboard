@@ -70,7 +70,7 @@ export default function EventsPage() {
   // Sanitize search query before using it
   const sanitizedSearchQuery = sanitizeSearchQuery(searchQuery);
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = (events || []).filter((event) => {
     // Sanitize event data before comparison
     const sanitizedEventName = sanitizeText(event.name || "").toLowerCase();
     const sanitizedUserId = sanitizeText(event.userId || "").toLowerCase();
@@ -135,7 +135,7 @@ export default function EventsPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {loadingEvents ? "..." : events.length.toLocaleString()}
+                {loadingEvents ? "..." : (events?.length || 0).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Last 24 hours</p>
             </CardContent>

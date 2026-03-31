@@ -4,68 +4,56 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* New Light Theme Palette */
-  --background: #F4F7FE;
-  /* Soft light gray data background */
-  --foreground: #222e3c;
-  /* Dark text */
+  /* Refined Craft Design System */
+  --background: #F8F7F4;
+  --foreground: #1C1917;
   --card: #FFFFFF;
-  --card-foreground: #222e3c;
+  --card-foreground: #1C1917;
   --popover: #FFFFFF;
-  --popover-foreground: #222e3c;
-  --primary: #2B3674;
-  /* Deep Navy Blue */
+  --popover-foreground: #1C1917;
+  --primary: #2563EB;
   --primary-foreground: #FFFFFF;
-  --secondary: #E3EAFB;
-  /* Light blue accent */
-  --secondary-foreground: #2B3674;
-  --muted: #F4F7FE;
-  --muted-foreground: #4363C7;
-  /* Muted text color */
-  --accent: #4318FF;
-  /* Vibrant Purple/Blue for active states */
+  --secondary: #F3F2F1;
+  --secondary-foreground: #1C1917;
+  --muted: #F3F2F1;
+  --muted-foreground: #78716C;
+  --accent: #2563EB;
   --accent-foreground: #FFFFFF;
   --destructive: oklch(0.6188 0.2376 25.7658);
   --destructive-foreground: oklch(1.0000 0 0);
-  --border: #E0E5F2;
-  --input: #F4F7FE;
-  --ring: #4318FF;
+  --border: #E7E5E4;
+  --input: #F8F7F4;
+  --ring: #2563EB;
 
-  --chart-1: #4318FF;
-  /* Purple */
-  --chart-2: #6AD2FF;
-  /* Light Blue */
-  --chart-3: #EFF4FB;
-  /* Very Light Blue */
-  --chart-4: #2B3674;
-  /* Navy */
-  --chart-5: #05CD99;
-  /* Green/Success */
+  --chart-1: #2563EB;
+  --chart-2: #16A34A;
+  --chart-3: #F3F2F1;
+  --chart-4: #1C1917;
+  --chart-5: #16A34A;
 
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #4363C7;
-  --sidebar-primary: #4318FF;
+  --sidebar-foreground: #78716C;
+  --sidebar-primary: #2563EB;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F4F7FE;
-  --sidebar-accent-foreground: #2B3674;
+  --sidebar-accent: #F8F7F4;
+  --sidebar-accent-foreground: #1C1917;
   --sidebar-border: transparent;
-  --sidebar-ring: #4318FF;
+  --sidebar-ring: #2563EB;
 
-  --success: #05CD99;
+  --success: #16A34A;
   --success-foreground: #FFFFFF;
-  --warning: #FFCE20;
+  --warning: #CA8A04;
   --warning-foreground: #FFFFFF;
 
   --font-sans: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   --font-serif: var(--font-sans), "DM Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 
-  --radius: 1rem;
-  /* Softer, rounder corners */
+  --radius: 0.75rem;
 
-  --shadow-sm: 0px 18px 40px 0px rgba(112, 144, 176, 0.12);
-  --shadow: 0px 18px 40px 0px rgba(112, 144, 176, 0.12);
-  --shadow-md: 0px 18px 40px 0px rgba(112, 144, 176, 0.12);
-  --shadow-lg: 0px 18px 40px 0px rgba(112, 144, 176, 0.12);
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.04);
+  --shadow: 0 1px 3px rgba(28, 25, 23, 0.06);
+  --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.06);
+  --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.08);
 
   --spacing: 0.25rem;
 }
@@ -229,7 +217,7 @@
   }
 
   .text-gradient-animated {
-    background: linear-gradient(90deg, #4318FF 0%, #6AD2FF 25%, #FFCE20 50%, #6AD2FF 75%, #4318FF 100%);
+    background: linear-gradient(90deg, #2563EB 0%, #16A34A 25%, #CA8A04 50%, #16A34A 75%, #2563EB 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;

@@ -982,8 +982,8 @@ export default function RevenuePage() {
                   {/* MRR & Revenue Trend */}
                   <Card className="min-w-0 overflow-hidden">
                     <CardHeader>
-                      <CardTitle className="text-[#2B3674] font-bold">MRR & Revenue Trend</CardTitle>
-                      <CardDescription className="text-[#4363C7]">
+                      <CardTitle className="text-[#1C1917] font-semibold">MRR & Revenue Trend</CardTitle>
+                      <CardDescription className="text-[#A8A29E]">
                         Monthly Recurring Revenue and daily revenue over time
                       </CardDescription>
                     </CardHeader>
@@ -992,11 +992,11 @@ export default function RevenuePage() {
                         config={{
                           mrr: {
                             label: "MRR",
-                            color: "#4318FF",
+                            color: "#2563EB",
                           },
                           revenue: {
                             label: "Revenue",
-                            color: "#05CD99",
+                            color: "#16A34A",
                           },
                         }}
                         className="h-[300px] w-full"
@@ -1005,12 +1005,12 @@ export default function RevenuePage() {
                           <LineChart data={revenueMetrics.time_series}>
                             <CartesianGrid
                               strokeDasharray="3 3"
-                              className="stroke-[#E0E5F2]"
+                              className="stroke-[#E7E5E4]"
                               vertical={false}
                             />
                             <XAxis
                               dataKey="date"
-                              className="text-xs text-[#4363C7]"
+                              className="text-xs text-[#78716C]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -1023,7 +1023,7 @@ export default function RevenuePage() {
                               }
                             />
                             <YAxis
-                              className="text-xs text-[#4363C7]"
+                              className="text-xs text-[#78716C]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -1033,7 +1033,7 @@ export default function RevenuePage() {
                               width={45}
                             />
                             <Tooltip
-                              cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                              cursor={{ stroke: "#E7E5E4", strokeWidth: 1 }}
                               contentStyle={{
                                 borderRadius: "12px",
                                 border: "none",
@@ -1047,12 +1047,12 @@ export default function RevenuePage() {
                             <Line
                               type="monotone"
                               dataKey="mrr"
-                              stroke="#4318FF"
+                              stroke="#2563EB"
                               strokeWidth={3}
                               dot={false}
                               activeDot={{
                                 r: 6,
-                                fill: "#4318FF",
+                                fill: "#2563EB",
                                 stroke: "#fff",
                                 strokeWidth: 2,
                               }}
@@ -1060,12 +1060,12 @@ export default function RevenuePage() {
                             <Line
                               type="monotone"
                               dataKey="revenue"
-                              stroke="#05CD99"
+                              stroke="#16A34A"
                               strokeWidth={3}
                               dot={false}
                               activeDot={{
                                 r: 6,
-                                fill: "#05CD99",
+                                fill: "#16A34A",
                                 stroke: "#fff",
                                 strokeWidth: 2,
                               }}
@@ -1079,8 +1079,8 @@ export default function RevenuePage() {
                   {/* MRR Movements */}
                   <Card className="min-w-0 overflow-hidden">
                     <CardHeader>
-                      <CardTitle className="text-[#2B3674] font-bold">MRR Movements</CardTitle>
-                      <CardDescription className="text-[#4363C7]">
+                      <CardTitle className="text-[#1C1917] font-semibold">MRR Movements</CardTitle>
+                      <CardDescription className="text-[#A8A29E]">
                         Expansion, downgrade, and churned MRR over time
                       </CardDescription>
                     </CardHeader>
@@ -1089,7 +1089,7 @@ export default function RevenuePage() {
                         config={{
                           expansion_mrr: {
                             label: "Expansion MRR",
-                            color: "#05CD99",
+                            color: "#16A34A",
                           },
                           downgrade_mrr: {
                             label: "Downgrade MRR",
@@ -1110,12 +1110,12 @@ export default function RevenuePage() {
                           <LineChart data={revenueMetrics.time_series}>
                             <CartesianGrid
                               strokeDasharray="3 3"
-                              className="stroke-[#E0E5F2]"
+                              className="stroke-[#E7E5E4]"
                               vertical={false}
                             />
                             <XAxis
                               dataKey="date"
-                              className="text-xs text-[#4363C7]"
+                              className="text-xs text-[#78716C]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -1129,7 +1129,7 @@ export default function RevenuePage() {
                             />
                             <YAxis
                               yAxisId="left"
-                              className="text-xs text-[#4363C7]"
+                              className="text-xs text-[#78716C]"
                               tickLine={false}
                               axisLine={false}
                               tickMargin={10}
@@ -1149,7 +1149,7 @@ export default function RevenuePage() {
                               width={40}
                             />
                             <Tooltip
-                              cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                              cursor={{ stroke: "#E7E5E4", strokeWidth: 1 }}
                               contentStyle={{
                                 borderRadius: "12px",
                                 border: "none",
@@ -1169,12 +1169,12 @@ export default function RevenuePage() {
                               yAxisId="left"
                               type="monotone"
                               dataKey="expansion_mrr"
-                              stroke="#05CD99"
+                              stroke="#16A34A"
                               strokeWidth={3}
                               dot={false}
                               activeDot={{
                                 r: 6,
-                                fill: "#05CD99",
+                                fill: "#16A34A",
                                 stroke: "#fff",
                                 strokeWidth: 2,
                               }}
@@ -1232,8 +1232,8 @@ export default function RevenuePage() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
-                        <CardTitle className="text-[#2B3674] font-bold">Customer Growth</CardTitle>
-                        <CardDescription className="text-[#4363C7]">
+                        <CardTitle className="text-[#1C1917] font-semibold">Customer Growth</CardTitle>
+                        <CardDescription className="text-[#A8A29E]">
                           Total customers over time
                         </CardDescription>
                       </CardHeader>
@@ -1251,12 +1251,12 @@ export default function RevenuePage() {
                             <LineChart data={revenueMetrics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-[#E0E5F2]"
+                                className="stroke-[#E7E5E4]"
                                 vertical={false}
                               />
                               <XAxis
                                 dataKey="date"
-                                className="text-xs text-[#4363C7]"
+                                className="text-xs text-[#78716C]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -1269,7 +1269,7 @@ export default function RevenuePage() {
                                 }
                               />
                               <YAxis
-                                className="text-xs text-[#4363C7]"
+                                className="text-xs text-[#78716C]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -1277,7 +1277,7 @@ export default function RevenuePage() {
                                 allowDecimals={false}
                               />
                               <Tooltip
-                                cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                                cursor={{ stroke: "#E7E5E4", strokeWidth: 1 }}
                                 contentStyle={{
                                   borderRadius: "12px",
                                   border: "none",
@@ -1305,8 +1305,8 @@ export default function RevenuePage() {
 
                     <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
-                        <CardTitle className="text-[#2B3674] font-bold">Active Subscriptions</CardTitle>
-                        <CardDescription className="text-[#4363C7]">
+                        <CardTitle className="text-[#1C1917] font-semibold">Active Subscriptions</CardTitle>
+                        <CardDescription className="text-[#A8A29E]">
                           Number of active subscriptions over time
                         </CardDescription>
                       </CardHeader>
@@ -1324,12 +1324,12 @@ export default function RevenuePage() {
                             <LineChart data={revenueMetrics.time_series}>
                               <CartesianGrid
                                 strokeDasharray="3 3"
-                                className="stroke-[#E0E5F2]"
+                                className="stroke-[#E7E5E4]"
                                 vertical={false}
                               />
                               <XAxis
                                 dataKey="date"
-                                className="text-xs text-[#4363C7]"
+                                className="text-xs text-[#78716C]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -1342,7 +1342,7 @@ export default function RevenuePage() {
                                 }
                               />
                               <YAxis
-                                className="text-xs text-[#4363C7]"
+                                className="text-xs text-[#78716C]"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={10}
@@ -1350,7 +1350,7 @@ export default function RevenuePage() {
                                 allowDecimals={false}
                               />
                               <Tooltip
-                                cursor={{ stroke: "#E0E5F2", strokeWidth: 1 }}
+                                cursor={{ stroke: "#E7E5E4", strokeWidth: 1 }}
                                 contentStyle={{
                                   borderRadius: "12px",
                                   border: "none",

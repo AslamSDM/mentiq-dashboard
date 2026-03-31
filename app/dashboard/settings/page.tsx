@@ -142,6 +142,15 @@ export default function SettingsPage() {
       return;
     }
 
+    if (profile.email && passwords.new_password.toLowerCase() === profile.email.toLowerCase()) {
+      toast({
+        title: "Insecure password",
+        description: "Password cannot be the same as your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {

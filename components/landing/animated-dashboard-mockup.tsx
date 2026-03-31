@@ -18,10 +18,10 @@ function MetricCard({ label, value, change, trend, delay = 0 }: MetricCardProps)
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E0E5F2] p-4 shadow-sm"
+      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E7E5E4] p-4 shadow-sm"
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-[#4363C7] font-medium">{label}</span>
+        <span className="text-xs text-[#78716C] font-medium">{label}</span>
         <div className={cn(
           "text-[10px] px-1.5 py-0.5 rounded-full font-medium",
           trend === "up" && "bg-emerald-100 text-emerald-700",
@@ -31,7 +31,7 @@ function MetricCard({ label, value, change, trend, delay = 0 }: MetricCardProps)
           {change}
         </div>
       </div>
-      <div className="text-xl font-bold text-[#2B3674]">{value}</div>
+      <div className="text-xl font-bold text-[#1C1917]">{value}</div>
       <div className="mt-2 h-8 flex items-end gap-0.5">
         {[40, 60, 45, 70, 55, 80, 65, 90, 75, 85].map((h, i) => (
           <motion.div
@@ -60,7 +60,7 @@ function InsightCard({ title, description, priority, delay = 0 }: InsightCardPro
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E0E5F2] p-4 shadow-sm"
+      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E7E5E4] p-4 shadow-sm"
     >
       <div className="flex items-start gap-3">
         <div className={cn(
@@ -73,7 +73,7 @@ function InsightCard({ title, description, priority, delay = 0 }: InsightCardPro
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold text-[#2B3674]">{title}</h4>
+            <h4 className="text-sm font-semibold text-[#1C1917]">{title}</h4>
             <span className={cn(
               "text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize",
               priority === "high" && "bg-red-100 text-red-700",
@@ -83,7 +83,7 @@ function InsightCard({ title, description, priority, delay = 0 }: InsightCardPro
               {priority}
             </span>
           </div>
-          <p className="text-xs text-[#4363C7] mt-1 leading-relaxed">{description}</p>
+          <p className="text-xs text-[#78716C] mt-1 leading-relaxed">{description}</p>
         </div>
       </div>
     </motion.div>
@@ -96,21 +96,21 @@ function AnimatedChart() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E0E5F2] p-4 shadow-sm"
+      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E7E5E4] p-4 shadow-sm"
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h4 className="text-sm font-semibold text-[#2B3674]">Retention Cohort</h4>
-          <p className="text-xs text-[#4363C7]">Weekly retention trends</p>
+          <h4 className="text-sm font-semibold text-[#1C1917]">Retention Cohort</h4>
+          <p className="text-xs text-[#78716C]">Weekly retention trends</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-full bg-primary"></div>
-            <span className="text-[10px] text-[#4363C7]">Current</span>
+            <span className="text-[10px] text-[#78716C]">Current</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-[#E0E5F2]"></div>
-            <span className="text-[10px] text-[#4363C7]">Previous</span>
+            <div className="w-2 h-2 rounded-full bg-[#E7E5E4]"></div>
+            <span className="text-[10px] text-[#78716C]">Previous</span>
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ function AnimatedChart() {
         {[0, 1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="absolute left-0 right-0 border-t border-dashed border-[#E0E5F2]"
+            className="absolute left-0 right-0 border-t border-dashed border-[#E7E5E4]"
             style={{ top: `${i * 25}%` }}
           />
         ))}
@@ -179,7 +179,7 @@ function AnimatedChart() {
         </svg>
         
         {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-[#4363C7]">
+        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-[#78716C]">
           <span>100%</span>
           <span>75%</span>
           <span>50%</span>
@@ -189,7 +189,7 @@ function AnimatedChart() {
       </div>
       
       {/* X-axis labels */}
-      <div className="flex justify-between mt-2 text-[10px] text-[#4363C7]">
+      <div className="flex justify-between mt-2 text-[10px] text-[#78716C]">
         <span>Week 1</span>
         <span>Week 2</span>
         <span>Week 3</span>
@@ -212,11 +212,11 @@ function ActivityFeed() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.4 }}
-      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E0E5F2] p-4 shadow-sm"
+      className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#E7E5E4] p-4 shadow-sm"
     >
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-[#2B3674]">Recent Activity</h4>
-        <Activity className="w-4 h-4 text-[#4363C7]" />
+        <h4 className="text-sm font-semibold text-[#1C1917]">Recent Activity</h4>
+        <Activity className="w-4 h-4 text-[#78716C]" />
       </div>
       
       <div className="space-y-3">
@@ -232,8 +232,8 @@ function ActivityFeed() {
               <activity.icon className="w-3.5 h-3.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-[#2B3674] truncate">{activity.text}</p>
-              <p className="text-[10px] text-[#4363C7]">{activity.time}</p>
+              <p className="text-xs text-[#1C1917] truncate">{activity.text}</p>
+              <p className="text-[10px] text-[#78716C]">{activity.time}</p>
             </div>
           </motion.div>
         ))}
@@ -249,7 +249,7 @@ export function AnimatedDashboardMockup({ className }: { className?: string }) {
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       transition={{ duration: 0.8, delay: 0.2 }}
       className={cn(
-        "relative rounded-2xl border border-[#E0E5F2] bg-white/60 backdrop-blur-xl shadow-2xl overflow-hidden",
+        "relative rounded-2xl border border-[#E7E5E4] bg-white/60 backdrop-blur-xl shadow-2xl overflow-hidden",
         className
       )}
     >
@@ -258,7 +258,7 @@ export function AnimatedDashboardMockup({ className }: { className?: string }) {
       <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl" />
       
       {/* Header */}
-      <div className="relative border-b border-[#E0E5F2] p-4">
+      <div className="relative border-b border-[#E7E5E4] p-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -266,9 +266,9 @@ export function AnimatedDashboardMockup({ className }: { className?: string }) {
             <div className="w-3 h-3 rounded-full bg-emerald-400" />
           </div>
           <div className="flex-1 flex items-center justify-center">
-            <div className="flex items-center gap-2 px-4 py-1.5 bg-[#F4F7FE] rounded-lg">
-              <BarChart3 className="w-4 h-4 text-[#4363C7]" />
-              <span className="text-xs text-[#4363C7]">Mentiq Dashboard</span>
+            <div className="flex items-center gap-2 px-4 py-1.5 bg-[#F8F7F4] rounded-lg">
+              <BarChart3 className="w-4 h-4 text-[#78716C]" />
+              <span className="text-xs text-[#78716C]">Mentiq Dashboard</span>
             </div>
           </div>
         </div>
@@ -328,8 +328,8 @@ export function AnimatedDashboardMockup({ className }: { className?: string }) {
                   <Zap className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-semibold text-[#2B3674]">AI Recommendation</h4>
-                  <p className="text-[10px] text-[#4363C7] mt-0.5">
+                  <h4 className="text-xs font-semibold text-[#1C1917]">AI Recommendation</h4>
+                  <p className="text-[10px] text-[#78716C] mt-0.5">
                     Trigger outreach playbook before renewal window closes
                   </p>
                 </div>
@@ -355,57 +355,57 @@ export function CompactDashboardMockup({ className }: { className?: string }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, delay: 0.1 }}
       className={cn(
-        "relative rounded-2xl border border-[#E0E5F2] bg-white/70 backdrop-blur-xl shadow-xl overflow-hidden",
+        "relative rounded-2xl border border-[#E7E5E4] bg-white/70 backdrop-blur-xl shadow-xl overflow-hidden",
         className
       )}
     >
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-xs font-medium text-[#4363C7]">Your data, simplified</div>
-            <div className="mt-1 font-sans text-xl tracking-tight text-[#2B3674]">
+            <div className="text-xs font-medium text-[#78716C]">Your data, simplified</div>
+            <div className="mt-1 font-sans text-xl tracking-tight text-[#1C1917]">
               What's happening — and what to do next
             </div>
           </div>
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-2">
-            <Zap className="h-5 w-5 text-[#4363C7]" />
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-2">
+            <Zap className="h-5 w-5 text-[#78716C]" />
           </div>
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-3">
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs text-[#4363C7]">At-risk accounts</div>
+              <div className="text-xs text-[#78716C]">At-risk accounts</div>
               <div className="text-xs text-emerald-600 font-medium">42</div>
             </div>
-            <div className="mt-1 text-xs text-[#4363C7]">Usage drop + billing friction pattern.</div>
+            <div className="mt-1 text-xs text-[#78716C]">Usage drop + billing friction pattern.</div>
           </div>
 
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-3">
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs text-[#4363C7]">Save priority</div>
+              <div className="text-xs text-[#78716C]">Save priority</div>
               <div className="text-xs text-emerald-600 font-medium">High</div>
             </div>
-            <div className="mt-1 text-xs text-[#4363C7]">Segment: 10–50 seats · expansion likely.</div>
+            <div className="mt-1 text-xs text-[#78716C]">Segment: 10–50 seats · expansion likely.</div>
           </div>
 
-          <div className="rounded-xl border border-[#E0E5F2] bg-[#F4F7FE] p-3">
+          <div className="rounded-xl border border-[#E7E5E4] bg-[#F8F7F4] p-3">
             <div className="flex items-center justify-between">
-              <div className="text-xs text-[#4363C7]">Next best action</div>
+              <div className="text-xs text-[#78716C]">Next best action</div>
               <div className="text-xs text-emerald-600 font-medium">Playbook</div>
             </div>
-            <div className="mt-1 text-xs text-[#4363C7]">Trigger outreach before renewal window.</div>
+            <div className="mt-1 text-xs text-[#78716C]">Trigger outreach before renewal window.</div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-[#E0E5F2] bg-gradient-to-r from-[#F4F7FE] to-white p-3">
+        <div className="mt-4 rounded-xl border border-[#E7E5E4] bg-gradient-to-r from-[#F8F7F4] to-white p-3">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 rounded-xl border border-[#E0E5F2] bg-white p-2">
-              <Sparkles className="h-4 w-4 text-[#4363C7]" />
+            <div className="mt-0.5 rounded-xl border border-[#E7E5E4] bg-white p-2">
+              <Sparkles className="h-4 w-4 text-[#78716C]" />
             </div>
             <div>
-              <div className="text-xs font-medium text-[#4363C7]">Plain-English takeaway</div>
-              <div className="mt-1 text-xs leading-relaxed text-[#4363C7]">
+              <div className="text-xs font-medium text-[#78716C]">Plain-English takeaway</div>
+              <div className="mt-1 text-xs leading-relaxed text-[#78716C]">
                 One page shows: who's slipping, what changed, and the next best playbook.
               </div>
             </div>
@@ -413,8 +413,8 @@ export function CompactDashboardMockup({ className }: { className?: string }) {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-[10px] text-[#4363C7]">Updated Sunday · 7-day snapshot</div>
-          <div className="inline-flex items-center gap-1 text-[10px] text-[#4363C7]">
+          <div className="text-[10px] text-[#78716C]">Updated Sunday · 7-day snapshot</div>
+          <div className="inline-flex items-center gap-1 text-[10px] text-[#78716C]">
             View full report
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
