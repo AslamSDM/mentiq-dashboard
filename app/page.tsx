@@ -1117,7 +1117,7 @@ export default function LandingPage() {
                   ["Features", "#features"],
                   ["How it works", "#how-it-works"],
                   ["Integrations", "#features"],
-                  ["Pricing", "/pricing"],
+                  // ["Pricing", "/pricing"],
                 ].map(([label, href]) => (
                   <li key={label}>
                     <Link
