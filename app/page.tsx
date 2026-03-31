@@ -956,7 +956,7 @@ export default function LandingPage() {
             <p className="text-xs font-medium text-[#3B5BDB] uppercase tracking-widest mb-4">
               FAQ
             </p>
-            <h2
+            {/* <h2
               id="faq-heading"
               className="text-[2.25rem] md:text-[2.75rem] leading-[1.1] tracking-tight text-slate-900"
               style={{ fontFamily: "'Instrument Serif', serif" }}
@@ -971,7 +971,7 @@ export default function LandingPage() {
               >
                 info@trymentiq.com
               </a>
-            </p>
+            </p> */}
           </div>
 
           <div>
@@ -1140,7 +1140,7 @@ export default function LandingPage() {
                   ["About", "#"],
                   ["Blog", "#"],
                   ["Careers", "#"],
-                  ["Contact", "mailto:info@trymentiq.com"],
+                  // ["Contact", "mailto:info@trymentiq.com"],
                 ].map(([label, href]) => (
                   <li key={label}>
                     <a
