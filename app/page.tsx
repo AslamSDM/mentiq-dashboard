@@ -319,12 +319,12 @@ export default function LandingPage() {
             >
               FAQ
             </a>
-            <Link
+            {/* <Link
               href="/pricing"
               className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
             >
               Pricing
-            </Link>
+            </Link> */}
           </div>
 
           <div className="hidden md:flex items-center gap-3">
@@ -399,13 +399,13 @@ export default function LandingPage() {
             >
               Customers
             </a>
-            <Link
+            {/* <Link
               href="/pricing"
               className="text-sm text-slate-600"
               onClick={() => setMenuOpen(false)}
             >
               Pricing
-            </Link>
+            </Link> */}
             <a
               href="#faq"
               className="text-sm text-slate-600"
