@@ -156,15 +156,20 @@ export function DashboardSidebar() {
         >
           {!isCollapsed ? (
             <Link href="/" onClick={() => setIsMobileOpen(false)}>
+              {/*
               <div className="relative h-30 w-36">
-                <Image
+                 <Image
                   src="/logo.png"
                   alt="Mentiq"
                   fill
                   className="object-contain -ml-8"
                   priority
-                />
+                /> 
               </div>
+                */}
+              <span className="text-2xl  bg-gradient-to-r from-[#2563EB] to-[#7C3AED] bg-clip-text text-transparent">
+                Mentiq
+              </span>
             </Link>
           ) : (
             <Link

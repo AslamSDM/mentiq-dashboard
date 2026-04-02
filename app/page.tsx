@@ -1131,28 +1131,6 @@ export default function LandingPage() {
               </ul>
             </div>
 
-            <div>
-              <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest mb-4">
-                Company
-              </h3>
-              <ul className="space-y-2.5" role="list">
-                {[
-                  ["About", "#"],
-                  ["Blog", "#"],
-                  ["Careers", "#"],
-                  // ["Contact", "mailto:info@trymentiq.com"],
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
 
             <div>
               <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest mb-4">
@@ -1160,9 +1138,9 @@ export default function LandingPage() {
               </h3>
               <ul className="space-y-2.5" role="list">
                 {[
-                  ["Privacy Policy", "#"],
-                  ["Terms of Service", "#"],
-                  ["Cookie Policy", "#"],
+                  ["Privacy Policy", "/docs/Privacy Policy MENTIQ.pdf"],
+                  ["Terms of Service", "/docs/Terms of Service MENTIQ.pdf"],
+                  ["Cookie Policy", "/docs/COOKIES MENTIQ.pdf"],
                 ].map(([label, href]) => (
                   <li key={label}>
                     <a
