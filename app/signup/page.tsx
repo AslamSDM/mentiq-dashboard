@@ -308,7 +308,7 @@ function SignUpContent() {
                       )}
                     />
                     <label htmlFor="terms" className="text-xs text-slate-500 leading-relaxed cursor-pointer select-none">
-                      I agree to the <Link href="/#" className="text-[#3B5BDB] hover:underline">Terms of Service</Link>, <Link href="/#" className="text-[#3B5BDB] hover:underline">Privacy Policy</Link>, and <Link href="/#" className="text-[#3B5BDB] hover:underline">DPA</Link>.
+                      I agree to the <a href="/docs/Terms of Service MENTIQ.pdf" target="_blank" className="text-[#3B5BDB] hover:underline">Terms of Service</a>, <a href="/docs/Privacy Policy MENTIQ.pdf" target="_blank" className="text-[#3B5BDB] hover:underline">Privacy Policy</a>, and <a href="/docs/COOKIES MENTIQ.pdf" target="_blank" className="text-[#3B5BDB] hover:underline">Cookie Policy</a>.
                     </label>
                   </div>
                   {errors.acceptedTerms && <p className="text-xs text-red-500 -mt-2">{errors.acceptedTerms.message}</p>}
