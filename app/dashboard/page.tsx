@@ -826,7 +826,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Bounce Rate */}
+          {/* Bounce Rate — hidden when no data */}
+          {bounceRate > 0 && (
           <div
             className="rounded-xl border bg-white p-5 flex flex-col justify-between"
             style={{ borderColor: "#E7E5E4" }}
@@ -916,6 +917,7 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+          )}
         </div>
 
         {/* Top Events + Recent Events */}
