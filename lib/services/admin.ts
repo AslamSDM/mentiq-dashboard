@@ -310,6 +310,7 @@ export interface LimitOverrides {
   session_replays_override?: number | null;
   automated_emails_override?: number | null;
   ai_generations_override?: number | null;
+  team_members_override?: number | null;
 }
 
 export interface AccountLimitsResponse {
@@ -321,6 +322,7 @@ export interface AccountLimitsResponse {
     session_replays_override: number | null;
     automated_emails_override: number | null;
     ai_generations_override: number | null;
+    team_members_override: number | null;
   };
   message?: string;
 }
@@ -334,6 +336,7 @@ export interface AccountUsage {
   session_replays_count: number;
   automated_emails_count: number;
   ai_generations_count: number;
+  team_members_count: number;
 }
 
 export interface TierInfo {
@@ -349,6 +352,7 @@ export interface TierInfo {
   overage_replays_per_500: number;
   overage_emails_per_10k: number;
   overage_ai_generations_per_100: number;
+  overage_team_members_per_1: number;
 }
 
 export const adminService = new AdminService();

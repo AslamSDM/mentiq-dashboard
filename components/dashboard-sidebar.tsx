@@ -71,6 +71,7 @@ const NAV_GROUPS = [
     items: [
       { name: "Projects", href: "/dashboard/projects", icon: FolderOpen },
       { name: "Team", href: "/dashboard/team", icon: UserCircle },
+      { name: "Usage & Billing", href: "/dashboard/usage", icon: Gauge },
       { name: "Settings", href: "/dashboard/settings", icon: Settings },
       {
         name: "Integrations",

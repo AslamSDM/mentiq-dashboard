@@ -71,6 +71,7 @@ interface ChurnMetrics {
   high_risk_users: number;
   medium_risk_users: number;
   low_risk_users: number;
+  at_risk_retention: number;
 }
 
 interface ChurnFactors {
@@ -118,7 +119,7 @@ export default function ChurnAnalysisPage() {
       );
 
       if (response) {
-        const { at_risk_users, total_at_risk, churn_rate } = response;
+        const { at_risk_users, total_at_risk, total_users, churn_rate } = response;
 
         // Parse churn rate (comes as "2.7%")
         const parsedChurnRate = parseFloat(churn_rate?.replace("%", "") || "0");
@@ -161,14 +162,20 @@ export default function ChurnAnalysisPage() {
           }),
         );
 
+        // At-risk retention: % of at-risk users who haven't churned yet
+        const atRiskRetention = total_at_risk > 0
+          ? ((total_at_risk - churnedUsers.length) / total_at_risk) * 100
+          : 0;
+
         setChurnMetrics({
-          total_users: total_at_risk + 1000, // Approximate total (at_risk is subset)
+          total_users: total_users || total_at_risk,
           churned_users: churnedUsers.length,
           churn_rate: parsedChurnRate,
           predicted_churners: highRiskUsers.length,
           high_risk_users: highRiskUsers.length,
           medium_risk_users: mediumRiskUsers.length,
           low_risk_users: lowRiskUsers.length,
+          at_risk_retention: atRiskRetention,
         });
 
         setRiskUsers(mappedRiskUsers);
@@ -225,7 +232,7 @@ export default function ChurnAnalysisPage() {
             date: new Date().toISOString().split("T")[0],
             churn_rate: parsedChurnRate,
             churned_users: churnedUsers.length,
-            total_users: total_at_risk + 1000,
+            total_users: total_users || total_at_risk,
           },
         ]);
       }
@@ -382,9 +389,9 @@ export default function ChurnAnalysisPage() {
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">0%</div>
+                <div className="text-2xl font-bold">{churnMetrics.at_risk_retention.toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground">
-                  No retention data yet
+                  {churnMetrics.at_risk_retention > 0 ? "At-risk users still retained" : "No retention data yet"}
                 </p>
               </CardContent>
             </Card>
