@@ -59,6 +59,35 @@ export interface UsageHistoryEntry {
   created_at: string;
 }
 
+// Subscription types
+
+export interface SubscriptionInfo {
+  id: string;
+  tier: string;
+  tier_name: string;
+  status: string;
+  monthly_price: number;
+  current_period_start: string;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  is_lifetime: boolean;
+  usage_paused: boolean;
+  usage_paused_reason?: string | null;
+}
+
+export interface SubscriptionResponse {
+  subscription: SubscriptionInfo | null;
+  has_payment_method: boolean;
+}
+
+export interface ProjectSettingsResponse {
+  settings: {
+    id: string;
+    project_id: string;
+    max_email_characters: number;
+  };
+}
+
 class UsageService extends BaseHttpService {
   async getUsageSummary(): Promise<UsageResponse> {
     return this.request<UsageResponse>("/api/v1/usage", {
@@ -70,6 +99,52 @@ class UsageService extends BaseHttpService {
     return this.request<{ history: UsageHistoryEntry[] }>(
       "/api/v1/usage/history",
       { method: "GET" }
+    );
+  }
+
+  async getSubscription(): Promise<SubscriptionResponse> {
+    return this.request<SubscriptionResponse>("/api/v1/subscription", {
+      method: "GET",
+    });
+  }
+
+  async redeemLifetimeKey(key: string): Promise<{ message: string; tier: string }> {
+    return this.request("/api/v1/lifetime/redeem", {
+      method: "POST",
+      body: JSON.stringify({ key }),
+    });
+  }
+
+  async requestCancel(reason: string): Promise<{ message: string }> {
+    return this.request("/api/v1/subscription/cancel", {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+  }
+
+  async unpauseUsage(): Promise<{ message: string }> {
+    return this.request("/api/v1/subscription/unpause", {
+      method: "POST",
+    });
+  }
+
+  async getProjectSettings(projectId: string): Promise<ProjectSettingsResponse> {
+    return this.request<ProjectSettingsResponse>(
+      `/api/v1/projects/${projectId}/settings`,
+      { method: "GET" }
+    );
+  }
+
+  async updateProjectSettings(
+    projectId: string,
+    settings: { max_email_characters?: number }
+  ): Promise<ProjectSettingsResponse> {
+    return this.request<ProjectSettingsResponse>(
+      `/api/v1/projects/${projectId}/settings`,
+      {
+        method: "PUT",
+        body: JSON.stringify(settings),
+      }
     );
   }
 }

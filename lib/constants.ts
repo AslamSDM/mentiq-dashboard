@@ -97,6 +97,38 @@ export const PRICING_TIERS = [
   },
 ] as const;
 
+// Lifetime tier — not shown on pricing page, activated via key redemption only
+export const LIFETIME_TIER = {
+  id: "lifetime",
+  name: "Lifetime",
+  basePrice: 0,
+  trialDays: 0,
+  description: "One-time purchase with included limits. Overages billed if card on file.",
+  included: {
+    paidUsers: 1_000,
+    sessionReplays: 500,
+    automatedEmails: 25_000,
+    aiGenerations: 150,
+    teamMembers: 5,
+  },
+  overages: {
+    paidUsersPer100: 10_00,
+    replaysPer500: 6_00,
+    emailsPer10k: 2_50,
+    aiGenerationsPer100: 5_00,
+  },
+  features: [
+    "1,000 paid users",
+    "500 session replays",
+    "25,000 automated emails",
+    "150 AI generations",
+    "5 team members",
+    "All analytics features",
+    "Lifetime access — no monthly fee",
+    "Overages billed only if card on file",
+  ],
+} as const;
+
 export type PricingTier = (typeof PRICING_TIERS)[number];
 
 export const getTierByUserCount = (userCount: number): PricingTier | null => {
