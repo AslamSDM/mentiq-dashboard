@@ -123,6 +123,8 @@ export default function EmailAutomationsPage() {
 
   // Data state
   const [mailchimp, setMailchimp] = useState<ProjectIntegration | null>(null);
+  const [resend, setResend] = useState<ProjectIntegration | null>(null);
+  const [sendgrid, setSendgrid] = useState<ProjectIntegration | null>(null);
   const [automations, setAutomations] = useState<AutomationSettings[]>([]);
   const [executions, setExecutions] = useState<AutomationExecution[]>([]);
   const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([]);
@@ -161,9 +163,13 @@ export default function EmailAutomationsPage() {
   // Trigger state
   const [triggeringId, setTriggeringId] = useState<string | null>(null);
 
-  // Mailchimp actions
+  // Integration actions
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [connectingResend, setConnectingResend] = useState(false);
+  const [resendApiKey, setResendApiKey] = useState("");
+  const [connectingSendgrid, setConnectingSendgrid] = useState(false);
+  const [sendgridApiKey, setSendgridApiKey] = useState("");
 
   // Fetch all data on mount
   useEffect(() => {
@@ -176,12 +182,16 @@ export default function EmailAutomationsPage() {
         automationService.getAutomations(effectiveProjectId),
         automationService.getAutomationExecutions(effectiveProjectId),
         automationService.getDiscountCodes(effectiveProjectId),
+        integrationsService.getIntegration(effectiveProjectId, "resend"),
+        integrationsService.getIntegration(effectiveProjectId, "sendgrid"),
       ]);
 
       if (results[0].status === "fulfilled") setMailchimp(results[0].value);
       if (results[1].status === "fulfilled") setAutomations(results[1].value ?? []);
       if (results[2].status === "fulfilled") setExecutions(results[2].value ?? []);
       if (results[3].status === "fulfilled") setDiscountCodes(results[3].value ?? []);
+      if (results[4].status === "fulfilled") setResend(results[4].value);
+      if (results[5].status === "fulfilled") setSendgrid(results[5].value);
 
       setLoading(false);
     };
@@ -219,6 +229,38 @@ export default function EmailAutomationsPage() {
       toast({ title: "Sync Failed", description: error.message, variant: "destructive" });
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleConnectResend = async () => {
+    if (!effectiveProjectId || !resendApiKey.trim()) return;
+    setConnectingResend(true);
+    try {
+      await integrationsService.connectResend(effectiveProjectId, { api_key: resendApiKey.trim() });
+      const updated = await integrationsService.getIntegration(effectiveProjectId, "resend");
+      setResend(updated);
+      setResendApiKey("");
+      toast({ title: "Connected", description: "Resend integration connected successfully." });
+    } catch (error: any) {
+      toast({ title: "Connection Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setConnectingResend(false);
+    }
+  };
+
+  const handleConnectSendgrid = async () => {
+    if (!effectiveProjectId || !sendgridApiKey.trim()) return;
+    setConnectingSendgrid(true);
+    try {
+      await integrationsService.connectSendGrid(effectiveProjectId, { api_key: sendgridApiKey.trim() });
+      const updated = await integrationsService.getIntegration(effectiveProjectId, "sendgrid");
+      setSendgrid(updated);
+      setSendgridApiKey("");
+      toast({ title: "Connected", description: "SendGrid integration connected successfully." });
+    } catch (error: any) {
+      toast({ title: "Connection Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setConnectingSendgrid(false);
     }
   };
 
@@ -464,58 +506,114 @@ export default function EmailAutomationsPage() {
         )}
 
         {/* Resend */}
-        <Card className="border border-[#E7E5E4] bg-white">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-[#1C1917]/8 flex items-center justify-center shrink-0">
-                <Send className="h-5 w-5 text-[#1C1917]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>Resend</h3>
-                  <span className="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full bg-[#F3F2F1] text-[#78716C]">Coming soon</span>
+        {!resend?.is_active ? (
+          <Card className="border border-[#E7E5E4] bg-white">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#1C1917]/8 flex items-center justify-center shrink-0">
+                  <Send className="h-5 w-5 text-[#1C1917]" />
                 </div>
-                <p className="text-xs" style={{ color: "#78716C" }}>Transactional email API</p>
+                <div>
+                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>Resend</h3>
+                  <p className="text-xs" style={{ color: "#78716C" }}>Transactional email API</p>
+                </div>
               </div>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full text-xs border-[#E7E5E4]"
-              disabled
-            >
-              <Send className="h-3.5 w-3.5 mr-1.5" />
-              Connect
-            </Button>
-          </CardContent>
-        </Card>
+              <Input
+                type="password"
+                placeholder="Resend API Key"
+                value={resendApiKey}
+                onChange={(e) => setResendApiKey(e.target.value)}
+                className="text-xs"
+              />
+              <Button
+                size="sm"
+                className="w-full bg-[#1C1917] hover:bg-[#1C1917]/90 text-white text-xs"
+                onClick={handleConnectResend}
+                disabled={connectingResend || !resendApiKey.trim()}
+              >
+                {connectingResend ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Connect
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-green-200 bg-green-50/50">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-green-900 truncate">Resend Connected</p>
+                  <p className="text-xs text-green-700 truncate">Transactional email API</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full text-xs" asChild>
+                <a href="/dashboard/settings/integrations">
+                  <Settings className="h-3.5 w-3.5 mr-1" />
+                  Settings
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* SendGrid */}
-        <Card className="border border-[#E7E5E4] bg-white">
-          <CardContent className="p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-[#2563EB]/10 flex items-center justify-center shrink-0">
-                <Mail className="h-5 w-5 text-[#2563EB]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>SendGrid</h3>
-                  <span className="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full bg-[#F3F2F1] text-[#78716C]">Coming soon</span>
+        {!sendgrid?.is_active ? (
+          <Card className="border border-[#E7E5E4] bg-white">
+            <CardContent className="p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-[#2563EB]/10 flex items-center justify-center shrink-0">
+                  <Mail className="h-5 w-5 text-[#2563EB]" />
                 </div>
-                <p className="text-xs" style={{ color: "#78716C" }}>Scalable email delivery</p>
+                <div>
+                  <h3 className="text-sm font-semibold" style={{ color: "#1C1917" }}>SendGrid</h3>
+                  <p className="text-xs" style={{ color: "#78716C" }}>Scalable email delivery</p>
+                </div>
               </div>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full text-xs border-[#E7E5E4]"
-              disabled
-            >
-              <Mail className="h-3.5 w-3.5 mr-1.5" />
-              Connect
-            </Button>
-          </CardContent>
-        </Card>
+              <Input
+                type="password"
+                placeholder="SendGrid API Key"
+                value={sendgridApiKey}
+                onChange={(e) => setSendgridApiKey(e.target.value)}
+                className="text-xs"
+              />
+              <Button
+                size="sm"
+                className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs"
+                onClick={handleConnectSendgrid}
+                disabled={connectingSendgrid || !sendgridApiKey.trim()}
+              >
+                {connectingSendgrid ? (
+                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Mail className="h-3.5 w-3.5 mr-1.5" />
+                )}
+                Connect
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-green-200 bg-green-50/50">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-green-900 truncate">SendGrid Connected</p>
+                  <p className="text-xs text-green-700 truncate">Scalable email delivery</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full text-xs" asChild>
+                <a href="/dashboard/settings/integrations">
+                  <Settings className="h-3.5 w-3.5 mr-1" />
+                  Settings
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Summary Stats */}
