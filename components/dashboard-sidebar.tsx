@@ -37,6 +37,7 @@ import {
   TrendingDown,
   Zap,
   Play,
+  Key,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -96,6 +97,7 @@ const ADMIN_GROUP = {
     // },
     { name: "Admin Tickets", href: "/dashboard/admin/tickets", icon: Ticket },
     { name: "Usage Limits", href: "/dashboard/admin/limits", icon: Gauge },
+    { name: "Lifetime Keys", href: "/dashboard/admin/lifetime-keys", icon: Key },
   ],
 };
 

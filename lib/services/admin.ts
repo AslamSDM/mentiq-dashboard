@@ -282,6 +282,36 @@ class AdminService extends BaseHttpService {
       method: "GET",
     });
   }
+
+  /**
+   * Generate one or more lifetime activation keys (admin only)
+   */
+  async generateLifetimeKeys(
+    count: number,
+    note?: string,
+  ): Promise<{ message: string; keys: LifetimeKey[] }> {
+    return this.request<{ message: string; keys: LifetimeKey[] }>(
+      "/api/v1/admin/lifetime-keys",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count, note }),
+      },
+    );
+  }
+
+  /**
+   * List lifetime keys with optional filter (admin only)
+   */
+  async getLifetimeKeys(
+    filter?: "all" | "redeemed" | "available",
+  ): Promise<{ keys: LifetimeKey[] }> {
+    const query = filter && filter !== "all" ? `?filter=${filter}` : "";
+    return this.request<{ keys: LifetimeKey[] }>(
+      `/api/v1/admin/lifetime-keys${query}`,
+      { method: "GET" },
+    );
+  }
 }
 
 // --- Types ---
@@ -353,6 +383,17 @@ export interface TierInfo {
   overage_emails_per_10k: number;
   overage_ai_generations_per_100: number;
   overage_team_members_per_1: number;
+}
+
+export interface LifetimeKey {
+  id: string;
+  key: string;
+  created_at: string;
+  created_by: string;
+  redeemed_at: string | null;
+  redeemed_by: string | null;
+  is_redeemed: boolean;
+  note: string;
 }
 
 export const adminService = new AdminService();
