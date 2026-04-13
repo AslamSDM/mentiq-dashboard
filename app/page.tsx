@@ -437,100 +437,118 @@ export default function LandingPage() {
         className="relative max-w-6xl mx-auto px-6 pt-24 pb-20 md:pt-32 md:pb-28"
         aria-labelledby="hero-heading"
       >
-        {/* Eyebrow */}
-        <div
-          className={`inline-flex items-center gap-2 text-xs font-medium text-[#3B5BDB] bg-[#EEF2FF] border border-[#C5D0FF] px-3 py-1.5 rounded-full mb-8 transition-all duration-700 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] animate-pulse"
-            aria-hidden="true"
-          />
-          Waitlist open — early access invites
-        </div>
-
-        <div className="max-w-2xl">
-          <h1
-            id="hero-heading"
-            className={`transition-all duration-700 delay-100 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-slate-900">
-              Stop churn
-            </span>
-            <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-[#3B5BDB]">
-              before it starts.
-            </span>
-          </h1>
-
-          <p
-            className={`mt-6 text-[1.0625rem] text-slate-500 leading-relaxed max-w-md transition-all duration-700 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          >
-            Mentiq gives SaaS teams clear visibility into churn risk, cohort
-            health, and the exact playbooks to act on it — before renewal
-            pressure hits.
-          </p>
-
-          <div
-            className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-          >
-            <a
-              href="#waitlist"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsWaitlistModalOpen(true);
-              }}
-              className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
-              aria-label="Request early access to Mentiq"
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            {/* Eyebrow */}
+            <div
+              className={`inline-flex items-center gap-2 text-xs font-medium text-[#3B5BDB] bg-[#EEF2FF] border border-[#C5D0FF] px-3 py-1.5 rounded-full mb-8 transition-all duration-700 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
             >
-              Request early access
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] animate-pulse"
                 aria-hidden="true"
-              >
-                <path
-                  d="M2 7h10M8 3l4 4-4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </a>
-            <a
-              href="#how-it-works"
-              className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
+              />
+              Waitlist open — early access invites
+            </div>
+
+            <h1
+              id="hero-heading"
+              className={`transition-all duration-700 delay-100 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+              style={{ fontFamily: "'Instrument Serif', serif" }}
             >
-              See how it works
-            </a>
+              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-slate-900">
+                Stop churn
+              </span>
+              <span className="block text-[3rem] md:text-[3.75rem] leading-[1.08] tracking-tight text-[#3B5BDB]">
+                before it starts.
+              </span>
+            </h1>
+
+            <p
+              className={`mt-6 text-[1.0625rem] text-slate-500 leading-relaxed max-w-md transition-all duration-700 delay-200 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
+              Mentiq gives SaaS teams clear visibility into churn risk, cohort
+              health, and the exact playbooks to act on it — before renewal
+              pressure hits.
+            </p>
+
+            <div
+              className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+            >
+              <a
+                href="#waitlist"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsWaitlistModalOpen(true);
+                }}
+                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
+                aria-label="Request early access to Mentiq"
+              >
+                Request early access
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 7h10M8 3l4 4-4 4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </a>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
+              >
+                See how it works
+              </a>
+            </div>
+
+            <p
+              className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
+            >
+              4,200+ SaaS operators on the waitlist
+            </p>
+
+            {/* Social proof logos */}
+            <div
+              className={`mt-8 transition-all duration-700 delay-500 ${heroVisible ? "opacity-100" : "opacity-0"}`}
+            >
+              <p className="text-xs text-slate-400 mb-3 uppercase tracking-widest">
+                Integrates with
+              </p>
+              <div className="flex items-center gap-5">
+                {["Stripe", "Mailchimp", "SendGrid", "Customer.io"].map(
+                  (name) => (
+                    <span
+                      key={name}
+                      className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {name}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
           </div>
 
-          <p
-            className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
-          >
-            4,200+ SaaS operators on the waitlist
-          </p>
-
-          {/* Social proof logos */}
+          {/* Dashboard preview */}
           <div
-            className={`mt-8 transition-all duration-700 delay-500 ${heroVisible ? "opacity-100" : "opacity-0"}`}
+            className={`transition-all duration-1000 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
           >
-            <p className="text-xs text-slate-400 mb-3 uppercase tracking-widest">
-              Integrates with
-            </p>
-            <div className="flex items-center gap-5">
-              {["Stripe", "Mailchimp", "SendGrid", "Customer.io"].map(
-                (name) => (
-                  <span
-                    key={name}
-                    className="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors"
-                  >
-                    {name}
-                  </span>
-                ),
-              )}
+            <div className="rounded-xl border border-slate-200 shadow-2xl shadow-slate-200/50 overflow-hidden">
+              <Image
+                src="/mentiq_final.png"
+                alt="Mentiq dashboard showing revenue analytics, MRR trends, and subscription metrics"
+                width={1200}
+                height={800}
+                priority
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>
