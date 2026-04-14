@@ -39,7 +39,7 @@ export function HeroContent({ children }: HeroContentProps) {
             variant="secondary"
             className="rounded-full border-[#E7E5E4] bg-[#F8F7F4] px-3 py-1 text-[#78716C]"
           >
-            Waitlist is open — early access invites
+            Now available — sign up today
           </Badge>
 
           <h1 className="mt-5 font-sans text-4xl leading-[1.06] tracking-tight text-[#1C1917] sm:text-5xl">
@@ -72,10 +72,10 @@ export function HeroContent({ children }: HeroContentProps) {
                 <div>
                   <div className="flex items-center gap-2 text-sm font-medium text-[#1C1917]">
                     <Sparkles className="h-4 w-4 text-[#78716C]" strokeWidth={1.75} />
-                    Join the Mentiq waitlist
+                    Get started with Mentiq
                   </div>
                   <p className="mt-1 text-sm leading-relaxed text-[#78716C]">
-                    Quick form. We use this to prioritize early access and tailor onboarding (especially for founders).
+                    Create your account and start analyzing churn in minutes.
                   </p>
                 </div>
                 <div className="hidden gap-2 sm:flex">
@@ -95,10 +95,10 @@ export function HeroContent({ children }: HeroContentProps) {
               </div>
 
               <div className="mt-4 flex items-center justify-between">
-                <div className="text-xs text-[#78716C]">We only use this to prioritize access — not for marketing.</div>
+                <div className="text-xs text-[#78716C]">No credit card required. Cancel anytime.</div>
                 <div className="inline-flex items-center gap-2 text-xs text-[#78716C]">
                   <Check className="h-4 w-4 text-emerald-600" strokeWidth={1.75} />
-                  <span>4,200+ SaaS operators on the list</span>
+                  <span>4,200+ SaaS teams trust Mentiq</span>
                 </div>
               </div>
             </div>

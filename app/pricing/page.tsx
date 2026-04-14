@@ -14,11 +14,15 @@ import {
   AlertCircle,
   Loader2,
   LogOut,
+  Key,
+  ChevronDown,
+  CheckCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
 import { UserCountSlider } from "@/components/user-count-slider";
+import { usageService } from "@/lib/services/usage";
 
 // Icon mapping for tiers
 const TIER_ICONS: Record<string, React.ReactNode> = {
@@ -57,6 +61,10 @@ function PricingContent() {
   const [isRequired, setIsRequired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [lifetimeOpen, setLifetimeOpen] = useState(false);
+  const [lifetimeKey, setLifetimeKey] = useState("");
+  const [redeemLoading, setRedeemLoading] = useState(false);
+  const [redeemSuccess, setRedeemSuccess] = useState(false);
 
   useEffect(() => {
     const required = searchParams.get("required");
@@ -143,6 +151,29 @@ function PricingContent() {
       title: "Demo Requested",
       description: "Our team will contact you within 24 hours.",
     });
+  };
+
+  const handleRedeemKey = async () => {
+    if (!lifetimeKey.trim()) return;
+    setRedeemLoading(true);
+    try {
+      const result = await usageService.redeemLifetimeKey(lifetimeKey.trim());
+      setRedeemSuccess(true);
+      setLifetimeKey("");
+      toast({
+        title: "Lifetime Plan Activated",
+        description: result.message || "Your lifetime plan is now active.",
+      });
+      setTimeout(() => router.push("/dashboard"), 2000);
+    } catch (error: any) {
+      toast({
+        title: "Invalid Key",
+        description: error.message || "That key is invalid or has already been used.",
+        variant: "destructive",
+      });
+    } finally {
+      setRedeemLoading(false);
+    }
   };
 
   return (
@@ -344,6 +375,66 @@ function PricingContent() {
             >
               Book a Demo
             </button>
+          </div>
+        )}
+
+        {/* ── LIFETIME CODE ──────────────────────────────────────────────── */}
+        {session && (
+          <div className="mt-16 max-w-xl mx-auto">
+            <button
+              onClick={() => setLifetimeOpen(!lifetimeOpen)}
+              className="w-full flex items-center justify-between gap-3 px-5 py-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-[#EEF2FF] flex items-center justify-center">
+                  <Key className="h-4 w-4 text-[#3B5BDB]" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Have a lifetime code?</p>
+                  <p className="text-xs text-slate-500">Redeem your activation key here</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${lifetimeOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-300 ${lifetimeOpen ? "max-h-60 mt-3" : "max-h-0"}`}>
+              <div className="rounded-xl border border-slate-200 bg-white p-6">
+                {redeemSuccess ? (
+                  <div className="flex items-center gap-3 text-green-700">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="text-sm font-medium">Lifetime plan activated!</p>
+                      <p className="text-xs text-green-600">Redirecting to dashboard...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-xs text-slate-500 mb-3">
+                      Enter your lifetime activation key to unlock your plan.
+                    </p>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="MQ-XXXX-XXXX-XXXX-XXXX"
+                          value={lifetimeKey}
+                          onChange={(e) => setLifetimeKey(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 text-sm outline-none focus:border-[#3B5BDB] focus:ring-2 focus:ring-[#3B5BDB]/10 transition-all font-mono bg-slate-50"
+                        />
+                      </div>
+                      <button
+                        onClick={handleRedeemKey}
+                        disabled={redeemLoading || !lifetimeKey.trim()}
+                        className="px-5 py-2.5 rounded-lg text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 transition-colors disabled:opacity-50"
+                      >
+                        {redeemLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Redeem"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

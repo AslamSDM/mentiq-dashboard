@@ -3,14 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 // ─── Inline animation hook ───────────────────────────────────────────────────
 function useInView(threshold = 0.15) {
@@ -179,98 +171,18 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const { toast } = useToast();
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [heroVisible, setHeroVisible] = useState(false);
-  const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
-
   useEffect(() => {
     const t = setTimeout(() => setHeroVisible(true), 80);
     return () => clearTimeout(t);
   }, []);
-
-  async function handleWaitlist(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          full_name: "", // Only collecting email in this streamlined form
-          email: email.trim(),
-          company: "",
-          user_count: 0,
-          source: "landing_page",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSubmitted(true);
-        setIsWaitlistModalOpen(false);
-        toast({
-          title: "You're on the waitlist",
-          description: "We'll reach out when Mentiq opens early access.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to join waitlist",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div
       className="bg-[#FAFAF8] text-slate-900"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      <Dialog open={isWaitlistModalOpen} onOpenChange={setIsWaitlistModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Join the waitlist</DialogTitle>
-            <DialogDescription>
-              Enter your work email to get early access to Mentiq.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleWaitlist} className="space-y-4 mt-2">
-            <div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                className="w-full text-sm text-slate-900 border border-slate-200 rounded-lg px-4 py-3 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#3B5BDB]/20 focus:border-[#3B5BDB] transition-all"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#3B5BDB] text-white font-medium text-sm rounded-lg px-4 py-3 hover:bg-[#3451C7] transition-colors"
-            >
-              {loading ? "Joining..." : "Request early access"}
-            </button>
-          </form>
-        </DialogContent>
-      </Dialog>
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 bg-[#FAFAF8]/90 backdrop-blur-md border-b border-slate-100">
         <nav
@@ -334,16 +246,12 @@ export default function LandingPage() {
             >
               Sign in
             </Link>
-            <a
-              href="#waitlist"
-              onClick={(e) => {
-                e.preventDefault();
-                setIsWaitlistModalOpen(true);
-              }}
-              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
+            <Link
+              href="/signup"
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2 rounded-lg hover:bg-[#3451C7] transition-colors"
             >
-              Join waitlist
-            </a>
+              Sign up
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -417,17 +325,13 @@ export default function LandingPage() {
             <Link href="/signin" className="text-sm text-slate-600">
               Sign in
             </Link>
-            <a
-              href="#waitlist"
-              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2.5 rounded-lg text-center cursor-pointer"
-              onClick={(e) => {
-                e.preventDefault();
-                setMenuOpen(false);
-                setIsWaitlistModalOpen(true);
-              }}
+            <Link
+              href="/signup"
+              className="text-sm font-medium bg-[#3B5BDB] text-white px-4 py-2.5 rounded-lg text-center"
+              onClick={() => setMenuOpen(false)}
             >
-              Join waitlist
-            </a>
+              Sign up
+            </Link>
           </div>
         )}
       </header>
@@ -447,7 +351,7 @@ export default function LandingPage() {
                 className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] animate-pulse"
                 aria-hidden="true"
               />
-              Waitlist open — early access invites
+              Now available — sign up today
             </div>
 
             <h1
@@ -474,16 +378,12 @@ export default function LandingPage() {
             <div
               className={`mt-8 flex flex-col sm:flex-row gap-3 transition-all duration-700 delay-300 ${heroVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
             >
-              <a
-                href="#waitlist"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsWaitlistModalOpen(true);
-                }}
-                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors cursor-pointer"
-                aria-label="Request early access to Mentiq"
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center gap-2 bg-[#3B5BDB] text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors"
+                aria-label="Sign up for Mentiq"
               >
-                Request early access
+                Sign up
                 <svg
                   width="14"
                   height="14"
@@ -499,7 +399,7 @@ export default function LandingPage() {
                     strokeLinejoin="round"
                   />
                 </svg>
-              </a>
+              </Link>
               <a
                 href="#how-it-works"
                 className="inline-flex items-center justify-center gap-2 text-sm text-slate-600 px-6 py-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-white transition-all"
@@ -511,7 +411,7 @@ export default function LandingPage() {
             <p
               className={`mt-5 text-xs text-slate-400 transition-all duration-700 delay-400 ${heroVisible ? "opacity-100" : "opacity-0"}`}
             >
-              4,200+ SaaS operators on the waitlist
+              4,200+ SaaS teams trust Mentiq
             </p>
 
             {/* Social proof logos */}
@@ -562,7 +462,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { value: 47, suffix: "%", label: "Average churn reduction" },
-            { value: 4200, suffix: "+", label: "SaaS teams on waitlist" },
+            { value: 4200, suffix: "+", label: "SaaS teams using Mentiq" },
             { value: 90, suffix: " days", label: "Time to measurable results" },
             { value: 3, suffix: "x", label: "Faster than manual CS review" },
           ].map(({ value, suffix, label }) => (
@@ -1011,7 +911,7 @@ export default function LandingPage() {
             />
             <FaqItem
               question="Is there a free trial?"
-              answer="We're currently in early access. Waitlist members get 60 days free when they're invited. No credit card required to join the waitlist."
+              answer="Yes! All plans include a free trial period. Sign up to get started — no credit card required."
             />
             <FaqItem
               question="How is Mentiq different from Mixpanel or Amplitude?"
@@ -1021,83 +921,45 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── WAITLIST CTA ────────────────────────────────────────────────── */}
+      {/* ── SIGN UP CTA ────────────────────────────────────────────────── */}
       <section
-        id="waitlist"
+        id="cta"
         className="bg-[#0F1117] py-24"
-        aria-labelledby="waitlist-heading"
+        aria-labelledby="cta-heading"
       >
         <div className="max-w-2xl mx-auto px-6 text-center">
           <p className="text-xs font-medium text-[#748FFC] uppercase tracking-widest mb-4">
-            Early access
+            Get started
           </p>
           <h2
-            id="waitlist-heading"
+            id="cta-heading"
             className="text-[2.25rem] md:text-[3rem] leading-[1.1] tracking-tight text-white mb-4"
             style={{ fontFamily: "'Instrument Serif', serif" }}
           >
-            Join 4,200+ SaaS teams already on the waitlist.
+            Join 4,200+ SaaS teams using Mentiq.
           </h2>
           <p className="text-[1rem] text-slate-400 mb-10 leading-relaxed">
-            Early access members get 60 days free, priority onboarding, and
+            Start preventing churn today with free trial access, priority onboarding, and
             direct access to the founding team.
           </p>
 
-          {submitted ? (
-            <div className="inline-flex items-center gap-3 bg-[#1A1D2E] border border-[#2A2D3E] rounded-xl px-6 py-4 text-white">
-              <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M2 6l2.5 2.5L10 3"
-                    stroke="#22c55e"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm">
-                You're on the list — we'll be in touch soon.
-              </span>
-            </div>
-          ) : (
-            <form
-              onSubmit={handleWaitlist}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-              aria-label="Join the Mentiq waitlist"
+          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+            <Link
+              href="/signup"
+              className="bg-[#3B5BDB] text-white text-sm font-medium px-8 py-3 rounded-lg hover:bg-[#3451C7] transition-colors whitespace-nowrap"
             >
-              <label htmlFor="waitlist-email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="waitlist-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
-                className="flex-1 bg-[#1A1D2E] border border-[#2A2D3E] text-white placeholder-slate-500 text-sm px-4 py-3 rounded-lg focus:outline-none focus:border-[#748FFC] transition-colors"
-                aria-required="true"
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-[#3B5BDB] disabled:opacity-50 text-white text-sm font-medium px-6 py-3 rounded-lg hover:bg-[#3451C7] transition-colors whitespace-nowrap"
-              >
-                {loading ? "Joining..." : "Join waitlist"}
-              </button>
-            </form>
-          )}
+              Sign up
+            </Link>
+            <Link
+              href="/signin"
+              className="bg-[#1A1D2E] border border-[#2A2D3E] text-white text-sm font-medium px-8 py-3 rounded-lg hover:bg-[#252836] transition-colors whitespace-nowrap"
+            >
+              Sign in
+            </Link>
+          </div>
 
           <p className="mt-4 text-xs text-slate-500">
-            No spam. No credit card. Unsubscribe anytime.
+            No credit card required. Cancel anytime.
           </p>
         </div>
       </section>

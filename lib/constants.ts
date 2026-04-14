@@ -3,7 +3,7 @@ export const PRICING_TIERS = [
   {
     id: "starter",
     name: "Starter",
-    basePrice: 59,
+    basePrice: 21,
     trialDays: 3,
     description: "Perfect for startups getting started",
     included: {
@@ -33,7 +33,7 @@ export const PRICING_TIERS = [
   {
     id: "growth",
     name: "Growth",
-    basePrice: 149,
+    basePrice: 199,
     trialDays: 3,
     description: "For growing teams finding PMF",
     included: {
