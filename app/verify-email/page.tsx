@@ -21,7 +21,7 @@ function VerifyEmailContent() {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || status !== "loading") return;
     const verifyEmail = async () => {
       try {
         const response = await fetch(
@@ -46,7 +46,8 @@ function VerifyEmailContent() {
       }
     };
     verifyEmail();
-  }, [token, session, updateSession, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   useEffect(() => {
     if (resendCooldown > 0) {
