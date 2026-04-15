@@ -14,10 +14,11 @@ export const PRICING_TIERS = [
       teamMembers: 1,
     },
     overages: {
-      paidUsersPer100: 12_00, // $12 in cents
-      replaysPer500: 7_00,
-      emailsPer10k: 3_00,
-      aiGenerationsPer100: 5_00,
+      paidUsersPer100: 15_00, // $15 per 100 users
+      replaysPer500: 10_00, // $10 per 500 replays
+      emailsPer10k: 4_00, // $4 per 10k emails
+      aiGenerationsPer100: 8_00, // $8 per 100 AI generations
+      teamMembersPer1: 8_00, // $8 per extra team member
     },
     features: [
       "150 paid users",
@@ -44,10 +45,11 @@ export const PRICING_TIERS = [
       teamMembers: 5,
     },
     overages: {
-      paidUsersPer100: 10_00,
-      replaysPer500: 6_00,
-      emailsPer10k: 3_00,
-      aiGenerationsPer100: 4_00,
+      paidUsersPer100: 12_00, // $12 per 100 users
+      replaysPer500: 8_00, // $8 per 500 replays
+      emailsPer10k: 3_00, // $3 per 10k emails
+      aiGenerationsPer100: 6_00, // $6 per 100 AI generations
+      teamMembersPer1: 6_00, // $6 per extra team member
     },
     features: [
       "2,000 paid users",
