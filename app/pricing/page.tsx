@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense } from "react";
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,8 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { PRICING_TIERS, getTierByUserCount } from "@/lib/constants";
-import { UserCountSlider } from "@/components/user-count-slider";
+import { PRICING_TIERS } from "@/lib/constants";
 import { usageService } from "@/lib/services/usage";
 
 // Icon mapping for tiers
@@ -72,7 +71,6 @@ function PricingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const [userCount, setUserCount] = useState(250);
   const [isRequired, setIsRequired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -86,55 +84,18 @@ function PricingContent() {
     setIsRequired(required === "true");
   }, [searchParams]);
 
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  const currentTier = getTierByUserCount(userCount);
 
-  // Auto-scroll to selected tier card
-  useEffect(() => {
-    if (
-      currentTier &&
-      cardRefs.current[currentTier.id] &&
-      carouselRef.current
-    ) {
-      const cardElement = cardRefs.current[currentTier.id];
-      const carouselElement = carouselRef.current;
-      if (!cardElement) return;
 
-      const cardLeft = cardElement.offsetLeft;
-      const cardWidth = cardElement.offsetWidth;
-      const carouselWidth = carouselElement.offsetWidth;
-
-      const scrollPosition = cardLeft - carouselWidth / 2 + cardWidth / 2;
-
-      carouselElement.scrollTo({
-        left: scrollPosition,
-        behavior: "smooth",
-      });
-    }
-  }, [currentTier]);
-
-  const calculatePrice = (tier: (typeof PRICING_TIERS)[number]) => {
-    return tier.basePrice;
-  };
 
   const handleGetStarted = async (tierId: string) => {
     if (session) {
-      if (userCount > 10000) {
-        toast({
-          title: "Contact Sales",
-          description: "Please contact our sales team for enterprise pricing.",
-        });
-        return;
-      }
-
       setIsLoading(true);
       try {
         const response = await fetch("/api/stripe/signup-checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tierId, userCount }),
+          body: JSON.stringify({ tierId }),
         });
 
         const data = await response.json();
@@ -161,7 +122,7 @@ function PricingContent() {
         setIsLoading(false);
       }
     } else {
-      router.push(`/signup?plan=${tierId}&users=${userCount}`);
+      router.push(`/signup?plan=${tierId}`);
     }
   };
 
@@ -380,6 +341,133 @@ function PricingContent() {
             </div>
           </div>
         )}
+
+        {/* ── HEADING ───────────────────────────────────────────────────── */}
+        <div className="text-center mb-6">
+          <h1
+            className="text-[3rem] md:text-[3.5rem] tracking-tight text-slate-900"
+            style={{ fontFamily: "'Instrument Serif', serif" }}
+          >
+            Simple, transparent pricing
+          </h1>
+          <p className="text-slate-500 text-lg mt-3 max-w-xl mx-auto">
+            Start free, scale as you grow. No hidden fees.
+          </p>
+        </div>
+
+        {/* ── PLAN CARDS ───────────────────────────────────────────────── */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-16"
+        >
+          {PRICING_TIERS.map((tier) => {
+            const isPopular = (tier as any).popular;
+            return (
+              <div
+                key={tier.id}
+                className={`relative rounded-2xl border p-7 flex flex-col transition-all duration-300 ${
+                  isPopular
+                    ? "border-[#3B5BDB] bg-white shadow-lg shadow-[#3B5BDB]/8 scale-[1.02]"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                {isPopular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[0.6875rem] font-semibold uppercase tracking-wider bg-[#3B5BDB] text-white px-3 py-1 rounded-full">
+                    Most Popular
+                  </span>
+                )}
+
+                {/* Tier icon + name */}
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                      isPopular
+                        ? "bg-[#3B5BDB] text-white"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {TIER_ICONS[tier.id]}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900">
+                      {tier.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">{tier.description}</p>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="mb-6">
+                  <span className="text-3xl font-bold text-slate-900">
+                    ${tier.basePrice}
+                  </span>
+                  <span className="text-sm text-slate-500 ml-1">/month</span>
+                  {tier.trialDays > 0 && (
+                    <p className="text-xs text-[#3B5BDB] mt-1 font-medium">
+                      {tier.trialDays}-day free trial
+                    </p>
+                  )}
+                </div>
+
+                {/* Features */}
+                <ul className="space-y-2.5 mb-8 flex-1">
+                  {tier.features.map((feature, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-[0.8125rem] text-slate-600"
+                    >
+                      <svg
+                        className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#3B5BDB]"
+                        fill="none"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          d="M4 8.5l2.5 2.5L12 5"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <button
+                  onClick={() => handleGetStarted(tier.id)}
+                  disabled={isLoading}
+                  className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isPopular
+                      ? "bg-[#3B5BDB] text-white hover:bg-[#3451C7]"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  } disabled:opacity-50`}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                  ) : session ? (
+                    "Subscribe"
+                  ) : (
+                    "Get Started"
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── ENTERPRISE CTA ──────────────────────────────────────────────── */}
+        <div className="mt-12 text-center">
+          <p className="text-sm text-slate-500">
+            Need more than 7,500 users?{" "}
+            <button
+              onClick={handleBookDemo}
+              className="text-[#3B5BDB] font-medium hover:underline"
+            >
+              Contact our sales team
+            </button>
+          </p>
+        </div>
 
         {/* ── LIFETIME CODE ──────────────────────────────────────────────── */}
         {session && (
