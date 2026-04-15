@@ -34,11 +34,11 @@ const PLAN_PRICES: Record<
     basePrice: 199,
     basePriceId: "price_1TMFR6EnZGKTei6CBzMBAqtB",
     overagePriceIds: [
-      "price_1TMFR8EnZGKTei6C0000GPUO", // Paid Users overage
-      "price_1TMFR9EnZGKTei6C0000GPSR", // Session Replays overage
-      "price_1TMFRAEnZGKTei6C0000GPEM", // Emails overage
-      "price_1TMFRBEnZGKTei6C0000GPAI", // AI Generations overage
-      "price_1TMFRCEnZGKTei6C0000GPTM", // Team Members overage
+      "price_1TMFQyEnZGKTei6CO6FqOf2s", // Paid Users overage
+      "price_1TMFQzEnZGKTei6CKgpZfC0B", // Session Replays overage
+      "price_1TMFR1EnZGKTei6C34YBJEkm", // Emails overage
+      "price_1TMFR3EnZGKTei6Cr0Q3WpnU", // AI Generations overage
+      "price_1TMFR4EnZGKTei6CZ1juzUMV", // Team Members overage
     ],
   },
 };
