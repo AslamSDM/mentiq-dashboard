@@ -110,24 +110,25 @@ export const LIFETIME_TIER = {
   trialDays: 0,
   description: "One-time purchase with included limits. Overages billed if card on file.",
   included: {
-    paidUsers: 1_000,
-    sessionReplays: 500,
-    automatedEmails: 25_000,
-    aiGenerations: 150,
-    teamMembers: 5,
+    paidUsers: 150,
+    sessionReplays: 100,
+    automatedEmails: 5_000,
+    aiGenerations: 25,
+    teamMembers: 1,
   },
   overages: {
-    paidUsersPer100: 10_00,
-    replaysPer500: 6_00,
-    emailsPer10k: 2_50,
-    aiGenerationsPer100: 5_00,
+    paidUsersPer100: 15_00, // $15 per 100 users (matches Starter)
+    replaysPer500: 10_00, // $10 per 500 replays
+    emailsPer10k: 4_00, // $4 per 10k emails
+    aiGenerationsPer100: 8_00, // $8 per 100 AI generations
+    teamMembersPer1: 8_00, // $8 per extra team member
   },
   features: [
-    "1,000 paid users",
-    "500 session replays",
-    "25,000 automated emails",
-    "150 AI generations",
-    "5 team members",
+    "150 paid users",
+    "100 session replays",
+    "5,000 automated emails",
+    "25 AI generations",
+    "1 team member",
     "All analytics features",
     "Lifetime access — no monthly fee",
     "Overages billed only if card on file",
