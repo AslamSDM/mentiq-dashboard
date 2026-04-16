@@ -10,7 +10,6 @@ import {
   Zap,
   TrendingUp,
   Building2,
-  Crown,
   AlertCircle,
   Loader2,
   LogOut,
@@ -27,7 +26,7 @@ import { usageService } from "@/lib/services/usage";
 const TIER_ICONS: Record<string, React.ReactNode> = {
   starter: <Zap className="h-5 w-5" />,
   growth: <TrendingUp className="h-5 w-5" />,
-  scale: <Building2 className="h-5 w-5" />,
+  enterprise: <Building2 className="h-5 w-5" />,
 };
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
@@ -70,7 +69,7 @@ function PricingContent() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const [isRequired, setIsRequired] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,6 +88,10 @@ function PricingContent() {
 
 
   const handleGetStarted = async (tierId: string) => {
+    if (tierId === "enterprise") {
+      handleBookDemo();
+      return;
+    }
     if (session) {
       setIsLoading(true);
       try {
@@ -144,7 +147,12 @@ function PricingContent() {
         title: "Lifetime Plan Activated",
         description: result.message || "Your lifetime plan is now active.",
       });
-      setTimeout(() => router.push("/dashboard"), 2000);
+      // Refresh NextAuth JWT so middleware sees hasActiveSubscription=true
+      // before we redirect. Without this, /dashboard bounces back to /pricing.
+      await updateSession();
+      // Full reload — ensures the fresh session cookie is read by the
+      // server-side middleware on the next request.
+      window.location.href = "/dashboard";
     } catch (error: any) {
       toast({
         title: "Invalid Key",
@@ -397,14 +405,29 @@ function PricingContent() {
 
                 {/* Price */}
                 <div className="mb-6">
-                  <span className="text-3xl font-bold text-slate-900">
-                    ${tier.basePrice}
-                  </span>
-                  <span className="text-sm text-slate-500 ml-1">/month</span>
-                  {tier.trialDays > 0 && (
-                    <p className="text-xs text-[#3B5BDB] mt-1 font-medium">
-                      {tier.trialDays}-day free trial
-                    </p>
+                  {(tier as any).custom ? (
+                    <>
+                      <span className="text-3xl font-bold text-slate-900">
+                        Custom
+                      </span>
+                      <p className="text-xs text-slate-500 mt-1 font-medium">
+                        Tailored to your team
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-bold text-slate-900">
+                        ${tier.basePrice}
+                      </span>
+                      <span className="text-sm text-slate-500 ml-1">
+                        /month
+                      </span>
+                      {tier.trialDays > 0 && (
+                        <p className="text-xs text-[#3B5BDB] mt-1 font-medium">
+                          {tier.trialDays}-day free trial
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -445,6 +468,8 @@ function PricingContent() {
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                  ) : (tier as any).custom ? (
+                    "Contact Sales"
                   ) : session ? (
                     "Subscribe"
                   ) : (
@@ -454,19 +479,6 @@ function PricingContent() {
               </div>
             );
           })}
-        </div>
-
-        {/* ── ENTERPRISE CTA ──────────────────────────────────────────────── */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-slate-500">
-            Need more than 7,500 users?{" "}
-            <button
-              onClick={handleBookDemo}
-              className="text-[#3B5BDB] font-medium hover:underline"
-            >
-              Contact our sales team
-            </button>
-          </p>
         </div>
 
         {/* ── LIFETIME CODE ──────────────────────────────────────────────── */}
@@ -570,7 +582,7 @@ function PricingContent() {
             />
             <FaqItem
               question="Is there a free trial?"
-              answer="Yes! Starter and Growth plans include a 3-day free trial, and the Scale plan includes a 14-day free trial. Cancel anytime during the trial period."
+              answer="Yes! Starter and Growth plans include a 3-day free trial. Cancel anytime during the trial period. Enterprise plans are custom — contact sales for trial options."
             />
           </div>
         </div>

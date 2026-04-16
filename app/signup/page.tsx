@@ -50,7 +50,7 @@ type SignUpFormData = z.infer<typeof signUpSchema>;
 const TIER_ICONS: Record<string, React.ReactNode> = {
   starter: <Zap className="w-5 h-5" />,
   growth: <TrendingUp className="w-5 h-5" />,
-  scale: <Building2 className="w-5 h-5" />,
+  enterprise: <Building2 className="w-5 h-5" />,
 };
 
 function SignUpContent() {
@@ -377,7 +377,7 @@ function SignUpContent() {
                   <div className="mt-6"><UserCountSlider userCount={userCount} onUserCountChange={setUserCount} showPrice={true} /></div>
                 </div>
 
-                {currentTier && userCount <= 10000 ? (
+                {currentTier && !(currentTier as any).custom ? (
                   <div className="rounded-2xl border border-slate-200 p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center bg-white shadow-sm">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-4">
@@ -417,7 +417,7 @@ function SignUpContent() {
                 ) : (
                   <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 md:p-8 text-center text-amber-900">
                     <h3 className="text-lg font-semibold mb-2">Enterprise Plan Required</h3>
-                    <p className="text-sm text-amber-800 mb-6 max-w-md mx-auto">For over 10,000 users, please contact our team to discuss custom pricing, SLA options, and dedicated infrastructure.</p>
+                    <p className="text-sm text-amber-800 mb-6 max-w-md mx-auto">Beyond our Growth plan? Contact our team to discuss custom pricing, SLA options, and dedicated infrastructure.</p>
                      <Link href="/pricing" className="inline-flex h-11 items-center justify-center px-6 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors">
                       View Enterprise Options
                     </Link>

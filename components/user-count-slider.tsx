@@ -9,12 +9,12 @@ import { PRICING_TIERS, getTierByUserCount, PricingTier } from "@/lib/constants"
 const TIER_COLORS: Record<string, string> = {
   starter: "from-blue-500 to-cyan-500",
   growth: "from-purple-500 to-pink-500",
-  scale: "from-green-500 to-emerald-500",
+  enterprise: "from-green-500 to-emerald-500",
 };
 
-// Create checkpoints from tier included paid users
+// Create checkpoints from billable tiers (exclude Enterprise — custom, no fixed size)
 const createCheckpoints = () => {
-  return PRICING_TIERS.map((tier) => ({
+  return PRICING_TIERS.filter((tier) => !(tier as any).custom).map((tier) => ({
     value: tier.included.paidUsers,
     label: tier.included.paidUsers.toLocaleString(),
     tierName: tier.name,

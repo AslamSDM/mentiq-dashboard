@@ -65,37 +65,40 @@ export const PRICING_TIERS = [
     popular: true,
   },
   {
-    id: "scale",
-    name: "Scale",
-    basePrice: 399,
-    trialDays: 14,
-    description: "No ceiling. Built for rapid expansion",
+    id: "enterprise",
+    name: "Enterprise",
+    basePrice: 0, // custom — contact sales
+    trialDays: 0,
+    description: "Custom pricing for large teams",
     included: {
-      paidUsers: 7_500,
-      sessionReplays: 2_000,
-      automatedEmails: 200_000,
-      aiGenerations: 600,
+      paidUsers: 0, // unlimited — negotiated
+      sessionReplays: 0,
+      automatedEmails: 0,
+      aiGenerations: 0,
       teamMembers: 0, // unlimited
     },
     overages: {
-      paidUsersPer100: 8_00,
-      replaysPer500: 5_00,
-      emailsPer10k: 2_00,
-      aiGenerationsPer100: 3_00,
+      paidUsersPer100: 0,
+      replaysPer500: 0,
+      emailsPer10k: 0,
+      aiGenerationsPer100: 0,
+      teamMembersPer1: 0,
     },
     features: [
-      "7,500 paid users",
-      "2,000 session replays",
-      "200,000 automated emails",
-      "600 AI generations",
+      "Unlimited paid users",
+      "Unlimited session replays",
+      "Unlimited automated emails",
+      "Unlimited AI generations",
       "Unlimited team members",
       "A/B testing & experiments",
       "Revenue analytics",
       "Advanced segmentation",
       "Predictive churn modeling",
-      "Priority support (< 4hr response)",
+      "Dedicated support (< 4hr response)",
       "SSO authentication",
+      "Custom SLA & invoicing",
     ],
+    custom: true,
   },
 ] as const;
 
@@ -134,14 +137,15 @@ export const LIFETIME_TIER = {
 export type PricingTier = (typeof PRICING_TIERS)[number];
 
 export const getTierByUserCount = (userCount: number): PricingTier | null => {
-  // Find the smallest tier that fits the user count
+  // Find the smallest billable tier that fits the user count (skip Enterprise)
   for (const tier of PRICING_TIERS) {
+    if ((tier as any).custom) continue;
     if (userCount <= tier.included.paidUsers) {
       return tier;
     }
   }
-  // Over Scale tier — still use Scale (overages apply)
-  return PRICING_TIERS[PRICING_TIERS.length - 1];
+  // Exceeds Growth — Enterprise is required (custom pricing)
+  return PRICING_TIERS.find((t) => (t as any).custom) ?? null;
 };
 
 export const getTierById = (id: string): PricingTier | null => {
