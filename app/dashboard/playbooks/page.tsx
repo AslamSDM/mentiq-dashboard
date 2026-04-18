@@ -60,6 +60,10 @@ import {
   Send,
   Play,
   FlaskConical,
+  Globe,
+  Palette,
+  Type,
+  Ban,
 } from "lucide-react";
 import {
   automationService,
@@ -67,6 +71,8 @@ import {
   AutomationExecution,
   DiscountCode,
   CreateAutomationRequest,
+  BrandProfile,
+  BrandSettings,
 } from "@/lib/services/automation";
 import {
   integrationsService,
@@ -162,6 +168,18 @@ export default function EmailAutomationsPage() {
 
   // Trigger state
   const [triggeringId, setTriggeringId] = useState<string | null>(null);
+
+  // Brand profile dialog
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
+  const [brandWebsiteUrl, setBrandWebsiteUrl] = useState("");
+  const [brandTone, setBrandTone] = useState("");
+  const [brandStyle, setBrandStyle] = useState("");
+  const [brandWordsToAvoid, setBrandWordsToAvoid] = useState("");
+  const [brandProfile, setBrandProfile] = useState<BrandProfile | null>(null);
+  const [crawling, setCrawling] = useState(false);
+
+  // Preview tab
+  const [testPreviewTab, setTestPreviewTab] = useState<"html" | "text">("html");
 
   // Integration actions
   const [connecting, setConnecting] = useState(false);
@@ -264,6 +282,33 @@ export default function EmailAutomationsPage() {
     }
   };
 
+  const handleCrawlBrand = async () => {
+    if (!brandWebsiteUrl.trim()) return;
+    setCrawling(true);
+    try {
+      const profile = await automationService.crawlBrandProfile(brandWebsiteUrl.trim());
+      setBrandProfile(profile);
+      toast({ title: "Brand Profile Loaded", description: `Detected: ${profile.company_name || "Unknown"}` });
+    } catch (error: any) {
+      toast({ title: "Crawl Failed", description: error.message, variant: "destructive" });
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  const handleSaveBrandSettings = () => {
+    const brandSettings: BrandSettings = {
+      website_url: brandWebsiteUrl,
+      tone: brandTone,
+      style: brandStyle,
+      words_to_avoid: brandWordsToAvoid,
+      brand_profile: brandProfile || undefined,
+    };
+    setFormConfig((c) => ({ ...c, brand_settings: brandSettings }));
+    setBrandDialogOpen(false);
+    toast({ title: "Brand Settings Saved", description: "Brand profile will be used in email generation." });
+  };
+
   const handleCreateAutomation = async () => {
     if (!effectiveProjectId || !formName.trim()) return;
     setCreating(true);
@@ -280,6 +325,11 @@ export default function EmailAutomationsPage() {
       setFormName("");
       setFormDescription("");
       setFormEnabled(true);
+      setBrandWebsiteUrl("");
+      setBrandTone("");
+      setBrandStyle("");
+      setBrandWordsToAvoid("");
+      setBrandProfile(null);
       toast({ title: "Automation Created", description: `"${created.name}" is ready.` });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -859,6 +909,53 @@ export default function EmailAutomationsPage() {
                 )}
               </div>
 
+              {/* Brand Profile Settings */}
+              <div className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium text-sm flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      Brand Profile
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Configure brand voice for AI-generated emails
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setBrandDialogOpen(true)}
+                  >
+                    {formConfig.brand_settings ? "Edit Brand" : "Set Up Brand"}
+                  </Button>
+                </div>
+                {formConfig.brand_settings && (
+                  <div className="flex flex-wrap gap-2">
+                    {formConfig.brand_settings.brand_profile?.company_name && (
+                      <Badge variant="secondary" className="text-xs">
+                        {formConfig.brand_settings.brand_profile.company_name}
+                      </Badge>
+                    )}
+                    {formConfig.brand_settings.tone && (
+                      <Badge variant="outline" className="text-xs">
+                        Tone: {formConfig.brand_settings.tone}
+                      </Badge>
+                    )}
+                    {formConfig.brand_settings.style && (
+                      <Badge variant="outline" className="text-xs">
+                        Style: {formConfig.brand_settings.style}
+                      </Badge>
+                    )}
+                    {formConfig.brand_settings.words_to_avoid && (
+                      <Badge variant="outline" className="text-xs text-destructive">
+                        Avoid: {formConfig.brand_settings.words_to_avoid.slice(0, 30)}
+                        {formConfig.brand_settings.words_to_avoid.length > 30 ? "..." : ""}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <Button onClick={handleCreateAutomation} disabled={creating || !formName.trim()}>
                 {creating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1191,12 +1288,42 @@ export default function EmailAutomationsPage() {
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Email Preview</Label>
-                      <div
-                        className="mt-1 rounded border bg-white p-4 text-sm max-h-60 overflow-auto"
-                        dangerouslySetInnerHTML={{
-                          __html: testResult.email_content.html || testResult.email_content.plain_text || "No content generated",
-                        }}
-                      />
+                      <div className="flex gap-1 mt-1 mb-2">
+                        <Button
+                          variant={testPreviewTab === "html" ? "default" : "outline"}
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => setTestPreviewTab("html")}
+                        >
+                          HTML
+                        </Button>
+                        <Button
+                          variant={testPreviewTab === "text" ? "default" : "outline"}
+                          size="sm"
+                          className="text-xs h-7"
+                          onClick={() => setTestPreviewTab("text")}
+                        >
+                          Plain Text
+                        </Button>
+                      </div>
+                      {testPreviewTab === "html" ? (
+                        testResult.email_content.html ? (
+                          <iframe
+                            srcDoc={testResult.email_content.html}
+                            className="w-full h-60 rounded border bg-white"
+                            sandbox="allow-same-origin"
+                            title="Test email preview"
+                          />
+                        ) : (
+                          <div className="rounded border bg-muted p-4 text-sm text-muted-foreground text-center">
+                            No HTML content generated.
+                          </div>
+                        )
+                      ) : (
+                        <pre className="rounded border bg-muted p-4 text-sm max-h-60 overflow-auto whitespace-pre-wrap">
+                          {testResult.email_content.text || testResult.email_content.plain_text || "No plain text generated."}
+                        </pre>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1227,6 +1354,130 @@ export default function EmailAutomationsPage() {
                   Run Test
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Brand Profile Dialog */}
+      <Dialog open={brandDialogOpen} onOpenChange={setBrandDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              Brand Profile
+            </DialogTitle>
+            <DialogDescription>
+              Configure your brand voice for AI-generated emails. Crawl your website to auto-detect brand details.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Website URL */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5" />
+                Website URL
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://yourcompany.com"
+                  value={brandWebsiteUrl}
+                  onChange={(e) => setBrandWebsiteUrl(e.target.value)}
+                />
+                <Button
+                  variant="outline"
+                  onClick={handleCrawlBrand}
+                  disabled={crawling || !brandWebsiteUrl.trim()}
+                >
+                  {crawling ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Crawl"
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                We&apos;ll extract brand colors, company name, and description from your website.
+              </p>
+            </div>
+
+            {/* Crawl result */}
+            {brandProfile && (
+              <div className="rounded-lg border bg-muted/30 p-3 space-y-1.5">
+                <p className="text-sm font-medium">{brandProfile.company_name}</p>
+                {brandProfile.industry && (
+                  <p className="text-xs text-muted-foreground">Industry: {brandProfile.industry}</p>
+                )}
+                {brandProfile.description && (
+                  <p className="text-xs text-muted-foreground">{brandProfile.description}</p>
+                )}
+                {brandProfile.colors && brandProfile.colors.length > 0 && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-xs text-muted-foreground">Colors:</span>
+                    {brandProfile.colors.map((color) => (
+                      <div
+                        key={color}
+                        className="h-5 w-5 rounded border"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tone */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Type className="h-3.5 w-3.5" />
+                Tone
+              </Label>
+              <Input
+                placeholder="e.g. Friendly, Professional, Empathetic, Casual"
+                value={brandTone}
+                onChange={(e) => setBrandTone(e.target.value)}
+              />
+            </div>
+
+            {/* Style */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Palette className="h-3.5 w-3.5" />
+                Style
+              </Label>
+              <Input
+                placeholder="e.g. Concise, Storytelling, Data-driven, Warm"
+                value={brandStyle}
+                onChange={(e) => setBrandStyle(e.target.value)}
+              />
+            </div>
+
+            {/* Words to avoid */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Ban className="h-3.5 w-3.5" />
+                Words to Avoid
+              </Label>
+              <Textarea
+                placeholder="e.g. spam, free, urgent, act now, limited time"
+                value={brandWordsToAvoid}
+                onChange={(e) => setBrandWordsToAvoid(e.target.value)}
+                rows={2}
+              />
+              <p className="text-xs text-muted-foreground">
+                Comma-separated list of words or phrases to exclude from generated emails.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBrandDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveBrandSettings}>
+              Save Brand Settings
             </Button>
           </DialogFooter>
         </DialogContent>

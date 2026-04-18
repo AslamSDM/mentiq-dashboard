@@ -450,6 +450,41 @@ class AutomationService {
 
     return response.json();
   }
+  // Brand Profile - crawl website to extract brand information
+  async crawlBrandProfile(websiteUrl: string): Promise<BrandProfile> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/brand-profile/crawl`,
+      {
+        method: "POST",
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ website_url: websiteUrl }),
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to crawl website");
+    }
+
+    return response.json();
+  }
+}
+
+export interface BrandProfile {
+  company_name: string;
+  tagline: string;
+  description: string;
+  colors: string[];
+  industry: string;
+  website_url: string;
+}
+
+export interface BrandSettings {
+  website_url: string;
+  tone: string;
+  style: string;
+  words_to_avoid: string;
+  brand_profile?: BrandProfile;
 }
 
 export const automationService = new AutomationService();

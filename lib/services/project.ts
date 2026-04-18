@@ -383,6 +383,9 @@ export interface RevenueMetrics {
   trial_to_pay_conversion_rate: number;
   total_customers: number;
   active_customers: number;
+  past_due_subscriptions?: number;
+  failed_payments?: number;
+  trialing_subscriptions?: number;
   last_updated: string;
   time_series?: Array<{
     date: string;

@@ -149,9 +149,14 @@ function PricingContent() {
       });
       // Refresh NextAuth JWT so middleware sees hasActiveSubscription=true
       // before we redirect. Without this, /dashboard bounces back to /pricing.
-      await updateSession();
-      // Full reload — ensures the fresh session cookie is read by the
-      // server-side middleware on the next request.
+      try {
+        await updateSession();
+      } catch (e) {
+        console.warn("Session refresh failed, redirecting anyway:", e);
+      }
+      // Give the browser a beat to persist the refreshed Set-Cookie header
+      // before the next request fires.
+      await new Promise((r) => setTimeout(r, 150));
       window.location.href = "/dashboard";
     } catch (error: any) {
       toast({
