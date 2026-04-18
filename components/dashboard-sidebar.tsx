@@ -38,6 +38,7 @@ import {
   Zap,
   Play,
   Key,
+  MessageSquare,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -98,6 +99,7 @@ const ADMIN_GROUP = {
     { name: "Admin Tickets", href: "/dashboard/admin/tickets", icon: Ticket },
     { name: "Usage Limits", href: "/dashboard/admin/limits", icon: Gauge },
     { name: "Lifetime Keys", href: "/dashboard/admin/lifetime-keys", icon: Key },
+    { name: "Contact Requests", href: "/dashboard/admin/contact-requests", icon: MessageSquare },
   ],
 };
 

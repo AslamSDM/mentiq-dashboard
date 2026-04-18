@@ -312,6 +312,41 @@ class AdminService extends BaseHttpService {
       { method: "GET" },
     );
   }
+  async getContactRequests(status?: string): Promise<{ contacts: ContactRequest[]; total: number }> {
+    const query = status ? `?status=${status}` : "";
+    return this.request<{ contacts: ContactRequest[]; total: number }>(
+      `/api/v1/admin/contact-requests${query}`,
+      { method: "GET" },
+    );
+  }
+
+  async updateContactRequest(
+    id: string,
+    data: { status?: string; notes?: string },
+  ): Promise<ContactRequest> {
+    return this.request<ContactRequest>(
+      `/api/v1/admin/contact-requests/${id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+  }
+}
+
+export interface ContactRequest {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  message: string;
+  source: string;
+  status: string;
+  notes: string;
+  account_id?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // --- Types ---

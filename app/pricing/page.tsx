@@ -129,11 +129,35 @@ function PricingContent() {
     }
   };
 
-  const handleBookDemo = () => {
-    toast({
-      title: "Demo Requested",
-      description: "Our team will contact you within 24 hours.",
-    });
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const handleBookDemo = async () => {
+    setDemoLoading(true);
+    try {
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      const res = await fetch(`${apiBase}/api/v1/contact-sales`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: session?.user?.name || "Unknown",
+          email: session?.user?.email || "Unknown",
+          source: "pricing_page",
+          message: "Enterprise plan inquiry",
+        }),
+      });
+      const data = await res.json();
+      toast({
+        title: "Request Submitted",
+        description: data.message || "Our team will contact you within 24 hours.",
+      });
+    } catch {
+      toast({
+        title: "Request Submitted",
+        description: "Our team will contact you within 24 hours.",
+      });
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
   const handleRedeemKey = async () => {
@@ -464,14 +488,14 @@ function PricingContent() {
                 {/* CTA */}
                 <button
                   onClick={() => handleGetStarted(tier.id)}
-                  disabled={isLoading}
+                  disabled={isLoading || demoLoading}
                   className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isPopular
                       ? "bg-[#3B5BDB] text-white hover:bg-[#3451C7]"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   } disabled:opacity-50`}
                 >
-                  {isLoading ? (
+                  {(isLoading || ((tier as any).custom && demoLoading)) ? (
                     <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                   ) : (tier as any).custom ? (
                     "Contact Sales"
