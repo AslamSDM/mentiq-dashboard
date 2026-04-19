@@ -289,7 +289,7 @@ export default function FeatureTrackingDashboard() {
                 </CardContent>
               </Card>
             ) : (
-              features
+              [...features]
                 .sort((a, b) => b.adoption_rate - a.adoption_rate)
                 .map((feature) => (
                   <Card key={feature.feature_name}>
@@ -387,7 +387,7 @@ export default function FeatureTrackingDashboard() {
                 Loading onboarding data...
               </CardContent>
             </Card>
-          ) : !onboarding || onboarding.total_started === 0 ? (
+          ) : !onboarding || !onboarding.steps || onboarding.total_started === 0 ? (
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">
                 No onboarding data available for this period
@@ -559,7 +559,10 @@ export default function FeatureTrackingDashboard() {
                             animationDuration={1500}
                             animationBegin={0}
                             animationEasing="ease-out"
-                            onClick={(data) => setSelectedStep(data)}
+                            onClick={(data) => {
+                              const step = onboarding.steps.find(s => s.step_name === data.step_name);
+                              if (step) setSelectedStep(step);
+                            }}
                             cursor="pointer"
                           >
                             {onboarding.steps.map((entry, index) => (
@@ -753,7 +756,7 @@ export default function FeatureTrackingDashboard() {
               </div>
 
               {/* Dropoff Points */}
-              {onboarding.dropoff_points.length > 0 && (
+              {onboarding.dropoff_points && onboarding.dropoff_points.length > 0 && (
                 <Card className="border-destructive/50">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-destructive">
